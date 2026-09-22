@@ -16,14 +16,14 @@ type TypingScreenProps = {
   session: TestSession;
   onType: (key: { key: string; repeat: boolean; now: number }) => void;
   onExpire: () => void;
-  onAbort: () => void;
+  onSetup: () => void;
 };
 
 export function TypingScreen({
   session,
   onType,
   onExpire,
-  onAbort,
+  onSetup,
 }: TypingScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const onTypeRef = useRef(onType);
@@ -83,7 +83,7 @@ export function TypingScreen({
     if (holdTimer.current !== null) {
       window.clearTimeout(holdTimer.current);
     }
-    holdTimer.current = window.setTimeout(onAbort, 600);
+    holdTimer.current = window.setTimeout(onSetup, 600);
   }
 
   function endHold() {

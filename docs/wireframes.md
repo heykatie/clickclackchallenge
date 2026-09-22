@@ -147,7 +147,7 @@ The strings on this screen live in `docs/design_system.md` (Brand voice). The di
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-Do not show the Top 5, operator settings, or a Start button on this screen. Returning to Event Setup is a long-press on the logo badge, specified in `docs/prd.md` §9.
+Do not show the Top 5, operator settings, or a Start button on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9.
 
 ## 6. Screen 03 — Typing
 
@@ -191,8 +191,8 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 ### Behavior
 
-1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. A long-press on the logo badge returns to Ready and does not save a score. That path is in `docs/prd.md` §11.
-2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press returns to Ready and discards the attempt without saving a score. The excluded keys are in `docs/prd.md` §11.
+1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. A long-press on the logo badge opens Event Setup and does not save a score. That path is in `docs/prd.md` §11.
+2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press opens Event Setup and discards the attempt without saving a score. The excluded keys are in `docs/prd.md` §11.
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
 

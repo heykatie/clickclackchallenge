@@ -267,7 +267,7 @@ The Event Setup screen must allow the operator to:
 
 When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Race are selected. Continue is unavailable.
 
-When an event already exists, including when the operator returns from Ready or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
+When an event already exists, including when the operator returns from Ready, Typing, Results, or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
 
 ### Start Fresh
 
@@ -297,7 +297,7 @@ If no previous event exists, the Continue option should be unavailable.
 
 ### Returning to Event Setup
 
-After Start Event, the operator returns to Event Setup by long-pressing the logo-only badge on Ready or the Leaderboard. The active event stays as it is. Keyboard input does not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. The active event stays as it is. An attempt that has not been saved is discarded. Keyboard input does not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -338,7 +338,7 @@ The timer starts only when the contestant presses the first valid typing charact
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
-A long-press on the logo badge returns to Ready and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
+A long-press on the logo badge opens Event Setup and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
 
 The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
@@ -846,7 +846,7 @@ then show name entry.
 
 If the contestant does not qualify for the Top 10, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
 When name entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt name entry. The label is in `docs/design_system.md` (Brand voice).
 
@@ -1563,12 +1563,11 @@ If the contestant ranks outside the Top 10, name entry must not be shown.
 
 ---
 
-### Waiting Typing Can Return to Ready
+### Typing Returns to Event Setup
 
 **Given**
 
 - the Typing screen is showing the sentence
-- the timer has not started
 
 **When**
 
@@ -1576,10 +1575,11 @@ If the contestant ranks outside the Top 10, name entry must not be shown.
 
 **Then**
 
-- Ready appears
+- Event Setup opens
+- the attempt is discarded
 - no score is saved
 
-The same long-press returns to Ready after the timer has started. The attempt in progress is discarded, and no score is saved.
+This is the same before and after the timer starts.
 
 ---
 
@@ -1702,7 +1702,7 @@ Any sentence that does not fit must be rewritten or removed.
 **Given**
 
 - an event has already been started
-- Ready or the Leaderboard is visible
+- Ready, Typing, Results, or the Leaderboard is visible
 
 **When**
 

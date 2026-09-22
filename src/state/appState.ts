@@ -50,8 +50,7 @@ export type AppAction =
   | { type: "ENTER_TYPING" }
   | { type: "TYPE_KEY"; key: string; repeat: boolean; now: number }
   | { type: "FINISH_TEST" }
-  | { type: "SHOW_LEADERBOARD"; currentScoreId: string }
-  | { type: "RETURN_TO_READY" };
+  | { type: "SHOW_LEADERBOARD"; currentScoreId: string };
 
 export const initialState: AppState = {
   screen: "setup",
@@ -86,7 +85,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         highScore: action.highScore === undefined ? state.highScore : action.highScore,
       };
     case "ENTER_SETUP":
-      if (state.screen !== "ready" && state.screen !== "leaderboard") {
+      if (state.screen === "setup") {
         return state;
       }
       return {
@@ -139,11 +138,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentTest: null,
         currentScoreId: action.currentScoreId,
       };
-    case "RETURN_TO_READY":
-      if (state.screen !== "typing" || state.currentTest === null) {
-        return state;
-      }
-      return { ...state, screen: "ready", currentTest: null };
   }
 }
 

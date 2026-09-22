@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MAX_NAME_LENGTH, normalizeName } from "../features/results/nameRules";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
@@ -9,6 +9,7 @@ type ResultsScreenProps = {
   saving: boolean;
   onSave: (name: string) => void;
   onViewLeaderboard: () => void;
+  onSetup: () => void;
 };
 
 export function ResultsScreen({
@@ -17,8 +18,10 @@ export function ResultsScreen({
   saving,
   onSave,
   onViewLeaderboard,
+  onSetup,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
+  const holdTimer = useRef<number | null>(null);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
 
@@ -29,8 +32,30 @@ export function ResultsScreen({
     onSave(savedName);
   }
 
+  function beginHold() {
+    if (holdTimer.current !== null) {
+      window.clearTimeout(holdTimer.current);
+    }
+    holdTimer.current = window.setTimeout(onSetup, 600);
+  }
+
+  function endHold() {
+    if (holdTimer.current !== null) {
+      window.clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+  }
+
   return (
     <main className="screen results-screen">
+      <button
+        type="button"
+        className="logo-badge"
+        aria-label="Logo"
+        onPointerDown={beginHold}
+        onPointerUp={endHold}
+        onPointerLeave={endHold}
+      />
       {copy ? <h1>{copy.headline}</h1> : null}
       <p className="stat-value">{result.displayedWpm} WPM</p>
       <p>

@@ -40,13 +40,13 @@ describe("appReducer", () => {
     expect(typed.screen).toBe("typing");
   });
 
-  it("returns to Ready from a waiting or running test and saves nothing", () => {
+  it("opens Event Setup from a waiting or running test and saves nothing", () => {
     const waiting = appReducer(
       appReducer(initialState, { type: "ENTER_READY" }),
       { type: "ENTER_TYPING" },
     );
-    const aborted = appReducer(waiting, { type: "RETURN_TO_READY" });
-    expect(aborted.screen).toBe("ready");
+    const aborted = appReducer(waiting, { type: "ENTER_SETUP" });
+    expect(aborted.screen).toBe("setup");
     expect(aborted.currentTest).toBeNull();
     expect(aborted.latestResult).toBeNull();
 
@@ -56,8 +56,8 @@ describe("appReducer", () => {
       repeat: false,
       now: 1000,
     });
-    const left = appReducer(running, { type: "RETURN_TO_READY" });
-    expect(left.screen).toBe("ready");
+    const left = appReducer(running, { type: "ENTER_SETUP" });
+    expect(left.screen).toBe("setup");
     expect(left.currentTest).toBeNull();
     expect(left.latestResult).toBeNull();
   });
@@ -108,14 +108,14 @@ describe("appReducer", () => {
     expect(sentence.startsWith("The")).toBe(false);
   });
 
-  it("keeps the high score when a waiting test returns to Ready", () => {
+  it("keeps the high score when a test opens Event Setup", () => {
     const ready = appReducer(initialState, {
       type: "ENTER_READY",
       highScore: { displayedWpm: 92, name: null },
     });
     const waiting = appReducer(ready, { type: "ENTER_TYPING" });
-    const back = appReducer(waiting, { type: "RETURN_TO_READY" });
-    expect(back.screen).toBe("ready");
+    const back = appReducer(waiting, { type: "ENTER_SETUP" });
+    expect(back.screen).toBe("setup");
     expect(back.highScore).toEqual({ displayedWpm: 92, name: null });
   });
 
@@ -144,5 +144,18 @@ describe("appReducer", () => {
     expect(ready.screen).toBe("ready");
     expect(ready.currentScoreId).toBeNull();
     expect(ready.latestResult).toBeNull();
+  });
+
+  it("opens Event Setup from Results without keeping the unsaved result", () => {
+    const finished = appReducer(
+      appReducer(initialState, { type: "ENTER_TYPING" }),
+      { type: "TYPE_KEY", key: "T", repeat: false, now: 0 },
+    );
+    const results = appReducer(finished, { type: "FINISH_TEST" });
+    const setup = appReducer(results, { type: "ENTER_SETUP" });
+    expect(results.screen).toBe("results");
+    expect(setup.screen).toBe("setup");
+    expect(setup.latestResult).toBeNull();
+    expect(setup.currentTest).toBeNull();
   });
 });

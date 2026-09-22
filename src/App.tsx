@@ -217,7 +217,7 @@ function App() {
           session={state.currentTest}
           onType={(key) => dispatch({ type: "TYPE_KEY", ...key })}
           onExpire={() => dispatch({ type: "FINISH_TEST" })}
-          onAbort={() => dispatch({ type: "RETURN_TO_READY" })}
+          onSetup={() => dispatch({ type: "ENTER_SETUP" })}
         />
       );
     case "results":
@@ -235,6 +235,7 @@ function App() {
           onViewLeaderboard={() => {
             void leaveResults(null);
           }}
+          onSetup={() => dispatch({ type: "ENTER_SETUP" })}
         />
       );
     case "leaderboard":

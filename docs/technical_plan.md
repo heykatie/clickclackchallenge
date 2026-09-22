@@ -1938,8 +1938,9 @@ Ready screen responds to a key press through a window-level keydown listener
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
-long-press on the logo while Typing is waiting returns to Ready and saves no score
-after the timer starts, that long-press returns to Ready and saves no score
+long-press on the logo while Typing is waiting opens Event Setup and saves no score
+after the timer starts, that long-press opens Event Setup and saves no score
+long-press on the logo from Results opens Event Setup and does not write the unsaved result
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time
