@@ -1,6 +1,6 @@
 # Typing Test — V1 Wireframes
 
-This document specifies the five-screen experience for an offline typing contest on a giant physical keyboard, displayed on a landscape iPad. Product rules come from `docs/prd.md` and `docs/technical_plan.md`. This document specifies screen flow and layout, using the accompanying leaderboard PNG. It describes the intended interface; application behavior has not been verified against running code in this workspace.
+This document specifies the five-screen experience for an offline typing contest on a giant physical keyboard, displayed on a landscape iPad. Product rules come from `docs/prd.md` and `docs/technical_plan.md`. This document specifies screen flow and layout, using the five tracked PNGs in `docs/wireframes/`. It describes the intended interface; application behavior has not been verified against running code in this workspace.
 
 **Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling.
 
@@ -10,8 +10,12 @@ This document specifies the five-screen experience for an offline typing contest
 
 - Product behavior comes from `docs/prd.md` and `docs/technical_plan.md`. Visual layout comes from this document and `docs/design_system.md`.
 - Later decisions replace older examples: blush/white replaces the cream-led palette; Ready has a keyboard prompt and current high score, with no Start button or leaderboard; the passage is a complete centered single line; shop-name text is removed.
-- The current [leaderboard wireframe](./leaderboard-wireframe.png) is available in this workspace. It is 1448 × 1086 pixels, an exact 4:3 ratio. Export pixels are not CSS layout dimensions.
-- The layouts below describe all five screens. Current PNG exports for the other four screens are not present here; older reference images contain superseded branding or styling and are not embedded as current designs.
+- Current PNG exports for all five screens are tracked in `docs/wireframes/`. Each is 4:3. Export pixels are not CSS layout dimensions.
+  - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086
+  - Ready: [02-ready.png](./wireframes/02-ready.png), 1448 × 1086
+  - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
+  - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200
+  - Leaderboard: [05-leaderboard.png](./wireframes/05-leaderboard.png), 1448 × 1086
 - Names, scores, accuracy values, and selected options in examples are sample data. They are not seeded event records or confirmed defaults.
 - Details marked **Proposed** complete a gap in the wireframe specification. Unresolved product decisions are collected in section 11.
 
@@ -99,6 +103,8 @@ These are starting layout sizes, not measurements extracted from the PNG. Packag
 
 **Purpose:** let the operator select the test length and choose whether to start a new event or resume the most recently active event.
 
+![Event Setup wireframe: test length, fresh or continue, and Start Event](./wireframes/01-setup.png)
+
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
 │ OPERATOR SETUP                                      [logo only]   │
@@ -137,6 +143,8 @@ Keep configuration limited to these choices. V1 has no event-history browser, sc
 ## 5. Screen 02 — Ready / Attract
 
 **Purpose:** explain the challenge, show the score to beat, and invite the next contestant to use the physical keyboard.
+
+![Ready wireframe: contest message, current high score, duration, and press-any-key prompt](./wireframes/02-ready.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
@@ -178,6 +186,8 @@ Do not show the Top 5, operator settings, or a Start button on this screen.
 ## 6. Screen 03 — Typing
 
 **Purpose:** provide a stable reading target and immediate typing feedback during the 30- or 60-second test.
+
+![Typing wireframe: one centered sentence with live WPM, timer, and accuracy](./wireframes/03-typing.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
@@ -226,6 +236,8 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 
 **Purpose:** make the final result easy to understand and collect a nickname from eligible Top 10 contestants on the same screen.
 
+![Results wireframe: final WPM, accuracy, and nickname entry](./wireframes/04-results.png)
+
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
 │ [logo only]                                                      │
@@ -270,7 +282,7 @@ Keep the WPM dominant, accuracy secondary, and ranking status clear. Use “NEW 
 
 **Purpose:** show the current event's five highest qualifying scores and make the next-player transition obvious.
 
-![Current landscape 4:3 leaderboard wireframe with five sample rows, first-place emphasis, a current-player marker, Next Player button, and reset message](./leaderboard-wireframe.png)
+![Leaderboard wireframe: five ranked rows, first-place emphasis, a current-player marker, Next Player, and a reset message](./wireframes/05-leaderboard.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
