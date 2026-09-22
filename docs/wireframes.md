@@ -102,18 +102,16 @@ Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `d
 
 Use two clear option groups with visible selected states and one large mint action. The example selections do not establish a default duration or event mode.
 
-| Control | Behavior |
+| Control | Layout |
 | --- | --- |
-| Test length | One choice: 30 or 60 seconds. The operator chooses; contestants do not. |
-| Start fresh | Create a new active event with an empty leaderboard. Preserve previous event data. |
-| Continue previous event | Resume the most recently active event, including its stored scores, passage set, and saved duration. |
-| START EVENT | Open Ready for the selected event. |
+| Test length | One choice: 30 or 60 seconds. |
+| Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
+| Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
+| START EVENT | Opens Ready for the selected event. |
 
-**Proposed empty state:** disable “Continue previous event” when none exists and show “No previous event yet.” An optional previous-event summary can show its score count and high score.
+**Proposed empty state:** disable “Continue previous event” when none exists and show “No previous event yet.”
 
-Continuing an event restores its saved duration. The test-length control does not change that event. A different duration requires Start Fresh.
-
-Keep configuration limited to these choices. V1 has no event-history browser, score-deletion controls, or Clear Leaderboard button. If an offline-ready indicator is included, show it only when offline readiness has actually been established.
+Event setup rules, including saved duration, are in `docs/prd.md`. If an offline-ready indicator is included, show it only when offline readiness has actually been established.
 
 ## 5. Screen 02 — Ready / Attract
 
@@ -141,13 +139,9 @@ Keep configuration limited to these choices. V1 has no event-history browser, sc
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. “Above 50 WPM” is defined with the Plinko rule in `docs/prd.md`.
+The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. Start behavior and the Plinko rule are in `docs/prd.md`.
 
-Show the current event's high-score WPM and nickname, plus the selected duration. The invitation can sit on a lavender or mint panel, but it is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
-
-On the opening keypress, show Typing with the complete sentence and the full duration still remaining. That opening keypress must not count as a typed character or start the test timer.
-
-When the active event has no leaderboard-eligible score, show the empty high-score string from the design system. Do not show a fictional contestant.
+Show the duration and the current high-score block. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
 Do not show the Top 5, operator settings, or a Start button on this screen.
 
@@ -225,23 +219,9 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Keep the WPM dominant, accuracy secondary, and ranking status clear. Use “NEW HIGH SCORE!” when applicable; otherwise use concise friendly copy such as “Nice typing!” Small pastel celebration motifs are appropriate outside the form area.
+Keep the WPM dominant and the nickname field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a nickname is saved, is in `docs/prd.md`.
 
-| Result state | Content and progression |
-| --- | --- |
-| Valid result in the Top 10 | Show qualification copy, a labeled nickname field, and SAVE SCORE. Save the nickname with that result, then show the updated leaderboard. |
-| Valid result outside the Top 10 | Show WPM, accuracy, and ranking status; omit nickname entry. Still proceed to the leaderboard. |
-| Result below the validity threshold | Show WPM, accuracy, and a clear qualification explanation. Exclude it from competitive rankings and omit nickname entry. Still allow progression. |
-| New high score | Add the high-score celebration to the eligible result state. |
-
-**Proposed non-qualifier action:** show a large “VIEW LEADERBOARD” button when nickname entry is not offered. The prior requirements establish progression but do not specify this control's label or an automatic Results delay.
-
-- Top 10 eligibility does not guarantee a visible Top 5 row. Ranks 6–10 can enter a nickname even though their rows are not shown on the next screen.
-- Nickname validation lives in `docs/prd.md`. There is no preset-name list. Do not invent a different length limit in the field styling.
-- Make the field large and visibly focused when editing. Use the physical keyboard for text entry and keep the action reachable by keyboard and touch.
-- Save valid scores locally. Nickname submission must update the same result, not create a duplicate entry. Store valid scores outside the visible Top 5 as well.
-- Do not run the leaderboard reset countdown while a contestant is entering a nickname.
-- **Proposed save-error state:** preserve the result and entered nickname, show a short save-failure message, and allow retry instead of falsely indicating success.
+**Proposed non-qualifier action:** show a large “VIEW LEADERBOARD” button when nickname entry is not offered. That label and any Results idle timeout are still open.
 
 ## 8. Screen 05 — Top 5 Leaderboard
 

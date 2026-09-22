@@ -268,14 +268,7 @@ Use IndexedDB instead of `localStorage` for core application data because:
 
 ### Passages
 
-Typing passages are:
-
-- prewritten
-- bundled with the application
-- versioned
-- deterministic within an event
-- available offline
-- not fetched from an API
+Passage rules are in `docs/prd.md`. Import the set from local application data. Do not fetch passages at runtime.
 
 ### Fonts and Visual Assets
 
@@ -289,15 +282,7 @@ Recommended font packages:
 @fontsource/atkinson-hyperlegible
 ```
 
-Roles:
-
-```text
-Fredoka                display / scores / major UI
-Nunito                 general UI
-Atkinson Hyperlegible  typing passage
-```
-
-Do not depend on Google Fonts or another remote CDN during booth use.
+Roles are defined in `docs/design_system.md`. Do not depend on Google Fonts or another remote CDN during booth use.
 
 ### Testing
 
@@ -331,11 +316,7 @@ No application server is required for V1 booth operation.
 
 ## Offline Behavior Implementation Specification
 
-Offline operation is a core V1 architectural requirement.
-
-After the application has been successfully loaded, installed, and cached on the target iPad, the complete booth workflow must function without an active internet connection.
-
-The application must not require a runtime server connection for normal V1 operation.
+The booth must work offline after caching. That requirement is in `docs/prd.md` (Offline Requirements). What must be saved is in `docs/prd.md` (Persistence Requirements).
 
 ### Offline Architecture Responsibilities
 
@@ -350,12 +331,6 @@ IndexedDB
 ```
 
 These systems solve different problems and both are required.
-
-The service worker must make the application itself available offline.
-
-IndexedDB must preserve event and contestant data independently of network connectivity.
-
-The booth must keep working with no network after the app is cached. That requirement is in `docs/prd.md` (Offline Requirements). Do not block launch or gameplay on a server, API, analytics host, or remote asset host.
 
 ### PWA and Service Worker Strategy
 
@@ -382,31 +357,7 @@ The installed app should remain usable after Safari or the Home Screen PWA is re
 
 ### Required Offline Assets
 
-All resources required for normal V1 booth use must be bundled locally or included in the service-worker cache.
-
-Required assets include:
-
-- HTML
-- generated JavaScript bundles
-- CSS
-- typing passages
-- fonts
-- logo
-- app icons
-- required images
-- decorative UI assets
-- web app manifest
-- other files required to render the V1 interface
-
-Do not depend on runtime requests to:
-
-- Google Fonts
-- remote CDNs
-- external passage APIs
-- remote image hosts
-- other third-party asset servers
-
-Recommended local font packages:
+Bundle the assets listed in `docs/prd.md` (Offline Requirements). Load fonts from local packages:
 
 ```text
 @fontsource/fredoka
@@ -478,46 +429,17 @@ scores
 settings
 ```
 
-The following data must be writable while offline:
-
-- event records
-- score records
-- nicknames
-- active-event reference
-- event duration
-- passage-set identifier
-- app settings required to restore or continue an event
-
-A network connection must not be required to:
-
-- create an event
-- archive a previous event
-- continue an event
-- save a score
-- save a nickname
-- calculate the current high score
-- calculate Top 10 eligibility
-- generate the Top 5 leaderboard
-- reset for the next contestant
+Which records must survive offline use is defined in `docs/prd.md`.
 
 ### Offline Leaderboard Behavior
 
-Do not persist a separate leaderboard record.
-
-The leaderboard should be derived from the active event's locally stored scores.
-
-Offline leaderboard flow:
+Do not persist a separate leaderboard record. Derive it from stored scores using the ranking rules in `docs/prd.md`.
 
 ```text
 load active event scores from IndexedDB
-→ filter scores meeting minimum accuracy
-→ sort using ranking rules
-→ derive Top 10
-→ derive Top 5
-→ derive current high score
+→ filter and sort
+→ derive Top 10, Top 5, and the current high score
 ```
-
-This computation must work without connectivity.
 
 ### Fresh Event While Offline
 
@@ -885,24 +807,7 @@ isTop10: boolean;
 
 These values can become stale whenever a new score is added.
 
-Derive them from current event scores:
-
-```text
-load event scores
-→ filter scores that meet minimum accuracy
-→ sort using leaderboard rules
-→ assign rank
-→ derive Top 10
-→ derive Top 5
-```
-
-Ranking order:
-
-```text
-1. displayedWpm descending
-2. accuracy descending
-3. createdAt ascending
-```
+Derive them from current event scores. Ranking order is in `docs/prd.md`.
 
 ### App Settings
 
@@ -1202,9 +1107,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 The Ready screen listens for keyboard input.
 
-```text
-PRESS ANY KEY TO START
-```
+The Ready string is in `docs/design_system.md` (Brand voice).
 
 On the first key event:
 
@@ -1278,7 +1181,7 @@ function meetsLeaderboardAccuracy(accuracy: number): boolean {
 }
 ```
 
-Live WPM uses elapsed time. Final WPM uses the configured duration. Store `rawWpm`. Rank and display `displayedWpm`, which is `Math.round(rawWpm)`. Before the first typing attempt, the UI shows `—%` or hides accuracy. `calculateAccuracy` returns `100` only so an empty attempt count does not become `NaN`.
+Scoring rules are in `docs/prd.md`. Store `rawWpm` and rank with `displayedWpm` (`Math.round(rawWpm)`). `calculateAccuracy` returns `100` when there are no attempts so the result is not `NaN`; the UI still follows the PRD before the first attempt.
 
 ```ts
 function compareScores(a: ScoreRecord, b: ScoreRecord): number {
@@ -1397,13 +1300,7 @@ Responsibility:
 
 - attract / ready state between contestants
 
-Displays:
-
-- contest messaging
-- Plinko threshold message
-- current high score
-- logo / allowed decorative branding
-- `PRESS ANY KEY TO START`
+Displays the Ready strings from `docs/design_system.md`.
 
 Handles:
 
@@ -1413,12 +1310,7 @@ contestant keypress
 → transition to TypingScreen
 ```
 
-The key used to leave the Ready screen must not:
-
-- start the timer
-- count as a typing attempt
-- affect WPM
-- affect accuracy
+The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
 It should not:
 

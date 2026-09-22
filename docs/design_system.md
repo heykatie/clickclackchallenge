@@ -223,9 +223,7 @@ Display two option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Starting fresh creates a new empty event and preserves prior event data. Continuing resumes the most recently active event, including its saved scores and saved duration. The test-length control does not change a continued event. A different duration requires Start Fresh. Keep operator settings out of contestant screens.
-
-Do not add event-history browsing, manual score deletion, or a Clear Leaderboard control to V1.
+Fresh-event and continue-event behavior, including saved duration, is defined in `docs/prd.md`.
 
 **Proposed empty state:** if there is no previous event, disable that option and show “No previous event yet.” If an offline-ready status is displayed, it must reflect actual cached readiness.
 
@@ -233,21 +231,7 @@ Do not add event-history browsing, manual score deletion, or a Clear Leaderboard
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Required content:
-
-```text
-GIANT keyboard typing contest!
-
-Type above 50 WPM for a Plinko drop.
-
-CURRENT HIGH SCORE
-92 WPM
-Alex
-
-PRESS ANY KEY TO START
-```
-
-Also show the selected duration, for example “30 SECOND TEST” or “60 SECOND TEST.” The score and name above are sample content. When the active event has no leaderboard-eligible score, show “Be the first high score!” Do not show a sample contestant or WPM.
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, use the empty high-score string from that list.
 
 Visual order:
 
@@ -256,12 +240,9 @@ Visual order:
 3. Current high-score WPM and nickname.
 4. Large keyboard invitation.
 
-A small logo-only badge and organic edge motifs are appropriate. Optional helper copy: “Your timer starts when you begin typing.”
+A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-- Do not show the Top 5 leaderboard, a Start button, or operator controls here.
-- The opening keypress reveals the Typing screen and is consumed. It must not enter a character or start the timer.
-- Show the complete sentence before the first valid typing keystroke starts timing.
-- “Above 50 WPM” means strictly greater than 50 WPM. Do not change the message to “50 WPM or more.” Prize messaging and leaderboard eligibility are separate rules.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen.
 
 ## 11. Typing
 
@@ -326,13 +307,7 @@ Nickname
 
 Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
 
-- Nickname entry is part of Results, not a separate screen.
-- Offer free-form nickname entry to valid Top 10 qualifiers. Players ranked 6–10 qualify even though only the Top 5 appear on the next screen.
-- Show a clear qualification explanation when a result is not eligible; do not show an unusable nickname field.
-- Keep the result and entered nickname intact during saving or recoverable errors.
-- Do not run the leaderboard reset countdown while the contestant is entering a nickname.
-- Save the nickname with the existing result; do not duplicate the score.
-- Nickname validation lives in `docs/prd.md`. Do not invent a different length limit in the field styling.
+Nickname eligibility, validation, and saving are defined in `docs/prd.md`. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible.
 
 **Proposed non-qualifier action:** “VIEW LEADERBOARD.” The flow requires access to the leaderboard, but this label and any Results idle timeout have not been finalized.
 
@@ -380,12 +355,9 @@ Show actual event data rather than filling missing places with sample contestant
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
-- The countdown duration lives in `docs/prd.md`. Show the remaining seconds. Do not leave the number static.
-- In the live app, update “Returning to ready screen in {seconds}s” as time passes; do not leave “10s” static.
+- The countdown duration and what reset preserves are defined in `docs/prd.md`. Show the remaining seconds. Do not leave the number static.
 - NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
-- Clear contestant input, result, nickname field, and temporary YOU state. Preserve the active event, duration, stored scores, high score, and rankings.
-- Return without refreshing the browser.
 
 ## 14. Motion
 
@@ -410,11 +382,7 @@ Motion should be brief and purposeful: button feedback, a result reveal, a new-h
 
 ## 16. Offline assets
 
-The completed app must work without internet after initial installation and caching.
-
-Locally package or cache the required fonts, logo, icons, decorative assets, interface files, and typing passages. Do not depend on remotely loaded assets during an event.
-
-Confirm that fonts and icons render correctly in airplane mode. Avoid fallback glyph boxes and significant font changes that could cause sentences to overflow. Local event and score persistence is defined in the PRD.
+Package the fonts and images in this design system locally. The offline booth requirement and score persistence are in `docs/prd.md`. Precache is in `docs/technical_plan.md`.
 
 ## 17. Brand voice
 
@@ -428,6 +396,7 @@ Type above 50 WPM for a Plinko drop.
 CURRENT HIGH SCORE
 Be the first high score!
 PRESS ANY KEY TO START
+Your timer starts when you begin typing.
 Nice typing!
 NEW HIGH SCORE!
 You made the Top 10!

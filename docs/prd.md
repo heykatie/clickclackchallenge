@@ -293,22 +293,9 @@ If the operator wants to change the test duration, they should start a fresh eve
 
 The Ready screen should clearly communicate the contest and current high score.
 
-Required content:
+Required strings live in `docs/design_system.md` (Brand voice).
 
-```text
-GIANT keyboard typing contest!
-
-Type above 50 WPM for a Plinko drop.
-
-CURRENT HIGH SCORE
-
-PRESS ANY KEY TO START
-```
-
-When a high score exists, show:
-
-- nickname
-- WPM
+When a high score exists, show the nickname and WPM from the eligible rank #1 score.
 
 The Ready screen must **not** show:
 
@@ -675,15 +662,11 @@ This preserves the data for:
 
 ## 13. Prize / Plinko Rule
 
-The current Ready-screen message is:
-
-```text
-Type above 50 WPM for a Plinko drop.
-```
+The Ready-screen prize string is in `docs/design_system.md` (Brand voice).
 
 Prize qualification and leaderboard qualification are separate rules.
 
-Based on the current wording, a contestant qualifies when their displayed WPM is greater than 50.
+A contestant qualifies when their displayed WPM is greater than 50.
 
 ```text
 51 WPM or higher → qualifies
@@ -911,11 +894,7 @@ The Ready screen should show:
 - high-score WPM
 - nickname
 
-If the active event has no eligible scores yet, show an empty state such as:
-
-```text
-Be the first high score!
-```
+If the active event has no eligible scores yet, show the empty high-score string from `docs/design_system.md` (Brand voice).
 
 ---
 
@@ -1740,11 +1719,7 @@ The following must remain unchanged:
 
 **Given**
 
-the Ready screen says:
-
-```text
-Type above 50 WPM for a Plinko drop.
-```
+- the Ready prize string in `docs/design_system.md` is the current wording
 
 **When**
 
