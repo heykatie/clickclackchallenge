@@ -144,7 +144,7 @@ Event setup rules, including saved duration, are in `docs/prd.md`.
 
 The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. When there is no eligible score, the high-score block shows “Be the first high score!” Start behavior and the Plinko rule are in `docs/prd.md`.
 
-Show the duration and the current high-score block. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
+Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
 Do not show the Top 5, operator settings, or a Start button on this screen. Returning to Event Setup is a long-press on the logo badge, specified in `docs/prd.md` §9.
 
@@ -290,7 +290,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] The shared palette and font roles are consistent; only a logo-only badge is used.
 - [ ] Setup offers 30/60 seconds, fresh/continue, and Start Event.
 - [ ] Fresh creates a new event without deleting prior scores; Continue restores saved event data.
-- [ ] Ready shows the contest copy, strictly-above-50-WPM message, duration, and current high score.
+- [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score.
 - [ ] Ready has no leaderboard or Start button.
 - [ ] The key used to leave Ready neither enters the passage nor starts timing.
 - [ ] The full first sentence is visible before the first valid typing keystroke starts the timer.

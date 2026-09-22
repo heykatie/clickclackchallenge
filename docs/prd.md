@@ -301,6 +301,8 @@ Required strings live in `docs/design_system.md` (Brand voice).
 
 When a high score exists, show the nickname and WPM from the eligible rank #1 score.
 
+Ready does not need to show the test duration. The Typing screen shows the remaining time before the timer starts.
+
 The Ready screen must **not** show:
 
 - Top 5 leaderboard

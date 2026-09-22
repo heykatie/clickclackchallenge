@@ -450,7 +450,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Visible branding is limited to the optional logo-only badge.
 - [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet.
 - [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
-- [ ] Ready shows the contest message, current high score and nickname, duration, and keyboard invitation.
+- [ ] Ready shows the contest message, current high score and nickname, and keyboard invitation.
 - [ ] Ready contains no Start button, Top 5, or operator controls.
 - [ ] The opening keypress is consumed; the full sentence appears before timing begins.
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
