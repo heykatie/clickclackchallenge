@@ -33,7 +33,7 @@ This document specifies the five-screen experience for an offline typing contest
   - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
   - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200. This export is the new-high-score state described in section 7, not the ordinary result in the diagram there.
   - Leaderboard: [05-leaderboard.png](./wireframes/05-leaderboard.png), 1448 × 1086
-- `01-setup.png`, `02-ready.png`, and `04-results.png` contain missing-glyph boxes on the logo, Start Event, Press Any Key, Top 10, and Save Score. Those boxes are export defects. Layout, hierarchy, and placement in the PNGs still count. Implementation uses a clean logo-only keycap badge and the real strings from `docs/design_system.md`.
+- `01-setup.png`, `02-ready.png`, and `04-results.png` contain missing-glyph boxes on the logo, Start Event, Press Any Key, Top 10, and Save Score. Those boxes are export defects. Layout, hierarchy, and placement in the PNGs still count. Implementation uses a clean logo-only keycap badge and the real strings from `docs/design_system.md`. The button text in the PNGs is not the label: `01-setup.png` shows title-case “Start Event,” and `04-results.png` shows “SAVE SCORE” with a trailing missing glyph. Implementation uses `START EVENT` and `SAVE SCORE` from `docs/design_system.md` §7, with no glyph.
 - Names, scores, accuracy values, and selected options in examples are sample data. They are not seeded event records or confirmed defaults.
 - Details marked **Proposed** complete a gap in the wireframe specification. Unresolved product decisions are collected in section 11.
 
