@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
-import { startFreshEvent, loadBooth, type TestDuration } from "./db/persistence";
+import { startFreshEvent, loadBooth, updateEventDuration, type TestDuration } from "./db/persistence";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -35,6 +35,25 @@ function App() {
     };
   }, []);
 
+  async function continueEvent(durationSeconds: TestDuration) {
+    const event = state.activeEvent;
+    if (!event) {
+      return;
+    }
+    setSaving(true);
+    try {
+      const active =
+        durationSeconds === event.durationSeconds
+          ? event
+          : await updateEventDuration(event.id, durationSeconds);
+      dispatch({ type: "SET_ACTIVE_EVENT", event: active });
+      dispatch({ type: "ENTER_READY" });
+    } catch {
+      setStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
   async function startFresh(durationSeconds: TestDuration) {
     setSaving(true);
     try {
@@ -70,7 +89,9 @@ function App() {
           onStartFresh={(durationSeconds) => {
             void startFresh(durationSeconds);
           }}
-          onContinue={() => dispatch({ type: "ENTER_READY" })}
+          onContinue={(durationSeconds) => {
+            void continueEvent(durationSeconds);
+          }}
         />
       );
     case "ready":

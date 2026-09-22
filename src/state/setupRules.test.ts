@@ -1,16 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { durationChoice } from "./setupRules";
+import { planEventStart } from "./setupRules";
 
-describe("durationChoice", () => {
-  it("keeps the stored duration while Continue is selected", () => {
-    expect(durationChoice("continue", 60, 30)).toBe(60);
+describe("planEventStart", () => {
+  it("keeps the event when Continue selects the other duration", () => {
+    expect(planEventStart("continue", true, 30)).toEqual({
+      mode: "continue",
+      durationSeconds: 30,
+    });
   });
 
-  it("uses the fresh choice only while Start Fresh is selected", () => {
-    expect(durationChoice("fresh", 60, 30)).toBe(30);
+  it("opens a new event when Start Fresh is selected", () => {
+    expect(planEventStart("fresh", true, 60)).toEqual({
+      mode: "fresh",
+      durationSeconds: 60,
+    });
   });
 
-  it("uses the fresh choice when there is no stored event", () => {
-    expect(durationChoice("continue", null, 30)).toBe(30);
+  it("opens a new event when Continue has no event to restore", () => {
+    expect(planEventStart("continue", false, 30)).toEqual({
+      mode: "fresh",
+      durationSeconds: 30,
+    });
   });
 });

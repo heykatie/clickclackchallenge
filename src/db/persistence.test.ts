@@ -11,9 +11,11 @@ import {
   saveScore,
   SETTINGS_KEY,
   startFreshEvent,
+  updateEventDuration,
   updateScoreNickname,
   type NewScore,
 } from "./persistence";
+import { rankScores } from "../features/leaderboard/ranking";
 
 function scoreInput(eventId: string, displayedWpm: number): NewScore {
   return {
@@ -124,5 +126,28 @@ describe("persistence", () => {
     expect(booth.activeEvent?.id).toBe(event.id);
     expect(booth.activeEvent?.durationSeconds).toBe(60);
     expect(await listScores(event.id)).toHaveLength(1);
+  });
+
+  it("changes the next contestant's duration without dropping the event's scores", async () => {
+    const event = await startFreshEvent(60);
+    const earned = await saveScore({
+      ...scoreInput(event.id, 46),
+      durationSeconds: 60,
+      rawWpm: 45.8,
+      displayedWpm: 46,
+    });
+    const updated = await updateEventDuration(event.id, 30);
+
+    expect(updated.id).toBe(event.id);
+    expect(updated.status).toBe("active");
+    expect(updated.durationSeconds).toBe(30);
+    const database = await openDatabase();
+    expect(await database.count("events")).toBe(1);
+
+    const scores = await listScores(event.id);
+    expect(scores).toEqual([earned]);
+    expect(scores[0]?.durationSeconds).toBe(60);
+    expect(scores[0]?.displayedWpm).toBe(46);
+    expect(rankScores(scores).map((entry) => entry.score.displayedWpm)).toEqual([46]);
   });
 });

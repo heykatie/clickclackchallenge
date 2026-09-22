@@ -227,7 +227,7 @@ Display two option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration and which options are selected, is defined in `docs/prd.md`. When no event exists, Start Fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration control shows the stored duration. While Continue is selected, do not let the operator highlight the other length. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+Fresh-event and continue-event behavior, including saved duration and which options are selected, is defined in `docs/prd.md`. When no event exists, Start Fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration control shows the stored duration. `30 seconds` and `60 seconds` stay selectable on Continue. That choice is the next contestant's length. It keeps the event and its leaderboard.
 
 **No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 

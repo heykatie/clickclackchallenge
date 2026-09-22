@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { TestDuration } from "../db/persistence";
-import { durationChoice, type SetupMode } from "../state/setupRules";
+import { planEventStart, type SetupMode } from "../state/setupRules";
 
 type EventSetupScreenProps = {
   storedDuration: TestDuration | null;
   saving: boolean;
   onStartFresh: (durationSeconds: TestDuration) => void;
-  onContinue: () => void;
+  onContinue: (durationSeconds: TestDuration) => void;
 };
 
 export function EventSetupScreen({
@@ -16,16 +16,15 @@ export function EventSetupScreen({
   onContinue,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
-  const [freshDuration, setFreshDuration] = useState<TestDuration>(storedDuration ?? 30);
-  const shownDuration = durationChoice(mode, storedDuration, freshDuration);
-  const durationLocked = mode === "continue" && storedDuration !== null;
+  const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
 
   function startEvent() {
-    if (mode === "continue" && storedDuration !== null) {
-      onContinue();
+    const plan = planEventStart(mode, storedDuration !== null, selectedDuration);
+    if (plan.mode === "continue") {
+      onContinue(plan.durationSeconds);
       return;
     }
-    onStartFresh(freshDuration);
+    onStartFresh(plan.durationSeconds);
   }
 
   return (
@@ -38,9 +37,8 @@ export function EventSetupScreen({
             type="radio"
             name="duration"
             value="30"
-            checked={shownDuration === 30}
-            disabled={durationLocked}
-            onChange={() => setFreshDuration(30)}
+            checked={selectedDuration === 30}
+            onChange={() => setSelectedDuration(30)}
           />
           30 seconds
         </label>
@@ -49,9 +47,8 @@ export function EventSetupScreen({
             type="radio"
             name="duration"
             value="60"
-            checked={shownDuration === 60}
-            disabled={durationLocked}
-            onChange={() => setFreshDuration(60)}
+            checked={selectedDuration === 60}
+            onChange={() => setSelectedDuration(60)}
           />
           60 seconds
         </label>

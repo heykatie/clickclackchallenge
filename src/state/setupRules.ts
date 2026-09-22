@@ -2,13 +2,18 @@ import type { TestDuration } from "../db/persistence";
 
 export type SetupMode = "fresh" | "continue";
 
-export function durationChoice(
+export interface EventStart {
+  mode: "fresh" | "continue";
+  durationSeconds: TestDuration;
+}
+
+export function planEventStart(
   mode: SetupMode,
-  storedDuration: TestDuration | null,
-  freshDuration: TestDuration,
-): TestDuration {
-  if (mode === "continue" && storedDuration !== null) {
-    return storedDuration;
+  hasActiveEvent: boolean,
+  selectedDuration: TestDuration,
+): EventStart {
+  if (mode === "continue" && hasActiveEvent) {
+    return { mode: "continue", durationSeconds: selectedDuration };
   }
-  return freshDuration;
+  return { mode: "fresh", durationSeconds: selectedDuration };
 }

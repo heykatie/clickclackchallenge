@@ -284,14 +284,12 @@ Continuing should:
 - reopen the current/most recently active event
 - retain all existing scores
 - retain its leaderboard
-- retain its original duration
 - retain its passage set
+- use the duration selected on this screen for the next contestant
 
 If no previous event exists, the Continue option should be unavailable.
 
-If the operator wants to change the test duration, they should start a fresh event.
-
-While Continue is selected, the test-length control shows the stored duration and does not accept another choice. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+`30 seconds` and `60 seconds` stay selectable while Continue is selected. The choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration and WPM stored on earlier scores. A test that has already started keeps the duration it began with. Start fresh remains the way to open an empty leaderboard.
 
 ### Returning to Event Setup
 
@@ -579,9 +577,9 @@ The app should keep track of the currently active event so the operator can cont
 
 Settings may also remember convenience preferences such as the most recently selected duration.
 
-An existing event's saved duration remains the source of truth when that event is continued.
+The event's saved duration is the length the next contestant will use. The operator can change it while continuing the event. Each score keeps the duration of the attempt that produced it, and the WPM calculated from that duration. Ranking uses those stored results. It does not recalculate an earlier score with the event's new duration.
 
-Changing the duration requires starting a fresh event.
+Changing the duration does not start a fresh event. Start fresh is only for an empty leaderboard.
 
 ### Fresh Leaderboard Behavior
 
@@ -1611,12 +1609,13 @@ Starting fresh must never delete old event data.
 **Then**
 
 - the same event is restored
-- the original duration is restored
+- the event's current duration is shown, and the operator can select the other length for the next contestant
 - the original passage set is restored
 - all saved scores remain available
+- Start Event after a duration change keeps the same event
+- earlier scores keep the duration and WPM from the attempt that earned them
 - the high score is restored
-- the Top 5 is recalculated correctly
-- a different duration highlighted while Continue is selected is ignored
+- the Top 5 is recalculated from those stored results
 
 Continuing must not create a new event.
 

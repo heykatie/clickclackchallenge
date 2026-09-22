@@ -165,6 +165,37 @@ export async function startFreshEvent(durationSeconds: TestDuration): Promise<Ev
   return event;
 }
 
+export async function updateEventDuration(
+  eventId: string,
+  durationSeconds: TestDuration,
+): Promise<EventRecord> {
+  const database = await openDatabase();
+  const event = await database.get("events", eventId);
+  if (!event || event.status !== "active") {
+    throw new Error("No active event to update");
+  }
+  if (event.durationSeconds === durationSeconds) {
+    return event;
+  }
+
+  const updated: EventRecord = {
+    ...event,
+    durationSeconds,
+    updatedAt: new Date().toISOString(),
+  };
+  const transaction = database.transaction(["events", "settings"], "readwrite");
+  await transaction.objectStore("events").put(updated);
+  const settings = await transaction.objectStore("settings").get(SETTINGS_KEY);
+  if (settings) {
+    await transaction.objectStore("settings").put(
+      { ...settings, lastSelectedDuration: durationSeconds },
+      SETTINGS_KEY,
+    );
+  }
+  await transaction.done;
+  return updated;
+}
+
 export async function listScores(eventId: string): Promise<ScoreRecord[]> {
   const database = await openDatabase();
   return database.getAllFromIndex("scores", "eventId", eventId);

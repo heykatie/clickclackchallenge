@@ -518,6 +518,8 @@ Field behavior:
 `durationSeconds`
 
 - snapshot of the test duration when the score was earned
+- unchanged when the operator later picks the other length for the same event
+- the duration that produced this score's WPM; ranking uses the stored WPM rather than recomputing it from the event's current duration
 
 `createdAt`
 
@@ -597,9 +599,9 @@ const settings: AppSettings = {
 };
 ```
 
-When continuing an existing event, `event.durationSeconds` remains the source of truth.
+When continuing an existing event, `event.durationSeconds` is the length for the next contestant. The operator may change it without archiving the event. Earlier `ScoreRecord.durationSeconds` values, and the WPM stored on those scores, stay as they were when each score was saved.
 
-Changing the duration requires starting a fresh event.
+Start fresh is required only when the operator wants a new empty leaderboard.
 
 ### Passage Set
 
@@ -690,11 +692,13 @@ Choosing **Continue Previous Event** restores the valid active event.
 Restore:
 
 - event ID
-- event duration
+- the event's current duration, which the operator can change for the next contestant
 - passage-set ID
-- saved scores
+- saved scores, each still carrying the duration and WPM from the attempt that earned it
 - derived current high score
 - derived leaderboard
+
+Changing the duration keeps this event. It does not create a new one and does not rewrite earlier scores.
 
 If no valid active event exists, Continue should be unavailable.
 
@@ -1801,7 +1805,10 @@ activeEventId changes to the new event
 continue restores the active event
 continue does not create a new event
 continue restores existing scores
-duration persists when continuing
+duration persists when continuing without a change
+changing duration while continuing keeps the same event and its scores
+each score keeps the duration and WPM from the attempt that earned it
+ranking uses stored WPM when scores in one event have different durations
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
 ```
@@ -1859,7 +1866,7 @@ Required cases:
 EventSetup disables Continue when no event exists
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
-while Continue is selected, choosing the other duration leaves the stored duration unchanged
+while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts
