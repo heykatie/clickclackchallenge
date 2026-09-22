@@ -1,6 +1,22 @@
 # Typing Test — V1 Wireframes
 
-This document specifies the five-screen experience for an offline typing contest on a giant physical keyboard, displayed on a landscape iPad. Product rules come from `docs/prd.md` and `docs/technical_plan.md`. This document specifies screen flow and layout, using the five tracked PNGs in `docs/wireframes/`. It describes the intended interface; application behavior has not been verified against running code in this workspace.
+This file owns screen layout and the five PNG wireframes in `docs/wireframes/`.
+
+## Document ownership
+
+Each fact has one owner. Other documents link to that owner instead of restating the rule.
+
+| Topic | Owner |
+| --- | --- |
+| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
+| Screen layout and the five PNG wireframes | `docs/wireframes.md` |
+| Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
+| Booth acceptance tests, automated test map, giant-keyboard and airplane-mode checks | `docs/testing.md` |
+
+If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
+
+This document specifies the five-screen experience for an offline typing contest on a giant physical keyboard, displayed on a landscape iPad. It describes the intended interface; application behavior has not been verified against running code in this workspace.
 
 **Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling.
 
@@ -55,49 +71,7 @@ There are five screens. Waiting and running are states of Typing; nickname entry
 
 ## 3. Shared visual system
 
-### Palette
-
-Use the latest documented palette below. These are approximate brand matches, not verified official brand colors. Generated image colors can vary slightly; use these values for implementation.
-
-| Role | Color | Use |
-| --- | --- | --- |
-| Blush | `#FBEDEF` | Main background |
-| Soft white | `#FFFDFC` | Panels, fields, ordinary leaderboard rows |
-| Mint | `#9DDED8` | Accent surfaces and decorative shapes |
-| Strong mint | `#6CCFC7` | Primary controls, caret, focus accents |
-| Lavender | `#AA9AD4` | Borders, current-word treatment, rank accents |
-| Light lavender | `#D9D0ED` | First-place row and soft emphasis |
-| Soft pink | `#F4C1D4` | Sparse decoration and celebration |
-| Peach | `#F5CFC0` | Sparse decorative shapes |
-| Charcoal | `#403738` | Essential text and scores |
-| Muted gray | `#8C8788` | Secondary text, subject to readability checks |
-| Error red | `#D95D5D` | Incorrect characters and validation feedback |
-
-Use charcoal for essential reading. Pastel accents are not a substitute for sufficient text contrast. Check active-word, upcoming-text, and error treatments on the actual iPad; use a tinted background or darker text variant if needed while retaining the state distinction.
-
-### Typography and geometry
-
-| Role | Font | Initial layout size |
-| --- | --- | --- |
-| Main headline | Fredoka 600–700 | 44–64 px |
-| Result WPM | Fredoka 600–700 | 72–100 px |
-| Section heading | Fredoka 600–700 | 28–40 px |
-| Primary button text | Fredoka 600–700 | 24–34 px |
-| Labels and leaderboard names | Nunito 600–700 | 20–24 px |
-| Body copy | Nunito 400–600 | 18–22 px |
-| Helper copy | Nunito 400–600 | 14–18 px; enlarge when needed for distance reading |
-| Typing passage | Atkinson Hyperlegible 400–700 | 32–36 px |
-| Typing timer | Fredoka 600–700 | 36–48 px |
-| Live WPM and accuracy | Nunito or Fredoka | 22–30 px |
-
-These are starting layout sizes, not measurements extracted from the PNG. Package fonts locally for offline use and validate the layout on the target iPad.
-
-- Use rounded controls, pill labels, and large rounded panels. Typical radii: 12–16 px for small controls, 18–26 px for buttons, and 24–36 px for panels.
-- Touch targets are at least 44 × 44 px; major actions should be at least 56 px tall.
-- Keep organic blobs, arcs, swirls, dots, and occasional stars near screen edges. Keep text, inputs, and controls clear.
-- Prefer flat fills, fine borders, and generous whitespace. Avoid heavy shadows, strong gradients, dark gamer styling, and dense dashboard layouts.
-- Keep Typing much quieter than Ready, Results, or Leaderboard. Avoid motion around the passage and honor reduced-motion preferences.
-- Provide visible focus and non-color indicators for selected options, current-player status, and errors. Use a proper logo/icon asset rather than missing-glyph boxes from older mockups.
+Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `docs/design_system.md`. Use those values instead of sampling colors from the PNGs. Words inside the diagrams show placement. The canonical strings live in the design system brand-voice section.
 
 ## 4. Screen 01 — Event Setup
 
@@ -166,20 +140,13 @@ Keep configuration limited to these choices. V1 has no event-history browser, sc
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Required copy:
-
-- “GIANT keyboard typing contest!”
-- “Type above 50 WPM for a Plinko drop.”
-- “CURRENT HIGH SCORE”
-- “PRESS ANY KEY TO START”
+The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. “Above 50 WPM” is defined with the Plinko rule in `docs/prd.md`.
 
 Show the current event's high-score WPM and nickname, plus the selected duration. The invitation can sit on a lavender or mint panel, but it is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-The word **above** means strictly greater than 50 WPM; do not silently change the message to “50 WPM or more.” The prize message and leaderboard qualification are separate concepts.
-
 On the opening keypress, show Typing with the complete sentence and the full duration still remaining. That opening keypress must not count as a typed character or start the test timer.
 
-When the active event has no leaderboard-eligible score, replace the sample high-score value and nickname with “Be the first high score!” Do not show a fictional contestant.
+When the active event has no leaderboard-eligible score, show the empty high-score string from the design system. Do not show a fictional contestant.
 
 Do not show the Top 5, operator settings, or a Start button on this screen.
 
@@ -230,7 +197,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
 
-Bundle passages and fonts locally. Do not add pause/restart controls, a leaderboard, scrolling passages, or continuous decoration to this screen. Accuracy and correction counting follow section 9. Which keys can start the timer remains open in section 11.
+Bundle passages and fonts locally. Do not add pause/restart controls, a leaderboard, scrolling passages, or continuous decoration to this screen. Accuracy and correction counting live in `docs/prd.md`. Which keys can start the timer remains open in section 11.
 
 ## 7. Screen 04 — Results + Nickname
 
@@ -269,10 +236,7 @@ Keep the WPM dominant, accuracy secondary, and ranking status clear. Use “NEW 
 **Proposed non-qualifier action:** show a large “VIEW LEADERBOARD” button when nickname entry is not offered. The prior requirements establish progression but do not specify this control's label or an automatic Results delay.
 
 - Top 10 eligibility does not guarantee a visible Top 5 row. Ranks 6–10 can enter a nickname even though their rows are not shown on the next screen.
-- Accept any free-form nickname. There is no preset-name list.
-- Trim leading and trailing whitespace, reject an empty value, and enforce a maximum length of 20 characters.
-- Display nickname content as plain text.
-- Skip behavior and abandonment handling remain open in section 11.
+- Nickname validation lives in `docs/prd.md`. There is no preset-name list. Do not invent a different length limit in the field styling.
 - Make the field large and visibly focused when editing. Use the physical keyboard for text entry and keep the action reachable by keyboard and touch.
 - Save valid scores locally. Nickname submission must update the same result, not create a duplicate entry. Store valid scores outside the visible Top 5 as well.
 - Do not run the leaderboard reset countdown while a contestant is entering a nickname.
@@ -322,29 +286,15 @@ Keep the WPM dominant, accuracy secondary, and ranking status clear. Use “NEW 
 - Show only the Top 5. Do not append the current player as a sixth row if they rank lower.
 - The PNG's five contestants are sample data. **Proposed sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, include “No scores yet.”
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored nickname.
-- The V1 automatic return is 10 seconds, matching the wireframe message. Booth testing may adjust that duration later. Implement 10 seconds now.
+- The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Render the remaining time in “Returning to ready screen in {seconds}s”; the live interface must not leave the number fixed at 10.
 - NEXT PLAYER returns immediately to Ready. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 
-These rules determine visible values and states; this document does not prescribe a storage library or application framework.
+Scoring, nickname rules, persistence, offline behavior, and reset timing live in `docs/prd.md`. This document shows where those states appear.
 
-| Rule | Requirement |
-| --- | --- |
-| WPM | Use correct characters: `(correct characters / 5) / elapsed minutes`. Incorrect keystrokes must not increase the score. |
-| Accuracy | `correctAttempts / (correctAttempts + incorrectAttempts) × 100`. A correct printable character counts as a correct attempt. An incorrect printable character counts as an incorrect attempt. Backspace is not an attempt. Correcting a mistake does not erase the original incorrect attempt. Before typing starts, show `—%` or hide accuracy. |
-| Validity | A score must reach 80% accuracy to qualify for ranking and nickname entry. 80.00% is eligible. 79.99% is not. Below the threshold, still show WPM and accuracy, omit nickname entry, and exclude the score from the leaderboard. 80% is the V1 development gate and stays provisional until giant-keyboard testing. |
-| Nicknames | Offered to qualifying Top 10 contestants. |
-| Visible rankings | Top 5 of the current active event. |
-| Retention | Preserve all valid event scores locally, not only the displayed rows. |
-| Fresh event | Create a new empty event; retain prior event data. |
-| Continued event | Resume the most recently active event and its saved data. |
-| Offline operation | After initial installation/caching, setup, typing, scoring, saving, rankings, and reset work without internet. |
-
-Both reset paths clear the current sentence, typed input, live WPM, live accuracy, timer, result, nickname input, and current-player marker. They preserve the active event, test duration, stored scores, high score, and leaderboard. Return to Ready without a browser reload.
-
-Event settings and scores survive an app/browser restart. V1 does not require accounts, cloud synchronization, a backend, shared rankings across devices, historical-event management, or a storefront.
+Both reset paths return to Ready without a browser reload. They clear the current contestant’s on-screen state and leave the active event in place.
 
 ## 10. Wireframe acceptance checklist
 
@@ -375,18 +325,12 @@ This is a review checklist for the intended interface, not a claim that the app 
 
 | Topic | What is established | What remains open |
 | --- | --- | --- |
-| Typing input | The first valid typing keystroke starts timing. Incorrect input does not increase WPM. Accuracy and Backspace counting are defined in section 9. | Which keys count as that first valid typing key, beyond the non-typing keys excluded by the technical plan. |
-| Ranking precision and ties | WPM is the primary ranking value. | Display rounding and comparison precision; whether to adopt accuracy then earlier submission as tie-breakers. |
-| Nickname policy | Top 10 players can enter any nickname. Trim whitespace, reject empty values, and limit the nickname to 20 characters. Display it as plain text. | Long-name display inside a row, skip behavior, and abandonment handling. |
+| Typing input | Timing, incorrect-input, and Backspace rules live in `docs/prd.md`. | Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`. |
+| Nickname policy | Validation lives in `docs/prd.md`. | Long-name display inside a row, skip behavior, and abandonment handling. |
 | Results progression | Every contestant can reach the leaderboard. | Confirm the proposed VIEW LEADERBOARD control for non-qualifiers and any Results idle behavior. |
-| Setup defaults | 30/60-second and fresh/continue choices exist. Continue restores the event’s saved duration and does not change it. A different duration requires Start Fresh. | Which options are selected when Event Setup first opens. |
+| Setup defaults | Continue-event duration behavior lives in `docs/prd.md`. | Which options are selected when Event Setup first opens. |
 | Operator re-entry | Settings are separate from contestant gameplay. | How the operator returns to Setup after starting an event. |
 
-### Provisional V1 values
+Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.
 
-These are implementation rules. Testing may change the number later. Do not treat them as undecided.
-
-- Leaderboard accuracy gate: 80%. Eligible at 80.00% and above. Provisional until giant-keyboard testing.
-- Leaderboard auto-reset: 10 seconds. The countdown starts when the leaderboard appears and does not run during nickname entry. The duration may be adjusted after booth testing.
-
-Until the remaining open items are resolved, do not treat illustrative values or proposed controls as previously approved product rules. Any implementation decision should be reflected here and in the project's PRD and design-system documents.
+Until the remaining open items are resolved, do not treat illustrative values or proposed controls as previously approved product rules.

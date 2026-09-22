@@ -1,8 +1,22 @@
 # Typing Test Design System
 
-This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. It reflects the latest agreed palette, screen layouts, and logo-only branding.
+This file owns the visual system and required contestant-facing strings: palette, type scale, CSS tokens, motifs, and component styling.
 
-Use `docs/prd.md` and `docs/technical_plan.md` for product behavior. Use this document and `docs/wireframes.md` for screen flow and layout. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions. Section 20 lists decisions that are still open.
+## Document ownership
+
+Each fact has one owner. Other documents link to that owner instead of restating the rule.
+
+| Topic | Owner |
+| --- | --- |
+| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
+| Screen layout and the five PNG wireframes | `docs/wireframes.md` |
+| Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
+| Booth acceptance tests, automated test map, giant-keyboard and airplane-mode checks | `docs/testing.md` |
+
+If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
+
+This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. Screen layout and the PNG inventory live in `docs/wireframes.md`. Product behavior lives in `docs/prd.md`. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions. Section 20 lists decisions that are still open.
 
 ## 1. Brand direction
 
@@ -170,7 +184,7 @@ Make WPM the strongest element, with the unit explicit. Keep nickname and suppor
 
 ### Leaderboard rows
 
-Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Stored nicknames are limited to 20 characters. A name must not push the WPM value off-screen. How a long name is visually truncated inside the row is still open.
+Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the nickname maximum in `docs/prd.md` so a name does not push the WPM value off-screen. How a long name is visually truncated inside the row is still open.
 
 ## 8. Typing feedback
 
@@ -317,8 +331,7 @@ Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach 
 - Keep the result and entered nickname intact during saving or recoverable errors.
 - Do not run the leaderboard reset countdown while the contestant is entering a nickname.
 - Save the nickname with the existing result; do not duplicate the score.
-- Accept any nickname. Trim leading and trailing whitespace, reject an empty value, and limit the nickname to 20 characters.
-- Display nickname content as plain text. Do not introduce a different length limit through styling.
+- Nickname validation lives in `docs/prd.md`. Do not invent a different length limit in the field styling.
 
 **Proposed non-qualifier action:** “VIEW LEADERBOARD.” The flow requires access to the leaderboard, but this label and any Results idle timeout have not been finalized.
 
@@ -366,7 +379,7 @@ Show actual event data rather than filling missing places with sample contestant
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
-- The V1 delay is 10 seconds. Booth testing may adjust it later. Implement 10 seconds now.
+- The countdown duration lives in `docs/prd.md`. Show the remaining seconds. Do not leave the number static.
 - In the live app, update “Returning to ready screen in {seconds}s” as time passes; do not leave “10s” static.
 - NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
@@ -412,6 +425,7 @@ Confirmed examples:
 GIANT keyboard typing contest!
 Type above 50 WPM for a Plinko drop.
 CURRENT HIGH SCORE
+Be the first high score!
 PRESS ANY KEY TO START
 Nice typing!
 NEW HIGH SCORE!
@@ -481,27 +495,13 @@ This checklist records what to verify; it does not claim the implementation has 
 
 ## 20. Product decisions still open
 
-Settled V1 rules below come from the PRD and technical plan. Keep the remaining open items in sync with `docs/wireframes.md` instead of silently fixing them in visual examples.
-
-### Settled for V1
-
-- Accuracy is `correctAttempts / (correctAttempts + incorrectAttempts) × 100`. Backspace is not an attempt. Correcting a mistake does not erase the original incorrect attempt. Before typing starts, show `—%` or hide accuracy.
-- Nicknames are trimmed, empty values are rejected, and the maximum length is 20 characters. Render them as plain text.
-- An event with no leaderboard-eligible score shows “Be the first high score!”
-- Continue restores the event’s saved duration. Changing the duration requires Start Fresh.
-
-### Provisional V1 values
-
-Implement these numbers now. Testing may change them later. They are not undecided.
-
-- Leaderboard accuracy gate: 80%. A score at 80.00% or above is eligible. Below that, show WPM and accuracy, omit nickname entry, and exclude the score from ranking. Provisional until giant-keyboard testing.
-- Leaderboard auto-reset: 10 seconds. The countdown starts when the leaderboard appears, shows the remaining seconds, and does not run during nickname entry. The duration may be adjusted after booth testing.
+Settled product rules live in `docs/prd.md`: scoring, nickname validation, the empty high-score string’s behavior, continue-event duration, the 80% accuracy gate, and the leaderboard reset duration. The empty high-score words themselves are in Brand voice above. Keep the open items below in sync with `docs/wireframes.md`.
 
 ### Still open
 
-- Which keys count as the first valid typing key, beyond the non-typing keys excluded by the technical plan.
-- WPM display precision and final tie-breaking policy.
-- Nickname skip behavior, abandonment handling, and how a valid long name is visually truncated in a row.
+- Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`.
+- How a valid long name is visually truncated in a row.
+- Nickname skip behavior and abandonment handling.
 - Non-qualifier Results action and any Results idle behavior.
 - Which options are selected when Event Setup first opens.
 - How the operator returns to Event Setup after starting an event.
