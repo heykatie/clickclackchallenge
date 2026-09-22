@@ -1764,6 +1764,8 @@ Backspace cannot move before the start of the current sentence
 sentence completes after every expected position has an entered character
 incorrect final character still completes the sentence
 sentence completion loads the next sentence
+one space between sentences is ignored and the next letter still scores
+a second space between sentences is an incorrect character
 sentence completion preserves cumulative score counters
 Backspace cannot reopen the previous committed sentence
 passage order remains deterministic

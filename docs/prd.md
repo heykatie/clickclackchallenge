@@ -768,6 +768,8 @@ The app should not:
 
 A sentence is considered complete when the contestant has entered a character for every position, even if some positions contain errors.
 
+Sentences are stored without a trailing space. After a sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
+
 ### Passage Length
 
 The bundled passage set must contain enough text for both 30-second and 60-second tests, including fast typists.

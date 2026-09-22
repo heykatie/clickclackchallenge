@@ -142,6 +142,32 @@ describe("typing engine", () => {
     expect(session.incorrectAttempts).toBe(1);
   });
 
+  it("ignores one space typed between sentences and still accepts the next letter", () => {
+    const spaced = type(createTestSession(["ab.", "cd"], 30), "ab. c");
+    const immediate = type(createTestSession(["ab.", "cd"], 30), "ab.c");
+    expect(spaced.expectedSentence).toBe("cd");
+    expect(spaced.typedCharacters.map((character) => character.typed)).toEqual(["c"]);
+    expect(spaced.correctAttempts).toBe(4);
+    expect(spaced.incorrectAttempts).toBe(0);
+    expect(immediate.typedCharacters.map((character) => character.typed)).toEqual(["c"]);
+    expect(immediate.correctAttempts).toBe(4);
+  });
+
+  it("counts a leading space on the first sentence as an incorrect character", () => {
+    const session = type(createTestSession(["ab"], 30), " ");
+    expect(session.characterIndex).toBe(1);
+    expect(session.incorrectAttempts).toBe(1);
+  });
+
+  it("counts a second space between sentences as an incorrect first character", () => {
+    const session = type(createTestSession(["ab.", "cd"], 30), "ab.  ");
+    expect(session.expectedSentence).toBe("cd");
+    expect(session.typedCharacters).toEqual([
+      { expected: "c", typed: " ", isCorrect: false },
+    ]);
+    expect(session.incorrectAttempts).toBe(1);
+  });
+
   it("does not let Backspace reopen a committed sentence", () => {
     const session = type(createTestSession(["ab", "cd"], 30), "ab");
     const erased = applyTypingKey(session, { key: "Backspace" }, 10);

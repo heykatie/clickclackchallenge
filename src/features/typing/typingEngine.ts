@@ -17,6 +17,7 @@ export interface TestSession {
   startedAt: number | null;
   endsAt: number | null;
   isFinished: boolean;
+  skippedSentenceSpace: boolean;
 }
 
 export interface TypingKey {
@@ -60,6 +61,7 @@ export function createTestSession(
     startedAt: null,
     endsAt: null,
     isFinished: false,
+    skippedSentenceSpace: false,
   };
 }
 
@@ -147,6 +149,17 @@ function startTimer(session: TestSession, now: number): TestSession {
 }
 
 function typeCharacter(session: TestSession, typed: string): TestSession {
+  // The first space after a committed sentence is the space people type after "." or "?".
+  if (
+    typed === " " &&
+    session.characterIndex === 0 &&
+    session.sentenceIndex > 0 &&
+    !session.skippedSentenceSpace &&
+    session.expectedSentence[0] !== " "
+  ) {
+    return { ...session, skippedSentenceSpace: true };
+  }
+
   const expected = session.expectedSentence[session.characterIndex];
   if (expected === undefined) {
     return session;
@@ -190,6 +203,7 @@ function typeCharacter(session: TestSession, typed: string): TestSession {
     characterIndex: 0,
     expectedSentence: nextSentence,
     typedCharacters: [],
+    skippedSentenceSpace: false,
   };
 }
 
