@@ -2,83 +2,97 @@
 
 ## 1. Purpose
 
-This document describes the technical implementation plan for the V1 **Typing Test**.
+This document defines the technical implementation plan for V1 of the **Typing Test**.
 
-The product is an offline-first typing competition designed for repeated use on a **landscape iPad** connected to a giant physical keyboard at event booths.
+The product is an offline-first typing competition designed for repeated use at event booths on a **landscape iPad** connected to a giant physical keyboard.
 
-The implementation must follow:
+Implementation should follow:
 
 - `docs/PRD.md`
 - `docs/DESIGN_SYSTEM.md`
-- Wireframes in `docs/wireframes/`
+- wireframes in `docs/wireframes/`
 
-V1 prioritizes:
+V1 priorities:
 
-1. Reliable booth operation
-2. Offline use
-3. Accurate scoring
-4. Fast contestant turnover
-5. Persistent event leaderboards
-6. Simple, readable landscape-iPad UX
-7. A codebase that demonstrates modern React + TypeScript engineering
+1. reliable booth operation
+2. offline functionality
+3. accurate and understandable scoring
+4. fair competition
+5. fast contestant turnover
+6. persistent local event data
+7. simple landscape-iPad interaction
+8. maintainable React + TypeScript architecture
 
 ---
 
-# 2. V1 Technical Scope
+## 2. V1 Technical Scope
 
-## In Scope
+### In Scope
 
-V1 will use:
+V1 uses:
 
 - React
 - TypeScript
 - Vite
 - Progressive Web App (PWA)
-- Service worker / offline asset caching
+- service worker / offline asset caching
 - IndexedDB for structured local persistence
-- Local, bundled typing passages
-- Local, bundled fonts and required visual assets
+- locally bundled typing passages
+- locally bundled fonts and required assets
 - Vitest for unit tests
-- React Testing Library for component behavior where useful
-- Static HTTPS deployment
+- React Testing Library for high-value component tests
+- static HTTPS deployment
 
-V1 will support:
+V1 supports:
 
 - 30-second and 60-second event modes
-- Fresh event creation
-- Continuing the most recently active event
-- Ready / Attract state
-- Typing state
-- Results + nickname state
-- Leaderboard state
-- Automatic and manual next-player reset
-- Offline operation after initial installation/load
-- Persistent events and scores across app restarts
+- fresh event creation
+- continuing the current/most recently active event
+- Ready / Attract screen
+- Typing screen
+- Results + nickname screen
+- Leaderboard screen
+- live WPM
+- live accuracy
+- timer
+- character-level typing feedback
+- Backspace
+- deterministic passage sequence
+- minimum leaderboard accuracy
+- Top 10 nickname eligibility
+- Top 5 leaderboard display
+- Plinko/prize qualification
+- manual Next Player reset
+- automatic reset after the Leaderboard screen
+- local event persistence
+- offline operation after installation/caching
 
-## Out of Scope
+### Out of Scope
 
-V1 will not require:
+V1 does not require:
 
 - Flask
 - SQLAlchemy
 - PostgreSQL
-- Cloud leaderboard synchronization
-- User accounts
-- Authentication
-- Online multiplayer
-- Cross-device synchronization
-- E-commerce
-- Admin dashboard
-- Historical-event management UI
+- cloud synchronization
+- user accounts
+- authentication
+- online multiplayer
+- cross-device leaderboard sync
+- e-commerce
+- admin dashboard
+- historical-event management UI
 - AI-generated passages
-- Advanced anti-cheat detection
-- Detailed analytics
+- advanced anti-cheat systems
+- detailed analytics
+- operator score deletion
+- multiple-device event management
 
-These may be added after the conference.
+These may be added after V1.
 
 ---
 
-# 3. Architecture Overview
+## 3. Architecture Overview
 
 ```text
 ┌─────────────────────────────────────┐
@@ -91,18 +105,18 @@ These may be added after the conference.
           ┌────────┴────────┐
           │                 │
           ▼                 ▼
-   IndexedDB          PWA Service Worker
-   local data          cached app shell
+      IndexedDB        PWA Service Worker
+      local data       cached app shell
           │                 │
           ▼                 ▼
- events / scores      HTML / JS / CSS
- settings             fonts / icons
-                      passages / assets
+   events / scores      HTML / JS / CSS
+   settings             fonts / icons
+                        passages / assets
 ```
 
-The core booth workflow must not depend on a server.
+The booth workflow must not depend on a server.
 
-The application should remain functional when the iPad is:
+The application must remain usable when the iPad is:
 
 - disconnected from Wi-Fi
 - in airplane mode
@@ -111,9 +125,9 @@ The application should remain functional when the iPad is:
 
 ---
 
-# 4. Recommended Stack
+## 4. Recommended Stack
 
-## Frontend
+### Frontend
 
 ```text
 React
@@ -123,12 +137,12 @@ Vite
 
 Reasons:
 
-- Fits the existing project skill set
-- Strong alignment with current entry-level frontend/full-stack roles
-- TypeScript adds useful compile-time safety
-- Vite provides a simple build system and integrates well with PWA tooling
+- React fits the state-driven screen flow
+- TypeScript provides strong safety for event, score, and typing-state logic
+- Vite keeps the build setup simple
+- the stack integrates well with PWA tooling
 
-## PWA
+### PWA
 
 Recommended package:
 
@@ -136,9 +150,9 @@ Recommended package:
 vite-plugin-pwa
 ```
 
-Use Workbox through `vite-plugin-pwa` to cache the application shell and required static assets.
+Use Workbox through `vite-plugin-pwa` to cache the app shell and required static assets.
 
-## Local Database
+### Local Database
 
 Recommended package:
 
@@ -146,20 +160,20 @@ Recommended package:
 idb
 ```
 
-`idb` is a small Promise-based wrapper around IndexedDB.
+`idb` is a Promise-based wrapper around IndexedDB.
 
-IndexedDB is preferred over `localStorage` because the project stores structured data:
+IndexedDB is preferred over `localStorage` because V1 stores structured data:
 
 - multiple events
 - multiple scores
 - settings
-- future historical event data
+- retained historical event data
 
-`localStorage` may be used only for non-critical trivial preferences if needed.
+`localStorage` is not required for core persistence.
 
-## Fonts
+### Fonts
 
-Fonts must be bundled with the app so they work offline.
+Fonts must be bundled locally for offline use.
 
 Recommended packages:
 
@@ -177,16 +191,16 @@ Nunito                 general UI
 Atkinson Hyperlegible  typing passage
 ```
 
-Do not load fonts from Google Fonts at runtime.
+Do not load fonts from Google Fonts or another remote CDN at runtime.
 
-## Testing
+### Testing
 
 ```text
 Vitest
 React Testing Library
 ```
 
-Optional after the core MVP:
+Optional after the MVP:
 
 ```text
 Playwright
@@ -194,11 +208,9 @@ Playwright
 
 ---
 
-# 5. Application State Model
+## 5. Application State Model
 
-The UI should be modeled as explicit application states rather than unrelated booleans.
-
-Recommended screen-state type:
+Use explicit screen states.
 
 ```ts
 type AppScreen =
@@ -209,7 +221,7 @@ type AppScreen =
   | "leaderboard";
 ```
 
-The primary flow is:
+Primary flow:
 
 ```text
 SETUP
@@ -218,9 +230,9 @@ READY
   ↓
 press any key
   ↓
-TYPING SCREEN LOADED
+TYPING SCREEN APPEARS
   ↓
-first valid typing keystroke
+first valid typing key
   ↓
 TIMER STARTS
   ↓
@@ -235,17 +247,17 @@ Next Player / automatic reset
 READY
 ```
 
-The key used to leave the Ready screen must **not** count as the contestant's first typed character.
+The key used to leave the Ready screen must not count as the contestant's first typed character.
 
 ---
 
-# 6. State Management Strategy
+## 6. State Management Strategy
 
-For V1, use React state plus `useReducer`.
+Use React state plus `useReducer`.
 
-A global state library is unnecessary for the initial project size.
+A global state-management library is unnecessary for V1.
 
-Suggested high-level state:
+Suggested app state:
 
 ```ts
 interface AppState {
@@ -256,7 +268,7 @@ interface AppState {
 }
 ```
 
-Use a reducer so transitions are explicit:
+Suggested reducer actions:
 
 ```text
 START_NEW_EVENT
@@ -270,57 +282,62 @@ SHOW_LEADERBOARD
 RESET_FOR_NEXT_PLAYER
 ```
 
-This makes the booth flow easier to reason about and test.
+State transitions should remain explicit and testable.
 
 ---
 
-# 7. Data Model
+## 7. Data Model
 
-## Event
+### Test Duration
 
 ```ts
 type TestDuration = 30 | 60;
+```
 
+### Event
+
+```ts
 interface EventRecord {
   id: string;
   createdAt: string;
   updatedAt: string;
 
   durationSeconds: TestDuration;
-
   passageSetId: string;
 
   status: "active" | "archived";
 }
 ```
 
+A user-facing event name is not required in V1.
+
 ### Event Rules
 
 Starting fresh:
 
 ```text
-Create new EventRecord
-→ mark previous event archived if appropriate
+create new EventRecord
+→ archive previous active event if one exists
 → set new event as active
-→ leaderboard starts empty
+→ start with an empty leaderboard
+→ retain all previous event records and scores
 ```
 
-Continuing previous:
+Continuing an event:
 
 ```text
-Load the most recently active event
+load activeEventId
+→ restore existing event
 → restore all existing scores
-→ restore that event's duration
-→ restore its passage set
+→ restore event duration
+→ restore passage set
 ```
 
-For fairness, continuing an existing event should **retain that event's test duration**.
+Continuing an event must retain that event's duration.
 
-If the operator wants to change between 30s and 60s, they should start a fresh event.
+If the operator wants to change between 30 and 60 seconds, they should start a fresh event.
 
----
-
-## Score
+### Score
 
 ```ts
 interface ScoreRecord {
@@ -329,35 +346,31 @@ interface ScoreRecord {
 
   nickname: string | null;
 
-  wpm: number;
+  rawWpm: number;
+  displayedWpm: number;
   accuracy: number;
 
   correctCharacters: number;
-  attemptedCharacters: number;
+  correctAttempts: number;
+  incorrectAttempts: number;
 
-  durationSeconds: number;
+  durationSeconds: TestDuration;
 
-  leaderboardEligible: boolean;
+  meetsAccuracyThreshold: boolean;
 
   createdAt: string;
 }
 ```
 
-All valid completed test results may be stored.
+Notes:
 
-Only contestants who qualify for the current Top 10 are prompted for a nickname.
+- `rawWpm` retains internal precision.
+- `displayedWpm` is the rounded integer shown to contestants and used for V1 ranking.
+- `meetsAccuracyThreshold` represents only the minimum accuracy gate.
+- Top 10 and Top 5 status should be derived at runtime.
+- Scores outside the Top 10 may remain stored with `nickname: null`.
 
-Scores outside the Top 10 may remain stored with:
-
-```ts
-nickname: null
-```
-
-They do not appear on the visible Top 5 leaderboard.
-
----
-
-## Settings
+### Settings
 
 ```ts
 interface AppSettings {
@@ -366,11 +379,9 @@ interface AppSettings {
 }
 ```
 
-This can be stored as a singleton IndexedDB record.
-
 ---
 
-# 8. IndexedDB Structure
+## 8. IndexedDB Structure
 
 Recommended database:
 
@@ -386,7 +397,7 @@ scores
 settings
 ```
 
-## `events`
+### `events`
 
 Key:
 
@@ -394,14 +405,14 @@ Key:
 id
 ```
 
-Useful index:
+Useful indexes:
 
 ```text
 createdAt
 status
 ```
 
-## `scores`
+### `scores`
 
 Key:
 
@@ -409,16 +420,16 @@ Key:
 id
 ```
 
-Indexes:
+Useful indexes:
 
 ```text
 eventId
 createdAt
 ```
 
-Leaderboard sorting can be performed in application code because event score counts will be small.
+Leaderboard sorting can be done in application code because score counts will be small.
 
-## `settings`
+### `settings`
 
 Key:
 
@@ -426,7 +437,7 @@ Key:
 key
 ```
 
-Example:
+Examples:
 
 ```text
 activeEventId
@@ -435,9 +446,9 @@ lastEventId
 
 ---
 
-# 9. Passage Architecture
+## 9. Passage Architecture
 
-Typing content must be local and deterministic.
+All typing content must be prewritten, local, deterministic, and bundled with the application.
 
 Recommended structure:
 
@@ -461,57 +472,118 @@ const passageSet: PassageSet = {
 };
 ```
 
-## Passage Requirements
+### Passage Source Rules
+
+V1 must not depend on:
+
+- API-generated passages
+- AI-generated passages
+- internet-loaded passages
+- runtime-generated sentence content
+
+### Sentence Style Rules
 
 Sentences should:
 
-- use natural grammar
-- use primarily common words
-- avoid unusual punctuation
-- avoid difficult or obscure vocabulary
-- be similar in difficulty
-- fit on one visual line
-- remain completely inside the safe content width
-- not require dynamic font shrinking
-- be bundled with the application
+- use natural grammatical English
+- use common everyday vocabulary
+- avoid obscure words
+- avoid highly technical vocabulary
+- avoid unnecessary proper nouns
+- avoid numbers in V1
+- use simple punctuation
+- use normal capitalization
+- be easy to scan quickly
 
-Initial character target:
+Random disconnected word lists should not be used.
+
+### Difficulty Consistency
+
+Sentences should be reasonably similar in difficulty.
+
+Control difficulty through:
+
+- similar sentence length
+- common vocabulary
+- similar average word length
+- simple punctuation
+- normal capitalization
+- avoiding unusually long or rare words
+
+Initial sentence target:
 
 ```text
 approximately 35–50 characters
 ```
 
-The exact limit should be validated using:
+This includes spaces and punctuation.
+
+The exact visual limit must be validated using:
 
 - the final Atkinson Hyperlegible font
-- the final font size
+- the final typing font size
 - the actual target iPad
 
----
+### Passage Length
 
-# 10. Competitive Fairness
+The passage set must contain enough content for fast typists in a 60-second test.
 
-All contestants within the same event should receive the **same ordered sentence sequence**.
+Initial V1 target:
+
+```text
+at least 25–30 curated sentences
+at least approximately 1,200–1,500 total characters
+```
+
+Both 30-second and 60-second modes use the same sequence.
+
+The 30-second test simply stops earlier.
+
+### Passage Set Versioning
+
+Each passage set must have a stable identifier.
 
 Example:
 
 ```text
-Contestant A
-sentence 1 → sentence 2 → sentence 3 ...
-
-Contestant B
-sentence 1 → sentence 2 → sentence 3 ...
+common-sentences-v1
 ```
 
-This avoids giving one contestant an easier random word/sentence sequence than another.
+If passages change later, create a new version instead of silently replacing the existing set.
 
-A future version may use multiple difficulty-balanced passage sets, but V1 should favor deterministic fairness.
+Example:
+
+```text
+common-sentences-v2
+```
+
+Each event stores its `passageSetId`.
 
 ---
 
-# 11. Typing Engine
+## 10. Competitive Fairness
 
-Create the typing logic as a pure, testable module separate from the visual components.
+All contestants within the same event receive the same ordered sentence sequence.
+
+Example:
+
+```text
+Contestant A:
+Sentence 1 → Sentence 2 → Sentence 3 → ...
+
+Contestant B:
+Sentence 1 → Sentence 2 → Sentence 3 → ...
+```
+
+Do not randomly shuffle sentences per contestant in V1.
+
+This keeps the text difficulty consistent across competitors and makes scores more directly comparable.
+
+---
+
+## 11. Typing Engine
+
+Create typing logic as a pure, testable module separate from visual components.
 
 Suggested module:
 
@@ -519,89 +591,121 @@ Suggested module:
 src/features/typing/typingEngine.ts
 ```
 
-Track:
+### Typed Character Model
+
+```ts
+interface TypedCharacter {
+  expected: string;
+  typed: string;
+  isCorrect: boolean;
+}
+```
+
+### Test Session Model
 
 ```ts
 interface TestSession {
   sentenceIndex: number;
+  characterIndex: number;
+
   expectedSentence: string;
-
-  typedCharacters: string[];
-
-  startedAt: number | null;
-  elapsedMs: number;
+  typedCharacters: TypedCharacter[];
 
   correctCharacters: number;
-  attemptedCharacters: number;
+  correctAttempts: number;
+  incorrectAttempts: number;
+
+  startedAt: number | null;
+  endsAt: number | null;
 
   isFinished: boolean;
 }
 ```
 
+Important distinction:
+
+```text
+typedCharacters
+```
+
+represents the current editable state of the displayed sentence.
+
+```text
+correctAttempts
+incorrectAttempts
+```
+
+represent cumulative attempt history and are not undone by Backspace.
+
 ---
 
-# 12. Starting the Test
+## 12. Starting the Test
 
-## Ready Screen
+### Ready Screen
 
-The Ready screen listens for a keyboard event.
+The Ready screen listens for keyboard input.
 
 ```text
 PRESS ANY KEY TO START
 ```
 
-On that event:
+On the first key event:
 
 ```text
-prevent contestant input from being scored
-→ transition to typing screen
-→ render sentence
+consume the Ready-screen key event
+→ transition to Typing
+→ render the first sentence
 → wait for a valid typing key
 ```
 
-Do not start the timer yet.
+Do not start the timer on the Ready-screen key.
 
-## Typing Screen
+The Ready-screen key must not propagate into the Typing-screen input handler.
 
-The first valid character input:
+### Typing Screen
+
+The first valid typing character:
 
 ```text
-starts timer
+starts the timer
 +
-becomes the first scored character
+counts as the first typing attempt
 ```
 
-Ignore keys that should not count as typing input, including:
+Keys that should not count as typing attempts include:
 
 - Shift by itself
 - Control
 - Option / Alt
 - Command / Meta
 - Caps Lock
-- function keys
-- arrow keys
+- Tab
 - Escape
+- arrow keys
+- function keys
 
-Backspace is handled as an editing action.
+Backspace is handled separately.
 
 ---
 
-## Scoring Implementation
+## 13. Scoring Implementation
 
-### WPM Calculation
+### 13.1 WPM Calculation
 
-WPM is calculated from correctly typed characters:
+WPM is based on correct characters:
 
-`WPM = (correctCharacters / 5) / elapsedMinutes`
+```text
+WPM = (correctCharacters / 5) / elapsedMinutes
+```
 
-Implementation notes:
+Rules:
 
-- Five correct characters equal one standard word.
-- Correct letters, spaces, and punctuation all count as correct characters.
-- Incorrect characters do not contribute to WPM.
-- Correct characters in a partially completed word still count if the timer expires before the word is finished.
-- WPM should be calculated from elapsed time while the test is running.
-- Final WPM should use the configured test duration.
+- five correct characters equal one standard word
+- correct letters, spaces, and punctuation count
+- incorrect characters do not contribute to WPM
+- correct characters in a partial word still count
+- live WPM uses actual elapsed time
+- final WPM uses the configured test duration
 
 Example:
 
@@ -618,32 +722,25 @@ function calculateWpm(
 }
 ```
 
-For final display, round consistently:
+For final display:
 
 ```ts
 const displayedWpm = Math.round(rawWpm);
 ```
 
-Prefer storing the unrounded value internally and rounding only for display and leaderboard comparison rules.
+Store `rawWpm` for internal precision.
 
----
+Use `displayedWpm` for visible V1 leaderboard ranking so tie-breaking remains understandable to contestants.
 
-### Accuracy Calculation
+### 13.2 Accuracy Calculation
 
 Accuracy is based on typing attempts:
 
-`Accuracy = correctAttempts / (correctAttempts + incorrectAttempts) × 100`
-
-Track attempts separately from the current visible text.
-
-Recommended session counters:
-
-```ts
-interface TypingMetrics {
-  correctAttempts: number;
-  incorrectAttempts: number;
-  correctCharacters: number;
-}
+```text
+Accuracy =
+correctAttempts /
+(correctAttempts + incorrectAttempts)
+× 100
 ```
 
 Example implementation:
@@ -661,23 +758,36 @@ function calculateAccuracy(
 }
 ```
 
-Backspace does not count as a typing attempt.
+Rules:
 
-If a contestant types an incorrect character, presses Backspace, and then types the correct character:
+- correct printable character → `correctAttempts + 1`
+- incorrect printable character → `incorrectAttempts + 1`
+- Backspace does not count as an attempt
+- correcting an error does not erase the original incorrect attempt
+
+Example:
 
 ```text
-incorrect keypress → incorrectAttempts + 1
-Backspace          → no accuracy change
-correct keypress   → correctAttempts + 1
+Expected: cat
+
+c          → correctAttempts + 1
+x          → incorrectAttempts + 1
+Backspace  → no accuracy change
+a          → correctAttempts + 1
+t          → correctAttempts + 1
 ```
 
-The original incorrect attempt remains part of the accuracy calculation.
+Final accuracy:
 
----
+```text
+3 / 4 = 75%
+```
 
-### Minimum Leaderboard Accuracy
+Before the contestant begins typing, the UI should show `—%` or hide accuracy rather than displaying `100%`.
 
-Leaderboard eligibility requires a configurable minimum accuracy.
+### 13.3 Minimum Leaderboard Accuracy
+
+Leaderboard participation requires a configurable minimum accuracy threshold.
 
 Initial development constant:
 
@@ -688,40 +798,39 @@ export const MIN_LEADERBOARD_ACCURACY = 80;
 Eligibility check:
 
 ```ts
-function isLeaderboardEligible(accuracy: number): boolean {
+function meetsLeaderboardAccuracy(accuracy: number): boolean {
   return accuracy >= MIN_LEADERBOARD_ACCURACY;
 }
 ```
 
-The `80%` value is provisional and must be validated using the physical giant keyboard before being treated as final.
+The `80%` threshold is provisional and must be validated on the physical giant keyboard before being treated as final.
 
 A contestant below the threshold:
 
-- still receives a Results screen
-- still sees WPM and accuracy
-- does not qualify for leaderboard ranking
+- still sees their Results screen
+- still sees WPM
+- still sees accuracy
+- does not participate in leaderboard ranking
 - is not prompted for a leaderboard nickname
 
-Do not bury the threshold directly inside ranking logic. Keep it as an explicit configuration constant so it can be changed after hardware testing.
+Keep the threshold as an explicit configuration constant.
 
----
+### 13.4 Ranking and Tie Behavior
 
-### Ranking and Tie Behavior
+Only scores meeting the minimum accuracy threshold participate in leaderboard ranking.
 
-Only leaderboard-eligible scores participate in ranking.
+Rank by:
 
-Sort scores using:
-
-1. WPM descending
-2. Accuracy descending
-3. Submission time ascending
+1. `displayedWpm` descending
+2. accuracy descending
+3. submission time ascending
 
 Recommended comparator:
 
 ```ts
 function compareScores(a: ScoreRecord, b: ScoreRecord): number {
-  if (b.wpm !== a.wpm) {
-    return b.wpm - a.wpm;
+  if (b.displayedWpm !== a.displayedWpm) {
+    return b.displayedWpm - a.displayedWpm;
   }
 
   if (b.accuracy !== a.accuracy) {
@@ -735,28 +844,18 @@ function compareScores(a: ScoreRecord, b: ScoreRecord): number {
 }
 ```
 
-Use the stored raw WPM value for comparison if raw values are persisted.
-
-Do not sort only by the rounded display value if two raw scores could display the same integer.
-
 Example:
 
 ```text
-92.49 WPM
-92.10 WPM
+Alex   92 WPM   98%
+Mia    92 WPM   96%
 ```
 
-Both may display as:
+Alex ranks above Mia.
 
-```text
-92 WPM
-```
+If WPM and accuracy are both tied, the earlier submitted score remains higher.
 
-but the higher raw WPM should rank first.
-
----
-
-### Character-Level Scoring
+### 13.5 Character-Level Scoring
 
 Scoring operates at the individual-character level.
 
@@ -781,23 +880,22 @@ This produces:
 
 ```text
 4 correct characters
+4 correct attempts
 1 incorrect attempt
 ```
 
 Do not invalidate the entire word because one character is wrong.
 
-This rule applies to:
+Character-level scoring applies to:
 
 - letters
 - spaces
 - punctuation
-- characters in partially completed words
+- partial words
 
----
+### 13.6 Partial Words
 
-### Partial Words
-
-If the timer expires while the contestant is in the middle of a word, all correctly typed characters before the timer expires remain valid.
+If time expires in the middle of a word, all correct characters entered before timeout remain valid.
 
 Example:
 
@@ -814,11 +912,7 @@ correctCharacters += 5
 
 Do not require a completed word boundary for WPM credit.
 
-The timer cutoff should be based on the actual test end timestamp, not whether the current word is complete.
-
----
-
-### Error Advancement
+### 13.7 Error Advancement
 
 Incorrect characters do not block progression.
 
@@ -827,32 +921,28 @@ On an incorrect printable character:
 ```text
 1. record an incorrect attempt
 2. store the typed character at the current position
-3. visually mark the position as incorrect
+3. visually mark that position as incorrect
 4. advance the caret one character
 ```
 
-The contestant may either:
+The contestant may:
 
 - continue typing, or
-- press Backspace to return and correct the mistake
+- press Backspace to correct the mistake
 
-Do not force contestants to correct errors before advancing.
+Do not force correction before advancing.
 
-This behavior is intentional because the physical giant keyboard is more error-prone than a standard keyboard.
+### 13.8 Backspace Behavior
 
----
-
-### Backspace Behavior
-
-Backspace is allowed during the active test.
+Backspace is allowed during an active test.
 
 Backspace should:
 
 ```text
-1. remove the most recently entered character
+1. remove the most recently entered character in the current sentence
 2. move the caret backward one position
-3. update the current visual correctness state
-4. allow the contestant to re-enter that character
+3. update visible correctness state
+4. allow the contestant to re-enter that position
 ```
 
 Backspace itself:
@@ -862,7 +952,7 @@ Backspace itself:
 - does not contribute to WPM
 - does not erase a previously recorded incorrect attempt from accuracy
 
-If the removed character was currently contributing to `correctCharacters`, remove that current correct-character credit until the contestant types the position correctly again.
+If the removed character currently contributes to `correctCharacters`, remove that current correct-character credit until the position is correctly entered again.
 
 Example:
 
@@ -890,65 +980,33 @@ correctAttempts += 1
 correctCharacters += 1
 ```
 
-This preserves the history of the mistake while allowing corrected text to receive valid WPM credit.
+Backspace applies only to the currently displayed sentence.
 
----
+Once a sentence is completed and replaced by the next sentence, the previous sentence is committed and cannot be edited.
 
-### Recommended Typing Session Model
+### 13.9 Sentence Completion
 
-The typing engine should distinguish between:
+A sentence is complete when the contestant has entered a character for every expected position, regardless of whether every character is correct.
 
-1. current editable text state
-2. cumulative attempt history
-
-Recommended structure:
-
-```ts
-interface TypedCharacter {
-  expected: string;
-  typed: string;
-  isCorrect: boolean;
-}
-
-interface TestSession {
-  sentenceIndex: number;
-  characterIndex: number;
-
-  typedCharacters: TypedCharacter[];
-
-  correctCharacters: number;
-  correctAttempts: number;
-  incorrectAttempts: number;
-
-  startedAt: number | null;
-  endsAt: number | null;
-
-  isFinished: boolean;
-}
-```
-
-The important distinction is:
+At completion:
 
 ```text
-typedCharacters
+commit sentence
+→ preserve cumulative scoring metrics
+→ increment sentenceIndex
+→ load next full sentence
+→ reset current-sentence typedCharacters
+→ reset characterIndex
+→ keep timer running
 ```
 
-represents the contestant's current editable position, while:
+Because errors do not block advancement, an incorrect final character still completes the sentence.
 
-```text
-correctAttempts
-incorrectAttempts
-```
+### 13.10 Valid Typing Input
 
-represent cumulative typing history and are not undone by Backspace.
+Only printable characters count as typing attempts.
 
----
-
-### Valid Typing Input
-
-Only printable typing characters should count as attempts.
-
-Examples that may count:
+Examples:
 
 ```text
 letters
@@ -957,7 +1015,7 @@ space
 punctuation
 ```
 
-Keys that should not count as typing attempts include:
+Keys that do not count:
 
 ```text
 Shift
@@ -971,25 +1029,25 @@ Arrow keys
 function keys
 ```
 
-Backspace is handled separately as an editing command.
+Backspace is handled separately.
 
-The first valid typing character on the Typing screen:
+### 13.11 Repeated Key Events
 
-```text
-starts the timer
-+
-counts as the first typing attempt
+Each physical keypress should count as one attempt.
+
+Browser-generated repeated `keydown` events caused by holding a key should be ignored.
+
+```ts
+if (event.repeat) return;
 ```
 
-The key used to transition from the Ready screen to the Typing screen must not count.
+Repeated letters in normal words still work because separate physical presses generate separate non-repeat events.
 
----
+### 13.12 Timer Cutoff
 
-### Timer Cutoff
+Input must stop contributing to the result once the configured duration has elapsed.
 
-Input should stop contributing to the result once the configured test duration has elapsed.
-
-Before processing a typing event, verify that the current timestamp is before the test end time.
+Before processing a typing event, confirm the current timestamp is before the test end time.
 
 Conceptually:
 
@@ -1000,11 +1058,9 @@ if (performance.now() >= endsAt) {
 }
 ```
 
-This prevents a late keypress from being counted after timeout because of UI rendering delay.
+This prevents late key events from being counted after timeout.
 
----
-
-### Final Score Calculation
+### 13.13 Final Score Calculation
 
 At test completion:
 
@@ -1019,7 +1075,9 @@ const rawWpm = calculateWpm(
   durationSeconds
 );
 
-const leaderboardEligible =
+const displayedWpm = Math.round(rawWpm);
+
+const meetsAccuracyThreshold =
   accuracy >= MIN_LEADERBOARD_ACCURACY;
 ```
 
@@ -1035,69 +1093,55 @@ interface TestResult {
   correctAttempts: number;
   incorrectAttempts: number;
 
-  leaderboardEligible: boolean;
+  meetsAccuracyThreshold: boolean;
 }
 ```
 
 ---
 
-### Required Scoring Tests
+## 14. Prize / Plinko Qualification
 
-At minimum, add unit tests for:
-
-```text
-perfect typing produces expected WPM
-incorrect characters do not increase WPM
-incorrect attempts lower accuracy
-Backspace itself does not affect accuracy
-correcting an error does not erase the original accuracy penalty
-correcting an error restores correct-character WPM credit
-partial words count toward WPM
-incorrect characters do not block further typing
-80% accuracy qualifies during development
-79.99% accuracy does not qualify
-higher WPM ranks first
-accuracy breaks WPM ties
-earlier submission breaks remaining ties
-late input after timeout is ignored
-Ready-screen start key is not scored
-first valid Typing-screen key starts timer and is scored
-```
-
-# 13. Character Handling
-
-Each typed character is compared against the expected character at the current cursor position.
-
-Store the typed character and whether it matches.
-
-Incorrect characters must not increase the correct-character count.
-
-Recommended behavior:
+The Ready screen currently says:
 
 ```text
-correct key
-→ advance cursor
-→ mark correct
-
-incorrect key
-→ advance cursor
-→ mark incorrect
-
-Backspace
-→ remove previous typed character
-→ move cursor backward
-→ recalculate affected metrics
+Type above 50 WPM for a Plinko drop.
 ```
 
-This permits normal typing behavior while preventing incorrect keystrokes from increasing WPM.
+Prize qualification and leaderboard qualification are separate rules.
+
+Initial implementation:
+
+```ts
+export const PLINKO_WPM_THRESHOLD = 50;
+```
+
+Based on the current wording **"above 50 WPM"**, qualification is:
+
+```ts
+const qualifiesForPlinko =
+  displayedWpm > PLINKO_WPM_THRESHOLD;
+```
+
+Therefore:
+
+```text
+51 WPM or higher → qualifies
+50 WPM           → does not qualify
+```
+
+If the intended business rule is actually **50 WPM or higher**, update both the implementation and UI copy together.
+
+The leaderboard accuracy threshold does not automatically control Plinko qualification unless that becomes an explicit future requirement.
 
 ---
 
-# 14. Current Word and Caret
+## 15. Current Word and Caret
 
-The typing sentence has four visual states.
+The typing sentence has several visual states.
 
-## Completed Text
+### Completed Correct Text
+
+Use:
 
 ```text
 charcoal
@@ -1109,9 +1153,9 @@ Token:
 --tiny-charcoal
 ```
 
-## Current Word
+### Current Word
 
-The entire active word is:
+Use:
 
 ```text
 lavender
@@ -1123,9 +1167,9 @@ Token:
 --tiny-lavender
 ```
 
-## Caret
+### Caret
 
-The caret is:
+Use:
 
 ```text
 strong mint
@@ -1137,7 +1181,7 @@ Token:
 --tiny-mint-strong
 ```
 
-It must appear at the contestant's exact character position within the current word.
+The caret must appear at the exact typed character position.
 
 Example:
 
@@ -1145,9 +1189,9 @@ Example:
 acr│oss
 ```
 
-## Upcoming Text
+### Upcoming Text
 
-Upcoming text is:
+Use:
 
 ```text
 muted gray
@@ -1159,216 +1203,82 @@ Token:
 --tiny-muted
 ```
 
-## Incorrect Character
+### Incorrect Character
 
-Incorrect text uses:
+Use:
 
 ```css
 --tiny-error
 ```
 
-and should include a secondary indicator such as underline or background tint so error state is not communicated by color alone.
+Also include a non-color indicator such as underline or background tint.
 
 ---
 
-# 15. Sentence Transition
+## 16. Sentence Transition
 
 Only one sentence is visible at a time.
 
-When the contestant completes the current sentence:
+When the contestant reaches the end of the current sentence:
 
 ```text
-sentence completed
-→ increment sentenceIndex
-→ load next full sentence
-→ keep timer running
-→ continue scoring
+sentence commits
+→ sentenceIndex increments
+→ next full sentence replaces it
+→ timer continues
+→ cumulative scoring continues
 ```
 
 Do not:
 
-- wrap to a second line
+- wrap the sentence to a second line
 - append the next sentence to the same line
 - dynamically shrink the font
-
-The new sentence replaces the completed sentence.
+- allow Backspace into a committed sentence
 
 ---
 
-# 16. Timer
+## 17. Timer
 
-The event duration is:
+Event duration:
 
 ```ts
 30 | 60
 ```
 
-Timer start:
+Timer starts on:
 
 ```text
-first valid typing keystroke
+first valid typing character on the Typing screen
 ```
 
-Timer end:
+Timer ends when:
 
 ```text
-selected duration reached
+selected duration has elapsed
 ```
 
-Use timestamps rather than relying only on decrementing `setInterval`.
-
-Recommended approach:
-
-```ts
-performance.now()
-```
-
-or equivalent monotonic timing.
-
-UI updates may use `requestAnimationFrame` or a short interval, but elapsed time must be calculated from the timestamps.
-
-This prevents timer drift.
-
----
-
-# 17. WPM Calculation
-
-Use **correct characters**, not total keystrokes.
-
-Formula:
-
-```text
-WPM = (correctCharacters / 5) / elapsedMinutes
-```
-
-For final score:
-
-```text
-elapsedMinutes = eventDurationSeconds / 60
-```
-
-Example:
-
-```text
-200 correct characters
-5 characters per word
-1 minute
-
-200 / 5 / 1 = 40 WPM
-```
-
-Round the displayed WPM consistently.
+Use monotonic timestamps rather than relying only on decrementing `setInterval`.
 
 Recommended:
 
 ```ts
-Math.round(wpm)
+const startedAt = performance.now();
+const endsAt = startedAt + durationSeconds * 1000;
 ```
 
-Store either the raw value and display the rounded value, or store the rounded value consistently throughout the product.
-
-Prefer storing raw calculated WPM plus displaying a rounded integer if future analytics are expected.
+UI updates may use `requestAnimationFrame` or a short interval, but elapsed time should always be derived from timestamps.
 
 ---
 
-# 18. Accuracy Calculation
+## 18. Top 10 Nickname Eligibility
 
-Recommended formula:
+After a test completes:
 
-```text
-accuracy =
-  correctCharacters / attemptedCharacters * 100
-```
-
-If:
-
-```text
-attemptedCharacters === 0
-```
-
-then accuracy should display:
-
-```text
-100%
-```
-
-or remain unshown until the first typed character.
-
-Never display:
-
-```text
-NaN
-Infinity
-```
-
----
-
-# 19. Button-Mashing Protection
-
-Incorrect characters do not contribute to WPM.
-
-In addition, leaderboard qualification requires a minimum accuracy threshold.
-
-Do **not** hard-code the final product threshold before testing on the physical giant keyboard.
-
-Implementation should expose a configuration constant:
-
-```ts
-MIN_LEADERBOARD_ACCURACY
-```
-
-An initial test value may be used during development, but the final value should be selected after real hardware testing.
-
-Example behavior:
-
-```text
-105 WPM
-42% accuracy
-
-→ result may be shown
-→ score is not leaderboard eligible
-```
-
-Accuracy does not otherwise determine normal ranking.
-
----
-
-# 20. Ranking Logic
-
-Leaderboard order:
-
-```text
-1. WPM descending
-2. Accuracy descending
-3. createdAt ascending
-```
-
-Example:
-
-```text
-Alex   92 WPM   98%
-Mia    92 WPM   96%
-
-Alex ranks above Mia.
-```
-
-Implement ranking as a pure function:
-
-```text
-src/features/leaderboard/ranking.ts
-```
-
-This function should be unit tested.
-
----
-
-# 21. Top 10 Nickname Eligibility
-
-After a valid test completes:
-
-1. Temporarily include the result in the event score set.
-2. Rank all eligible scores.
-3. Determine whether the contestant is within the Top 10.
+1. confirm the score meets the minimum accuracy threshold
+2. temporarily include it in the event's eligible scores
+3. rank all eligible scores
+4. determine the contestant's rank
 
 If:
 
@@ -1384,32 +1294,27 @@ Otherwise:
 nickname entry is omitted
 ```
 
-The visible leaderboard still shows only:
+Only the Top 5 are displayed on the Leaderboard screen.
 
-```text
-Top 5
-```
+Top 10 and Top 5 status are derived values and should not be permanently stored.
 
 ---
 
-# 22. Nickname Handling
+## 19. Nickname Handling
 
-Nickname input rules:
+Nickname rules:
 
-- any nickname allowed
+- any nickname is allowed
 - trim leading/trailing whitespace
-- prevent empty nickname submissions
-- enforce a reasonable maximum length for layout safety
+- reject empty values
+- enforce a maximum length for layout safety
+- render as plain text, never HTML
 
-Recommended V1 maximum:
+Recommended maximum:
 
 ```text
 20 characters
 ```
-
-Render nicknames as plain text.
-
-React's normal text rendering should be used so nickname content is escaped rather than inserted as HTML.
 
 Do not use:
 
@@ -1417,18 +1322,19 @@ Do not use:
 dangerouslySetInnerHTML
 ```
 
-for contestant-provided nicknames.
+for contestant-provided nickname content.
 
 ---
 
-# 23. Results Screen
+## 20. Results Screen
 
 The Results screen displays:
 
-- WPM
-- accuracy
-- new-high-score status when applicable
-- Top 10 qualification status
+- final WPM
+- final accuracy
+- new-high-score state when applicable
+- Plinko qualification when applicable
+- Top 10 qualification when applicable
 
 If Top 10 eligible:
 
@@ -1438,43 +1344,37 @@ show nickname field
 Save Score
 ```
 
-Nickname entry remains on the Results screen rather than becoming a separate app state.
+Nickname entry remains on the same Results screen.
 
-Do not start automatic next-player reset while a contestant is entering a nickname.
+Automatic next-player reset must not run while nickname entry is in progress.
+
+After saving or continuing from Results, show the Leaderboard screen.
 
 ---
 
-# 24. High Score Detection
+## 21. High Score Detection
 
-Current event high score:
-
-```text
-highest leaderboard-eligible WPM
-```
-
-If scores are tied, apply the standard ranking rules.
+The current high score is the rank #1 leaderboard-eligible score using the standard ranking rules.
 
 Ready screen behavior:
 
 ```text
-if event has a score:
+if event has an eligible score:
   display high score + nickname
 
-if event has no score:
-  display an empty-state message
+if event has no eligible score:
+  display empty state
 ```
 
-Recommended empty-state copy:
+Example:
 
 ```text
 Be the first high score!
 ```
 
-Exact copy may be adjusted during UI polish.
-
 ---
 
-# 25. Leaderboard Screen
+## 22. Leaderboard Screen
 
 Display:
 
@@ -1486,30 +1386,30 @@ Each row contains:
 
 - rank
 - nickname
-- WPM
+- displayed WPM
 
-Optional:
+Optional presentation:
 
-- visually highlight the newest contestant if they appear in the Top 5
-- visually emphasize rank #1
+- emphasize rank #1
+- highlight the newest contestant if they appear in the Top 5
 
 Do not expose:
 
 - raw character counts
 - internal IDs
-- event database metadata
+- database metadata
 
 ---
 
-# 26. Next Player and Automatic Reset
+## 23. Next Player and Automatic Reset
 
-Leaderboard screen supports:
+The Leaderboard screen includes:
 
 ```text
 NEXT PLAYER
 ```
 
-Selecting it immediately transitions to:
+Selecting it returns immediately to:
 
 ```text
 ready
@@ -1517,30 +1417,28 @@ ready
 
 Also support automatic reset.
 
-Recommended initial constant:
+Initial configurable value:
 
 ```ts
-LEADERBOARD_AUTO_RESET_MS = 10_000;
+export const LEADERBOARD_AUTO_RESET_MS = 10_000;
 ```
 
-This is a configuration value and can be adjusted after booth testing.
+Automatic reset begins only after the Leaderboard screen appears.
 
-Automatic reset should begin only after the Leaderboard screen is shown.
-
-Reset:
+Reset contestant-specific state:
 
 - typed text
 - sentence position
 - timer state
-- current WPM
-- accuracy
+- live WPM
+- live accuracy
 - current result
 - nickname input
 
-Preserve:
+Preserve event state:
 
 - active event
-- event duration
+- duration
 - passage set
 - saved scores
 - high score
@@ -1548,7 +1446,7 @@ Preserve:
 
 ---
 
-# 27. Ready / Attract Screen
+## 24. Ready / Attract Screen
 
 The Ready screen displays:
 
@@ -1570,26 +1468,26 @@ Do not display:
 - Start button
 - operator settings
 
-The screen should listen for keyboard interaction only while this state is active.
+The screen listens for contestant keyboard input only while in the Ready state.
 
 ---
 
-# 28. Typing Screen Layout
+## 25. Typing Screen Layout
 
-The typing screen is intentionally minimal.
+The Typing screen is intentionally minimal.
 
-## Top
+### Top
 
-Display only lightweight context such as:
+Display lightweight context such as:
 
 ```text
 logo
 high score
 ```
 
-Do not show the shop name if the final wireframe/design removes it.
+Do not show the shop name if the final design remains unbranded.
 
-## Center
+### Center
 
 Display:
 
@@ -1600,45 +1498,44 @@ one complete sentence
 Requirements:
 
 - horizontally centered
-- visually centered as a single unit
+- visually centered as one text block
 - one line
 - no clipping
-- equal safe space on left and right
+- balanced safe space left and right
 - Atkinson Hyperlegible
 - current word lavender
 - caret strong mint
+- incorrect characters visually distinct
 
-## Bottom Left
+### Bottom Left
 
 ```text
 live WPM
 ```
 
-## Bottom Center
+### Bottom Center
 
 ```text
-timer
+remaining time
 ```
 
-## Bottom Right
+### Bottom Right
 
 ```text
 accuracy
 ```
 
-The timer must remain at the bottom center.
-
 ---
 
-# 29. Design Implementation
+## 26. Design Implementation
 
-All UI must follow:
+All UI should follow:
 
 ```text
 docs/DESIGN_SYSTEM.md
 ```
 
-Core design tokens:
+Core tokens:
 
 ```css
 :root {
@@ -1669,20 +1566,31 @@ Typography:
 --font-typing: "Atkinson Hyperlegible", sans-serif;
 ```
 
-The UI should use:
+Visual direction:
 
+- blush / white backgrounds
+- mint as strongest interactive accent
+- lavender as secondary emphasis
+- soft pink and peach as supporting decoration
 - flat pastel surfaces
-- organic edge shapes
 - rounded forms
+- organic edge shapes
 - minimal shadows
 - generous whitespace
 - sparse decorative motifs
 
-Do not implement the interface as a generic dashboard with pastel colors.
+Avoid:
+
+- dark gamer UI
+- neon RGB styling
+- heavy gradients
+- heavy shadows
+- sharp corporate layouts
+- clutter during typing
 
 ---
 
-# 30. Suggested Component Structure
+## 27. Suggested Component and Module Structure
 
 ```text
 src/
@@ -1748,11 +1656,11 @@ src/
 
 Keep abstractions small during V1.
 
-Do not create modules that do not yet serve a concrete requirement.
+Do not create modules that do not serve a concrete requirement.
 
 ---
 
-# 31. PWA Strategy
+## 28. PWA Strategy
 
 The typing test must be installable on the iPad and usable without connectivity.
 
@@ -1771,7 +1679,7 @@ Cache:
 - CSS
 - local fonts
 - logo
-- icons
+- app icons
 - required images
 - passage data
 
@@ -1779,58 +1687,57 @@ Core booth behavior must not use remote requests.
 
 ---
 
-# 32. iPad Installation Flow
+## 29. iPad Installation and Offline Verification
 
-Before the event, while online:
+Before an event, while online:
 
 ```text
-1. Open deployed HTTPS URL in Safari
-2. Allow the application to load fully
-3. Add to Home Screen
-4. Launch installed web app
-5. Confirm event data loads
-6. Enable airplane mode
-7. Relaunch app
-8. Run a complete test
+1. Open the deployed HTTPS URL in Safari.
+2. Allow the app to load fully.
+3. Add it to the Home Screen.
+4. Launch the installed PWA.
+5. Confirm event setup and assets load.
+6. Enable airplane mode.
+7. Relaunch the app.
+8. Run a complete test.
+9. Save a score.
+10. Close and reopen the app.
+11. Confirm the event and score still exist.
 ```
 
-Do not consider offline support complete until this test succeeds on the target iPad.
+Do not consider offline support complete until this succeeds on the target iPad.
 
 ---
 
-# 33. Offline Caching Strategy
+## 30. Offline Caching Strategy
 
-For the application shell and versioned build assets:
+For the app shell and versioned build assets:
 
 ```text
 Cache First
 ```
 
-Because these resources are generated/versioned by Vite.
+V1 should have no runtime API dependency.
 
-For V1 there should be no runtime API dependency.
+When a new deployment exists, the service worker may update cached assets when connectivity returns.
 
-After a new deployment, the service worker should be able to update the cached application when the iPad next has connectivity.
+Do not interrupt an active contestant session to apply updates.
 
-Avoid aggressive update behavior while an active contestant is typing.
+Apply a newly available version:
 
-A newly available app version should be applied:
-
-- on next launch, or
-- when the app is safely idle
-
-rather than interrupting an active test.
+- on a later launch, or
+- while the app is safely idle
 
 ---
 
-# 34. Persistence Requirements
+## 31. Persistence Requirements
 
 The following must survive:
 
 ```text
 browser refresh
 Home Screen app close/reopen
-temporary loss of connectivity
+temporary network loss
 normal iPad restart
 ```
 
@@ -1841,99 +1748,102 @@ Persist:
 - nicknames
 - active event
 - event duration
-- leaderboard state derivable from scores
+- passage-set identifier
+- settings
 
-Do not persist transient contestant typing state after a completed/reset session.
+Leaderboard state should be derived from persisted scores rather than stored separately.
 
-If the app closes during an active test, returning to the app may safely return to the Ready screen rather than attempting to restore a partially completed test.
+Do not persist transient contestant typing state after completion/reset.
+
+If the app closes during an active test, reopening may safely return to the Ready screen rather than restoring a partial test.
 
 ---
 
-# 35. Error Handling
+## 32. Error Handling
 
-## IndexedDB Failure
+### IndexedDB Failure
 
 If IndexedDB cannot initialize:
 
 - show a clear operator-facing error
 - do not silently run a non-persistent competition
-- explain that scores may not be saved
+- explain that scores cannot be reliably saved
 
-## Corrupt or Missing Event
+### Corrupt or Missing Active Event
 
 If `activeEventId` points to a missing event:
 
 ```text
-clear invalid reference
+clear invalid activeEventId
 → return to Event Setup
 ```
 
-## No Previous Event
+### No Previous Event
 
-If operator selects Continue but no prior event exists:
+If no previous event can be continued:
 
-- disable Continue, or
-- show a clear message and keep Start fresh available
+- disable Continue Previous Event
 
-Prefer disabling Continue when no previous event exists.
-
-## PWA Offline Asset Failure
+### Offline Asset Failure
 
 If required assets are not cached:
 
-- fail visibly before the event
-- do not allow the operator to assume offline readiness
+- surface the issue before event use where practical
+- do not falsely imply offline readiness
 
-An "Offline ready" indicator should reflect actual application readiness where practical rather than being decorative only.
+If an "Offline ready" indicator exists, it should reflect actual readiness rather than decoration.
 
 ---
 
-# 36. Accessibility
+## 33. Accessibility
 
 Requirements:
 
 - semantic buttons and inputs
 - visible keyboard focus
-- high contrast
+- readable contrast
 - large type
-- large touch targets
-- no essential information communicated only with color
-- `aria-live` for important dynamic result announcements where useful
-- nickname field has an explicit label
-- errors include more than color
-- reduced-motion support
+- large touch targets for operator controls
+- no essential information communicated only through color
+- incorrect-character state includes a non-color indicator
+- nickname input has an explicit label
+- reduced-motion support where animation exists
+- `aria-live` may be used for result announcements
 
-The physical keyboard is the primary contestant interaction method.
+The physical keyboard is the primary contestant input.
 
-The operator must still be able to use touch controls on the iPad.
+The operator must still be able to use touch controls.
 
 ---
 
-# 37. Performance
+## 34. Performance
 
-The application should feel immediate.
+The app should feel immediate.
 
 Targets:
 
 - no network dependency during gameplay
 - no remote font loads
 - minimal JavaScript bundle
-- no heavy animation libraries for V1
-- no unnecessary rerenders on every timer tick
-- typing input handling should remain responsive
+- no heavy animation libraries in V1
+- responsive key handling
+- no blocking IndexedDB work in the typing hot path
+- avoid unnecessary rerenders on every timer tick
 
 Prefer CSS transitions for simple visual feedback.
 
+Scoring calculations should remain pure, lightweight functions.
+
 ---
 
-# 38. Privacy and Security
+## 35. Privacy and Security
 
-V1 stores data locally on the event iPad.
+V1 stores contestant data locally on the event iPad.
 
-Collected contestant data is limited to:
+Collected data is limited to:
 
 - nickname, if Top 10
-- typing score
+- WPM
 - accuracy
 - timestamp
 
@@ -1945,73 +1855,93 @@ Do not collect:
 - location
 - device identity
 
-Nickname content should always be rendered as text and never interpreted as HTML.
+Nickname content must render as plain text and never as HTML.
 
-Because nicknames are publicly displayed, limit length to preserve layout.
-
-A profanity/moderation system is not required for V1 unless requested by the operator.
+A profanity/moderation system is not required for V1 unless requested later.
 
 ---
 
-# 39. Testing Plan
+## 36. Testing Plan
 
-## Unit Tests
+### Unit Tests — Scoring
 
-### Scoring
-
-Test:
+Required tests:
 
 ```text
-correct WPM calculation
-wrong characters do not increase WPM
-accuracy calculation
-zero-character case
-30-second calculation
-60-second calculation
-backspace metric correction
+perfect typing produces expected WPM
+30-second final WPM is correct
+60-second final WPM is correct
+incorrect characters do not increase WPM
+incorrect attempts lower accuracy
+Backspace itself does not affect accuracy
+correcting an error does not erase the original accuracy penalty
+correcting a removed character restores correct-character WPM credit
+partial words count toward WPM
+incorrect characters do not block further typing
+80% accuracy meets the development threshold
+79.99% accuracy does not meet the development threshold
+late input after timeout is ignored
+held-key repeat events are ignored
+Ready-screen start key is not scored
+first valid Typing-screen key starts timer and is scored
 ```
 
-### Ranking
+### Unit Tests — Ranking
 
-Test:
+Required tests:
 
 ```text
-higher WPM wins
-accuracy breaks WPM tie
-earlier submission breaks remaining tie
-Top 10 qualification
-Top 5 display selection
+higher displayed WPM ranks first
+accuracy breaks displayed-WPM ties
+earlier submission breaks remaining ties
+scores below minimum accuracy are excluded
+Top 10 qualification is correct
+Top 5 selection is correct
 ```
 
-### Events
+### Unit Tests — Events
 
-Test:
+Required tests:
 
 ```text
 fresh event has no scores
-continue restores previous event
-duration persists with continued event
-starting fresh does not delete historical event data
+starting fresh preserves old event data
+continue restores active event
+continue restores existing scores
+duration persists when continuing
+passage set persists when continuing
 ```
 
----
+### Unit Tests — Passages
 
-## Component Tests
+Required tests:
+
+```text
+passage set has a stable ID
+passage set is not empty
+all sentences are strings
+all sentences meet the configured one-line character target during content validation
+passage set contains enough total characters for a fast 60-second test
+```
+
+The final one-line fit must also be validated visually on the target iPad because character count alone cannot guarantee rendered width.
+
+### Component Tests
 
 High-value component behavior:
 
 ```text
-Ready screen responds to key press
-Ready key is not scored
-first typing key starts timer
-Top 10 result shows nickname field
-non-Top-10 result omits nickname field
+Ready screen responds to a key press
+Ready-screen key is not scored
+Typing waits for first valid typing key before timer starts
+Top 10 result shows nickname input
+non-Top-10 result omits nickname input
 Next Player returns to Ready
+auto reset starts only on Leaderboard
+nickname entry is not interrupted by auto reset
 ```
 
----
-
-## Manual Hardware Tests
+### Manual Hardware Tests
 
 Required before event deployment:
 
@@ -2023,21 +1953,28 @@ actual giant keyboard input
 fast typing
 slow typing
 incorrect typing
-backspace
+Backspace
+mistake correction
 button mashing
+held key
+partial word at timeout
+sentence transition
 Top 10 qualification
 Top 5 ranking
 nickname entry
+Plinko threshold
 auto reset
 Next Player
 app restart
 airplane mode
 PWA relaunch
+score persistence after restart
+one-line passage fit
 ```
 
 ---
 
-# 40. Deployment
+## 37. Deployment
 
 V1 is a static frontend application.
 
@@ -2046,26 +1983,26 @@ Requirements:
 - HTTPS
 - stable URL
 - service-worker support
-- no server dependency for booth use
+- no server dependency for booth operation
 
 Suitable hosts include:
 
 - Vercel
 - Netlify
 - Cloudflare Pages
-- GitHub Pages if configured correctly for the PWA routing/build
+- GitHub Pages if configured correctly for the build and PWA behavior
 
-Deployment choice should prioritize simplicity and reliable HTTPS.
+Deployment should prioritize simplicity and reliable HTTPS.
 
 ---
 
-# 41. Environment Configuration
+## 38. Environment Configuration
 
-Avoid secrets in V1 because there is no backend/API.
+V1 should not require secrets because there is no backend/API.
 
 No `.env` values should be required for normal booth operation.
 
-If deployment tooling introduces environment variables, commit only:
+If deployment tooling later introduces environment variables, commit only:
 
 ```text
 .env.example
@@ -2075,7 +2012,7 @@ and keep actual secret files ignored.
 
 ---
 
-# 42. Git Workflow
+## 39. Git Workflow
 
 Primary branch:
 
@@ -2083,9 +2020,9 @@ Primary branch:
 main
 ```
 
-For a one-day MVP, avoid unnecessary branching complexity.
+For the V1 MVP, avoid unnecessary branching complexity.
 
-Recommended workflow:
+Typical workflow:
 
 ```bash
 git pull
@@ -2094,61 +2031,70 @@ git commit -m "meaningful message"
 git push
 ```
 
-Use small, meaningful commits such as:
+Example commits:
 
 ```text
 Initialize React TypeScript app
-
-Add event setup flow
-
-Implement typing engine and timer
-
-Add WPM and accuracy scoring
-
-Add IndexedDB event persistence
-
+Add design tokens and local fonts
+Add app screen state flow
+Add curated typing passages
+Implement typing engine
+Add timer and scoring
 Add leaderboard ranking
-
+Add IndexedDB persistence
+Add event setup flow
+Add results and nickname entry
 Add offline PWA support
-
-Apply typing test design system
-
 Add scoring and ranking tests
+Apply final wireframe styling
 ```
 
-Do not force-push shared history unless absolutely necessary.
+Do not force-push shared history unless necessary.
 
 ---
 
-# 43. One-Day MVP Implementation Order
+## 40. V1 Implementation Order
 
-The goal is a working booth loop before visual polish.
+Build the working booth loop before visual polish.
 
-## Phase 1 — Project Foundation
+### Phase 1 — Project Foundation
+
+Implement:
 
 ```text
 React + TypeScript + Vite
-basic styles
 design tokens
-font packages
-screen-state reducer
+local fonts
+basic screen-state reducer
 ```
 
-## Phase 2 — Typing Engine
+### Phase 2 — Passage Data
+
+Implement:
+
+```text
+curated local sentence set
+deterministic ordering
+stable passage-set ID
+enough text for 60-second fast typists
+```
+
+### Phase 3 — Typing Engine
 
 Implement:
 
 ```text
 sentence display
 keypress handling
+repeat-event protection
 caret
 current word
-correct / incorrect character tracking
-backspace
-sentence transition
+correct / incorrect tracking
+Backspace
+sentence commit and transition
 ```
 
-## Phase 3 — Timer and Scoring
+### Phase 4 — Timer and Scoring
 
 Implement:
 
@@ -2157,32 +2103,27 @@ first-key timer start
 30 / 60 second duration
 live WPM
 accuracy
+partial-word handling
+minimum accuracy threshold
 test completion
+Plinko qualification
 ```
 
 Add unit tests before continuing.
 
-## Phase 4 — Event Setup
+### Phase 5 — IndexedDB and Event Persistence
 
 Implement:
-
-```text
-30 / 60 selection
-fresh event
-continue previous event
-```
-
-## Phase 5 — IndexedDB
-
-Persist:
 
 ```text
 events
 scores
 settings
+fresh event
+continue event
 ```
 
-## Phase 6 — Results
+### Phase 6 — Results
 
 Implement:
 
@@ -2192,21 +2133,22 @@ accuracy
 high-score detection
 Top 10 qualification
 nickname entry
+Plinko result
 ```
 
-## Phase 7 — Leaderboard
+### Phase 7 — Leaderboard
 
 Implement:
 
 ```text
 ranking
 Top 5 display
-current/high-score emphasis
+rank #1 emphasis
 Next Player
 auto reset
 ```
 
-## Phase 8 — Ready Screen
+### Phase 8 — Ready Screen
 
 Implement:
 
@@ -2216,7 +2158,7 @@ current high score
 Press Any Key to Start
 ```
 
-## Phase 9 — PWA
+### Phase 9 — PWA
 
 Implement:
 
@@ -2228,18 +2170,18 @@ offline asset caching
 Home Screen installation
 ```
 
-## Phase 10 — Brand Styling
+### Phase 10 — Final Styling
 
 Apply:
 
 ```text
 DESIGN_SYSTEM.md
 wireframes
-responsive landscape-iPad spacing
+landscape-iPad spacing
 organic pastel graphics
 ```
 
-## Phase 11 — Hardware and Offline Testing
+### Phase 11 — Hardware and Offline Testing
 
 Test on:
 
@@ -2249,42 +2191,53 @@ giant keyboard
 airplane mode
 ```
 
-Fix reliability issues before adding optional polish.
+Fix reliability issues before optional polish.
 
 ---
 
-# 44. Definition of Done for V1
+## 41. Definition of Done for V1
 
 V1 is technically complete when:
 
 - React + TypeScript app builds successfully
 - operator can create a fresh event
-- operator can continue the previous event
-- 30s and 60s modes work
+- operator can continue the active event
+- fresh event preserves historical data
+- 30-second and 60-second modes work
 - Ready screen starts from any key
 - Ready-screen key is not scored
-- first typing key starts timer
+- first valid Typing-screen key starts the timer
+- held-key repeat events are ignored
 - sentence remains one line and fully visible
 - current word is highlighted
-- caret follows exact character position
+- caret follows the exact character position
+- incorrect characters are visually identifiable
 - WPM is correct
 - accuracy is correct
-- button mashing cannot create a valid competitive score
-- Top 10 users can enter nickname
+- partial words are counted correctly
+- Backspace follows the defined scoring rules
+- errors do not need to be corrected before advancing
+- minimum leaderboard accuracy is enforced
+- Top 10 contestants can enter a nickname
 - Top 5 displays correctly
+- tie behavior is deterministic
 - high score updates correctly
-- Next Player resets the contestant session
-- auto reset works
+- Plinko qualification follows the configured rule
+- passage order is consistent across contestants in the same event
+- passage set contains enough text for fast 60-second typists
+- passage-set ID is retained with the event
+- Next Player resets contestant state
+- automatic reset works
 - event and scores survive restart
 - app launches and functions in airplane mode
 - app matches the documented design system
-- core scoring/ranking tests pass
+- core scoring, ranking, passage, and event tests pass
 
 ---
 
-# 45. Post-V1 Full-Stack Roadmap
+## 42. Post-V1 Full-Stack Roadmap
 
-After the conference, the project can evolve into a full-stack application without replacing the offline architecture.
+After V1, the project can evolve into a full-stack application without replacing the offline-first booth architecture.
 
 Recommended backend:
 
@@ -2312,7 +2265,7 @@ Future architecture:
                   when online
 ```
 
-## Potential API
+### Potential API
 
 ```http
 POST /api/events
@@ -2324,7 +2277,7 @@ GET  /api/events/:id/scores
 POST /api/sync
 ```
 
-## Future Sync Requirements
+### Future Sync Requirements
 
 The local database remains the source used during live booth operation.
 
@@ -2337,11 +2290,11 @@ local unsynced data
 → mark local records synced
 ```
 
-Gameplay should not wait for synchronization.
+Gameplay must never wait for synchronization.
 
 ---
 
-# 46. Post-V1 Enhancements
+## 43. Post-V1 Enhancements
 
 Possible future work:
 
@@ -2356,7 +2309,7 @@ Possible future work:
 - analytics
 - storefront integration
 - event-specific themes
-- balanced alternate passage sets
+- alternate balanced passage sets
 - admin controls
 - automated offline/online sync
 - Docker
@@ -2368,7 +2321,7 @@ These should be added only after the core booth workflow is proven reliable.
 
 ---
 
-# 47. Primary Engineering Principle
+## 44. Primary Engineering Principle
 
 The central technical requirement is:
 
