@@ -88,4 +88,25 @@ describe("appReducer", () => {
     expect(typing.durationSeconds).toBe(60);
     expect(typing.currentTest?.durationSeconds).toBe(60);
   });
+
+  it("keeps the high score when a waiting test returns to Ready", () => {
+    const ready = appReducer(initialState, {
+      type: "ENTER_READY",
+      highScore: { displayedWpm: 92, name: null },
+    });
+    const waiting = appReducer(ready, { type: "ENTER_TYPING" });
+    const back = appReducer(waiting, { type: "RETURN_TO_READY" });
+    expect(back.screen).toBe("ready");
+    expect(back.highScore).toEqual({ displayedWpm: 92, name: null });
+  });
+
+  it("returns to Event Setup from Ready and keeps the active event", () => {
+    const ready = appReducer(
+      appReducer(initialState, { type: "SET_ACTIVE_EVENT", event: event60 }),
+      { type: "ENTER_READY", highScore: null },
+    );
+    const setup = appReducer(ready, { type: "ENTER_SETUP" });
+    expect(setup.screen).toBe("setup");
+    expect(setup.activeEvent?.id).toBe(event60.id);
+  });
 });

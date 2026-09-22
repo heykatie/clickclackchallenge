@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
-import { startFreshEvent, loadBooth, updateEventDuration, type TestDuration } from "./db/persistence";
+import { startFreshEvent, listScores, loadBooth, updateEventDuration, type EventRecord, type TestDuration } from "./db/persistence";
+import { highScore } from "./features/leaderboard/ranking";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -35,6 +36,15 @@ function App() {
     };
   }, []);
 
+  async function openReady(event: EventRecord) {
+    const top = highScore(await listScores(event.id));
+    dispatch({ type: "SET_ACTIVE_EVENT", event });
+    dispatch({
+      type: "ENTER_READY",
+      highScore: top ? { displayedWpm: top.displayedWpm, name: top.name } : null,
+    });
+  }
+
   async function continueEvent(durationSeconds: TestDuration) {
     const event = state.activeEvent;
     if (!event) {
@@ -46,20 +56,19 @@ function App() {
         durationSeconds === event.durationSeconds
           ? event
           : await updateEventDuration(event.id, durationSeconds);
-      dispatch({ type: "SET_ACTIVE_EVENT", event: active });
-      dispatch({ type: "ENTER_READY" });
+      await openReady(active);
     } catch {
       setStatus("failed");
     } finally {
       setSaving(false);
     }
   }
+
   async function startFresh(durationSeconds: TestDuration) {
     setSaving(true);
     try {
       const event = await startFreshEvent(durationSeconds);
-      dispatch({ type: "SET_ACTIVE_EVENT", event });
-      dispatch({ type: "ENTER_READY" });
+      await openReady(event);
     } catch {
       setStatus("failed");
     } finally {
@@ -96,7 +105,11 @@ function App() {
       );
     case "ready":
       return (
-        <ReadyScreen onStart={() => dispatch({ type: "ENTER_TYPING" })} />
+        <ReadyScreen
+          highScore={state.highScore}
+          onStart={() => dispatch({ type: "ENTER_TYPING" })}
+          onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+        />
       );
     case "typing":
       if (state.currentTest === null) {

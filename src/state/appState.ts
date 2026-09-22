@@ -26,18 +26,25 @@ export interface TestResult {
   displayedAccuracy: number | null;
 }
 
+export interface HighScoreSummary {
+  displayedWpm: number;
+  name: string | null;
+}
+
 export interface AppState {
   screen: AppScreen;
   durationSeconds: 30 | 60;
   activeEvent: EventRecord | null;
   currentTest: TestSession | null;
   latestResult: TestResult | null;
+  highScore: HighScoreSummary | null;
 }
 
 export type AppAction =
   | { type: "SELECT_DURATION"; durationSeconds: 30 | 60 }
   | { type: "SET_ACTIVE_EVENT"; event: EventRecord }
-  | { type: "ENTER_READY" }
+  | { type: "ENTER_READY"; highScore?: HighScoreSummary | null }
+  | { type: "ENTER_SETUP" }
   | { type: "ENTER_TYPING" }
   | { type: "TYPE_KEY"; key: string; repeat: boolean; now: number }
   | { type: "FINISH_TEST" }
@@ -49,6 +56,7 @@ export const initialState: AppState = {
   activeEvent: null,
   currentTest: null,
   latestResult: null,
+  highScore: null,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -65,7 +73,17 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         durationSeconds: action.event.durationSeconds,
       };
     case "ENTER_READY":
-      return { ...state, screen: "ready", currentTest: null };
+      return {
+        ...state,
+        screen: "ready",
+        currentTest: null,
+        highScore: action.highScore === undefined ? state.highScore : action.highScore,
+      };
+    case "ENTER_SETUP":
+      if (state.screen !== "ready" && state.screen !== "leaderboard") {
+        return state;
+      }
+      return { ...state, screen: "setup", currentTest: null };
     case "ENTER_TYPING":
       return {
         ...state,
