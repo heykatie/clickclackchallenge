@@ -14,7 +14,7 @@ npm run dev
 
 | Document | What it owns |
 | --- | --- |
-| [Product requirements](docs/prd.md) | Scoring, nickname rules, persistence, offline requirements, and booth acceptance tests |
+| [Product requirements](docs/prd.md) | Scoring, name rules, persistence, offline requirements, and booth acceptance tests |
 | [Technical plan](docs/technical_plan.md) | Implementation plan, application structure, and the automated test map |
 | [Design system](docs/design_system.md) | Palette, type, tokens, and contestant-facing strings |
 | [Wireframes](docs/wireframes.md) | Screen layout |

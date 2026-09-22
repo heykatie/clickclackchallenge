@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -52,15 +52,15 @@ TYPING — waiting for first typing input                      │
 TYPING — running                                            │
     │ Selected duration expires                             │
     ▼                                                       │
-RESULTS + NICKNAME                                          │
-    │ Top 10: nickname entry and Save Score                  │
+RESULTS + NAME                                          │
+    │ Top 10: name entry and Save Score                  │
     │ Other results: View Leaderboard                        │
     ▼                                                       │
 TOP 5 LEADERBOARD                                           │
     └── Next Player or automatic reset ─────────────────────┘
 ```
 
-There are five screens. Waiting and running are states of Typing; nickname entry is part of Results, not a sixth screen. Event Setup is for the operator and does not repeat between contestants.
+There are five screens. Waiting and running are states of Typing; name entry is part of Results, not a sixth screen. Event Setup is for the operator and does not repeat between contestants.
 
 | Transition | Required behavior |
 | --- | --- |
@@ -68,7 +68,7 @@ There are five screens. Waiting and running are states of Typing; nickname entry
 | Ready → Typing | Show the whole sentence; consume the opening keypress without entering it into the passage or starting the timer. |
 | Waiting → Running | Start timing on the first valid typing keystroke. |
 | Running → Results | End the test at the selected duration and show final WPM, accuracy, and qualification status. |
-| Results → Leaderboard | Top 10 contestants save a nickname. Other contestants use View Leaderboard. Both open the Top 5. The control is in `docs/prd.md` §15. |
+| Results → Leaderboard | Top 10 contestants save a name. Other contestants use View Leaderboard. Both open the Top 5. The control is in `docs/prd.md` §15. |
 | Leaderboard → Ready | Clear contestant state, retain event data, and return without refreshing the browser. |
 
 ## 3. Shared visual system
@@ -197,11 +197,11 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 Bundle passages and fonts locally. Do not add pause/restart controls, a leaderboard, scrolling passages, or continuous decoration to this screen. Accuracy and correction counting live in `docs/prd.md`. Which key starts the timer is in `docs/prd.md` §11.
 
-## 7. Screen 04 — Results + Nickname
+## 7. Screen 04 — Results + Name
 
-**Purpose:** make the final result easy to understand and collect a nickname from eligible Top 10 contestants on the same screen.
+**Purpose:** make the final result easy to understand and collect a name from eligible Top 10 contestants on the same screen.
 
-![Results wireframe: final WPM, accuracy, and nickname entry](./wireframes/04-results.png)
+![Results wireframe: final WPM, accuracy, and name entry](./wireframes/04-results.png)
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
@@ -215,7 +215,7 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 │                    You earned a Plinko drop!                     │
 │                       You made the Top 10!                        │
 │                                                                  │
-│                       Nickname                                   │
+│                         Name                                     │
 │                       [ Morgan____________ ]                     │
 │                                                                  │
 │                       [ SAVE SCORE ]                             │
@@ -223,13 +223,13 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Keep the WPM dominant and the nickname field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a nickname is saved, is in `docs/prd.md`.
+Keep the WPM dominant and the name field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a name is saved, is in `docs/prd.md`.
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” only when the result is a new high score. Show “You earned a Plinko drop!” only when the contestant qualifies. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
-When nickname entry is omitted, show a large View Leaderboard button. When nickname entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null nickname. Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When name entry is omitted, show a large View Leaderboard button. When name entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
-Focusing the nickname field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the nickname field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
+Focusing the name field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the name field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
 
 ## 8. Screen 05 — Top 5 Leaderboard
 
@@ -261,11 +261,11 @@ Focusing the nickname field can open the iPad software keyboard over SAVE SCORE,
 
 - Small logo-only badge near the upper-left safe margin. Long-press behavior is in `docs/prd.md` §9.
 - Centered “TOP 5” pill and “Leaderboard” heading.
-- One wide white rounded panel with five consistent row positions, aligned ranks, left-aligned nicknames, and right-aligned WPM values.
+- One wide white rounded panel with five consistent row positions, aligned ranks, left-aligned names, and right-aligned WPM values.
 - Rank 1 uses a light lavender row and mint rank accent. A small crown is optional; the numeral and score remain explicit.
 - Other ranks use calm white surfaces and subtle separators, not a different bright color per rank.
-- When the current player's result is in the Top 5, a subtle mint row treatment and “YOU” pill may identify it. Match the actual result, not just the nickname, because names may repeat.
-- A saved score with no nickname still occupies its rank. Show a dash in the name column. Do not invent a guest name. Truncate a long nickname with an ellipsis. The stored name stays the full saved value. Both rules are in `docs/design_system.md`.
+- When the current player's result is in the Top 5, a subtle mint row treatment and “YOU” pill may identify it. Match the actual result, not just the name, because names may repeat.
+- A saved score with no name still occupies its rank. Show a dash in the name column. Do not invent a guest name. Truncate a long name with an ellipsis. The stored name stays the full saved value. Both rules are in `docs/design_system.md`.
 - Keep rank 1 the strongest ranking emphasis even when another row has the current-player treatment. If the player is first, combine the treatments in that one row.
 - Place one large mint “NEXT PLAYER” button below the panel, followed by a readable automatic-reset message.
 - Keep pink, peach, and other organic motifs at the edges. No heavy shadows or shop-name text.
@@ -275,14 +275,14 @@ Focusing the nickname field can open the iPad software keyboard over SAVE SCORE,
 - Rank by displayed WPM, then displayed accuracy rounded to a whole number, then the earlier submission. That order is in `docs/prd.md`. Do not sort on the stored accuracy tenths.
 - Show only the Top 5. Do not append the current player as a sixth row if they rank lower.
 - The PNG's five contestants are sample data. **Proposed sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, include “No scores yet.”
-- “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored nickname.
+- “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Render the remaining time in “Returning to ready screen in {seconds}s”; the live interface must not leave the number fixed at 10.
 - NEXT PLAYER returns immediately to Ready. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 
-Scoring, nickname rules, persistence, offline behavior, and reset timing live in `docs/prd.md`. This document shows where those states appear.
+Scoring, name rules, persistence, offline behavior, and reset timing live in `docs/prd.md`. This document shows where those states appear.
 
 Accuracy is attempt-based: correct attempts divided by correct attempts plus incorrect attempts. Backspace is not an attempt, and it does not erase the original incorrect attempt. Both rules are in `docs/prd.md` §12. Do not calculate accuracy as correct characters divided by characters typed.
 
@@ -304,8 +304,8 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
 - [ ] Results show WPM, accuracy, the Plinko line when displayed WPM is above 50, high-score status when applicable, and qualification status.
-- [ ] Nickname entry is on Results and offered to Top 10 qualifiers, including ranks 6–10.
-- [ ] Nickname entry is protected from automatic reset; saving does not duplicate a score.
+- [ ] Name entry is on Results and offered to Top 10 qualifiers, including ranks 6–10.
+- [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.
 - [ ] NEXT PLAYER and the countdown return to Ready with event data intact.
@@ -318,7 +318,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 | Topic | Rule |
 | --- | --- |
 | Typing input | The first printable character starts the timer, including space and punctuation. The excluded non-typing keys are in `docs/prd.md` §11. |
-| Nickname display | A missing nickname is a dash. A long nickname is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
+| Name display | A missing name is a dash. A long name is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
 | Setup defaults | With no event, Start fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected. Behavior is in `docs/prd.md` §9. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.

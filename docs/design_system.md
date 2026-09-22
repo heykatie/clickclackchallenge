@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -56,7 +56,7 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 
 The five screens are landscape 4:3 only. Portrait and Split View must not show them. Show “Turn sideways and use the full screen.” The manifest lock and that gate are in `docs/technical_plan.md`.
 
-Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including nickname entry with the physical keyboard connected.
+Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including name entry with the physical keyboard connected.
 
 Do not rely on shrinking important text to make a crowded screen fit. Reduce content and decoration first.
 
@@ -104,7 +104,7 @@ Use three primary font families. Required font files must be packaged or cached 
 | Role | Family | Weights | Use |
 | --- | --- | --- | --- |
 | Display | Fredoka | 600, 700 | Headlines, large scores, primary actions, leaderboard headings |
-| Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, nicknames, helper copy |
+| Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, names, helper copy |
 | Typing passage | Atkinson Hyperlegible | 400, 700 | Sentences and character-level feedback |
 
 The passage prioritizes clear character recognition, including `I`, `l`, `1`, `O`, and `0`. Do not substitute a decorative display face for passage text. Do not add a fourth primary handwritten font in V1.
@@ -155,7 +155,7 @@ Allowed motifs include organic pastel blobs, swirls, arcs, dots, stars, sparkles
 
 Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge; essential content may not.
 
-During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and nickname field clear.
+During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and name field clear.
 
 ## 7. Controls and reusable components
 
@@ -179,17 +179,17 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 Use labeled, mutually exclusive choices for test duration and leaderboard mode. A selected option needs a visible radio/check indicator as well as its mint or lavender treatment. Do not make color the only selection cue.
 
-### Nickname field
+### Name field
 
-Use a large soft-white field with a persistent “Nickname” label, Nunito text, and a clear focus indicator. Keep the field and Save Score action visible while editing. Support the physical keyboard and reachable keyboard/touch controls.
+Use a large soft-white field with a persistent “Name” label, Nunito text, and a clear focus indicator. Keep the field and Save Score action visible while editing. Support the physical keyboard and reachable keyboard/touch controls.
 
 ### Score panel
 
-Make WPM the strongest element, with the unit explicit. Keep nickname and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
+Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
 
 ### Leaderboard rows
 
-Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the nickname maximum in `docs/prd.md` so a name does not push the WPM value off-screen. When the visible name still does not fit, truncate it with an ellipsis. The stored nickname stays the full saved value. A score with no nickname shows a dash in the name column. Do not invent a guest name.
+Use aligned rank, name, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the name maximum in `docs/prd.md` so a name does not push the WPM value off-screen. When the visible name still does not fit, truncate it with an ellipsis. The stored name stays the full saved value. A score with no name shows a dash in the name column. Do not invent a guest name.
 
 ## 8. Typing feedback
 
@@ -235,13 +235,13 @@ Fresh-event and continue-event behavior, including saved duration and which opti
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no nickname, show a dash instead of a name.
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no name, show a dash instead of a name.
 
 Visual order:
 
 1. Contest headline.
 2. Plinko message on a clear mint-accented surface.
-3. Current high-score WPM and nickname.
+3. Current high-score WPM and name.
 4. Large keyboard invitation.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
@@ -284,16 +284,16 @@ Incorrect keystrokes must not increase WPM. Starting-key and correction rules ar
 
 Use the feedback treatments in section 8. Keep the passage dominant. Do not show a leaderboard, large logo, dense instructions, decorative panels, or continuously animated elements.
 
-## 12. Results + Nickname
+## 12. Results + Name
 
-**Purpose:** present the final result and collect a nickname from Top 10 qualifiers on the same screen.
+**Purpose:** present the final result and collect a name from Top 10 qualifiers on the same screen.
 
 Required hierarchy:
 
 1. Large final WPM.
 2. Accuracy.
 3. New-high-score, Plinko, and Top 10 qualification status when applicable.
-4. Nickname field and Save Score action for eligible contestants.
+4. Name field and Save Score action for eligible contestants.
 
 Example eligible result:
 
@@ -306,7 +306,7 @@ Nice typing!
 You earned a Plinko drop!
 You made the Top 10!
 
-Nickname
+Name
 [ Morgan________________ ]
 
 [ SAVE SCORE ]
@@ -314,7 +314,7 @@ Nickname
 
 Use “NEW HIGH SCORE!” when applicable. Use “You earned a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “NEW HIGH SCORE!”, and the Plinko line are charcoal. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
 
-Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. That exit still writes one score row with a null nickname. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
+Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted, and it is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
 
 ## 13. Top 5 Leaderboard
 
@@ -344,7 +344,7 @@ Returning to ready screen in 10s
 - Use one wide soft-white rounded panel with five consistent row positions.
 - Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.
 - Keep the other rows quiet and easy to scan.
-- Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its nickname.
+- Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its name.
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
 - Place a large mint NEXT PLAYER button below the panel, with the automatic-return message beneath it.
 - Keep peripheral motifs sparse and separate from the rows and button.
@@ -367,7 +367,7 @@ Show actual event data rather than filling missing places with sample contestant
 Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition.
 
 - Do not animate the passage position or use moving backgrounds during Typing.
-- Do not let celebrations obscure scores, delay controls, or interfere with nickname entry.
+- Do not let celebrations obscure scores, delay controls, or interfere with name entry.
 - Respect `prefers-reduced-motion`; essential feedback must remain understandable without animation.
 - A visible timer and reset message provide information independently of decorative motion.
 
@@ -379,7 +379,7 @@ Motion should be brief and purposeful: button feedback, a result reveal, a new-h
 - Give selected options, errors, and the current-player row non-color identifiers.
 - Keep the active word and caret recognizable throughout the passage.
 - Do not hide essential instructions in small, pale helper text.
-- Keep the nickname field and action usable with the physical keyboard connected.
+- Keep the name field and action usable with the physical keyboard connected.
 - Keep SAVE SCORE visible when the iPad software keyboard is open. The upper-half placement is in `docs/wireframes.md` §7.
 - Keep controls and state changes understandable without animation or sound.
 - Ensure long names, larger text, and empty states do not obscure scores or primary actions.
@@ -456,14 +456,14 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Visible branding is limited to the optional logo-only badge.
 - [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
 - [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
-- [ ] Ready shows the contest message, current high score and nickname, and keyboard invitation.
+- [ ] Ready shows the contest message, current high score and name, and keyboard invitation.
 - [ ] Ready contains no Start button, Top 5, or operator controls.
 - [ ] The opening keypress is consumed; the full sentence appears before timing begins.
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
 - [ ] Results display score, accuracy, the Plinko line when it applies, and applicable qualification/high-score status.
-- [ ] Top 10 nickname entry stays on Results and is protected from automatic reset.
+- [ ] Top 10 name entry stays on Results and is protected from automatic reset.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.
@@ -475,6 +475,6 @@ This checklist records what to verify; it does not claim the implementation has 
 These choices are settled. Product behavior is in `docs/prd.md`.
 
 - The first printable character starts the timer. Space and punctuation count. The excluded non-typing keys are in `docs/prd.md` §11.
-- A long nickname is truncated with an ellipsis in the row. The stored name is unchanged.
+- A long name is truncated with an ellipsis in the row. The stored name is unchanged.
 - When no event exists, Event Setup selects Start Fresh and 30 seconds, and Continue is unavailable. When an event exists, Continue is selected.
-- A ranked score with no nickname shows a dash. Do not invent a guest name.
+- A ranked score with no name shows a dash. Do not invent a guest name.

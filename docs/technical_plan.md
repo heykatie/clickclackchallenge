@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -67,7 +67,7 @@ V1 supports:
 - continuing the current/most recently active event
 - Ready / Attract screen
 - Typing screen
-- Results + nickname screen
+- Results + name screen
 - Leaderboard screen
 - live WPM
 - live accuracy
@@ -76,7 +76,7 @@ V1 supports:
 - Backspace
 - deterministic passage sequence
 - minimum leaderboard accuracy
-- Top 10 nickname eligibility
+- Top 10 name eligibility
 - Top 5 leaderboard display
 - Plinko/prize qualification
 - manual Next Player reset
@@ -151,7 +151,7 @@ create / continue event
 → run typing test
 → calculate score
 → save score
-→ collect nickname when eligible
+→ collect name when eligible
 → derive leaderboard
 → reset for next contestant
 ```
@@ -276,7 +276,7 @@ structured event, score, and settings data
 → IndexedDB
 ```
 
-Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist a separate leaderboard record. Do not reload for a service-worker update during Ready-to-Typing, an active test, or nickname entry. Apply updates on a later launch or while the app is idle.
+Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist a separate leaderboard record. Do not reload for a service-worker update during Ready-to-Typing, an active test, or name entry. Apply updates on a later launch or while the app is idle.
 
 The airplane-mode acceptance test is in `docs/prd.md`. Installation steps are in the Testing Plan section below.
 
@@ -310,7 +310,7 @@ TIMER STARTS
   ↓
 RESULTS
   ↓
-nickname if Top 10 eligible
+name if Top 10 eligible
   ↓
 LEADERBOARD
   ↓
@@ -447,7 +447,7 @@ interface ScoreRecord {
   id: string;
   eventId: string;
 
-  nickname: string | null;
+  name: string | null;
 
   rawWpm: number;
   displayedWpm: number;
@@ -474,9 +474,9 @@ Field behavior:
 
 - identifies the event this score belongs to
 
-`nickname`
+`name`
 
-- nickname for a Top 10 qualifying score
+- name for a Top 10 qualifying score
 - null when that contestant leaves through View Leaderboard
 - null for scores outside the Top 10
 - the score row is still written in both null cases
@@ -532,7 +532,7 @@ Example:
 const score: ScoreRecord = {
   id: crypto.randomUUID(),
   eventId: "event-id",
-  nickname: "Alex",
+  name: "Alex",
 
   rawWpm: 91.6,
   displayedWpm: 92,
@@ -718,7 +718,7 @@ new Date().toISOString()
 
 Do not derive IDs from:
 
-- nickname
+- name
 - score
 - array index
 - timestamp alone
@@ -831,7 +831,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started.
 
-Scoring, nickname, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
+Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
 ## 11. Component and Module Boundaries
 
@@ -972,7 +972,7 @@ The screen should use pure typing/scoring functions rather than embedding all lo
 It should not:
 
 - persist final scores directly
-- decide Top 10 nickname eligibility by itself
+- decide Top 10 name eligibility by itself
 - render the final leaderboard
 - create or archive events
 
@@ -1015,7 +1015,7 @@ Displays:
 If the contestant is Top 10 eligible, render:
 
 ```text
-NicknameForm
+NameForm
 ```
 
 The Results screen should coordinate score saving through `ScoreService`.
@@ -1025,18 +1025,18 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
-→ if Top 10, show NicknameForm
+→ if Top 10, show NameForm
 → one exit writes one score row:
-    Save Score, with the nickname
-    or View Leaderboard, with nickname null
+    Save Score, with the name
+    or View Leaderboard, with name null
 → LeaderboardScreen
 ```
 
-Both Results exits write one score row. View Leaderboard does that with a null nickname, as in `docs/prd.md` §15.
+Both Results exits write one score row. View Leaderboard does that with a null name, as in `docs/prd.md` §15.
 
-Nickname entry remains part of the Results screen.
+Name entry remains part of the Results screen.
 
-Do not add a separate app-level `"nickname"` screen state.
+Do not add a separate app-level `"name"` screen state.
 
 It should not:
 
@@ -1046,17 +1046,17 @@ It should not:
 
 ---
 
-### NicknameForm
+### NameForm
 
 Suggested file:
 
 ```text
-src/components/NicknameForm.tsx
+src/components/NameForm.tsx
 ```
 
 Responsibility:
 
-- collect and validate a qualifying contestant's nickname
+- collect and validate a qualifying contestant's name
 
 Handles:
 
@@ -1069,14 +1069,14 @@ Handles:
 Recommended V1 limit:
 
 ```ts
-export const MAX_NICKNAME_LENGTH = 20;
+export const MAX_NAME_LENGTH = 20;
 ```
 
 Suggested props:
 
 ```ts
-interface NicknameFormProps {
-  onSubmit: (nickname: string) => void;
+interface NameFormProps {
+  onSubmit: (name: string) => void;
 }
 ```
 
@@ -1089,7 +1089,7 @@ It should not:
 - decide whether the contestant is Top 10
 - calculate WPM or accuracy
 
-The parent `ResultsScreen` determines whether `NicknameForm` should be shown.
+The parent `ResultsScreen` determines whether `NameForm` should be shown.
 
 Focusing this field can open the iPad software keyboard. SAVE SCORE must stay visible. If the keyboard covers it, keep the field and button in the upper half, as in `docs/wireframes.md` §7. Do not add a keyboard library.
 
@@ -1112,7 +1112,7 @@ Displays:
 
 - Top 5
 - rank
-- nickname
+- name
 - displayed WPM
 - optional emphasis for rank #1
 - optional highlight for the newest contestant
@@ -1221,7 +1221,7 @@ Suggested responsibilities:
 
 ```text
 save completed score
-update nickname
+update name
 load scores for an event
 ```
 
@@ -1234,9 +1234,9 @@ getScoresForEvent(
   eventId: string
 ): Promise<ScoreRecord[]>;
 
-updateScoreNickname(
+updateScoreName(
   scoreId: string,
-  nickname: string
+  name: string
 ): Promise<void>;
 ```
 
@@ -1471,7 +1471,7 @@ src/
 │   └── LeaderboardScreen.tsx
 │
 ├── components/
-│   └── NicknameForm.tsx
+│   └── NameForm.tsx
 │
 ├── services/
 │   ├── EventService.ts
@@ -1548,7 +1548,7 @@ Examples:
 ```text
 TypingScreen should not call IndexedDB directly.
 
-NicknameForm should not calculate Top 10 eligibility.
+NameForm should not calculate Top 10 eligibility.
 
 ScoreService should not render leaderboard rows.
 
@@ -1655,7 +1655,7 @@ Requirements:
 - large touch targets for operator controls
 - no essential information communicated only through color
 - incorrect-character state includes a non-color indicator
-- nickname input has an explicit label
+- name input has an explicit label
 - reduced-motion support where animation exists
 - `aria-live` may be used for result announcements
 
@@ -1691,7 +1691,7 @@ V1 stores contestant data locally on the event iPad.
 
 Collected data is limited to:
 
-- nickname, if Top 10
+- name, if Top 10
 - WPM
 - accuracy
 - timestamp
@@ -1704,7 +1704,7 @@ Do not collect:
 - location
 - device identity
 
-Nickname content must render as plain text and never as HTML.
+Name content must render as plain text and never as HTML.
 
 A profanity/moderation system is not required for V1 unless requested later.
 
@@ -1845,13 +1845,13 @@ score can be written and read
 multiple scores can be retrieved by eventId
 settings can save activeEventId
 settings can restore activeEventId
-nickname persists after update
+name persists after update
 fresh event does not delete archived events
 fresh event does not delete old scores
 leaderboard can be reconstructed from persisted scores
 data survives page reload
 submitting Save Score twice for the same result inserts one score row
-View Leaderboard with no nickname inserts one score row with nickname null
+View Leaderboard with no name inserts one score row with name null
 ```
 
 ---
@@ -1876,14 +1876,14 @@ after the timer starts, that long-press stays on Typing
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time
-Top 10 result shows NicknameForm
-non-Top-10 result does not show NicknameForm
+Top 10 result shows NameForm
+non-Top-10 result does not show NameForm
 non-Top-10 View Leaderboard opens the Top 5
-nickname validation rejects empty values
-View Leaderboard with an empty nickname writes one score row with a null nickname and opens the Top 5
+name validation rejects empty values
+View Leaderboard with an empty name writes one score row with a null name and opens the Top 5
 Next Player returns to Ready
 auto reset begins only on Leaderboard
-auto reset does not run while nickname entry is active
+auto reset does not run while name entry is active
 Leaderboard renders no more than five rows
 ```
 
@@ -1908,7 +1908,7 @@ incorrect-character state is distinguishable without relying only on color
 live WPM is readable
 timer is readable at bottom center
 accuracy is readable
-Results / Nickname layout fits
+Results / Name layout fits
 iPad software keyboard does not cover SAVE SCORE; if it does, the field and button stay in the upper half
 Top 5 leaderboard fits
 Next Player is easy for the operator to use
@@ -1966,7 +1966,7 @@ Before V1 is considered finished:
 7. Close and relaunch the installed PWA.
 8. Create a fresh event.
 9. Complete a full typing test.
-10. Save a qualifying nickname.
+10. Save a qualifying name.
 11. Confirm the leaderboard updates.
 12. Use Next Player.
 13. Complete another test.
@@ -2072,7 +2072,7 @@ Add timer and scoring
 Add leaderboard ranking
 Add IndexedDB persistence
 Add event setup flow
-Add results and nickname entry
+Add results and name entry
 Add offline PWA support
 Add scoring and ranking tests
 Apply final wireframe styling
@@ -2173,7 +2173,7 @@ WPM
 accuracy
 high-score detection
 Top 10 qualification
-nickname entry
+name entry
 Plinko result
 ```
 

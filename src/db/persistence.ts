@@ -15,7 +15,7 @@ export interface EventRecord {
 export interface ScoreRecord {
   id: string;
   eventId: string;
-  nickname: string | null;
+  name: string | null;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;
@@ -39,7 +39,7 @@ export interface BoothState {
 
 export interface NewScore {
   eventId: string;
-  nickname: string | null;
+  name: string | null;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;
@@ -212,16 +212,16 @@ export async function saveScore(input: NewScore): Promise<ScoreRecord> {
   return score;
 }
 
-export async function updateScoreNickname(
+export async function updateScoreName(
   scoreId: string,
-  nickname: string | null,
+  name: string | null,
 ): Promise<ScoreRecord> {
   const database = await openDatabase();
   const existing = await database.get("scores", scoreId);
   if (!existing) {
     throw new Error(`Missing score ${scoreId}`);
   }
-  const updated = { ...existing, nickname };
+  const updated = { ...existing, name };
   await database.put("scores", updated);
   return updated;
 }

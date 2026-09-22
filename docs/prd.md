@@ -1,6 +1,6 @@
 # Typing Test — V1 Product Requirements Document
 
-This file owns product behavior: scoring, the accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, the requirement that the booth works offline, and the booth acceptance tests.
+This file owns product behavior: scoring, the accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, the requirement that the booth works offline, and the booth acceptance tests.
 
 ## Document ownership
 
@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -65,7 +65,7 @@ Contestants should be able to:
 - type continuously without unnecessary interruptions
 - see live WPM, accuracy, and remaining time
 - see their final result
-- enter a nickname if they qualify for the Top 10
+- enter a name if they qualify for the Top 10
 - see the Top 5 leaderboard
 
 ### Secondary User — Booth Operator
@@ -101,7 +101,7 @@ Pain points:
 - unnecessary manual work
 - inconsistent reset behavior
 - no persistent local event leaderboard
-- no integrated nickname flow
+- no integrated name flow
 - no integrated Top 5 display
 - no booth-specific prize messaging
 - no guaranteed offline operation
@@ -120,7 +120,7 @@ V1 should:
 5. prevent incorrect typing from inflating WPM
 6. prevent very low-accuracy button mashing from entering the leaderboard
 7. retain event scores locally
-8. support a Top 10 nickname flow
+8. support a Top 10 name flow
 9. display a Top 5 leaderboard
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
@@ -153,8 +153,8 @@ V1 includes:
 - results screen
 - high-score detection
 - minimum leaderboard accuracy requirement
-- Top 10 nickname eligibility
-- nickname entry
+- Top 10 name eligibility
+- name entry
 - Top 5 leaderboard
 - Next Player action
 - automatic reset after leaderboard display
@@ -211,7 +211,7 @@ Ready
 → contestant types
 → timer expires
 → Results screen
-→ Save Score, or View Leaderboard with no nickname, if Top 10 eligible; otherwise View Leaderboard
+→ Save Score, or View Leaderboard with no name, if Top 10 eligible; otherwise View Leaderboard
 → Leaderboard
 → Next Player or automatic reset
 → Ready
@@ -237,7 +237,7 @@ As a contestant, I want to see my WPM, accuracy, and remaining time while I type
 
 As a contestant, I want to see my result immediately when time expires.
 
-As a qualifying contestant, I want to enter a nickname so my result can appear on the leaderboard.
+As a qualifying contestant, I want to enter a name so my result can appear on the leaderboard.
 
 ### Booth Operator
 
@@ -303,7 +303,7 @@ The Ready screen should clearly communicate the contest and current high score.
 
 Required strings live in `docs/design_system.md` (Brand voice).
 
-When a high score exists, show the nickname and WPM from the eligible rank #1 score.
+When a high score exists, show the name and WPM from the eligible rank #1 score.
 
 Ready does not need to show the test duration. The Typing screen shows the remaining time before the timer starts.
 
@@ -510,7 +510,7 @@ A contestant below the threshold:
 - still sees their WPM
 - still sees their accuracy
 - does not qualify for leaderboard ranking
-- is not prompted for a leaderboard nickname
+- is not prompted for a leaderboard name
 
 ### Ranking and Ties
 
@@ -559,8 +559,8 @@ A score should retain:
 
 - a unique score ID
 - the event ID it belongs to
-- nickname, when the contestant saves one
-- null nickname when a Top 10 contestant leaves through View Leaderboard
+- name, when the contestant saves one
+- null name when a Top 10 contestant leaves through View Leaderboard
 - final WPM
 - final accuracy
 - score submission time
@@ -809,7 +809,7 @@ common-sentences-v2
 
 ---
 
-## 15. Results and Nickname Screen
+## 15. Results and Name Screen
 
 The Results screen should display:
 
@@ -821,7 +821,7 @@ The Results screen should display:
 
 Show “You earned a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The words are in `docs/design_system.md` (Brand voice).
 
-Results and nickname entry should remain on the **same screen**.
+Results and name entry should remain on the **same screen**.
 
 ### Top 10 Qualification
 
@@ -830,25 +830,25 @@ If the contestant's score:
 - meets the minimum accuracy threshold, and
 - ranks within the event's Top 10
 
-then show nickname entry.
+then show name entry.
 
-If the contestant does not qualify for the Top 10, nickname entry should not be shown.
+If the contestant does not qualify for the Top 10, name entry should not be shown.
 
-When nickname entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
 
-When nickname entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null nickname and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt nickname entry. The label is in `docs/design_system.md` (Brand voice).
+When name entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt name entry. The label is in `docs/design_system.md` (Brand voice).
 
-### Nickname Rules
+### Name Rules
 
-Nickname input should:
+Name input should:
 
-- allow any nickname
+- allow any name
 - trim leading/trailing whitespace
 - reject empty values
 - use a reasonable maximum length for layout safety
-- display nickname content as plain text
+- display name content as plain text
 
-The stored nickname is the trimmed value, up to the maximum below. A row may show an ellipsis when the name does not fit. That display does not change the stored value. The truncation is in `docs/design_system.md`.
+The stored name is the trimmed value, up to the maximum below. A row may show an ellipsis when the name does not fit. That display does not change the stored value. The truncation is in `docs/design_system.md`.
 
 Recommended maximum:
 
@@ -856,7 +856,7 @@ Recommended maximum:
 20 characters
 ```
 
-Automatic next-player reset must not interrupt nickname entry.
+Automatic next-player reset must not interrupt name entry.
 
 ---
 
@@ -871,10 +871,10 @@ Top 5
 Each leaderboard row should include:
 
 - rank
-- nickname, or a dash when the score has no nickname
+- name, or a dash when the score has no name
 - displayed WPM
 
-Do not invent a name for a null nickname. A long name may be truncated in the row. The stored nickname stays complete. The dash and the ellipsis are in `docs/design_system.md`.
+Do not invent a name for a null name. A long name may be truncated in the row. The stored name stays complete. The dash and the ellipsis are in `docs/design_system.md`.
 
 The leaderboard may:
 
@@ -898,7 +898,7 @@ The current high score is the rank #1 eligible score for the active event.
 The Ready screen should show:
 
 - high-score WPM
-- nickname, or a dash when that score has no nickname
+- name, or a dash when that score has no name
 
 If the active event has no eligible scores yet, show “Be the first high score!”
 
@@ -932,7 +932,7 @@ Reset contestant-specific state:
 - live WPM
 - live accuracy
 - current result
-- nickname field
+- name field
 
 Preserve event state:
 
@@ -945,7 +945,7 @@ Preserve event state:
 
 Automatic reset should begin only after the Leaderboard screen is shown.
 
-It should not run while nickname entry is still in progress.
+It should not run while name entry is still in progress.
 
 ---
 
@@ -969,7 +969,7 @@ The app must not require a network connection to reach or use:
 - Event Setup
 - Ready / Attract
 - Typing
-- Results / Nickname
+- Results / Name
 - Leaderboard
 
 A temporary or complete loss of connectivity must not prevent the booth from continuing to operate.
@@ -987,7 +987,7 @@ open app
 → complete typing test
 → calculate WPM and accuracy
 → determine leaderboard eligibility
-→ enter nickname when eligible
+→ enter name when eligible
 → save score locally
 → update leaderboard
 → show Leaderboard screen
@@ -1036,7 +1036,7 @@ A network connection must not be required to:
 - create an event
 - continue an event
 - save a score
-- save a nickname
+- save a name
 - calculate the current high score
 - calculate Top 10 eligibility
 - generate the Top 5 leaderboard
@@ -1120,7 +1120,7 @@ V1 satisfies the offline requirement only when all of the following are true:
 - the Ready screen works offline
 - the Typing screen works offline
 - scoring works offline
-- nickname entry works offline
+- name entry works offline
 - scores save offline
 - the high score updates offline
 - the Top 5 leaderboard updates offline
@@ -1145,7 +1145,7 @@ Persist:
 
 - events
 - scores
-- nicknames
+- names
 - active-event reference
 - event duration
 - passage-set identifier
@@ -1169,7 +1169,7 @@ V1 should include:
 - large text
 - large touch targets for operator controls
 - error feedback that does not rely on color alone
-- explicit nickname input label
+- explicit name input label
 - reduced-motion support where animation is used
 
 The contestant's primary interaction method is the physical keyboard.
@@ -1417,7 +1417,7 @@ Separate physical presses of the same key must still work normally.
 - their accuracy is still shown
 - the score does not participate in leaderboard ranking
 - the contestant is not considered Top 10
-- nickname entry is not shown
+- name entry is not shown
 - the score cannot appear in the Top 5
 
 Boundary cases:
@@ -1473,7 +1473,7 @@ Expected order:
 
 ---
 
-### Top 10 Nickname Eligibility
+### Top 10 Name Eligibility
 
 **Given**
 
@@ -1486,10 +1486,10 @@ Expected order:
 
 **Then**
 
-- nickname entry is shown
-- the contestant may enter and save a nickname
+- name entry is shown
+- the contestant may enter and save a name
 
-If the contestant ranks outside the Top 10, nickname entry must not be shown.
+If the contestant ranks outside the Top 10, name entry must not be shown.
 
 ---
 
@@ -1498,7 +1498,7 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 **Given**
 
 - the contestant does not qualify for the Top 10
-- nickname entry is not shown
+- name entry is not shown
 
 **When**
 
@@ -1511,11 +1511,11 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 ---
 
-### Nickname Entry Is Not Interrupted
+### Name Entry Is Not Interrupted
 
 **Given**
 
-- a qualifying contestant is entering a nickname
+- a qualifying contestant is entering a name
 
 **When**
 
@@ -1523,17 +1523,17 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 **Then**
 
-- automatic reset must not interrupt the nickname flow
-- the contestant remains on Results until the nickname flow is completed
+- automatic reset must not interrupt the name flow
+- the contestant remains on Results until the name flow is completed
 
 ---
 
-### Nickname Can Be Skipped
+### Name Can Be Skipped
 
 **Given**
 
 - a qualifying contestant is on Results
-- the nickname field is empty
+- the name field is empty
 
 **When**
 
@@ -1543,7 +1543,7 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 - Save Score would still reject the empty name
 - one score row is written
-- its nickname is null
+- its name is null
 - that score stays eligible for ranking
 - the Top 5 leaderboard appears
 - automatic reset has not moved the screen on its own
@@ -1635,7 +1635,7 @@ Continuing must not create a new event.
 
 - the active event still exists
 - the saved score still exists
-- the nickname still exists when applicable
+- the name still exists when applicable
 - the high score remains correct
 - the leaderboard can be reconstructed from saved scores
 
@@ -1722,7 +1722,7 @@ the app returns to Ready and clears:
 - live WPM
 - live accuracy
 - current result
-- nickname input
+- name input
 
 The following must remain unchanged:
 
@@ -1740,7 +1740,7 @@ The following must remain unchanged:
 **Given**
 
 - the Leaderboard screen is visible
-- nickname entry is no longer active
+- name entry is no longer active
 
 **When**
 
@@ -1800,7 +1800,7 @@ launch app
 → start typing test
 → complete test
 → calculate WPM and accuracy
-→ enter nickname when eligible
+→ enter name when eligible
 → save score
 → update leaderboard
 → Next Player or automatic reset
@@ -1818,7 +1818,7 @@ and confirm:
 
 - active event survives
 - saved scores survive
-- nicknames survive
+- names survive
 - high score is reconstructed
 - Top 5 is reconstructed
 - passages load
@@ -1845,7 +1845,7 @@ partial words count correctly
 Backspace behavior passes
 held-key repeat protection passes
 minimum accuracy gate passes
-Top 10 nickname behavior passes
+Top 10 name behavior passes
 Top 5 sorting passes
 Plinko qualification passes
 fresh event behavior passes

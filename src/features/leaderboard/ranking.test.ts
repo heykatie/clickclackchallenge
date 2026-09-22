@@ -7,7 +7,7 @@ function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm
   return {
     id: overrides.id ?? overrides.createdAt,
     eventId: "event-1",
-    nickname: null,
+    name: null,
     rawWpm: overrides.displayedWpm,
     correctCharacters: 0,
     correctAttempts: 10,

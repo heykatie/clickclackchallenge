@@ -12,7 +12,7 @@ import {
   SETTINGS_KEY,
   startFreshEvent,
   updateEventDuration,
-  updateScoreNickname,
+  updateScoreName,
   type NewScore,
 } from "./persistence";
 import { rankScores } from "../features/leaderboard/ranking";
@@ -20,7 +20,7 @@ import { rankScores } from "../features/leaderboard/ranking";
 function scoreInput(eventId: string, displayedWpm: number): NewScore {
   return {
     eventId,
-    nickname: null,
+    name: null,
     rawWpm: displayedWpm,
     displayedWpm,
     accuracy: 96.4,
@@ -101,19 +101,19 @@ describe("persistence", () => {
     expect(booth.settings.activeEventId).toBeNull();
   });
 
-  it("writes scores for one event and keeps a nickname update", async () => {
+  it("writes scores for one event and keeps a name update", async () => {
     const event = await startFreshEvent(30);
     const first = await saveScore(scoreInput(event.id, 40));
-    const second = await saveScore({ ...scoreInput(event.id, 55), nickname: "Alex" });
+    const second = await saveScore({ ...scoreInput(event.id, 55), name: "Alex" });
     expect(first).not.toHaveProperty("meetsAccuracyThreshold");
     expect(first).not.toHaveProperty("displayedAccuracy");
 
-    const renamed = await updateScoreNickname(first.id, "Sam");
+    const renamed = await updateScoreName(first.id, "Sam");
     const scores = await listScores(event.id);
     expect(scores).toHaveLength(2);
     expect(scores.map((score) => score.displayedWpm).sort()).toEqual([40, 55]);
-    expect(scores.find((score) => score.id === renamed.id)?.nickname).toBe("Sam");
-    expect(scores.find((score) => score.id === second.id)?.nickname).toBe("Alex");
+    expect(scores.find((score) => score.id === renamed.id)?.name).toBe("Sam");
+    expect(scores.find((score) => score.id === second.id)?.name).toBe("Alex");
     expect(scores.every((score) => score.accuracy === 96.4)).toBe(true);
   });
 
