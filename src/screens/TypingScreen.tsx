@@ -80,8 +80,8 @@ export function TypingScreen({
   );
 
   function beginHold() {
-    if (session.startedAt !== null) {
-      return;
+    if (holdTimer.current !== null) {
+      window.clearTimeout(holdTimer.current);
     }
     holdTimer.current = window.setTimeout(onAbort, 600);
   }

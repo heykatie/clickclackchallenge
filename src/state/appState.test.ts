@@ -40,7 +40,7 @@ describe("appReducer", () => {
     expect(typed.screen).toBe("typing");
   });
 
-  it("returns to Ready from the waiting state and stays after the timer starts", () => {
+  it("returns to Ready from a waiting or running test and saves nothing", () => {
     const waiting = appReducer(
       appReducer(initialState, { type: "ENTER_READY" }),
       { type: "ENTER_TYPING" },
@@ -48,6 +48,7 @@ describe("appReducer", () => {
     const aborted = appReducer(waiting, { type: "RETURN_TO_READY" });
     expect(aborted.screen).toBe("ready");
     expect(aborted.currentTest).toBeNull();
+    expect(aborted.latestResult).toBeNull();
 
     const running = appReducer(waiting, {
       type: "TYPE_KEY",
@@ -55,9 +56,10 @@ describe("appReducer", () => {
       repeat: false,
       now: 1000,
     });
-    const stayed = appReducer(running, { type: "RETURN_TO_READY" });
-    expect(stayed.screen).toBe("typing");
-    expect(stayed.currentTest?.startedAt).toBe(1000);
+    const left = appReducer(running, { type: "RETURN_TO_READY" });
+    expect(left.screen).toBe("ready");
+    expect(left.currentTest).toBeNull();
+    expect(left.latestResult).toBeNull();
   });
 
   it("opens Results when the test finishes, using the configured duration for WPM", () => {

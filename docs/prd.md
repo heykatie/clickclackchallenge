@@ -338,7 +338,7 @@ The timer starts only when the contestant presses the first valid typing charact
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
-While the first valid key has not been pressed, a long-press on the logo badge returns to Ready and does not save a score. The badge is present in that waiting state so the screen has a way back. After the timer starts, that long-press does not leave the test.
+A long-press on the logo badge returns to Ready and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
 
 The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
@@ -1579,7 +1579,7 @@ If the contestant ranks outside the Top 10, name entry must not be shown.
 - Ready appears
 - no score is saved
 
-After the timer has started, that long-press does not leave the test.
+The same long-press returns to Ready after the timer has started. The attempt in progress is discarded, and no score is saved.
 
 ---
 

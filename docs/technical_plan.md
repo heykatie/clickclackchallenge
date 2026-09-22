@@ -1939,7 +1939,7 @@ Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 long-press on the logo while Typing is waiting returns to Ready and saves no score
-after the timer starts, that long-press stays on Typing
+after the timer starts, that long-press returns to Ready and saves no score
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time

@@ -140,11 +140,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentScoreId: action.currentScoreId,
       };
     case "RETURN_TO_READY":
-      if (
-        state.screen !== "typing" ||
-        state.currentTest === null ||
-        state.currentTest.startedAt !== null
-      ) {
+      if (state.screen !== "typing" || state.currentTest === null) {
         return state;
       }
       return { ...state, screen: "ready", currentTest: null };
