@@ -287,6 +287,8 @@ If no previous event exists, the Continue option should be unavailable.
 
 If the operator wants to change the test duration, they should start a fresh event.
 
+While Continue is selected, the test-length control shows the stored duration and does not accept another choice. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+
 ### Returning to Event Setup
 
 After Start Event, the operator returns to Event Setup by long-pressing the logo-only badge on Ready or the Leaderboard. The active event stays as it is. Keyboard input does not open Event Setup. Ready still shows no operator settings.
@@ -360,9 +362,9 @@ The typing sentence should distinguish:
 Design behavior:
 
 - completed text: charcoal
-- current word: lavender
+- current word: charcoal text on a light-lavender surface
 - caret: strong mint
-- upcoming text: muted gray
+- upcoming text: charcoal
 - incorrect character: accessible red plus a non-color indicator such as underline or background tint
 
 The caret must appear at the contestant's exact character position.
@@ -1072,7 +1074,7 @@ The app should only be considered ready for event use after all required applica
 
 If required offline assets are missing, the app should not falsely indicate that it is fully offline-ready.
 
-If an offline-readiness indicator is included, it should represent actual readiness rather than being decorative.
+If an offline-readiness indicator is included, it must reflect real cache and service-worker readiness. Chips in the wireframe PNGs are decoration and are not that indicator.
 
 ### PWA Installation Requirement
 
@@ -1594,6 +1596,7 @@ Starting fresh must never delete old event data.
 - all saved scores remain available
 - the high score is restored
 - the Top 5 is recalculated correctly
+- a different duration highlighted while Continue is selected is ignored
 
 Continuing must not create a new event.
 

@@ -37,7 +37,7 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 
 - A small logo-only keycap badge is allowed.
 - Retain the established brand-inspired visual style without adding a replacement wordmark.
-- Use a clean logo asset with no embedded shop-name text. Do not reproduce missing-glyph boxes found in older mockups.
+- Use a clean logo asset with no embedded shop-name text. Do not reproduce the missing-glyph boxes in `01-setup.png`, `02-ready.png`, and `04-results.png` on the keycap badge, Start Event, Press Any Key, Top 10, or Save Score. The real strings are in Brand voice and in section 7.
 - The internal `--tiny-*` token prefix may remain; it is not visible interface branding.
 - On Typing, omit the badge or keep it small enough that it does not compete with the passage.
 
@@ -52,6 +52,9 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 | Scrolling | Keep each contestant screen within one viewport |
 | Content placement | Generous safe margins; no clipped text, rows, or actions |
 | Export sizing | PNG pixels are not CSS layout dimensions |
+| Orientation | Landscape full screen only |
+
+The five screens are landscape 4:3 only. Portrait and Split View must not show them. Show “Turn sideways and use the full screen.” The manifest lock and that gate are in `docs/technical_plan.md`.
 
 Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including nickname entry with the physical keyboard connected.
 
@@ -72,7 +75,7 @@ These are the latest documented design values. They are approximate visual match
 | Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
 | Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
-| Muted gray | `--tiny-muted` | `#8C8788` | Secondary text where contrast is sufficient |
+| Muted gray | `--tiny-muted` | `#8C8788` | Secondary text outside the passage, and only where contrast is sufficient |
 | Error red | `--tiny-error` | `#D95D5D` | Incorrect characters and validation feedback |
 
 ### Color hierarchy
@@ -90,7 +93,7 @@ Use fewer colors during Typing. Do not assign a different bright color to every 
 - Use charcoal for important reading, headlines, scores, and labels on pastel controls.
 - Do not copy lavender display type from the wireframe PNGs. Where that type is too faint, keep lavender in a border or tinted surface and use charcoal for the text.
 - Do not assume a pastel foreground is readable simply because it belongs to the palette.
-- Check lavender word styling, muted passage text, error text, and focus indicators against their actual backgrounds.
+- Check error text and focus indicators against their actual backgrounds. Do not use muted gray for passage text. `#8C8788` is about 3.11:1, which meets large-text AA at 32–36 px and is still weak at the two-foot distance in section 2.
 - Where an accent foreground is too faint, keep the accent in a border or tinted background and use darker text.
 - Pair errors with an underline or another non-color indicator. Pair selection with a radio/check indicator, and current-player emphasis with a “YOU” label.
 
@@ -192,13 +195,13 @@ Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values 
 
 | State | Visual treatment |
 | --- | --- |
-| Completed text | Charcoal on each correct character already typed, including characters before an error in the same word |
-| Current word | Lavender emphasis across the whole active word |
+| Completed text | Charcoal, in the bold passage weight, on each correct character already typed, including characters before an error in the same word |
+| Current word | Charcoal text on a light-lavender surface across the active word |
 | Caret | Strong mint at the exact current character position inside the active word |
-| Upcoming words | Secondary but fully readable text |
+| Upcoming words | Charcoal, in the regular passage weight. Not muted gray. |
 | Incorrect characters | Error red plus underline or another non-color cue |
 
-For the active word, use `--tiny-lavender` where foreground contrast is sufficient. If it is too faint, preserve the lavender emphasis with a light-lavender surface and charcoal text. Apply the same readable treatment consistently across the passage set.
+The active word uses a light-lavender surface and charcoal text. Do not paint it in lavender type. `--tiny-lavender` (`#AA9AD4`) is about 2.23:1 on blush and 2.50:1 on white, so it fails WCAG AA even for large text. Lavender stays a surface, border, or selected-state accent. Apply the same treatment across the passage set.
 
 Incorrect-character feedback takes precedence over the ordinary word treatment. Correct characters already typed stay charcoal even when they sit inside the active word. The caret must remain clearly visible against both the passage background and the active-word treatment.
 
@@ -224,9 +227,9 @@ Display two option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration, is defined in `docs/prd.md`.
+Fresh-event and continue-event behavior, including saved duration, is defined in `docs/prd.md`. While Continue is selected, show the stored duration and do not let the operator highlight the other length. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
 
-**Proposed empty state:** if there is no previous event, disable that option and show “No previous event yet.” If an offline-ready status is displayed, it must reflect actual cached readiness.
+**Proposed empty state:** if there is no previous event, disable that option and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
 ## 10. Ready / Attract
 
@@ -308,7 +311,7 @@ Nickname
 [ SAVE SCORE ]
 ```
 
-Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
+Use “NEW HIGH SCORE!” when applicable. Both that line and “Nice typing!” are charcoal. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
 
 Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. The label is “VIEW LEADERBOARD” from Brand voice.
 
@@ -396,6 +399,7 @@ CURRENT HIGH SCORE
 Be the first high score!
 PRESS ANY KEY TO START
 Your timer starts when you begin typing.
+Turn sideways and use the full screen.
 Nice typing!
 NEW HIGH SCORE!
 You made the Top 10!
@@ -447,7 +451,7 @@ This checklist records what to verify; it does not claim the implementation has 
 
 - [ ] All screens use the current palette and the three defined font roles.
 - [ ] Visible branding is limited to the optional logo-only badge.
-- [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet.
+- [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
 - [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
 - [ ] Ready shows the contest message, current high score and nickname, and keyboard invitation.
 - [ ] Ready contains no Start button, Top 5, or operator controls.

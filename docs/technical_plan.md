@@ -264,6 +264,8 @@ Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS
 
 Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
+Set the web app manifest `orientation` to `landscape`. That is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports.
+
 Load fonts with `@fontsource/fredoka`, `@fontsource/nunito`, and `@fontsource/atkinson-hyperlegible`. Import passages from local application data. If passage data is emitted as a separate static asset, precache that asset too.
 
 ```text
@@ -930,6 +932,8 @@ contestant keypress
 ```
 
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
+
+Listen for that key with a `keydown` listener on `window`, and focus the page when Ready is shown. An installed iPad PWA in Safari often does not deliver keys unless the page has focus, so a listener on the prompt element alone can miss the giant keyboard.
 
 It should not:
 
@@ -1632,7 +1636,7 @@ If required assets are not cached:
 - surface the issue before event use where practical
 - do not falsely imply offline readiness
 
-If an "Offline ready" indicator exists, it should reflect actual readiness rather than decoration.
+If an "Offline ready" indicator exists, it must reflect real cache and service-worker readiness. Chips in the wireframe PNGs are decoration and are not that indicator.
 
 ---
 
@@ -1849,7 +1853,7 @@ Required cases:
 EventSetup disables Continue when no event exists
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
-Ready screen responds to a key press
+Ready screen responds to a key press through a window-level keydown listener
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
@@ -1875,6 +1879,7 @@ Required on the actual target landscape iPad:
 
 ```text
 Event Setup fits without clipping
+portrait and Split View show the landscape full-screen instruction instead of the five screens
 Ready screen is readable from approximately two feet away
 typing sentence remains on one line
 typing sentence does not clip at either side

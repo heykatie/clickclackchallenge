@@ -28,7 +28,7 @@ This document specifies the five-screen experience for an offline typing contest
 - Product behavior comes from `docs/prd.md` and `docs/technical_plan.md`. Visual layout comes from this document and `docs/design_system.md`.
 - Later decisions replace older examples: blush/white replaces the cream-led palette; Ready has a keyboard prompt and current high score, with no Start button or leaderboard; the passage is a complete centered single line; shop-name text is removed.
 - Current PNG exports for all five screens are tracked in `docs/wireframes/`. Each is 4:3. They are layout references, not safe pixel targets. Export pixels are not CSS layout dimensions. Keep the pastel system in `docs/design_system.md`. Do not copy missing-glyph boxes, the palette-legend footer, or the decorative “Offline-ready” chip. Lavender display type in the exports is not a contrast target; essential text uses charcoal.
-  - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086. The offline-ready status and previous-event summary in this export are proposed, not required. See section 4.
+  - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086. The “Offline-ready” chip in this export is decoration, not a control. See section 4.
   - Ready: [02-ready.png](./wireframes/02-ready.png), 1448 × 1086
   - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
   - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200. This export is the new-high-score state described in section 7, not the ordinary result in the diagram there.
@@ -105,14 +105,14 @@ Use two clear option groups with visible selected states and one large mint acti
 
 | Control | Layout |
 | --- | --- |
-| Test length | One choice: 30 or 60 seconds. |
+| Test length | One choice: 30 or 60 seconds while Start Fresh is selected. While Continue is selected, show the stored duration and do not accept the other length. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. |
 
 **Proposed empty state:** disable “Continue previous event” when none exists and show “No previous event yet.”
 
-`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. Required Setup is the two option groups and Start Event. The summary is sample text. It is not the event Start fresh creates. If an offline-ready indicator is included, it must reflect real cache state, as in `docs/prd.md` (Offline Readiness).
+`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the two option groups and Start Event. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
 Event setup rules, including saved duration, are in `docs/prd.md`.
 
@@ -182,10 +182,10 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 | Text state | Treatment |
 | --- | --- |
-| Completed text | Charcoal on each correct character already typed, including characters before an error in the same word |
-| Current word | Lavender emphasis across the active word; retain legibility |
+| Completed text | Charcoal, in the bold passage weight, on each correct character already typed, including characters before an error in the same word |
+| Current word | Charcoal text on a light-lavender surface across the active word |
 | Caret | Strong mint, inside the active word at the current character position |
-| Upcoming words | Secondary but readable text |
+| Upcoming words | Charcoal, in the regular passage weight. Not muted gray. |
 | Incorrect characters | Error red plus underline or another non-color indicator; error feedback takes precedence over ordinary word styling |
 
 ### Behavior
