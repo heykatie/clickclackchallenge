@@ -1305,12 +1305,14 @@ calculateWpm(
 calculateAccuracy(
   correctAttempts: number,
   incorrectAttempts: number
-): number;
+): number | null;
 
 meetsLeaderboardAccuracy(
   accuracy: number
 ): boolean;
 ```
+
+Return `null` when `correctAttempts + incorrectAttempts` is 0. Do not return 100 for that case. The live UI follows `docs/prd.md`: hide accuracy or show `—%`, and do not display 100 before the contestant has made an attempt.
 
 It should not:
 
@@ -1710,7 +1712,7 @@ perfect typing produces expected WPM
 60-second final WPM is correct
 incorrect characters do not increase WPM
 incorrect attempts lower accuracy
-zero-attempt accuracy calculation does not return NaN
+zero-attempt accuracy calculation returns null
 Backspace itself does not affect accuracy
 correcting an error does not erase the original accuracy penalty
 removing a credited character removes current correct-character credit

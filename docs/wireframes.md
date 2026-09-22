@@ -31,7 +31,7 @@ This document specifies the five-screen experience for an offline typing contest
   - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086
   - Ready: [02-ready.png](./wireframes/02-ready.png), 1448 × 1086
   - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
-  - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200
+  - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200. This export is the new-high-score state described in section 7, not the ordinary result in the diagram there.
   - Leaderboard: [05-leaderboard.png](./wireframes/05-leaderboard.png), 1448 × 1086
 - `01-setup.png`, `02-ready.png`, and `04-results.png` contain missing-glyph boxes on the logo, Start Event, Press Any Key, Top 10, and Save Score. Those boxes are export defects. Layout, hierarchy, and placement in the PNGs still count. Implementation uses a clean logo-only keycap badge and the real strings from `docs/design_system.md`.
 - Names, scores, accuracy values, and selected options in examples are sample data. They are not seeded event records or confirmed defaults.
@@ -221,6 +221,8 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 ```
 
 Keep the WPM dominant and the nickname field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a nickname is saved, is in `docs/prd.md`.
+
+`04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy. Both use sample numbers. Use “NEW HIGH SCORE!” only when the result is a new high score.
 
 When nickname entry is omitted, show a large View Leaderboard button. That action is in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 

@@ -416,6 +416,7 @@ Rules:
 - Backspace itself does not count as a typing attempt
 - correcting a mistake does not erase the original incorrect attempt
 - accuracy should be hidden or shown as `—%` before the contestant begins typing
+- do not display 100, or any other percentage, when there have been no attempts
 
 ### Character-Level Scoring
 
