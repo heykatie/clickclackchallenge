@@ -1,0 +1,7 @@
+{
+  "workbench.colorCustomizations": {
+    "editorError.foreground": "#009561",
+    "errorLens.statusBarIconErrorForeground": "#009561",
+    "errorLens.statusBarErrorForeground": "#009561"
+  }
+}
