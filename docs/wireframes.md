@@ -280,6 +280,8 @@ When nickname entry is omitted, show a large View Leaderboard button. When nickn
 
 Scoring, nickname rules, persistence, offline behavior, and reset timing live in `docs/prd.md`. This document shows where those states appear.
 
+Accuracy is attempt-based: correct attempts divided by correct attempts plus incorrect attempts. Backspace is not an attempt, and it does not erase the original incorrect attempt. Both rules are in `docs/prd.md` §12. Do not calculate accuracy as correct characters divided by characters typed.
+
 Both reset paths return to Ready without a browser reload. They clear the current contestant’s on-screen state and leave the active event in place.
 
 ## 10. Wireframe acceptance checklist
