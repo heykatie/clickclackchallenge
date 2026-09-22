@@ -974,6 +974,9 @@ Core gameplay must not require:
 
 Before V1 is considered complete, the app must be tested on the actual iPad in airplane mode.
 
+The V1 application must operate fully offline after installation/caching
+and must not require a server connection during booth operation.
+
 Required offline test:
 
 ```text
