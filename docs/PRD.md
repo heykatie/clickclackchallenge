@@ -7,7 +7,7 @@ The typing test is an offline-first, landscape-iPad typing competition designed 
 
 It replaces the current generic browser typing test and manual whiteboard score tracking with a dedicated experience that automatically calculates scores, manages an event leaderboard, and resets cleanly for each new contestant.
 
-Visual design must follow the Tiny Keyboard Shop design system documented in:
+Visual design must follow the design system documented in:
 
 `docs/DESIGN_SYSTEM.md`
 
@@ -62,7 +62,7 @@ They should be able to:
 - No persistent event scores
 - Event Wi-Fi may be unavailable or unreliable
 - Existing test is not optimized for repeated booth use
-- Existing test does not match the desired Tiny Keyboard Shop experience or branding
+- Existing test does not match the desired experience or branding
 
 ---
 
@@ -147,7 +147,7 @@ They should be able to:
 ### Contestant Flow
 
 1. Ready / attract screen displays:
-   - Tiny Keyboard Shop branding
+   - branding
    - "GIANT keyboard typing contest!"
    - "Type above 50 WPM for a Plinko drop."
    - Current high score
@@ -209,7 +209,7 @@ They should be able to:
 
 Display:
 
-- Tiny Keyboard Shop branding
+- branding
 - "GIANT keyboard typing contest!"
 - "Type above 50 WPM for a Plinko drop."
 - Current high score

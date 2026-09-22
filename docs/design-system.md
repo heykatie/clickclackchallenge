@@ -3,7 +3,7 @@
 
 ## 1. Brand Direction
 
-The typing test should visually align with **Tiny Keyboard Shop**.
+The typing test should visually align with brand.
 
 The brand aesthetic is:
 
@@ -18,7 +18,7 @@ The brand aesthetic is:
 - Retail/event-oriented
 - Light and approachable rather than dark or gamer-styled
 
-The interface should feel like an interactive extension of Tiny Keyboard Shop's event flyers and physical booth.
+The interface should feel like an interactive extension of event flyers and physical booth.
 
 ---
 
@@ -74,7 +74,7 @@ The user should quickly understand:
 
 # 3. Color Palette
 
-These colors are approximate visual matches based on Tiny Keyboard Shop's existing graphics.
+These colors are approximate visual matches based on existing graphics.
 
 ## Core Colors
 
@@ -221,7 +221,7 @@ Use for:
 
 ## Optional Accent Colors
 
-These appear in some Tiny Keyboard Shop graphics but should not dominate the core application.
+These appear in some graphics but should not dominate the core application.
 
 ### Coral
 
@@ -304,7 +304,7 @@ TOP 5
 START
 ```
 
-Fredoka reflects the rounded, chunky, playful type used throughout Tiny Keyboard Shop's event graphics.
+Fredoka reflects the rounded, chunky, playful type used throughout event graphics.
 
 ---
 
@@ -399,7 +399,7 @@ Exact sizes should be validated on the actual iPad.
 
 # 7. Shape Language
 
-Tiny Keyboard Shop graphics frequently use soft, organic shapes.
+Brand graphics frequently use soft, organic shapes.
 
 Use:
 
@@ -539,7 +539,6 @@ This screen can be highly branded and playful.
 Primary content hierarchy:
 
 ```text
-Tiny Keyboard Shop
 
 GIANT keyboard typing contest!
 
@@ -960,7 +959,7 @@ Recommended starting variables:
 
 # 26. Brand Reference Summary
 
-The design direction is based on recurring visual patterns in Tiny Keyboard Shop materials:
+The design direction is based on recurring visual patterns in brand materials:
 
 - Aqua / teal
 - Lavender
@@ -975,4 +974,4 @@ The design direction is based on recurring visual patterns in Tiny Keyboard Shop
 - Handmade illustrations
 - Playful event-focused layouts
 
-The typing test should feel recognizably connected to Tiny Keyboard Shop while remaining more functional and restrained than a promotional poster.
+The typing test should feel recognizably connected to while remaining more functional and restrained than a promotional poster.
