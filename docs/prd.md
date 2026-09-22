@@ -319,7 +319,7 @@ The Ready screen must **not** show:
 
 ### Start Behavior
 
-Any key may transition from Ready to Typing.
+Any key except Escape may transition from Ready to Typing. Escape is the key that leaves a typing session for Ready, so it does not start a test.
 
 The key used to leave the Ready screen:
 
@@ -339,6 +339,8 @@ The timer starts only when the contestant presses the first valid typing charact
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
 A long-press on the logo badge opens Event Setup and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
+
+Escape returns to Ready and does not save a score. That also works while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
 
 The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
@@ -1580,6 +1582,24 @@ If the contestant ranks outside the Top 10, name entry must not be shown.
 - no score is saved
 
 This is the same before and after the timer starts.
+
+### Escape Returns to Ready
+
+**Given**
+
+- the Typing screen is showing the sentence
+
+**When**
+
+- Escape is pressed
+
+**Then**
+
+- Ready appears
+- the attempt is discarded
+- no score is saved
+
+Escape does not leave Ready for Typing.
 
 ---
 

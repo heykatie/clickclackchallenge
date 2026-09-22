@@ -215,7 +215,15 @@ function App() {
       return (
         <TypingScreen
           session={state.currentTest}
-          onType={(key) => dispatch({ type: "TYPE_KEY", ...key })}
+          onType={(key) => {
+            if (key.key === "Escape") {
+              if (!key.repeat) {
+                dispatch({ type: "ENTER_READY" });
+              }
+              return;
+            }
+            dispatch({ type: "TYPE_KEY", ...key });
+          }}
           onExpire={() => dispatch({ type: "FINISH_TEST" })}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
         />

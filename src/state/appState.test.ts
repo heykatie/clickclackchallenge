@@ -40,6 +40,22 @@ describe("appReducer", () => {
     expect(typed.screen).toBe("typing");
   });
 
+  it("returns to Ready from a running test without saving", () => {
+    const ready = appReducer(initialState, {
+      type: "ENTER_READY",
+      highScore: { displayedWpm: 92, name: null },
+    });
+    const running = appReducer(
+      appReducer(ready, { type: "ENTER_TYPING" }),
+      { type: "TYPE_KEY", key: "T", repeat: false, now: 1000 },
+    );
+    const left = appReducer(running, { type: "ENTER_READY" });
+    expect(left.screen).toBe("ready");
+    expect(left.currentTest).toBeNull();
+    expect(left.latestResult).toBeNull();
+    expect(left.highScore).toEqual({ displayedWpm: 92, name: null });
+  });
+
   it("opens Event Setup from a waiting or running test and saves nothing", () => {
     const waiting = appReducer(
       appReducer(initialState, { type: "ENTER_READY" }),

@@ -192,7 +192,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 ### Behavior
 
 1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. A long-press on the logo badge opens Event Setup and does not save a score. That path is in `docs/prd.md` §11.
-2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press opens Event Setup and discards the attempt without saving a score. The excluded keys are in `docs/prd.md` §11.
+2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press opens Event Setup and discards the attempt without saving a score. Escape returns to Ready and discards the attempt without saving a score. The excluded keys are in `docs/prd.md` §11.
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
 

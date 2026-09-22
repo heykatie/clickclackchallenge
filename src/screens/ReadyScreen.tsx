@@ -15,6 +15,9 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
+      if (event.repeat || event.key === "Escape") {
+        return;
+      }
       onStart();
     };
     window.addEventListener("keydown", onKeyDown);
