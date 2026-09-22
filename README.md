@@ -2,6 +2,8 @@
 
 An offline typing contest for a landscape iPad and a giant physical keyboard, intended for repeated use at an event booth.
 
+On Event Setup the operator chooses 30 or 60 seconds and a game mode: Standard or Race. A score keeps the length, mode, and WPM from the attempt that earned it.
+
 ## Run
 
 ```bash

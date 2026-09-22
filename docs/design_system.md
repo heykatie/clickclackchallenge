@@ -127,7 +127,7 @@ These are starting CSS layout sizes. Validate readability and fit on the actual 
 | Live WPM and accuracy | 22–30 px |
 | High-score target during Typing | 18–24 px |
 
-Keep the passage font size consistent between sentences and contestants. Names, scores, required instructions, and the reset message must remain easy to read without leaning toward the screen.
+Keep the passage font size consistent between sentences and contestants on the same screen size. A narrower window may use one smaller size for every line, as in the Typing section. Names, scores, required instructions, and the reset message must remain easy to read without leaning toward the screen.
 
 ## 5. Shapes, spacing, and surfaces
 
@@ -270,7 +270,7 @@ The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do
 - Start with approximately 10% horizontal safe margins. Validate the actual text width on the target iPad.
 - Use short, natural sentences made primarily from common words, initially around 35–50 characters.
 - Measured fit matters more than character count: every sentence must fit completely at the selected font size.
-- Do not wrap, crop, horizontally scroll, or shrink the passage between sentences.
+- Do not wrap, crop, or horizontally scroll the passage. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
 - When a sentence is complete, replace it with the next full sentence at the same focal point. Continue the existing timer.
 
 ### Screen states
@@ -456,7 +456,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] All screens use the current palette and the three defined font roles.
 - [ ] Visible branding is limited to the optional logo-only badge.
 - [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
-- [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
+- [ ] Event Setup contains the duration, game mode, and leaderboard choices plus Start Event.
 - [ ] Ready shows the contest message, current high score and name, and keyboard invitation.
 - [ ] Ready contains no Start button, Top 5, or operator controls.
 - [ ] The opening keypress is consumed; the full sentence appears before timing begins.
@@ -477,5 +477,5 @@ These choices are settled. Product behavior is in `docs/prd.md`.
 
 - The first printable character starts the timer. Space and punctuation count. The excluded non-typing keys are in `docs/prd.md` §11.
 - A long name is truncated with an ellipsis in the row. The stored name is unchanged.
-- When no event exists, Event Setup selects Start Fresh and 30 seconds, and Continue is unavailable. When an event exists, Continue is selected.
+- When no event exists, Event Setup selects Start Fresh, 30 seconds, and Race, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices.
 - A ranked score with no name shows a dash. Do not invent a guest name.

@@ -74,7 +74,8 @@ V1 supports:
 - timer
 - character-level typing feedback
 - Backspace
-- deterministic passage sequence
+- Race sentence sequence, the same for every attempt
+- Standard word list, with a new draw for each attempt
 - minimum leaderboard accuracy
 - Top 10 name eligibility
 - Top 5 leaderboard display
@@ -654,7 +655,7 @@ const commonSentencesV1: PassageSet = {
 
 Passages are bundled with the application rather than downloaded at runtime.
 
-Each event stores only its `passageSetId`.
+The event stores `testMode` and `passageSetId` for the next contestant. Each score stores the mode and passage-set identifier from the attempt that earned it.
 
 ### Data Relationships
 
@@ -686,7 +687,8 @@ Rules:
 
 - one event may have many scores
 - one score belongs to exactly one event
-- one event references one passage-set version
+- the active event references the passage-set version for its current game mode
+- each score references the passage-set version from the attempt that earned it
 - settings reference the currently active event
 
 ### Fresh Event Behavior
@@ -1200,7 +1202,7 @@ Suggested API:
 ```ts
 createEvent(
   durationSeconds: TestDuration,
-  passageSetId: string
+  testMode: TestMode
 ): Promise<EventRecord>;
 
 getActiveEvent(): Promise<EventRecord | null>;
@@ -1425,11 +1427,13 @@ export const commonSentencesV1: PassageSet = {
 };
 ```
 
-The module should not:
+Race sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list.
 
-- fetch passages from an API
-- generate passages at runtime
-- shuffle sentences per contestant
+The modules should not:
+
+- fetch passages or words from an API
+- write new Race sentences at runtime
+- shuffle Race sentences per contestant
 - contain UI logic
 
 ---
@@ -1520,7 +1524,9 @@ src/
 │   └── settingsRepository.ts
 │
 ├── data/
-│   └── passages.ts
+│   ├── passages.ts
+│   ├── commonWords.ts
+│   └── wordLines.ts
 │
 ├── app/
 │   ├── App.tsx
@@ -1583,7 +1589,8 @@ EventService should not calculate WPM.
 
 ranking.ts should not save scores.
 
-passages.ts should not shuffle content per contestant.
+passages.ts should not shuffle Race sentences per contestant.
+wordLines.ts builds a new Standard draw for each attempt from the bundled word list.
 ```
 
 ---
@@ -1856,6 +1863,9 @@ passage set is not empty
 all sentence entries are strings
 sentence order is deterministic
 passage set contains enough total text for fast 60-second tests
+word list has a stable ID and 200 lowercase words
+Standard lines fit on one line and change with a new random sequence
+the same random sequence rebuilds the same Standard lines
 ```
 
 Content validation should also check the intended character-length range where useful.
@@ -2181,6 +2191,8 @@ scores
 settings
 fresh event
 continue event
+duration change for the next contestant
+game mode change for the next contestant
 Event Setup screen
 Start Event
 ```

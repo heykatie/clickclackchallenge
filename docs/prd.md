@@ -125,7 +125,7 @@ V1 should:
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
 12. maintain a simple, readable landscape-iPad interface
-13. use a deterministic passage sequence for fair competition
+13. keep each game mode fair: Race uses one sentence sequence, and Standard draws from one fixed word list
 14. follow the documented visual design system
 
 ---
@@ -139,6 +139,7 @@ V1 includes:
 - event setup
 - 30-second mode
 - 60-second mode
+- operator-selected Standard and Race game modes
 - fresh event creation
 - continue previous/current active event
 - Ready / Attract screen
@@ -149,7 +150,8 @@ V1 includes:
 - countdown timer
 - character-level error feedback
 - Backspace support
-- deterministic local passage sequence
+- Race sentence sequence, the same for every attempt
+- Standard word list, with a new draw for each attempt
 - results screen
 - high-score detection
 - minimum leaderboard accuracy requirement
@@ -182,7 +184,7 @@ V1 does not include:
 - historical-event management UI
 - detailed analytics
 - AI-generated passages
-- contestant-selectable game modes
+- contestants choosing their own game mode
 - advanced anti-cheat systems
 - operator score deletion
 - multiple-device event management
@@ -196,6 +198,7 @@ V1 does not include:
 ```text
 operator opens app
 → selects 30 seconds or 60 seconds
+→ selects Standard or Race
 → selects Start Fresh or Continue Previous Event
 → event begins
 → Ready screen
@@ -542,8 +545,9 @@ Each event should be stored as a separate record.
 An event must retain:
 
 - a unique event ID
-- the selected test duration
-- the passage-set version used for that event
+- the selected test duration for the next contestant
+- the selected game mode for the next contestant
+- the passage-set version for that mode
 - whether the event is currently active or archived
 - the event creation time
 - the event's most recent update time
@@ -564,9 +568,12 @@ A score should retain:
 - null name when a Top 10 contestant leaves through View Leaderboard
 - final WPM
 - final accuracy
+- the duration of the attempt that produced the WPM
+- the game mode of that attempt
+- the passage-set version of that attempt
 - score submission time
 
-The technical implementation may retain additional scoring details such as raw WPM, correct-character counts, and correct/incorrect attempt counts.
+The technical implementation may retain additional scoring details such as raw WPM, correct-character counts, and correct/incorrect attempt counts. Ranking uses the stored WPM. It does not recalculate an earlier score from the event's later duration or game mode.
 
 Top 5 and Top 10 status should not be permanently stored on a score because rankings may change as new scores are added.
 
@@ -578,9 +585,9 @@ The app should keep track of the currently active event so the operator can cont
 
 Settings may also remember convenience preferences such as the most recently selected duration.
 
-The event's saved duration is the length the next contestant will use. The operator can change it while continuing the event. Each score keeps the duration of the attempt that produced it, and the WPM calculated from that duration. Ranking uses those stored results. It does not recalculate an earlier score with the event's new duration.
+The event's saved duration and game mode are what the next contestant will use. The operator can change either while continuing the event. Each score keeps the duration, game mode, passage set, and WPM of the attempt that produced it. Ranking uses those stored results.
 
-Changing the duration does not start a fresh event. Start fresh is only for an empty leaderboard.
+Changing the duration or game mode does not start a fresh event. Start fresh is only for an empty leaderboard.
 
 ### Fresh Leaderboard Behavior
 
@@ -638,7 +645,7 @@ Event
 
 The app's settings point to the currently active event.
 
-Passage content is bundled with the app, while each event stores only the identifier of the passage-set version it used.
+Passage content is bundled with the app. The event stores the game mode and passage-set identifier for the next contestant. Each score stores the mode and passage-set identifier from the attempt that earned it.
 
 What must survive a refresh, restart, or loss of connectivity is in §20. Persistence Requirements.
 
@@ -680,20 +687,18 @@ Leaderboard accuracy requirements do not automatically determine prize qualifica
 
 ### Passage Source
 
-All typing passages must be prewritten and bundled locally with the application.
+Race sentences and the Standard word list are bundled locally with the application. Standard lines are assembled from that word list when an attempt starts. That assembly does not use the network.
 
 V1 must not depend on:
 
 - API-generated passages
 - AI-generated passages
 - internet-loaded text
-- runtime-generated sentence content
-
-This ensures the typing test works fully offline and uses consistent text across contestants.
+- runtime-written Race sentences
 
 ### Sentence Style
 
-Passages should use natural, grammatical English sentences.
+Race passages should use natural, grammatical English sentences.
 
 Sentences should:
 
@@ -705,7 +710,7 @@ Sentences should:
 - favor normal sentence structure
 - be easy to read quickly
 
-Random disconnected word lists should not be used.
+Standard is the word-list mode. Its lines are lowercase, have no punctuation, and are drawn from the bundled 200 most common English words.
 
 ### Difficulty Consistency
 
@@ -771,28 +776,29 @@ The app should not:
 
 A sentence is considered complete when the contestant has entered a character for every position, even if some positions contain errors.
 
-Sentences are stored without a trailing space. After a sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
+Race sentences are stored without a trailing space. After a Race sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
+
+A Standard line includes the space after its last word. That space is a scored character. The same one-space ignore applies only to an extra space typed after the line is already complete.
 
 ### Passage Length
 
-The bundled passage set must contain enough text for both 30-second and 60-second tests, including fast typists.
+Both game modes must contain enough text for 30-second and 60-second tests, including fast typists.
 
-Initial V1 target:
+Race target:
 
 - at least 25–30 curated sentences
 - at least approximately 1,200–1,500 total characters
+- the same sentence sequence for 30-second and 60-second tests
 
-Both 30-second and 60-second tests should use the same sentence sequence.
-
-The 30-second test simply ends earlier.
+Standard uses the same 200-word list for both durations. Each attempt builds enough lines for a fast 60-second test. The 30-second test simply ends earlier.
 
 ### One-Line Requirement
 
-Every sentence must fit completely on one line at the final typing-screen font size on the target landscape iPad.
+Every Race sentence and every Standard line must fit completely on one line at the final typing-screen font size on the target landscape iPad.
 
-The app should not dynamically shrink the font to fit individual sentences.
+The app should not shrink one line relative to another. On a window narrower than that iPad, every line uses the same smaller size, chosen so the widest line still fits. The iPad size stays the standard size.
 
-If a sentence does not fit within the safe typing area, the sentence should be rewritten or removed.
+If a Race sentence does not fit within the safe typing area at the iPad size, the sentence should be rewritten or removed.
 
 ### Passage Set Versioning
 
@@ -802,6 +808,7 @@ Example:
 
 ```text
 common-sentences-v1
+common-words-v1
 ```
 
 If the passage set changes later, create a new version rather than silently replacing the existing set.
@@ -943,6 +950,7 @@ Preserve event state:
 
 - active event
 - duration
+- game mode
 - passage set
 - scores
 - high score
@@ -1615,10 +1623,10 @@ Starting fresh must never delete old event data.
 
 - the same event is restored
 - the event's current duration is shown, and the operator can select the other length for the next contestant
-- the original passage set is restored
+- the event's current game mode is shown, and the operator can select the other mode for the next contestant
 - all saved scores remain available
-- Start Event after a duration change keeps the same event
-- earlier scores keep the duration and WPM from the attempt that earned them
+- Start Event after a duration or game-mode change keeps the same event
+- earlier scores keep the duration, game mode, passage set, and WPM from the attempt that earned them
 - the high score is restored
 - the Top 5 is recalculated from those stored results
 
@@ -1735,6 +1743,7 @@ The following must remain unchanged:
 
 - active event
 - duration
+- game mode
 - passage set
 - saved scores
 - current high score
@@ -1858,8 +1867,9 @@ Plinko qualification passes
 fresh event behavior passes
 continue event behavior passes
 score persistence passes
-same passage sequence is used for all contestants
-all passages fit one line
+Race uses the same sentence sequence for every attempt
+Standard draws each attempt from the same 200-word list
+every Race sentence and Standard line fits on one line
 Next Player reset passes
 automatic reset passes
 giant keyboard input passes

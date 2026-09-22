@@ -113,9 +113,9 @@ Use three clear option groups with visible selected states and one large mint ac
 
 **No previous event:** disable “Continue previous event” and show “No previous event yet.”
 
-`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the three option groups and Start Event. The setup PNG was drawn before the Game mode group. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
+`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the three option groups and Start Event. The setup PNG and the diagram above were drawn before the Game mode group. “Applies to everyone” in that diagram is old sample text. Duration and game mode apply to the next contestant and can change during Continue. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
-Event setup rules, including saved duration, are in `docs/prd.md`.
+Event setup rules, including saved duration and game mode, are in `docs/prd.md`.
 
 ## 5. Screen 02 — Ready / Attract
 
@@ -176,7 +176,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 - Center the entire sentence as one text block, horizontally and near the vertical center. Character styling must not shift the line's position.
 - Display one complete sentence on one line. Keep the first and last characters fully visible with equal visual space on both sides.
-- Start with approximately 10% safe space at each horizontal edge. Curate passages to fit at the selected font size; do not shrink fonts between sentences or contestants.
+- Start with approximately 10% safe space at each horizontal edge. Curate Race sentences to fit at the iPad font size. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
 - Target roughly 35–50 characters using natural sentences and common words. Character count is a guide; measured fit on the iPad is the actual constraint.
 - Put live WPM at the bottom left, the timer at the bottom center, and accuracy at the bottom right. Keep the high-score target small at the top.
 - Omit the large badge and decorative panels. A small logo-only mark is optional if it does not compete with the passage.
@@ -320,6 +320,6 @@ This is a review checklist for the intended interface, not a claim that the app 
 | --- | --- |
 | Typing input | The first printable character starts the timer, including space and punctuation. The excluded non-typing keys are in `docs/prd.md` §11. |
 | Name display | A missing name is a dash. A long name is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
-| Setup defaults | With no event, Start fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected. Behavior is in `docs/prd.md` §9. |
+| Setup defaults | With no event, Start fresh, 30 seconds, and Race are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices. Behavior is in `docs/prd.md` §9. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.
