@@ -2,7 +2,7 @@
 
 This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. It reflects the latest agreed palette, screen layouts, and logo-only branding.
 
-Use it alongside `docs/prd.md` for product behavior and `docs/wireframes.md` for screen flow, layouts, and unresolved decisions. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions.
+Use `docs/prd.md` and `docs/technical_plan.md` for product behavior. Use this document and `docs/wireframes.md` for screen flow and layout. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions. Section 20 lists decisions that are still open.
 
 ## 1. Brand direction
 
@@ -170,7 +170,7 @@ Make WPM the strongest element, with the unit explicit. Keep nickname and suppor
 
 ### Leaderboard rows
 
-Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Long names must not push scores off-screen; the exact name-length and overflow policy remains to be finalized.
+Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Stored nicknames are limited to 20 characters. A name must not push the WPM value off-screen. How a long name is visually truncated inside the row is still open.
 
 ## 8. Typing feedback
 
@@ -208,7 +208,7 @@ Display two option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Starting fresh creates a new empty event and preserves prior event data. Continuing resumes the most recently active event and its saved data. Keep operator settings out of contestant screens.
+Starting fresh creates a new empty event and preserves prior event data. Continuing resumes the most recently active event, including its saved scores and saved duration. The test-length control does not change a continued event. A different duration requires Start Fresh. Keep operator settings out of contestant screens.
 
 Do not add event-history browsing, manual score deletion, or a Clear Leaderboard control to V1.
 
@@ -232,7 +232,7 @@ Alex
 PRESS ANY KEY TO START
 ```
 
-Also show the selected duration, for example “30 SECOND TEST” or “60 SECOND TEST.” The score and name above are sample content.
+Also show the selected duration, for example “30 SECOND TEST” or “60 SECOND TEST.” The score and name above are sample content. When the active event has no leaderboard-eligible score, show “Be the first high score!” Do not show a sample contestant or WPM.
 
 Visual order:
 
@@ -247,8 +247,6 @@ A small logo-only badge and organic edge motifs are appropriate. Optional helper
 - The opening keypress reveals the Typing screen and is consumed. It must not enter a character or start the timer.
 - Show the complete sentence before the first valid typing keystroke starts timing.
 - “Above 50 WPM” means strictly greater than 50 WPM. Do not change the message to “50 WPM or more.” Prize messaging and leaderboard eligibility are separate rules.
-
-**Proposed empty state:** show “Be the first to set a score!” in place of a fictional high-score value and name.
 
 ## 11. Typing
 
@@ -319,10 +317,12 @@ Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach 
 - Keep the result and entered nickname intact during saving or recoverable errors.
 - Do not run the leaderboard reset countdown while the contestant is entering a nickname.
 - Save the nickname with the existing result; do not duplicate the score.
+- Accept any nickname. Trim leading and trailing whitespace, reject an empty value, and limit the nickname to 20 characters.
+- Display nickname content as plain text. Do not introduce a different length limit through styling.
 
 **Proposed non-qualifier action:** “VIEW LEADERBOARD.” The flow requires access to the leaderboard, but this label and any Results idle timeout have not been finalized.
 
-Nickname length, blank-name handling, skip behavior, and abandonment handling remain open product decisions. Do not introduce arbitrary limits through styling alone.
+Skip behavior and abandonment handling remain open. See section 20.
 
 ## 13. Top 5 Leaderboard
 
@@ -366,7 +366,7 @@ Show actual event data rather than filling missing places with sample contestant
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
-- The latest wireframe shows 10 seconds. Keep **10 seconds as the proposed default** until the final delay is confirmed.
+- The V1 delay is 10 seconds. Booth testing may adjust it later. Implement 10 seconds now.
 - In the live app, update “Returning to ready screen in {seconds}s” as time passes; do not leave “10s” static.
 - NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
@@ -481,15 +481,29 @@ This checklist records what to verify; it does not claim the implementation has 
 
 ## 20. Product decisions still open
 
-Keep these decisions in sync with the PRD and wireframes instead of silently fixing them in visual examples:
+Settled V1 rules below come from the PRD and technical plan. Keep the remaining open items in sync with `docs/wireframes.md` instead of silently fixing them in visual examples.
 
-- Minimum accuracy/validity threshold for competitive scores.
-- Exact valid-start-key, correction, and character-counting behavior.
+### Settled for V1
+
+- Accuracy is `correctAttempts / (correctAttempts + incorrectAttempts) × 100`. Backspace is not an attempt. Correcting a mistake does not erase the original incorrect attempt. Before typing starts, show `—%` or hide accuracy.
+- Nicknames are trimmed, empty values are rejected, and the maximum length is 20 characters. Render them as plain text.
+- An event with no leaderboard-eligible score shows “Be the first high score!”
+- Continue restores the event’s saved duration. Changing the duration requires Start Fresh.
+
+### Provisional V1 values
+
+Implement these numbers now. Testing may change them later. They are not undecided.
+
+- Leaderboard accuracy gate: 80%. A score at 80.00% or above is eligible. Below that, show WPM and accuracy, omit nickname entry, and exclude the score from ranking. Provisional until giant-keyboard testing.
+- Leaderboard auto-reset: 10 seconds. The countdown starts when the leaderboard appears, shows the remaining seconds, and does not run during nickname entry. The duration may be adjusted after booth testing.
+
+### Still open
+
+- Which keys count as the first valid typing key, beyond the non-typing keys excluded by the technical plan.
 - WPM display precision and final tie-breaking policy.
-- Nickname length, overflow, blank-name, skip, and abandonment rules.
+- Nickname skip behavior, abandonment handling, and how a valid long name is visually truncated in a row.
 - Non-qualifier Results action and any Results idle behavior.
-- Final leaderboard reset duration; 10 seconds is currently proposed.
-- Initial setup selections and duration changes when continuing an event.
+- Which options are selected when Event Setup first opens.
 - How the operator returns to Event Setup after starting an event.
 
 The visual system remains usable while these details are resolved. Do not confuse sample values or proposed states with approved product rules.
