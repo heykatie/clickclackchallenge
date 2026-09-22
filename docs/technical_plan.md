@@ -286,58 +286,106 @@ State transitions should remain explicit and testable.
 
 ---
 
-## 7. Data Model
+## Data Model
+
+V1 uses a small local data model built around four concepts:
+
+- `EventRecord`
+- `ScoreRecord`
+- `AppSettings`
+- `PassageSet`
+
+The model should preserve event history, keep scores associated with the event in which they were earned, and allow the active event to be restored after the app is closed or restarted.
 
 ### Test Duration
+
+Only two timed modes are supported in V1:
 
 ```ts
 type TestDuration = 30 | 60;
 ```
 
-### Event
+---
+
+### Event Record
+
+Each booth event is stored as its own event record.
 
 ```ts
 interface EventRecord {
   id: string;
-  createdAt: string;
-  updatedAt: string;
+
+  name: string | null;
 
   durationSeconds: TestDuration;
   passageSetId: string;
 
   status: "active" | "archived";
+
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
-A user-facing event name is not required in V1.
+#### Field Definitions
 
-### Event Rules
+`id`
 
-Starting fresh:
+- unique identifier for the event
+- generated with `crypto.randomUUID()`
 
-```text
-create new EventRecord
-→ archive previous active event if one exists
-→ set new event as active
-→ start with an empty leaderboard
-→ retain all previous event records and scores
+`name`
+
+- optional human-readable event name
+- not required from the operator in V1
+- may remain `null`
+- supports future event-history features without requiring a data-model redesign
+
+`durationSeconds`
+
+- the event's fixed typing-test duration
+- valid values are `30` or `60`
+- once an event is created, this duration remains the source of truth for that event
+
+`passageSetId`
+
+- identifies the passage-set version used by the event
+- example: `common-sentences-v1`
+- allows historical events to remain associated with the passage set they used
+
+`status`
+
+- `"active"` for the event currently being used
+- `"archived"` for previous retained events
+
+`createdAt`
+
+- ISO timestamp recording when the event was created
+- also provides the event date, so a separate `date` field is unnecessary
+
+`updatedAt`
+
+- ISO timestamp recording the most recent event update
+
+Example:
+
+```ts
+const event: EventRecord = {
+  id: crypto.randomUUID(),
+  name: null,
+  durationSeconds: 30,
+  passageSetId: "common-sentences-v1",
+  status: "active",
+  createdAt: "2026-09-22T07:18:00.000Z",
+  updatedAt: "2026-09-22T07:18:00.000Z"
+};
 ```
 
-Continuing an event:
+---
 
-```text
-load activeEventId
-→ restore existing event
-→ restore all existing scores
-→ restore event duration
-→ restore passage set
-```
+### Score Record
 
-Continuing an event must retain that event's duration.
-
-If the operator wants to change between 30 and 60 seconds, they should start a fresh event.
-
-### Score
+Each completed contestant score belongs to exactly one event.
 
 ```ts
 interface ScoreRecord {
@@ -362,22 +410,384 @@ interface ScoreRecord {
 }
 ```
 
-Notes:
+#### Field Definitions
 
-- `rawWpm` retains internal precision.
-- `displayedWpm` is the rounded integer shown to contestants and used for V1 ranking.
-- `meetsAccuracyThreshold` represents only the minimum accuracy gate.
-- Top 10 and Top 5 status should be derived at runtime.
-- Scores outside the Top 10 may remain stored with `nickname: null`.
+`id`
 
-### Settings
+- unique score identifier
+- generated with `crypto.randomUUID()`
+
+`eventId`
+
+- identifies the event this score belongs to
+- used to retrieve and rank scores for a specific event
+
+`nickname`
+
+- contestant nickname when the score qualifies for Top 10 nickname entry
+- otherwise may remain `null`
+
+`rawWpm`
+
+- precise calculated WPM before display rounding
+- retained for internal precision and possible future analytics
+
+`displayedWpm`
+
+- rounded whole-number WPM shown to the contestant
+- used for V1 leaderboard ranking
+
+`accuracy`
+
+- final typing accuracy percentage
+
+`correctCharacters`
+
+- number of currently credited correct characters
+- used for WPM calculation
+
+`correctAttempts`
+
+- cumulative number of correct typing attempts
+- used for accuracy calculation
+
+`incorrectAttempts`
+
+- cumulative number of incorrect typing attempts
+- used for accuracy calculation
+- incorrect attempts remain recorded even if the contestant later corrects the character with Backspace
+
+`durationSeconds`
+
+- snapshot of the event duration when the score was earned
+- valid values are `30` or `60`
+
+`meetsAccuracyThreshold`
+
+- indicates whether the score passed the configured minimum leaderboard accuracy threshold
+- this does not mean the score is necessarily Top 10 or Top 5
+
+`createdAt`
+
+- ISO timestamp for score submission
+- used as the final leaderboard tie-breaker when displayed WPM and accuracy are equal
+
+Example:
+
+```ts
+const score: ScoreRecord = {
+  id: crypto.randomUUID(),
+  eventId: "event-id",
+  nickname: "Alex",
+
+  rawWpm: 91.6,
+  displayedWpm: 92,
+  accuracy: 96.4,
+
+  correctCharacters: 229,
+  correctAttempts: 241,
+  incorrectAttempts: 9,
+
+  durationSeconds: 30,
+
+  meetsAccuracyThreshold: true,
+
+  createdAt: "2026-09-22T07:43:12.000Z"
+};
+```
+
+---
+
+### Derived Ranking Data
+
+Do not permanently store leaderboard position or Top 5 / Top 10 status on a score.
+
+Do not add fields such as:
+
+```ts
+rank: number;
+isTop5: boolean;
+isTop10: boolean;
+```
+
+These values can become stale whenever a new score is added.
+
+Instead derive them from the current event's eligible scores:
+
+```text
+load event scores
+→ filter scores that meet the accuracy threshold
+→ sort by leaderboard rules
+→ assign rank
+→ derive Top 10
+→ derive Top 5
+```
+
+V1 ranking order is:
+
+```text
+1. displayedWpm descending
+2. accuracy descending
+3. createdAt ascending
+```
+
+---
+
+### App Settings
+
+App-level settings should remain small.
 
 ```ts
 interface AppSettings {
   activeEventId: string | null;
-  lastEventId: string | null;
+  lastSelectedDuration: TestDuration;
+  schemaVersion: number;
 }
 ```
+
+#### Field Definitions
+
+`activeEventId`
+
+- identifies the event currently being used
+- allows the app to restore or continue the active event after reopening
+
+`lastSelectedDuration`
+
+- convenience preference for Event Setup
+- remembers the operator's most recently selected duration
+- does not override an existing event's saved duration
+
+`schemaVersion`
+
+- identifies the local data-model version
+- supports future IndexedDB migrations
+
+Example:
+
+```ts
+const settings: AppSettings = {
+  activeEventId: "event-id",
+  lastSelectedDuration: 30,
+  schemaVersion: 1
+};
+```
+
+When continuing an existing event:
+
+```text
+event.durationSeconds
+```
+
+is always the source of truth.
+
+Changing the duration requires starting a fresh event.
+
+---
+
+### Passage Set
+
+Passages are bundled with the application rather than entered by contestants or downloaded at runtime.
+
+```ts
+interface PassageSet {
+  id: string;
+  sentences: string[];
+}
+```
+
+Example:
+
+```ts
+const commonSentencesV1: PassageSet = {
+  id: "common-sentences-v1",
+  sentences: [
+    "The little dog ran across the yard today.",
+    "We went down the road to see our old friend.",
+    "The sun came out as we walked back home."
+  ]
+};
+```
+
+Each event stores only:
+
+```ts
+passageSetId
+```
+
+This allows passage content to be versioned while keeping old events associated with the set they used.
+
+---
+
+### Data Relationships
+
+The relationships are:
+
+```text
+PassageSet
+    ▲
+    │ passageSetId
+    │
+EventRecord
+    │
+    │ eventId
+    ▼
+ScoreRecord
+ScoreRecord
+ScoreRecord
+```
+
+App settings point to the active event:
+
+```text
+AppSettings
+    │
+    │ activeEventId
+    ▼
+EventRecord
+```
+
+Rules:
+
+- one event may have many scores
+- one score belongs to exactly one event
+- one event references one passage-set version
+- settings reference the currently active event
+
+---
+
+### Fresh Event Behavior
+
+Choosing **Start Fresh** creates a new event.
+
+It must not delete or overwrite prior event data.
+
+Expected behavior:
+
+```text
+existing active event
+→ status = "archived"
+
+create new EventRecord
+→ status = "active"
+→ selected duration is stored
+→ current passageSetId is stored
+
+AppSettings.activeEventId
+→ updated to new event ID
+```
+
+The new event begins with zero scores, so its leaderboard appears empty.
+
+Previous events and scores remain stored.
+
+Therefore:
+
+> A fresh leaderboard means creating a new event, not deleting old scores.
+
+---
+
+### Continue Event Behavior
+
+Choosing **Continue Previous Event** restores the existing active event.
+
+Restore:
+
+- event ID
+- event duration
+- passage-set ID
+- saved scores
+- current high score
+- derived leaderboard
+
+If no valid active event exists, Continue should be unavailable.
+
+---
+
+### IDs and Timestamps
+
+Generate persisted IDs with:
+
+```ts
+crypto.randomUUID()
+```
+
+Generate persisted timestamps with:
+
+```ts
+new Date().toISOString()
+```
+
+Do not derive IDs from:
+
+- nickname
+- score
+- array index
+- timestamp alone
+
+---
+
+### IndexedDB Mapping
+
+The model maps to three IndexedDB object stores:
+
+```text
+typing-test-db
+├── events
+├── scores
+└── settings
+```
+
+Recommended structure:
+
+```text
+events
+  keyPath: id
+  indexes:
+    createdAt
+    status
+
+scores
+  keyPath: id
+  indexes:
+    eventId
+    createdAt
+
+settings
+  singleton record
+```
+
+A separate `leaderboards` object store is not needed.
+
+Leaderboard state should always be derived from the current event's saved scores.
+
+---
+
+### Data Retention Rules
+
+Persist:
+
+- all event records
+- all score records
+- nicknames
+- active-event reference
+- event duration
+- passage-set identifier
+- app settings
+
+Old event data must remain stored when a new event is created.
+
+V1 does not require a historical-event management UI, but retaining historical records supports future:
+
+- event history
+- analytics
+- cloud sync
+- debugging
+- recovery
+
+Transient contestant typing state does not need to be persisted after a completed or reset test.
+
+If the app closes during an active test, reopening may safely return to the Ready screen.
 
 ---
 
