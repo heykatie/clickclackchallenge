@@ -10,7 +10,15 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.vite/
+coverage
 *.local
+
+/docs/wireframes/private/
+
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*

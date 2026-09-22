@@ -1,32 +1,27 @@
-# React + TypeScript + Vite
+# Typing Test
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+An offline typing contest for a landscape iPad and a giant physical keyboard, intended for repeated use at an event booth.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+nvm use
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Documentation
+
+| Document | What it owns |
+| --- | --- |
+| [Product requirements](docs/prd.md) | Scoring, nickname rules, persistence, offline requirements, and booth acceptance tests |
+| [Technical plan](docs/technical_plan.md) | Implementation plan, application structure, and the automated test map |
+| [Design system](docs/design_system.md) | Palette, type, tokens, and contestant-facing strings |
+| [Wireframes](docs/wireframes.md) | Screen layout |
+| [Wireframe images](docs/wireframes/) | The five screen PNGs |
+
+## License
+
+No license has been selected yet.
+
+Until a license is added, this repository does not grant reuse of the source or project assets. If the project is made public, add an explicit license only after deciding how the specification, future code, and any branding or assets may be used.
