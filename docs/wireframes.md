@@ -33,6 +33,7 @@ This document specifies the five-screen experience for an offline typing contest
   - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
   - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200
   - Leaderboard: [05-leaderboard.png](./wireframes/05-leaderboard.png), 1448 × 1086
+- `01-setup.png`, `02-ready.png`, and `04-results.png` contain missing-glyph boxes on the logo, Start Event, Press Any Key, Top 10, and Save Score. Those boxes are export defects. Layout, hierarchy, and placement in the PNGs still count. Implementation uses a clean logo-only keycap badge and the real strings from `docs/design_system.md`.
 - Names, scores, accuracy values, and selected options in examples are sample data. They are not seeded event records or confirmed defaults.
 - Details marked **Proposed** complete a gap in the wireframe specification. Unresolved product decisions are collected in section 11.
 
