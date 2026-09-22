@@ -182,7 +182,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 | Text state | Treatment |
 | --- | --- |
-| Completed words | Charcoal |
+| Completed text | Charcoal on each correct character already typed, including characters before an error in the same word |
 | Current word | Lavender emphasis across the active word; retain legibility |
 | Caret | Strong mint, inside the active word at the current character position |
 | Upcoming words | Secondary but readable text |

@@ -191,7 +191,7 @@ Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values 
 
 | State | Visual treatment |
 | --- | --- |
-| Completed words | Charcoal; visually settled |
+| Completed text | Charcoal on each correct character already typed, including characters before an error in the same word |
 | Current word | Lavender emphasis across the whole active word |
 | Caret | Strong mint at the exact current character position inside the active word |
 | Upcoming words | Secondary but fully readable text |
@@ -199,7 +199,7 @@ Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values 
 
 For the active word, use `--tiny-lavender` where foreground contrast is sufficient. If it is too faint, preserve the lavender emphasis with a light-lavender surface and charcoal text. Apply the same readable treatment consistently across the passage set.
 
-Incorrect-character feedback takes precedence over the ordinary word treatment. The caret must remain clearly visible against both the passage background and the active-word treatment.
+Incorrect-character feedback takes precedence over the ordinary word treatment. Correct characters already typed stay charcoal even when they sit inside the active word. The caret must remain clearly visible against both the passage background and the active-word treatment.
 
 Example caret position:
 
