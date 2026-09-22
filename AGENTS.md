@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository contains a **typing test** being developed for Tiny Keyboard Shop.
+This repository contains a **typing test** for an in-person retail event.
 
 Always refer to the product as the **"typing test."**
 
@@ -96,7 +96,7 @@ Avoid introducing a new dependency when the existing stack can reasonably handle
 
 ## Design System
 
-All UI work should follow the established Tiny Keyboard Shop-inspired visual system.
+All UI work should follow the established visual system in `docs/design_system.md`.
 
 ### Core aesthetic
 
@@ -137,13 +137,9 @@ It should not feel:
 
 ---
 
-## Tiny Keyboard Shop Branding
+## Branding
 
-Tiny Keyboard Shop is the underlying brand.
-
-However:
-
-**Do not display the text "Tiny Keyboard Shop" in the application UI unless the user explicitly requests it.**
+**Do not display the shop name in the application UI unless the user explicitly requests it.**
 
 Existing approved logo artwork may still be used where appropriate.
 
@@ -151,7 +147,7 @@ Do not independently add:
 
 - brand-name headings
 - brand-name footer text
-- "Tiny Keyboard Shop" labels
+- shop-name labels
 - unnecessary branding copy
 
 just because the experience belongs to the brand.

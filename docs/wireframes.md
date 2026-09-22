@@ -28,7 +28,7 @@ This document specifies the five-screen experience for an offline typing contest
 - Product behavior comes from `docs/prd.md` and `docs/technical_plan.md`. Visual layout comes from this document and `docs/design_system.md`.
 - Later decisions replace older examples: blush/white replaces the cream-led palette; Ready has a keyboard prompt and current high score, with no Start button or leaderboard; the passage is a complete centered single line; shop-name text is removed.
 - Current PNG exports for all five screens are tracked in `docs/wireframes/`. Each is 4:3. Export pixels are not CSS layout dimensions.
-  - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086
+  - Event Setup: [01-setup.png](./wireframes/01-setup.png), 1448 × 1086. The offline-ready status and previous-event summary in this export are proposed, not required. See section 4.
   - Ready: [02-ready.png](./wireframes/02-ready.png), 1448 × 1086
   - Typing: [03-typing.png](./wireframes/03-typing.png), 1448 × 1086
   - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200. This export is the new-high-score state described in section 7, not the ordinary result in the diagram there.
@@ -112,7 +112,9 @@ Use two clear option groups with visible selected states and one large mint acti
 
 **Proposed empty state:** disable “Continue previous event” when none exists and show “No previous event yet.”
 
-Event setup rules, including saved duration, are in `docs/prd.md`. If an offline-ready indicator is included, show it only when offline readiness has actually been established.
+`01-setup.png` also shows two proposed extras that are not required chrome: “Offline-ready on this iPad,” and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Required Setup is the two option groups and Start Event. The summary is sample text. It is not the event Start fresh creates. If an offline-ready indicator is included, it must reflect real cache state, as in `docs/prd.md` (Offline Readiness).
+
+Event setup rules, including saved duration, are in `docs/prd.md`.
 
 ## 5. Screen 02 — Ready / Attract
 
