@@ -605,7 +605,7 @@ came back when someone called.
 
 ---
 
-# 13. Typing Feedback Colors
+## 13. Typing Feedback Colors
 
 ### Upcoming text
 
