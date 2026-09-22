@@ -94,27 +94,50 @@ These may be added after V1.
 
 ## 3. Architecture Overview
 
+V1 uses a **local-first static web architecture**. The entire booth workflow must work without a required server connection after the app and its required assets have been installed/cached on the iPad.
+
 ```text
-┌─────────────────────────────────────┐
-│          React + TypeScript         │
-│                                     │
-│  Setup → Ready → Typing → Results   │
-│                    → Leaderboard    │
-└──────────────────┬──────────────────┘
-                   │
-          ┌────────┴────────┐
-          │                 │
-          ▼                 ▼
-      IndexedDB        PWA Service Worker
-      local data       cached app shell
-          │                 │
-          ▼                 ▼
-   events / scores      HTML / JS / CSS
-   settings             fonts / icons
-                        passages / assets
+┌──────────────────────────────────────────┐
+│           React + TypeScript UI          │
+│                                          │
+│ Setup → Ready → Typing → Results         │
+│                         → Leaderboard     │
+└───────────────────┬──────────────────────┘
+                    │
+          ┌─────────┴─────────┐
+          │                   │
+          ▼                   ▼
+      IndexedDB          Service Worker
+      structured data    offline app assets
+          │                   │
+          ▼                   ▼
+   events / scores       HTML / CSS / JS
+   app settings          fonts / icons
+                         images / passages
 ```
 
-The booth workflow must not depend on a server.
+The two offline systems have separate responsibilities:
+
+```text
+IndexedDB
+→ preserves structured event, score, and settings data
+
+Service Worker
+→ makes the application code and required static assets available offline
+```
+
+The complete V1 booth workflow must remain local:
+
+```text
+create / continue event
+→ start contestant
+→ run typing test
+→ calculate score
+→ save score
+→ collect nickname when eligible
+→ derive leaderboard
+→ reset for next contestant
+```
 
 The application must remain usable when the iPad is:
 
@@ -123,59 +146,125 @@ The application must remain usable when the iPad is:
 - reopened from the Home Screen
 - restarted between events
 
----
+No V1 gameplay action should wait for a network request.
 
+### No Required Server Connection
+
+V1 has no required runtime dependency on:
+
+- Flask
+- REST API
+- PostgreSQL
+- cloud database
+- authentication service
+- remote passage service
+
+A backend may be added after V1 for synchronization, analytics, event history, or other online features, but it must not replace the local-first booth workflow.
+
+---
 ## 4. Recommended Stack
 
-### Frontend
+### Frontend Framework — React
 
 ```text
 React
+```
+
+React is responsible for:
+
+- screen rendering
+- state-driven transitions
+- contestant and operator interactions
+- live typing feedback
+- Results and Leaderboard presentation
+
+### Language — TypeScript
+
+```text
 TypeScript
+```
+
+TypeScript should define and protect:
+
+- event data
+- score data
+- app settings
+- passage-set definitions
+- typing-session state
+- reducer actions
+- scoring and ranking function contracts
+
+### Build Tool — Vite
+
+```text
 Vite
 ```
 
-Reasons:
+Vite provides:
 
-- React fits the state-driven screen flow
-- TypeScript provides strong safety for event, score, and typing-state logic
-- Vite keeps the build setup simple
-- the stack integrates well with PWA tooling
+- local development server
+- React + TypeScript build pipeline
+- optimized production bundles
+- straightforward PWA plugin integration
 
-### PWA
+### PWA / Service Worker
 
-Recommended package:
+Recommended:
 
 ```text
 vite-plugin-pwa
+Workbox
 ```
 
-Use Workbox through `vite-plugin-pwa` to cache the app shell and required static assets.
+`vite-plugin-pwa` should generate/register the service worker and Workbox precache manifest.
 
-### Local Database
+### Local Structured Storage — IndexedDB
 
-Recommended package:
+Use:
+
+```text
+IndexedDB
+```
+
+Recommended wrapper:
 
 ```text
 idb
 ```
 
-`idb` is a Promise-based wrapper around IndexedDB.
+IndexedDB stores:
 
-IndexedDB is preferred over `localStorage` because V1 stores structured data:
+```text
+events
+scores
+settings
+```
 
-- multiple events
-- multiple scores
-- settings
-- retained historical event data
+Use IndexedDB instead of `localStorage` for core application data because:
 
-`localStorage` is not required for core persistence.
+- events contain multiple related scores
+- historical events are retained
+- the data is structured
+- indexes are useful
+- future schema migrations are expected
+- future cloud synchronization can build on the same model
 
-### Fonts
+### Passages
 
-Fonts must be bundled locally for offline use.
+Typing passages are:
 
-Recommended packages:
+- prewritten
+- bundled with the application
+- versioned
+- deterministic within an event
+- available offline
+- not fetched from an API
+
+### Fonts and Visual Assets
+
+Fonts, icons, logos, and required images must be bundled locally.
+
+Recommended font packages:
 
 ```text
 @fontsource/fredoka
@@ -191,23 +280,37 @@ Nunito                 general UI
 Atkinson Hyperlegible  typing passage
 ```
 
-Do not load fonts from Google Fonts or another remote CDN at runtime.
+Do not depend on Google Fonts or another remote CDN during booth use.
 
 ### Testing
+
+Use:
 
 ```text
 Vitest
 React Testing Library
 ```
 
-Optional after the MVP:
+Optional after core V1:
 
 ```text
 Playwright
 ```
 
----
+### Deployment Model
 
+V1 is deployed as a static HTTPS application.
+
+Suitable hosts include:
+
+- Vercel
+- Netlify
+- Cloudflare Pages
+- GitHub Pages if configured correctly for the build and PWA behavior
+
+No application server is required for V1 booth operation.
+
+---
 ## 5. Application State Model
 
 Use explicit screen states.
@@ -286,30 +389,26 @@ State transitions should remain explicit and testable.
 
 ---
 
-## Data Model
+## 7. Data Model
 
-V1 uses a small local data model built around four concepts:
+V1 uses four core data concepts:
 
 - `EventRecord`
 - `ScoreRecord`
 - `AppSettings`
 - `PassageSet`
 
-The model should preserve event history, keep scores associated with the event in which they were earned, and allow the active event to be restored after the app is closed or restarted.
+The model must preserve historical event data, associate every score with the event in which it was earned, and allow the active event to be restored after the app closes or restarts.
 
 ### Test Duration
-
-Only two timed modes are supported in V1:
 
 ```ts
 type TestDuration = 30 | 60;
 ```
 
----
-
 ### Event Record
 
-Each booth event is stored as its own event record.
+Each booth event is stored as its own record.
 
 ```ts
 interface EventRecord {
@@ -327,45 +426,44 @@ interface EventRecord {
 }
 ```
 
-#### Field Definitions
+Field behavior:
 
 `id`
 
-- unique identifier for the event
+- unique event identifier
 - generated with `crypto.randomUUID()`
 
 `name`
 
-- optional human-readable event name
+- optional human-readable event label
 - not required from the operator in V1
 - may remain `null`
-- supports future event-history features without requiring a data-model redesign
+- supports future event-history features without changing the model
 
 `durationSeconds`
 
-- the event's fixed typing-test duration
-- valid values are `30` or `60`
-- once an event is created, this duration remains the source of truth for that event
+- fixed event duration
+- valid values: `30` or `60`
+- remains the source of truth when continuing the event
 
 `passageSetId`
 
 - identifies the passage-set version used by the event
 - example: `common-sentences-v1`
-- allows historical events to remain associated with the passage set they used
 
 `status`
 
-- `"active"` for the event currently being used
-- `"archived"` for previous retained events
+- `"active"` for the current event
+- `"archived"` for retained previous events
 
 `createdAt`
 
-- ISO timestamp recording when the event was created
-- also provides the event date, so a separate `date` field is unnecessary
+- ISO timestamp for event creation
+- also provides the event date/time, so a separate date field is unnecessary
 
 `updatedAt`
 
-- ISO timestamp recording the most recent event update
+- ISO timestamp for the event's most recent update
 
 Example:
 
@@ -380,8 +478,6 @@ const event: EventRecord = {
   updatedAt: "2026-09-22T07:18:00.000Z"
 };
 ```
-
----
 
 ### Score Record
 
@@ -410,7 +506,7 @@ interface ScoreRecord {
 }
 ```
 
-#### Field Definitions
+Field behavior:
 
 `id`
 
@@ -420,21 +516,20 @@ interface ScoreRecord {
 `eventId`
 
 - identifies the event this score belongs to
-- used to retrieve and rank scores for a specific event
 
 `nickname`
 
-- contestant nickname when the score qualifies for Top 10 nickname entry
-- otherwise may remain `null`
+- nickname for a Top 10 qualifying score
+- may remain `null` for scores outside the Top 10
 
 `rawWpm`
 
-- precise calculated WPM before display rounding
+- precise WPM before display rounding
 - retained for internal precision and possible future analytics
 
 `displayedWpm`
 
-- rounded whole-number WPM shown to the contestant
+- rounded WPM shown to contestants
 - used for V1 leaderboard ranking
 
 `accuracy`
@@ -443,34 +538,33 @@ interface ScoreRecord {
 
 `correctCharacters`
 
-- number of currently credited correct characters
+- currently credited correct-character count
 - used for WPM calculation
 
 `correctAttempts`
 
-- cumulative number of correct typing attempts
+- cumulative correct typing attempts
 - used for accuracy calculation
 
 `incorrectAttempts`
 
-- cumulative number of incorrect typing attempts
+- cumulative incorrect typing attempts
 - used for accuracy calculation
-- incorrect attempts remain recorded even if the contestant later corrects the character with Backspace
+- not erased by Backspace
 
 `durationSeconds`
 
-- snapshot of the event duration when the score was earned
-- valid values are `30` or `60`
+- snapshot of the test duration when the score was earned
 
 `meetsAccuracyThreshold`
 
 - indicates whether the score passed the configured minimum leaderboard accuracy threshold
-- this does not mean the score is necessarily Top 10 or Top 5
+- does not imply Top 10 or Top 5 status
 
 `createdAt`
 
-- ISO timestamp for score submission
-- used as the final leaderboard tie-breaker when displayed WPM and accuracy are equal
+- ISO submission timestamp
+- final tie-breaker when displayed WPM and accuracy are equal
 
 Example:
 
@@ -496,13 +590,9 @@ const score: ScoreRecord = {
 };
 ```
 
----
-
 ### Derived Ranking Data
 
-Do not permanently store leaderboard position or Top 5 / Top 10 status on a score.
-
-Do not add fields such as:
+Do not permanently store:
 
 ```ts
 rank: number;
@@ -512,18 +602,18 @@ isTop10: boolean;
 
 These values can become stale whenever a new score is added.
 
-Instead derive them from the current event's eligible scores:
+Derive them from current event scores:
 
 ```text
 load event scores
-→ filter scores that meet the accuracy threshold
-→ sort by leaderboard rules
+→ filter scores that meet minimum accuracy
+→ sort using leaderboard rules
 → assign rank
 → derive Top 10
 → derive Top 5
 ```
 
-V1 ranking order is:
+Ranking order:
 
 ```text
 1. displayedWpm descending
@@ -531,11 +621,7 @@ V1 ranking order is:
 3. createdAt ascending
 ```
 
----
-
 ### App Settings
-
-App-level settings should remain small.
 
 ```ts
 interface AppSettings {
@@ -545,22 +631,18 @@ interface AppSettings {
 }
 ```
 
-#### Field Definitions
-
 `activeEventId`
 
 - identifies the event currently being used
-- allows the app to restore or continue the active event after reopening
+- allows Continue to restore it after reopening
 
 `lastSelectedDuration`
 
 - convenience preference for Event Setup
-- remembers the operator's most recently selected duration
 - does not override an existing event's saved duration
 
 `schemaVersion`
 
-- identifies the local data-model version
 - supports future IndexedDB migrations
 
 Example:
@@ -573,21 +655,11 @@ const settings: AppSettings = {
 };
 ```
 
-When continuing an existing event:
-
-```text
-event.durationSeconds
-```
-
-is always the source of truth.
+When continuing an existing event, `event.durationSeconds` remains the source of truth.
 
 Changing the duration requires starting a fresh event.
 
----
-
 ### Passage Set
-
-Passages are bundled with the application rather than entered by contestants or downloaded at runtime.
 
 ```ts
 interface PassageSet {
@@ -609,19 +681,11 @@ const commonSentencesV1: PassageSet = {
 };
 ```
 
-Each event stores only:
+Passages are bundled with the application rather than downloaded at runtime.
 
-```ts
-passageSetId
-```
-
-This allows passage content to be versioned while keeping old events associated with the set they used.
-
----
+Each event stores only its `passageSetId`.
 
 ### Data Relationships
-
-The relationships are:
 
 ```text
 PassageSet
@@ -637,7 +701,7 @@ ScoreRecord
 ScoreRecord
 ```
 
-App settings point to the active event:
+Settings point to the active event:
 
 ```text
 AppSettings
@@ -654,15 +718,9 @@ Rules:
 - one event references one passage-set version
 - settings reference the currently active event
 
----
-
 ### Fresh Event Behavior
 
-Choosing **Start Fresh** creates a new event.
-
-It must not delete or overwrite prior event data.
-
-Expected behavior:
+Choosing **Start Fresh** creates a new event without deleting previous event data.
 
 ```text
 existing active event
@@ -670,26 +728,22 @@ existing active event
 
 create new EventRecord
 → status = "active"
-→ selected duration is stored
-→ current passageSetId is stored
+→ store selected duration
+→ store current passageSetId
 
 AppSettings.activeEventId
-→ updated to new event ID
+→ new event ID
 ```
 
-The new event begins with zero scores, so its leaderboard appears empty.
+The new event begins with zero scores, so its leaderboard is empty.
 
-Previous events and scores remain stored.
-
-Therefore:
+Previous events and their scores remain stored.
 
 > A fresh leaderboard means creating a new event, not deleting old scores.
 
----
-
 ### Continue Event Behavior
 
-Choosing **Continue Previous Event** restores the existing active event.
+Choosing **Continue Previous Event** restores the valid active event.
 
 Restore:
 
@@ -697,16 +751,14 @@ Restore:
 - event duration
 - passage-set ID
 - saved scores
-- current high score
+- derived current high score
 - derived leaderboard
 
 If no valid active event exists, Continue should be unavailable.
 
----
-
 ### IDs and Timestamps
 
-Generate persisted IDs with:
+Generate IDs with:
 
 ```ts
 crypto.randomUUID()
@@ -726,71 +778,6 @@ Do not derive IDs from:
 - timestamp alone
 
 ---
-
-### IndexedDB Mapping
-
-The model maps to three IndexedDB object stores:
-
-```text
-typing-test-db
-├── events
-├── scores
-└── settings
-```
-
-Recommended structure:
-
-```text
-events
-  keyPath: id
-  indexes:
-    createdAt
-    status
-
-scores
-  keyPath: id
-  indexes:
-    eventId
-    createdAt
-
-settings
-  singleton record
-```
-
-A separate `leaderboards` object store is not needed.
-
-Leaderboard state should always be derived from the current event's saved scores.
-
----
-
-### Data Retention Rules
-
-Persist:
-
-- all event records
-- all score records
-- nicknames
-- active-event reference
-- event duration
-- passage-set identifier
-- app settings
-
-Old event data must remain stored when a new event is created.
-
-V1 does not require a historical-event management UI, but retaining historical records supports future:
-
-- event history
-- analytics
-- cloud sync
-- debugging
-- recovery
-
-Transient contestant typing state does not need to be persisted after a completed or reset test.
-
-If the app closes during an active test, reopening may safely return to the Ready screen.
-
----
-
 ## 8. IndexedDB Structure
 
 Recommended database:
@@ -809,53 +796,33 @@ settings
 
 ### `events`
 
-Key:
-
 ```text
-id
-```
-
-Useful indexes:
-
-```text
-createdAt
-status
+keyPath: id
+indexes:
+  createdAt
+  status
 ```
 
 ### `scores`
 
-Key:
-
 ```text
-id
+keyPath: id
+indexes:
+  eventId
+  createdAt
 ```
-
-Useful indexes:
-
-```text
-eventId
-createdAt
-```
-
-Leaderboard sorting can be done in application code because score counts will be small.
 
 ### `settings`
 
-Key:
+Use a singleton settings record containing the `AppSettings` values.
 
-```text
-key
-```
+A separate `leaderboards` object store is not needed.
 
-Examples:
+Leaderboard state should always be derived from the current event's saved scores.
 
-```text
-activeEventId
-lastEventId
-```
+Historical events and their scores must remain stored when Start Fresh creates a new active event.
 
 ---
-
 ## 9. Passage Architecture
 
 All typing content must be prewritten, local, deterministic, and bundled with the application.
@@ -2072,31 +2039,55 @@ Do not create modules that do not serve a concrete requirement.
 
 ## 28. PWA Strategy
 
-The typing test must be installable on the iPad and usable without connectivity.
+The typing test must be installable on the iPad and usable without connectivity after the required application assets have been cached.
 
-Recommended configuration:
+Recommended implementation:
 
 ```text
+Vite
++
 vite-plugin-pwa
 +
 Workbox-generated service worker
 ```
 
-Cache:
+The PWA must include:
 
-- generated HTML
-- JavaScript bundles
-- CSS
-- local fonts
-- logo
-- app icons
-- required images
-- passage data
+- web app manifest
+- installable app icons
+- service worker
+- offline-cached application shell
+- locally bundled fonts
+- locally bundled passages
+- locally bundled required images/assets
 
-Core booth behavior must not use remote requests.
+Core gameplay must not make runtime network requests.
+
+Expected lifecycle:
+
+```text
+open app while online
+→ service worker installs and caches required assets
+→ add app to iPad Home Screen
+→ launch installed app
+→ disconnect network
+→ complete full booth flow locally
+```
+
+### Service Worker Updates
+
+A newly deployed version may be discovered/downloaded when connectivity returns.
+
+Do not force a service-worker update or page reload during an active contestant session.
+
+Prefer applying a new version:
+
+- on a future app launch, or
+- while the app is safely idle
+
+The typing session must never be interrupted by an update.
 
 ---
-
 ## 29. iPad Installation and Offline Verification
 
 Before an event, while online:
@@ -2121,25 +2112,42 @@ Do not consider offline support complete until this succeeds on the target iPad.
 
 ## 30. Offline Caching Strategy
 
-For the app shell and versioned build assets:
+Use **Workbox precaching** for all resources required to run V1 offline.
+
+Precache:
+
+- generated HTML / app entry point
+- JavaScript bundles
+- CSS
+- bundled font files
+- app icons
+- logo
+- required decorative images
+- any static assets not already embedded in the build
+
+Passages imported into the application bundle are naturally included with the versioned application code. If passage data is emitted as a separate static asset, it must also be precached.
+
+For Vite's hashed/versioned build assets, rely on the Workbox precache manifest generated through `vite-plugin-pwa`. A separate runtime cache is not required for core V1 assets.
+
+For SPA navigation, configure an offline navigation fallback to the application's entry point where needed so reopening the installed app loads the React application even without connectivity.
+
+V1 has no required runtime API, so no API caching strategy is needed.
+
+The offline data split is:
 
 ```text
-Cache First
+application code + static assets
+→ service-worker precache
+
+structured event + score + settings data
+→ IndexedDB
 ```
 
-V1 should have no runtime API dependency.
+When a new deployment becomes available, cached build assets may update when connectivity returns, but the app must not reload during an active typing session.
 
-When a new deployment exists, the service worker may update cached assets when connectivity returns.
-
-Do not interrupt an active contestant session to apply updates.
-
-Apply a newly available version:
-
-- on a later launch, or
-- while the app is safely idle
+If an offline-readiness indicator is shown, it should represent actual service-worker/cache readiness where practical rather than being decorative only.
 
 ---
-
 ## 31. Persistence Requirements
 
 The following must survive:
@@ -2316,6 +2324,7 @@ Required tests:
 ```text
 fresh event has no scores
 starting fresh preserves old event data
+starting fresh archives the previous active event
 continue restores active event
 continue restores existing scores
 duration persists when continuing
@@ -2639,7 +2648,9 @@ V1 is technically complete when:
 - Next Player resets contestant state
 - automatic reset works
 - event and scores survive restart
+- required application assets are available offline
 - app launches and functions in airplane mode
+- full contestant flow succeeds without a required server connection
 - app matches the documented design system
 - core scoring, ranking, passage, and event tests pass
 
