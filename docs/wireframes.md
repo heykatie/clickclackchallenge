@@ -169,7 +169,7 @@ Do not show the Top 5, operator settings, or a Start button on this screen. Retu
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-The diagram shows a running test. The `│` inside `across` represents the caret, not a character to type.
+The diagram shows a running test. The `│` inside `across` represents the caret, not a character to type. The timer format is `24s`: the unit is on the number, and `TIME` is only the label. `03-typing.png` shows a bare `24` under `TIME`. That export omits the unit.
 
 ### Layout and text states
 

@@ -256,6 +256,8 @@ Start behavior, including the opening keypress and the “above 50 WPM” compar
 | Bottom center | Countdown timer |
 | Bottom right | Live accuracy |
 
+The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do not show a bare number.
+
 ### Sentence layout
 
 - Center the entire sentence as one text block, horizontally and near the vertical center.
