@@ -12,11 +12,14 @@ import {
   type TestSession,
 } from "../features/typing/typingEngine";
 
+const WAITING_RETURN_MS = 5000;
+
 type TypingScreenProps = {
   session: TestSession;
   onType: (key: { key: string; repeat: boolean; now: number }) => void;
   onExpire: () => void;
   onSetup: () => void;
+  onReturnToReady: () => void;
 };
 
 export function TypingScreen({
@@ -24,17 +27,28 @@ export function TypingScreen({
   onType,
   onExpire,
   onSetup,
+  onReturnToReady,
 }: TypingScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const onTypeRef = useRef(onType);
   const onExpireRef = useRef(onExpire);
+  const onReturnRef = useRef(onReturnToReady);
   const [now, setNow] = useState(() => performance.now());
   const holdTimer = useRef<number | null>(null);
 
   useEffect(() => {
     onTypeRef.current = onType;
     onExpireRef.current = onExpire;
+    onReturnRef.current = onReturnToReady;
   });
+
+  useEffect(() => {
+    if (session.startedAt !== null) {
+      return;
+    }
+    const id = window.setTimeout(() => onReturnRef.current(), WAITING_RETURN_MS);
+    return () => window.clearTimeout(id);
+  }, [session.startedAt]);
 
   useEffect(() => {
     screenRef.current?.focus();

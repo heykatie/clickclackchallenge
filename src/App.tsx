@@ -226,6 +226,7 @@ function App() {
           }}
           onExpire={() => dispatch({ type: "FINISH_TEST" })}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          onReturnToReady={() => dispatch({ type: "ENTER_READY" })}
         />
       );
     case "results":

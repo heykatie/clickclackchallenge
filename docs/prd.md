@@ -332,6 +332,8 @@ The Typing screen appears first.
 
 The timer starts only when the contestant presses the first valid typing character on the Typing screen.
 
+If that key has not been pressed within 5 seconds, Ready appears again. No score is saved. Keys that do not start the timer do not reset those 5 seconds.
+
 ---
 
 ## 11. Typing Screen Requirements
@@ -1600,6 +1602,24 @@ This is the same before and after the timer starts.
 - no score is saved
 
 Escape does not leave Ready for Typing.
+
+### Waiting Typing Returns to Ready
+
+**Given**
+
+- the Typing screen is showing the sentence
+- the timer has not started
+
+**When**
+
+- 5 seconds pass without a key that starts the timer
+
+**Then**
+
+- Ready appears
+- no score is saved
+
+Once the timer has started, those 5 seconds no longer apply.
 
 ---
 
