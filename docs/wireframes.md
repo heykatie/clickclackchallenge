@@ -4,7 +4,7 @@ This document specifies the five-screen experience for an offline typing contest
 
 **Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling.
 
-**Current branding rule:** preserve the Tiny-inspired pastel visual style and optional logo-only keycap badge. Do not display “Tiny Keyboard Shop,” “tinykeyboardshop,” or “TKS” in screen headings, badges, footers, or other interface copy.
+**Current branding rule:** preserve the brand inspired pastel visual style and optional logo-only keycap badge.
 
 ## 1. References and interpretation
 
