@@ -311,6 +311,434 @@ Suitable hosts include:
 No application server is required for V1 booth operation.
 
 ---
+
+## Offline Behavior Implementation Specification
+
+Offline operation is a core V1 architectural requirement.
+
+After the application has been successfully loaded, installed, and cached on the target iPad, the complete booth workflow must function without an active internet connection.
+
+The application must not require a runtime server connection for normal V1 operation.
+
+### Offline Architecture Responsibilities
+
+Offline behavior is split between two local systems:
+
+```text
+Service Worker / PWA Cache
+→ keeps application code and required static assets available offline
+
+IndexedDB
+→ keeps structured event, score, and settings data available offline
+```
+
+These systems solve different problems and both are required.
+
+The service worker must make the application itself available offline.
+
+IndexedDB must preserve event and contestant data independently of network connectivity.
+
+### Offline Launch Requirement
+
+After a successful online installation/cache cycle, the installed PWA must launch when:
+
+- Wi-Fi is disabled
+- cellular data is unavailable
+- airplane mode is enabled
+- event Wi-Fi is unstable or unavailable
+
+The app must be able to reach and use all V1 screens offline:
+
+```text
+Event Setup
+Ready / Attract
+Typing
+Results / Nickname
+Leaderboard
+```
+
+The app must not block launch because a server, API, analytics service, or remote asset host is unavailable.
+
+### Offline Contestant Flow
+
+The full contestant workflow must run locally:
+
+```text
+open app
+→ create or continue event
+→ Ready screen
+→ press any key
+→ Typing screen
+→ run timed typing test
+→ calculate WPM and accuracy
+→ determine leaderboard eligibility
+→ determine Plinko qualification
+→ enter nickname when eligible
+→ save result
+→ derive leaderboard
+→ show Leaderboard
+→ reset for next contestant
+```
+
+No step in this flow may require:
+
+- a backend server
+- REST API
+- cloud database
+- authentication service
+- remote passage service
+- remote font request
+- remote asset request
+
+### PWA and Service Worker Strategy
+
+Use:
+
+```text
+vite-plugin-pwa
+Workbox
+```
+
+The service worker should be generated and registered through the Vite PWA configuration.
+
+The service worker is responsible for making the application shell and required static resources available when the network is unavailable.
+
+Required PWA resources include:
+
+- web app manifest
+- app icons
+- service worker
+- application shell
+- offline-cached build assets
+
+The installed app should remain usable after Safari or the Home Screen PWA is relaunched without connectivity.
+
+### Required Offline Assets
+
+All resources required for normal V1 booth use must be bundled locally or included in the service-worker cache.
+
+Required assets include:
+
+- HTML
+- generated JavaScript bundles
+- CSS
+- typing passages
+- fonts
+- logo
+- app icons
+- required images
+- decorative UI assets
+- web app manifest
+- other files required to render the V1 interface
+
+Do not depend on runtime requests to:
+
+- Google Fonts
+- remote CDNs
+- external passage APIs
+- remote image hosts
+- other third-party asset servers
+
+Recommended local font packages:
+
+```text
+@fontsource/fredoka
+@fontsource/nunito
+@fontsource/atkinson-hyperlegible
+```
+
+Typing passages should be imported from local application data rather than fetched at runtime.
+
+### Precache Strategy
+
+Use Workbox precaching for the generated application shell and versioned build assets.
+
+Precache resources required for booth operation.
+
+Conceptually:
+
+```text
+build output
+→ Workbox precache manifest
+→ service-worker cache
+```
+
+Because Vite generates hashed/versioned production assets, the service worker should use those generated revisions rather than manually versioning files.
+
+Core required assets should be available immediately after a successful installation/cache cycle.
+
+### Navigation Fallback
+
+Because the application is a client-side React app, offline navigation should resolve back to the application entry point where appropriate.
+
+Configure an SPA navigation fallback so launching or reopening the installed application offline still loads the React app shell.
+
+Do not rely on the server to generate individual application screens.
+
+### Runtime Network Requests
+
+Core V1 functionality should make **no required runtime API requests**.
+
+Therefore, V1 does not require a runtime API caching strategy for gameplay.
+
+If optional network functionality is introduced later, it must fail non-blockingly and must not interfere with the local booth flow.
+
+### IndexedDB Offline Persistence
+
+Use IndexedDB for structured local application data.
+
+Recommended wrapper:
+
+```text
+idb
+```
+
+Required object stores:
+
+```text
+events
+scores
+settings
+```
+
+The following data must be writable while offline:
+
+- event records
+- score records
+- nicknames
+- active-event reference
+- event duration
+- passage-set identifier
+- app settings required to restore or continue an event
+
+A network connection must not be required to:
+
+- create an event
+- archive a previous event
+- continue an event
+- save a score
+- save a nickname
+- calculate the current high score
+- calculate Top 10 eligibility
+- generate the Top 5 leaderboard
+- reset for the next contestant
+
+### Offline Leaderboard Behavior
+
+Do not persist a separate leaderboard record.
+
+The leaderboard should be derived from the active event's locally stored scores.
+
+Offline leaderboard flow:
+
+```text
+load active event scores from IndexedDB
+→ filter scores meeting minimum accuracy
+→ sort using ranking rules
+→ derive Top 10
+→ derive Top 5
+→ derive current high score
+```
+
+This computation must work without connectivity.
+
+### Fresh Event While Offline
+
+The operator must be able to start a fresh event without internet access.
+
+Expected local behavior:
+
+```text
+existing active event
+→ archive locally
+
+new event
+→ create in IndexedDB
+→ selected duration saved
+→ passageSetId saved
+→ status = active
+
+settings.activeEventId
+→ update locally
+```
+
+Previous event records and scores must remain stored.
+
+### Continue Event While Offline
+
+The operator must be able to continue the active event without internet access.
+
+Restore from IndexedDB:
+
+- event ID
+- duration
+- passage-set ID
+- saved scores
+- derived high score
+- derived leaderboard
+
+If no valid active event exists, Continue should be unavailable.
+
+### Connection Loss During Active Use
+
+If connectivity disappears while the app is already running, the active booth workflow must continue normally.
+
+The app should not interrupt the contestant because of:
+
+- Wi-Fi loss
+- network timeout
+- DNS failure
+- poor event connectivity
+- loss of internet access after launch
+
+V1 should not display blocking network errors for functionality that is designed to be local.
+
+### Persistence Across App Restarts
+
+Completed event and score data must survive:
+
+- React screen transitions
+- browser/page refresh
+- Home Screen app close/reopen
+- temporary network loss
+- normal iPad restart
+
+The following data must remain available:
+
+```text
+events
+scores
+nicknames
+activeEventId
+durationSeconds
+passageSetId
+required app settings
+```
+
+The leaderboard should be reconstructed from persisted scores after relaunch.
+
+A partially completed contestant session does not need to be restored after an unexpected app close.
+
+If the app closes during a test:
+
+```text
+reopen app
+→ restore active event
+→ return to Ready
+```
+
+Previously completed scores must remain intact.
+
+### Offline Readiness
+
+The app should not be considered event-ready merely because it opened successfully while online.
+
+Offline readiness requires the application shell and all required V1 assets to be available from the local cache.
+
+If an offline-readiness indicator is implemented, it should represent actual readiness rather than being decorative.
+
+Do not display an affirmative offline-ready state until required caching has completed successfully.
+
+### Service Worker Update Behavior
+
+A new deployed version may become available when the device regains connectivity.
+
+Do not force an update or reload during:
+
+- Ready-to-Typing transition
+- active typing session
+- Results nickname entry
+- any other contestant-critical state
+
+Prefer applying updates:
+
+- on a future application launch, or
+- while the application is safely idle
+
+The current cached version should remain usable if the device is offline.
+
+### iPad Installation Procedure
+
+Before relying on the app at an event:
+
+```text
+1. Connect the target iPad to the internet.
+2. Open the deployed HTTPS application in Safari.
+3. Allow the application to finish loading.
+4. Allow required PWA assets to finish caching.
+5. Add the application to the Home Screen.
+6. Launch the installed app while still online.
+7. Confirm Event Setup loads correctly.
+8. Confirm fonts, passages, icons, and required visual assets render correctly.
+```
+
+Installation alone is not sufficient.
+
+Offline operation must be verified separately.
+
+### Airplane Mode Acceptance Test
+
+Offline support is not complete until the app passes a full end-to-end test on the actual target iPad.
+
+Required test:
+
+```text
+1. Connect the iPad to the internet.
+2. Open the deployed application.
+3. Allow all required assets to finish loading/caching.
+4. Add the app to the Home Screen if necessary.
+5. Launch the installed app once while online.
+6. Enable airplane mode.
+7. Close and relaunch the installed app.
+8. Create a fresh event or continue an existing event.
+9. Reach the Ready screen.
+10. Start the test using the physical keyboard.
+11. Complete the full timed typing test.
+12. Confirm WPM and accuracy are calculated.
+13. Confirm leaderboard eligibility is calculated.
+14. Enter and save a nickname when applicable.
+15. Confirm the Top 5 leaderboard updates.
+16. Use Next Player or allow automatic reset.
+17. Confirm the app returns to Ready.
+18. Close the app while airplane mode remains enabled.
+19. Reopen the app.
+20. Confirm the active event still exists.
+21. Confirm previously saved scores still exist.
+22. Confirm the high score and leaderboard are reconstructed correctly.
+```
+
+The MVP must not be considered complete until this test succeeds.
+
+### Offline Technical Acceptance Criteria
+
+The offline implementation is complete only when:
+
+- the installed PWA launches without internet access
+- all required V1 screens render offline
+- locally bundled passages load offline
+- required fonts load offline
+- icons, logo, and required visual assets load offline
+- Event Setup works offline
+- a fresh event can be created offline
+- the active event can be continued offline
+- the Ready screen works offline
+- the Typing screen works offline
+- timer and scoring work offline
+- nickname entry works offline
+- event and score data can be written to IndexedDB offline
+- the current high score can be derived offline
+- Top 10 qualification can be derived offline
+- the Top 5 leaderboard can be derived offline
+- Next Player works offline
+- automatic reset works offline
+- saved data survives app close/reopen
+- saved data survives normal iPad restart
+- loss of connectivity during an active session does not interrupt gameplay
+- no required V1 runtime request depends on a backend server
+- the complete contestant flow passes in airplane mode on the target iPad
+
+---
+
 ## 5. Application State Model
 
 Use explicit screen states.
