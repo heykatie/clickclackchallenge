@@ -510,6 +510,152 @@ Each physical keypress should count as one typing attempt.
 
 ---
 
+## Data and Persistence Rules
+
+### Event Data
+
+Each event should be stored as a separate record.
+
+An event must retain:
+
+- a unique event ID
+- the selected test duration
+- the passage-set version used for that event
+- whether the event is currently active or archived
+- the event creation time
+- the event's most recent update time
+
+A human-readable event name may be supported later, but it is not required for V1.
+
+The event's creation timestamp is sufficient to preserve its date and time.
+
+### Score Data
+
+Each completed score belongs to exactly one event.
+
+A score should retain:
+
+- a unique score ID
+- the event ID it belongs to
+- nickname, when applicable
+- final WPM
+- final accuracy
+- score submission time
+
+The technical implementation may retain additional scoring details such as raw WPM, correct-character counts, and correct/incorrect attempt counts.
+
+Top 5 and Top 10 status should not be permanently stored on a score because rankings may change as new scores are added.
+
+Leaderboard position should always be derived from the event's saved scores.
+
+### Active Event Settings
+
+The app should keep track of the currently active event so the operator can continue it later.
+
+Settings may also remember convenience preferences such as the most recently selected duration.
+
+An existing event's saved duration remains the source of truth when that event is continued.
+
+Changing the duration requires starting a fresh event.
+
+### Fresh Leaderboard Behavior
+
+Choosing **Start Fresh** creates a new event with an empty leaderboard.
+
+It must not delete previous event data.
+
+Expected behavior:
+
+```text
+current active event
+→ becomes archived
+
+new event
+→ created
+→ becomes active
+→ starts with no scores
+```
+
+All scores from older events remain stored locally.
+
+Therefore:
+
+> A fresh leaderboard means starting a new event, not deleting old scores.
+
+### Continue Event Behavior
+
+Choosing **Continue Previous Event** should restore the active event and its existing data.
+
+This includes:
+
+- event duration
+- passage-set version
+- saved scores
+- current high score
+- leaderboard ranking
+
+If there is no previous event available, the Continue option should be disabled.
+
+### Data Relationships
+
+Each event may have many scores.
+
+Each score belongs to one event.
+
+Conceptually:
+
+```text
+Event
+├── Score
+├── Score
+├── Score
+└── Score
+```
+
+The app's settings point to the currently active event.
+
+Passage content is bundled with the app, while each event stores only the identifier of the passage-set version it used.
+
+### Persistence Requirements
+
+The following data must survive:
+
+- browser refresh
+- closing and reopening the installed app
+- temporary loss of connectivity
+- normal iPad restart
+
+Persist:
+
+- events
+- scores
+- nicknames
+- active-event reference
+- event duration
+- passage-set identifier
+- app settings required to continue an event
+
+The leaderboard itself does not need to be stored separately.
+
+It should be recalculated from the event's saved scores.
+
+A partially completed contestant test does not need to be restored if the app closes unexpectedly. Returning to the Ready screen is acceptable.
+
+### Historical Data Retention
+
+V1 should retain old event records and their scores even though it does not include a historical-event management screen.
+
+Starting a new event must not overwrite or permanently delete previous events.
+
+This preserves the data for:
+
+- future event-history features
+- future analytics
+- future cloud synchronization
+- debugging or recovery if needed
+
+---
+
 ## 13. Prize / Plinko Rule
 
 The current Ready-screen message is:
