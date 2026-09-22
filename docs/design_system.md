@@ -2,7 +2,7 @@
 
 This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. It reflects the latest agreed palette, screen layouts, and logo-only branding.
 
-Use it alongside `docs/PRD.md` for product behavior and `docs/wireframes.md` for screen flow, layouts, and unresolved decisions. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions.
+Use it alongside `docs/prd.md` for product behavior and `docs/wireframes.md` for screen flow, layouts, and unresolved decisions. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions.
 
 ## 1. Brand direction
 

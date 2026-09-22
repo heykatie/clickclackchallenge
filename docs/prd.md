@@ -12,7 +12,7 @@ The interface should follow:
 
 - `docs/DESIGN_SYSTEM.md`
 - wireframes in `docs/wireframes/`
-- the technical implementation details in `docs/TECHNICAL_PLAN.md`
+- the technical implementation details in `docs/technical_plan.md`
 
 ---
 
@@ -1337,7 +1337,7 @@ The typing screen should remain substantially more restrained than the Ready, Re
 
 Testing must verify that the Typing Test behaves correctly from the operator and contestant perspective and is reliable enough for repeated booth use.
 
-This section defines the product-level acceptance tests for V1. Implementation-specific unit, component, and repository tests belong in `docs/TECHNICAL_PLAN.md`.
+This section defines the product-level acceptance tests for V1. Implementation-specific unit, component, and repository tests belong in `docs/technical_plan.md`.
 
 The MVP is not complete until the required acceptance tests pass, including the full airplane-mode test on the actual target iPad and giant keyboard.
 

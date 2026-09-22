@@ -8,8 +8,8 @@ The product is an offline-first typing competition designed for repeated use at 
 
 Implementation should follow:
 
-- `docs/PRD.md`
-- `docs/DESIGN_SYSTEM.md`
+- `docs/prd.md`
+- `docs/design_system.md`
 - wireframes in `docs/wireframes/`
 
 V1 priorities:
