@@ -117,18 +117,21 @@ export function TypingScreen({
           ]
             .filter(Boolean)
             .join(" ");
+          const atCaret = index === session.characterIndex;
+          const atEnd =
+            index === session.expectedSentence.length - 1 &&
+            session.characterIndex >= session.expectedSentence.length;
           return (
             <span className={className} key={`${session.sentenceIndex}-${index}`}>
-              {index === session.characterIndex ? (
-                <span className="caret" />
-              ) : null}
-              {character}
+              <span className="passage-char-measure" aria-hidden="true">
+                {character}
+              </span>
+              <span className="passage-char-glyph">{character}</span>
+              {atCaret ? <span className="caret" aria-hidden="true" /> : null}
+              {atEnd ? <span className="caret caret-end" aria-hidden="true" /> : null}
             </span>
           );
         })}
-        {session.characterIndex >= session.expectedSentence.length ? (
-          <span className="caret" />
-        ) : null}
       </p>
       <div className="stats">
         <p>

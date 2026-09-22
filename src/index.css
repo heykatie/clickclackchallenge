@@ -52,6 +52,7 @@ h1,
 .typing-screen {
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
 }
 
 .logo-badge {
@@ -65,17 +66,40 @@ h1,
 }
 
 .passage-line {
+  width: 100%;
+  min-width: 0;
   margin: auto;
+  /* 2rem on an iPad. On a narrower window, shrink every sentence the same amount so the widest bold line still fits. */
   font-size: 2rem;
+  font-size: min(2rem, calc(100cqw / 24));
   white-space: nowrap;
   text-align: center;
 }
 
-.passage-char.correct {
+/* The hidden copy is bold, so the slot stays the bold width while the visible glyph changes weight. */
+.passage-char {
+  position: relative;
+  display: inline-block;
+  font-weight: 700;
+  white-space: pre;
+}
+
+.passage-char-measure {
+  visibility: hidden;
+}
+
+.passage-char-glyph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-weight: 400;
+}
+
+.passage-char.correct .passage-char-glyph {
   font-weight: 700;
 }
 
-.passage-char.incorrect {
+.passage-char.incorrect .passage-char-glyph {
   color: var(--tiny-error);
   text-decoration: underline;
 }
@@ -85,12 +109,18 @@ h1,
 }
 
 .caret {
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
   width: 0;
   height: 1.1em;
-  margin-right: -3px;
   border-left: 3px solid var(--tiny-mint-strong);
-  vertical-align: text-bottom;
+  pointer-events: none;
+}
+
+.caret-end {
+  left: 100%;
 }
 
 .stats {
