@@ -1441,7 +1441,17 @@ Screens/components should not contain raw IndexedDB calls.
 
 ## 12. Recommended V1 Structure
 
-Use this as the initial structure:
+First build:
+
+- the five screens: Event Setup, Ready, Typing, Results, and Leaderboard
+- one pure typing and scoring module
+- one ranking helper
+- one persistence module for events, scores, and settings
+- passages bundled in the app
+
+Do not add libraries beyond Vite, React, the PWA plugin, IndexedDB, the local font packages, and Vitest. Do not create a separate service or repository until that one persistence module is no longer enough. Section 14 already rules out extra services.
+
+The tree below is a later split, not the first build:
 
 ```text
 src/
@@ -2050,7 +2060,7 @@ Do not force-push shared history unless necessary.
 
 ## 23. V1 Implementation Order
 
-Build the working booth loop before visual polish.
+Build the working booth loop before visual polish. The first build is the five screens, one pure typing and scoring module, a ranking helper, one persistence module, and bundled passages, as in section 12. Later phases add behavior inside those modules. Do not add a library to start a phase.
 
 ### Phase 1 — Project Foundation
 
