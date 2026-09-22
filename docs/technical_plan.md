@@ -3399,11 +3399,634 @@ A profanity/moderation system is not required for V1 unless requested later.
 
 ---
 
-## 36. Testing Plan
+## Testing Plan
+
+Testing should verify both the correctness of the typing/scoring logic and the reliability of the full booth workflow.
+
+V1 testing should be split into:
+
+- acceptance tests
+- unit tests
+- component tests
+- persistence tests
+- manual hardware tests
+- offline / airplane-mode tests
+
+The MVP is not complete until the required acceptance criteria pass on the actual target iPad and giant keyboard.
+
+---
+
+### Acceptance Tests
+
+Acceptance tests describe the behavior V1 must provide from the user's perspective.
+
+#### 30-Second Mode Ends Correctly
+
+**Given**
+
+- an active event is configured for 30 seconds
+- the contestant is on the Typing screen
+- the timer has not started
+
+**When**
+
+- the contestant presses the first valid typing character
+
+**Then**
+
+- that character counts as the first typing attempt
+- the timer starts
+- the test runs for 30 seconds
+- the test ends when 30 seconds have elapsed
+- input after the deadline is ignored
+- the Results screen appears once
+
+---
+
+#### 60-Second Mode Ends Correctly
+
+**Given**
+
+- an active event is configured for 60 seconds
+- the contestant is on the Typing screen
+
+**When**
+
+- the contestant presses the first valid typing character
+
+**Then**
+
+- that character counts as the first typing attempt
+- the timer starts
+- the test runs for 60 seconds
+- the test ends when 60 seconds have elapsed
+- input after the deadline is ignored
+- the Results screen appears once
+
+---
+
+#### Ready-Screen Key Does Not Count as Typing Input
+
+**Given**
+
+- the contestant is on the Ready screen
+
+**When**
+
+- the contestant presses any key
+
+**Then**
+
+- the app transitions to the Typing screen
+- the Ready-screen key does not start the timer
+- the Ready-screen key does not count as a typing attempt
+- the Ready-screen key does not affect WPM
+- the Ready-screen key does not affect accuracy
+
+The timer should begin only after the contestant presses the first valid typing character on the Typing screen.
+
+---
+
+#### First Valid Typing Key Starts the Timer and Is Scored
+
+**Given**
+
+- the Typing screen is visible
+- the timer has not started
+
+**When**
+
+- the contestant presses the first valid printable typing character
+
+**Then**
+
+- the timer starts
+- the key is processed as the first typing attempt
+- the key contributes to `correctAttempts` or `incorrectAttempts`
+- the key contributes to WPM only if correct
+
+---
+
+#### Wrong Keys Do Not Inflate WPM
+
+**Given**
+
+- the contestant is actively typing
+
+**When**
+
+- the contestant enters incorrect characters
+
+**Then**
+
+- those characters increase `incorrectAttempts`
+- they do not increase `correctCharacters`
+- they do not increase WPM
+- they reduce accuracy
+- the contestant may continue typing without correcting them
+
+Example:
+
+```text
+Expected: house
+Typed:    housr
+```
+
+Expected scoring:
+
+```text
+correctCharacters = 4
+correctAttempts   = 4
+incorrectAttempts = 1
+```
+
+---
+
+#### Partial Words Count at Timeout
+
+**Given**
+
+- the contestant is typing the current word
+- time expires before the word is complete
+
+**When**
+
+- the test ends
+
+**Then**
+
+- all correct characters typed before the deadline count toward WPM
+- the incomplete word is not discarded
+
+Example:
+
+```text
+Expected: keyboard
+Typed before timeout: keybo
+```
+
+If all five typed characters are correct:
+
+```text
+correctCharacters += 5
+```
+
+---
+
+#### Backspace Does Not Erase the Original Accuracy Penalty
+
+**Given**
+
+- the contestant enters an incorrect character
+
+**When**
+
+- they press Backspace
+- then type the correct replacement character
+
+**Then**
+
+- Backspace itself does not change `correctAttempts`
+- Backspace itself does not change `incorrectAttempts`
+- the original incorrect attempt remains counted
+- the corrected character may receive correct-character credit
+- accuracy still reflects the original mistake
+
+Example:
+
+```text
+Expected: dog
+Typed:    dig
+```
+
+After the typo:
+
+```text
+incorrectAttempts += 1
+```
+
+After Backspace:
+
+```text
+incorrectAttempts remains unchanged
+```
+
+After typing the correct replacement:
+
+```text
+correctAttempts += 1
+correctCharacters += 1
+```
+
+---
+
+#### Errors Do Not Block Advancement
+
+**Given**
+
+- the contestant enters an incorrect printable character
+
+**When**
+
+- they continue typing without correcting it
+
+**Then**
+
+- the caret advances
+- later correctly typed positions may still receive credit
+- the test does not force the contestant to correct the error first
+
+---
+
+#### Completed Sentence Cannot Be Reopened
+
+**Given**
+
+- the contestant has entered a character for every position in the current sentence
+- the next sentence has appeared
+
+**When**
+
+- the contestant presses Backspace
+
+**Then**
+
+- the previous completed sentence remains committed
+- Backspace applies only to the currently displayed sentence
+- the app does not return to the previous sentence
+
+---
+
+#### Held-Key Browser Repeat Is Ignored
+
+**Given**
+
+- the contestant holds down a physical key long enough for the browser to generate repeated `keydown` events
+
+**When**
+
+- `KeyboardEvent.repeat` is `true`
+
+**Then**
+
+- the repeated event is ignored
+- no additional typing attempt is recorded
+- WPM and accuracy are not affected by browser auto-repeat
+
+Separate physical presses of the same letter must still work normally.
+
+---
+
+#### Low-Accuracy Button Mashing Cannot Enter the Leaderboard
+
+**Given**
+
+- the minimum leaderboard accuracy is configured as 80%
+
+**When**
+
+- a contestant completes a test below 80% accuracy
+
+**Then**
+
+- their WPM is still displayed
+- their accuracy is still displayed
+- the score does not participate in leaderboard ranking
+- they are not considered Top 10
+- they are not prompted for a leaderboard nickname
+- they cannot appear in the Top 5
+
+Boundary cases:
+
+```text
+80.00% → eligible
+79.99% → not eligible
+```
+
+The 80% value is provisional until it is validated on the physical giant keyboard.
+
+---
+
+#### Top Five Sort Correctly
+
+**Given**
+
+- an event contains multiple leaderboard-eligible scores
+
+**When**
+
+- leaderboard ranking is calculated
+
+**Then**
+
+scores are ordered by:
+
+```text
+1. displayedWpm descending
+2. accuracy descending
+3. createdAt ascending
+```
+
+Only the first five ranked scores appear on the visible leaderboard.
+
+Example:
+
+```text
+Alex   92 WPM   98%
+Mia    92 WPM   96%
+Sam    91 WPM   100%
+```
+
+Expected order:
+
+```text
+1. Alex
+2. Mia
+3. Sam
+```
+
+If displayed WPM and accuracy are both equal, the earlier submitted score ranks higher.
+
+---
+
+#### Top 10 Qualifying Score Shows Nickname Form
+
+**Given**
+
+- the completed score meets the minimum accuracy threshold
+- the completed score ranks within the event's Top 10
+
+**When**
+
+- the Results screen appears
+
+**Then**
+
+- `NicknameForm` is shown
+- the contestant may enter and save a nickname
+
+---
+
+#### Non-Top-10 Score Does Not Show Nickname Form
+
+**Given**
+
+- the completed score meets the accuracy threshold
+- but ranks outside the Top 10
+
+**When**
+
+- the Results screen appears
+
+**Then**
+
+- the contestant still sees WPM and accuracy
+- `NicknameForm` is not shown
+
+---
+
+#### Nickname Entry Is Not Interrupted by Automatic Reset
+
+**Given**
+
+- the contestant qualifies for Top 10 nickname entry
+- `NicknameForm` is visible
+
+**When**
+
+- the contestant is entering a nickname
+
+**Then**
+
+- the automatic next-player reset does not run
+- the contestant remains on the Results screen until the nickname flow is completed
+
+---
+
+#### Saved Score Survives Reload
+
+**Given**
+
+- a contestant completed a test
+- the score was successfully saved to IndexedDB
+
+**When**
+
+- the application is refreshed or reopened
+
+**Then**
+
+- the active event is restored
+- the saved score still exists
+- the nickname still exists when applicable
+- leaderboard position is derived correctly from the saved scores
+- the current high score remains correct
+
+No server connection should be required.
+
+---
+
+#### Fresh Event Starts with a Blank Leaderboard and Preserves Old Data
+
+**Given**
+
+- Event A is active
+- Event A contains saved scores
+
+**When**
+
+- the operator chooses **Start Fresh**
+
+**Then**
+
+- Event A becomes archived
+- Event A remains stored
+- Event A's scores remain stored
+- a new Event B is created
+- Event B becomes active
+- Event B contains zero scores
+- Event B's leaderboard is blank
+- `activeEventId` points to Event B
+
+Starting fresh must never delete old scores.
+
+---
+
+#### Continue Event Retains Scores and Configuration
+
+**Given**
+
+- an active event contains saved scores
+
+**When**
+
+- the app is reopened
+- the operator chooses **Continue Previous Event**
+
+**Then**
+
+- the same event is restored
+- the same `eventId` is used
+- the original duration is restored
+- the original `passageSetId` is restored
+- all saved scores remain available
+- the high score is derived correctly
+- the Top 5 is recalculated correctly
+
+Continuing must not create a new event.
+
+---
+
+#### Same Passage Sequence Is Used for Every Contestant
+
+**Given**
+
+- multiple contestants participate in the same event
+
+**When**
+
+- each contestant begins their test
+
+**Then**
+
+- each contestant starts with the same first sentence
+- each contestant receives the same sentence order
+- the passage sequence is not randomly shuffled per contestant
+
+---
+
+#### Next Player Completely Resets Contestant State
+
+**Given**
+
+- a contestant has completed a test
+- the Leaderboard screen is visible
+
+**When**
+
+- **Next Player** is selected
+
+**Then**
+
+the app returns to Ready and clears:
+
+- typed characters
+- current sentence position
+- timer state
+- live WPM
+- live accuracy
+- current result
+- nickname input
+
+The following must remain unchanged:
+
+- active event
+- duration
+- passage set
+- saved scores
+- current high score
+- derived leaderboard
+
+---
+
+#### Automatic Reset Returns to Ready
+
+**Given**
+
+- the Leaderboard screen is visible
+- no nickname entry is active
+
+**When**
+
+- the configured auto-reset delay expires
+
+**Then**
+
+- the app returns to the Ready screen
+- contestant-specific state is reset
+- event-specific state is preserved
+
+---
+
+#### Plinko Qualification Uses the Configured Rule
+
+**Given**
+
+- the current prize copy says `Type above 50 WPM for a Plinko drop.`
+
+**When**
+
+- final displayed WPM is calculated
+
+**Then**
+
+```text
+51 WPM or higher → qualifies
+50 WPM           → does not qualify
+```
+
+If the business rule changes to `50 WPM or higher`, the test and UI copy must be updated together.
+
+---
+
+#### App Works in Airplane Mode
+
+This is a required manual acceptance test on the target iPad.
+
+**Given**
+
+- the deployed app has been loaded and cached
+- the PWA has been added to the Home Screen
+
+**When**
+
+- airplane mode is enabled
+- the installed app is closed and relaunched
+
+**Then**
+
+the operator must be able to complete:
+
+```text
+launch app
+→ create or continue event
+→ Ready
+→ start typing test
+→ complete test
+→ calculate WPM and accuracy
+→ save nickname when eligible
+→ update leaderboard
+→ Next Player / automatic reset
+→ Ready
+```
+
+Then:
+
+```text
+close app
+→ reopen while still in airplane mode
+```
+
+and confirm:
+
+- active event survives
+- saved scores survive
+- nicknames survive
+- high score is reconstructed
+- Top 5 is reconstructed
+- passages load
+- fonts load
+- required visual assets load
+
+The MVP is not complete until this test succeeds on the actual target iPad.
+
+---
 
 ### Unit Tests — Scoring
 
-Required tests:
+Add unit tests for the pure scoring logic.
+
+Required cases:
 
 ```text
 perfect typing produces expected WPM
@@ -3411,105 +4034,288 @@ perfect typing produces expected WPM
 60-second final WPM is correct
 incorrect characters do not increase WPM
 incorrect attempts lower accuracy
+zero-attempt accuracy calculation does not return NaN
 Backspace itself does not affect accuracy
 correcting an error does not erase the original accuracy penalty
-correcting a removed character restores correct-character WPM credit
+removing a credited character removes current correct-character credit
+correcting a removed position restores correct-character credit
 partial words count toward WPM
-incorrect characters do not block further typing
+incorrect characters do not block later correct input
 80% accuracy meets the development threshold
 79.99% accuracy does not meet the development threshold
 late input after timeout is ignored
 held-key repeat events are ignored
 Ready-screen start key is not scored
-first valid Typing-screen key starts timer and is scored
+first valid Typing-screen key starts the timer and is scored
 ```
+
+---
+
+### Unit Tests — Typing Engine
+
+Required cases:
+
+```text
+correct character advances caret
+incorrect character advances caret
+incorrect character is marked incorrect
+Backspace removes the most recent current-sentence character
+Backspace moves caret backward
+Backspace cannot move before the start of the current sentence
+sentence completes after every expected position has an entered character
+incorrect final character still completes the sentence
+sentence completion loads the next sentence
+sentence completion preserves cumulative score counters
+Backspace cannot reopen the previous committed sentence
+passage order remains deterministic
+```
+
+---
 
 ### Unit Tests — Ranking
 
-Required tests:
+Required cases:
 
 ```text
 higher displayed WPM ranks first
 accuracy breaks displayed-WPM ties
-earlier submission breaks remaining ties
+earlier createdAt breaks remaining ties
 scores below minimum accuracy are excluded
-Top 10 qualification is correct
+rank is derived rather than stored
+Top 10 selection is correct
 Top 5 selection is correct
+high score is the first eligible ranked score
 ```
+
+---
 
 ### Unit Tests — Events
 
-Required tests:
+Required cases:
 
 ```text
-fresh event has no scores
-starting fresh preserves old event data
+fresh event is created with selected duration
+fresh event stores current passageSetId
+fresh event starts with no scores
 starting fresh archives the previous active event
-continue restores active event
+starting fresh preserves prior event data
+starting fresh preserves prior scores
+activeEventId changes to the new event
+continue restores the active event
+continue does not create a new event
 continue restores existing scores
 duration persists when continuing
-passage set persists when continuing
+passageSetId persists when continuing
+Continue is unavailable when no valid active event exists
 ```
+
+---
 
 ### Unit Tests — Passages
 
-Required tests:
+Required cases:
 
 ```text
 passage set has a stable ID
 passage set is not empty
-all sentences are strings
-all sentences meet the configured one-line character target during content validation
-passage set contains enough total characters for a fast 60-second test
+all sentence entries are strings
+sentence order is deterministic
+passage set contains enough total text for fast 60-second tests
 ```
 
-The final one-line fit must also be validated visually on the target iPad because character count alone cannot guarantee rendered width.
+Content validation should also check the intended character-length range where useful.
+
+The final one-line fit must still be verified visually on the target iPad because character count alone cannot guarantee rendered width.
+
+---
+
+### Persistence Tests
+
+Verify IndexedDB behavior independently of UI rendering.
+
+Required cases:
+
+```text
+event can be written and read
+score can be written and read
+multiple scores can be retrieved by eventId
+settings can save activeEventId
+settings can restore activeEventId
+nickname persists after update
+fresh event does not delete archived events
+fresh event does not delete old scores
+leaderboard can be reconstructed from persisted scores
+data survives page reload
+```
+
+---
 
 ### Component Tests
 
-High-value component behavior:
+Use React Testing Library for high-value UI behavior rather than testing every visual detail.
+
+Required cases:
 
 ```text
+EventSetup disables Continue when no event exists
+EventSetup can select 30-second mode
+EventSetup can select 60-second mode
 Ready screen responds to a key press
-Ready-screen key is not scored
-Typing waits for first valid typing key before timer starts
-Top 10 result shows nickname input
-non-Top-10 result omits nickname input
+Ready-screen key is not passed into Typing as contestant input
+Typing screen renders the full sentence before timer starts
+Typing screen waits for first valid typing character before timer starts
+Typing screen displays live WPM
+Typing screen displays live accuracy
+Typing screen displays remaining time
+Top 10 result shows NicknameForm
+non-Top-10 result does not show NicknameForm
+nickname validation rejects empty values
 Next Player returns to Ready
-auto reset starts only on Leaderboard
-nickname entry is not interrupted by auto reset
+auto reset begins only on Leaderboard
+auto reset does not run while nickname entry is active
+Leaderboard renders no more than five rows
 ```
 
-### Manual Hardware Tests
+Do not over-test static decorative styling through component tests.
 
-Required before event deployment:
+---
+
+### Manual Layout Tests
+
+Required on the actual target landscape iPad:
 
 ```text
-landscape layout on target iPad
-actual giant keyboard input
-30-second mode
-60-second mode
+Event Setup fits without clipping
+Ready screen is readable from approximately two feet away
+typing sentence remains on one line
+typing sentence does not clip at either side
+typing sentence remains visually centered
+current-word highlight is visible
+caret is easy to locate
+incorrect-character state is distinguishable without relying only on color
+live WPM is readable
+timer is readable at bottom center
+accuracy is readable
+Results / Nickname layout fits
+Top 5 leaderboard fits
+Next Player is easy for the operator to use
+```
+
+Test all production passage sentences at the final font size.
+
+Any sentence that does not safely fit on one line should be rewritten or removed rather than dynamically shrinking its font.
+
+---
+
+### Manual Giant-Keyboard Tests
+
+Test with the actual giant physical keyboard.
+
+Required cases:
+
+```text
+normal typing
 fast typing
 slow typing
 incorrect typing
 Backspace
-mistake correction
-button mashing
+multiple corrections
 held key
+repeated letters
+spacebar input
+punctuation input used by passages
+button mashing
+first key from Ready
+first scored key on Typing
+30-second test
+60-second test
 partial word at timeout
 sentence transition
-Top 10 qualification
-Top 5 ranking
-nickname entry
-Plinko threshold
-auto reset
-Next Player
-app restart
-airplane mode
-PWA relaunch
-score persistence after restart
-one-line passage fit
 ```
+
+Use this testing to validate whether the provisional 80% leaderboard accuracy threshold is appropriate.
+
+Do not treat 80% as final until giant-keyboard testing is complete.
+
+---
+
+### Offline / Airplane-Mode Test
+
+Before V1 is considered finished:
+
+```text
+1. Connect the target iPad to the internet.
+2. Open the deployed HTTPS app.
+3. Allow the app and required assets to finish loading/caching.
+4. Add the app to the Home Screen.
+5. Launch the installed PWA once while online.
+6. Enable airplane mode.
+7. Close and relaunch the installed PWA.
+8. Create a fresh event.
+9. Complete a full typing test.
+10. Save a qualifying nickname.
+11. Confirm the leaderboard updates.
+12. Use Next Player.
+13. Complete another test.
+14. Close the app.
+15. Reopen the app while airplane mode remains enabled.
+16. Continue the active event.
+17. Confirm previously saved scores remain.
+18. Confirm the high score remains correct.
+19. Confirm the Top 5 is reconstructed.
+20. Confirm passages, fonts, icons, and required visual assets still load.
+```
+
+Repeat the test with a previously created event to verify **Continue Previous Event** also works fully offline.
+
+---
+
+### Pre-Event Regression Checklist
+
+Run this checklist before using the app at a real event:
+
+```text
+30-second mode passes
+60-second mode passes
+WPM calculation passes
+accuracy calculation passes
+Backspace behavior passes
+minimum accuracy gate passes
+Top 10 qualification passes
+Top 5 sorting passes
+Plinko threshold passes
+fresh event behavior passes
+continue event behavior passes
+score persistence passes
+Next Player reset passes
+automatic reset passes
+all passages fit one line
+giant keyboard input passes
+PWA launches offline
+airplane-mode full flow passes
+saved scores survive relaunch
+```
+
+If any core item fails, V1 should not be considered event-ready.
+
+---
+
+### Definition of Testing Complete
+
+Testing for V1 is complete only when:
+
+- all required scoring unit tests pass
+- all required typing-engine unit tests pass
+- all required ranking tests pass
+- all required event tests pass
+- persistence tests pass
+- high-value component tests pass
+- final passage layout has been checked on the actual iPad
+- giant-keyboard behavior has been tested
+- the minimum accuracy threshold has been reviewed using real keyboard behavior
+- the full booth workflow passes in airplane mode
+- saved event and score data survive offline app relaunch
+- no known issue prevents reliable repeated contestant use
 
 ---
 
