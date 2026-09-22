@@ -322,50 +322,106 @@ Return to the Ready screen without reloading the browser.
 
 ---
 
-## 10. Scoring Rules
+## Scoring Rules
 
 ### WPM
 
-Use correct characters rather than raw keystrokes.
+WPM is calculated using correctly typed characters:
 
-Formula:
+`WPM = (correctCharacters / 5) / elapsedMinutes`
 
-`correct characters / 5 / elapsed minutes`
-
-Incorrect keystrokes must not increase WPM.
+- Five correct characters count as one standard word.
+- Correct letters, spaces, and punctuation count toward WPM.
+- Incorrect characters do not increase WPM.
+- If time expires in the middle of a word, all correct characters typed before the timer ends still count.
 
 ### Accuracy
 
-Example formula:
+Accuracy is calculated from typing attempts:
 
-`correct characters / total typed characters × 100`
+`Accuracy = correctAttempts / (correctAttempts + incorrectAttempts) × 100`
 
-Accuracy is displayed but does not determine normal leaderboard ranking.
+- Correct typing attempts increase the correct-attempt count.
+- Incorrect typing attempts increase the incorrect-attempt count.
+- Backspace does not count as a typing attempt.
+- Correcting a mistake does not erase the original incorrect attempt from the accuracy calculation.
 
 ### Leaderboard Eligibility
 
-A score must meet a minimum accuracy/validity threshold to qualify.
+A completed score must meet a minimum accuracy requirement to qualify for the leaderboard.
 
-The exact threshold should be determined through testing on the giant keyboard.
+Initial V1 threshold:
 
-This protects against intentionally pressing random keys rapidly.
+`80% accuracy`
 
-### Ranking
+This threshold is provisional and should be validated on the physical giant keyboard before the event.
 
-Primary ranking:
+A contestant may still see their final WPM and accuracy if they fall below the threshold, but their score will not qualify for leaderboard ranking.
 
-1. WPM descending
+### Ranking and Ties
 
-If a tie-breaker is required:
+Leaderboard scores are ranked using:
 
-2. Accuracy descending
+1. Higher WPM
+2. Higher accuracy
 3. Earlier submitted score
 
-### Nickname Eligibility
+Accuracy is used as a tie-breaker and does not otherwise determine leaderboard position.
 
-Contestants currently ranked within the Top 10 may enter a nickname.
+### Incorrect Characters
 
-The visible leaderboard displays only the Top 5.
+Incorrect characters:
+
+- are visually marked as errors
+- do not contribute to WPM
+- count against accuracy
+- do not prevent the contestant from continuing to type
+
+Contestants are not required to correct errors before advancing.
+
+### Backspace
+
+Backspace is allowed.
+
+When a contestant presses Backspace:
+
+- the caret moves back one typed character
+- the previous typed character is removed from the current text
+- Backspace itself does not affect WPM or accuracy
+- the contestant may type the correct character and receive correct-character credit for that position
+- any original incorrect typing attempt still counts against accuracy
+
+### Partial Words
+
+Contestants receive credit for correct characters even when the timer expires before the current word is completed.
+
+Example:
+
+If the expected word is `keyboard` and the contestant correctly types `keybo` before time expires, those five correct characters still count toward WPM.
+
+### Character-Level Scoring
+
+Scoring is based on individual characters rather than requiring an entire word to be correct.
+
+Example:
+
+Expected:
+
+`house`
+
+Typed:
+
+`housr`
+
+Scoring:
+
+- `h` — correct
+- `o` — correct
+- `u` — correct
+- `s` — correct
+- `r` — incorrect
+
+The contestant receives credit for four correct characters rather than losing credit for the entire word.
 
 ---
 
