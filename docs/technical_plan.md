@@ -586,6 +586,484 @@ Backspace is handled as an editing action.
 
 ---
 
+## Scoring Implementation
+
+### WPM Calculation
+
+WPM is calculated from correctly typed characters:
+
+`WPM = (correctCharacters / 5) / elapsedMinutes`
+
+Implementation notes:
+
+- Five correct characters equal one standard word.
+- Correct letters, spaces, and punctuation all count as correct characters.
+- Incorrect characters do not contribute to WPM.
+- Correct characters in a partially completed word still count if the timer expires before the word is finished.
+- WPM should be calculated from elapsed time while the test is running.
+- Final WPM should use the configured test duration.
+
+Example:
+
+```ts
+function calculateWpm(
+  correctCharacters: number,
+  elapsedSeconds: number
+): number {
+  if (elapsedSeconds <= 0) return 0;
+
+  const elapsedMinutes = elapsedSeconds / 60;
+
+  return (correctCharacters / 5) / elapsedMinutes;
+}
+```
+
+For final display, round consistently:
+
+```ts
+const displayedWpm = Math.round(rawWpm);
+```
+
+Prefer storing the unrounded value internally and rounding only for display and leaderboard comparison rules.
+
+---
+
+### Accuracy Calculation
+
+Accuracy is based on typing attempts:
+
+`Accuracy = correctAttempts / (correctAttempts + incorrectAttempts) × 100`
+
+Track attempts separately from the current visible text.
+
+Recommended session counters:
+
+```ts
+interface TypingMetrics {
+  correctAttempts: number;
+  incorrectAttempts: number;
+  correctCharacters: number;
+}
+```
+
+Example implementation:
+
+```ts
+function calculateAccuracy(
+  correctAttempts: number,
+  incorrectAttempts: number
+): number {
+  const totalAttempts = correctAttempts + incorrectAttempts;
+
+  if (totalAttempts === 0) return 100;
+
+  return (correctAttempts / totalAttempts) * 100;
+}
+```
+
+Backspace does not count as a typing attempt.
+
+If a contestant types an incorrect character, presses Backspace, and then types the correct character:
+
+```text
+incorrect keypress → incorrectAttempts + 1
+Backspace          → no accuracy change
+correct keypress   → correctAttempts + 1
+```
+
+The original incorrect attempt remains part of the accuracy calculation.
+
+---
+
+### Minimum Leaderboard Accuracy
+
+Leaderboard eligibility requires a configurable minimum accuracy.
+
+Initial development constant:
+
+```ts
+export const MIN_LEADERBOARD_ACCURACY = 80;
+```
+
+Eligibility check:
+
+```ts
+function isLeaderboardEligible(accuracy: number): boolean {
+  return accuracy >= MIN_LEADERBOARD_ACCURACY;
+}
+```
+
+The `80%` value is provisional and must be validated using the physical giant keyboard before being treated as final.
+
+A contestant below the threshold:
+
+- still receives a Results screen
+- still sees WPM and accuracy
+- does not qualify for leaderboard ranking
+- is not prompted for a leaderboard nickname
+
+Do not bury the threshold directly inside ranking logic. Keep it as an explicit configuration constant so it can be changed after hardware testing.
+
+---
+
+### Ranking and Tie Behavior
+
+Only leaderboard-eligible scores participate in ranking.
+
+Sort scores using:
+
+1. WPM descending
+2. Accuracy descending
+3. Submission time ascending
+
+Recommended comparator:
+
+```ts
+function compareScores(a: ScoreRecord, b: ScoreRecord): number {
+  if (b.wpm !== a.wpm) {
+    return b.wpm - a.wpm;
+  }
+
+  if (b.accuracy !== a.accuracy) {
+    return b.accuracy - a.accuracy;
+  }
+
+  return (
+    new Date(a.createdAt).getTime() -
+    new Date(b.createdAt).getTime()
+  );
+}
+```
+
+Use the stored raw WPM value for comparison if raw values are persisted.
+
+Do not sort only by the rounded display value if two raw scores could display the same integer.
+
+Example:
+
+```text
+92.49 WPM
+92.10 WPM
+```
+
+Both may display as:
+
+```text
+92 WPM
+```
+
+but the higher raw WPM should rank first.
+
+---
+
+### Character-Level Scoring
+
+Scoring operates at the individual-character level.
+
+Example:
+
+```text
+Expected: house
+Typed:    housr
+```
+
+Result:
+
+```text
+h → correct
+o → correct
+u → correct
+s → correct
+r → incorrect
+```
+
+This produces:
+
+```text
+4 correct characters
+1 incorrect attempt
+```
+
+Do not invalidate the entire word because one character is wrong.
+
+This rule applies to:
+
+- letters
+- spaces
+- punctuation
+- characters in partially completed words
+
+---
+
+### Partial Words
+
+If the timer expires while the contestant is in the middle of a word, all correctly typed characters before the timer expires remain valid.
+
+Example:
+
+```text
+Expected: keyboard
+Typed before timeout: keybo
+```
+
+If all five characters are correct:
+
+```text
+correctCharacters += 5
+```
+
+Do not require a completed word boundary for WPM credit.
+
+The timer cutoff should be based on the actual test end timestamp, not whether the current word is complete.
+
+---
+
+### Error Advancement
+
+Incorrect characters do not block progression.
+
+On an incorrect printable character:
+
+```text
+1. record an incorrect attempt
+2. store the typed character at the current position
+3. visually mark the position as incorrect
+4. advance the caret one character
+```
+
+The contestant may either:
+
+- continue typing, or
+- press Backspace to return and correct the mistake
+
+Do not force contestants to correct errors before advancing.
+
+This behavior is intentional because the physical giant keyboard is more error-prone than a standard keyboard.
+
+---
+
+### Backspace Behavior
+
+Backspace is allowed during the active test.
+
+Backspace should:
+
+```text
+1. remove the most recently entered character
+2. move the caret backward one position
+3. update the current visual correctness state
+4. allow the contestant to re-enter that character
+```
+
+Backspace itself:
+
+- does not increase `correctAttempts`
+- does not increase `incorrectAttempts`
+- does not contribute to WPM
+- does not erase a previously recorded incorrect attempt from accuracy
+
+If the removed character was currently contributing to `correctCharacters`, remove that current correct-character credit until the contestant types the position correctly again.
+
+Example:
+
+```text
+Expected: dog
+Typed:    dig
+```
+
+After typing `i`:
+
+```text
+incorrectAttempts += 1
+```
+
+After Backspace:
+
+```text
+incorrectAttempts remains unchanged
+```
+
+After typing `o` correctly:
+
+```text
+correctAttempts += 1
+correctCharacters += 1
+```
+
+This preserves the history of the mistake while allowing corrected text to receive valid WPM credit.
+
+---
+
+### Recommended Typing Session Model
+
+The typing engine should distinguish between:
+
+1. current editable text state
+2. cumulative attempt history
+
+Recommended structure:
+
+```ts
+interface TypedCharacter {
+  expected: string;
+  typed: string;
+  isCorrect: boolean;
+}
+
+interface TestSession {
+  sentenceIndex: number;
+  characterIndex: number;
+
+  typedCharacters: TypedCharacter[];
+
+  correctCharacters: number;
+  correctAttempts: number;
+  incorrectAttempts: number;
+
+  startedAt: number | null;
+  endsAt: number | null;
+
+  isFinished: boolean;
+}
+```
+
+The important distinction is:
+
+```text
+typedCharacters
+```
+
+represents the contestant's current editable position, while:
+
+```text
+correctAttempts
+incorrectAttempts
+```
+
+represent cumulative typing history and are not undone by Backspace.
+
+---
+
+### Valid Typing Input
+
+Only printable typing characters should count as attempts.
+
+Examples that may count:
+
+```text
+letters
+numbers
+space
+punctuation
+```
+
+Keys that should not count as typing attempts include:
+
+```text
+Shift
+Control
+Alt / Option
+Meta / Command
+Caps Lock
+Tab
+Escape
+Arrow keys
+function keys
+```
+
+Backspace is handled separately as an editing command.
+
+The first valid typing character on the Typing screen:
+
+```text
+starts the timer
++
+counts as the first typing attempt
+```
+
+The key used to transition from the Ready screen to the Typing screen must not count.
+
+---
+
+### Timer Cutoff
+
+Input should stop contributing to the result once the configured test duration has elapsed.
+
+Before processing a typing event, verify that the current timestamp is before the test end time.
+
+Conceptually:
+
+```ts
+if (performance.now() >= endsAt) {
+  finishTest();
+  return;
+}
+```
+
+This prevents a late keypress from being counted after timeout because of UI rendering delay.
+
+---
+
+### Final Score Calculation
+
+At test completion:
+
+```ts
+const accuracy = calculateAccuracy(
+  session.correctAttempts,
+  session.incorrectAttempts
+);
+
+const rawWpm = calculateWpm(
+  session.correctCharacters,
+  durationSeconds
+);
+
+const leaderboardEligible =
+  accuracy >= MIN_LEADERBOARD_ACCURACY;
+```
+
+Recommended result shape:
+
+```ts
+interface TestResult {
+  rawWpm: number;
+  displayedWpm: number;
+  accuracy: number;
+
+  correctCharacters: number;
+  correctAttempts: number;
+  incorrectAttempts: number;
+
+  leaderboardEligible: boolean;
+}
+```
+
+---
+
+### Required Scoring Tests
+
+At minimum, add unit tests for:
+
+```text
+perfect typing produces expected WPM
+incorrect characters do not increase WPM
+incorrect attempts lower accuracy
+Backspace itself does not affect accuracy
+correcting an error does not erase the original accuracy penalty
+correcting an error restores correct-character WPM credit
+partial words count toward WPM
+incorrect characters do not block further typing
+80% accuracy qualifies during development
+79.99% accuracy does not qualify
+higher WPM ranks first
+accuracy breaks WPM ties
+earlier submission breaks remaining ties
+late input after timeout is ignored
+Ready-screen start key is not scored
+first valid Typing-screen key starts timer and is scored
+```
+
 # 13. Character Handling
 
 Each typed character is compared against the expected character at the current cursor position.
