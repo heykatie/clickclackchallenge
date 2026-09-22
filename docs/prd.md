@@ -258,12 +258,13 @@ As an operator, I want the app to work without Wi-Fi.
 The Event Setup screen must allow the operator to:
 
 - select `30 seconds` or `60 seconds`
+- select a game mode: `Standard` or `Race`
 - start a fresh event
 - continue the current/most recently active event when one exists
 
-When Event Setup opens and no event exists, Start Fresh and `30 seconds` are selected. Continue is unavailable.
+When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Race are selected. Continue is unavailable.
 
-When an event already exists, including when the operator returns from Ready or the Leaderboard, Continue is selected. The duration control shows that event's stored duration.
+When an event already exists, including when the operator returns from Ready or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
 
 ### Start Fresh
 
@@ -271,6 +272,7 @@ Starting fresh should:
 
 - create a new event
 - use the selected duration
+- use the selected game mode
 - begin with an empty leaderboard
 - preserve previous event data
 - make the new event the active event
@@ -284,12 +286,11 @@ Continuing should:
 - reopen the current/most recently active event
 - retain all existing scores
 - retain its leaderboard
-- retain its passage set
-- use the duration selected on this screen for the next contestant
+- use the duration and game mode selected on this screen for the next contestant
 
 If no previous event exists, the Continue option should be unavailable.
 
-`30 seconds` and `60 seconds` stay selectable while Continue is selected. The choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration and WPM stored on earlier scores. A test that has already started keeps the duration it began with. Start fresh remains the way to open an empty leaderboard.
+`30 seconds` and `60 seconds` stay selectable while Continue is selected. `Standard` and `Race` stay selectable too. Either choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
 ### Returning to Event Setup
 
@@ -731,7 +732,7 @@ The final character limit should be validated using the final typing font and th
 
 ### Event Fairness
 
-All contestants within the same event must receive the same ordered sentence sequence.
+Race uses one ordered sentence sequence for every attempt in the event.
 
 Example:
 
@@ -743,9 +744,11 @@ Contestant B:
 Sentence 1 → Sentence 2 → Sentence 3 → ...
 ```
 
-Sentences should not be randomly shuffled for each contestant in V1.
+Race sentences are not shuffled per contestant. Every attempt, including a retake, starts again at the first sentence. That keeps Race difficulty consistent across competitors.
 
-This keeps text difficulty consistent across competitors and makes leaderboard scores more directly comparable.
+Standard uses the same list of the 200 most common English words for every attempt. Each attempt gets a new random draw from that list. Words are lowercase and have no punctuation. A line ends with the space that joins it to the next word, and that space is scored like any other character. The draw changes per attempt. The word list does not.
+
+A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Race score with the Standard word list, or a Standard score with the Race sentences. Standard and Race scores in the same event stay on one leaderboard.
 
 ### Sentence Progression
 
@@ -1657,9 +1660,11 @@ A server connection must not be required.
 
 **Then**
 
-- every contestant starts with the same first sentence
-- every contestant receives the same ordered sentence sequence
-- passages are not shuffled per contestant
+- Race starts every contestant at the same first sentence
+- Race gives every contestant the same ordered sentence sequence
+- Race passages are not shuffled per contestant
+- Standard gives every attempt a new draw from the same 200-word list
+- a score keeps the mode and WPM from the attempt that earned it
 
 ---
 

@@ -101,18 +101,19 @@ Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `d
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Use two clear option groups with visible selected states and one large mint action. When no event exists, the selected options are Start fresh and 30 seconds, as in `docs/prd.md`. Continue is unavailable.
+Use three clear option groups with visible selected states and one large mint action. When no event exists, the selected options are Start fresh, 30 seconds, and Race, as in `docs/prd.md`. Continue is unavailable.
 
 | Control | Layout |
 | --- | --- |
 | Test length | One choice: 30 or 60 seconds. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. Behavior is in `docs/prd.md`. |
+| Game mode | One choice: Standard or Race. On Continue, the control opens on the event's current mode and still accepts the other mode for the next contestant. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. |
 
 **No previous event:** disable “Continue previous event” and show “No previous event yet.”
 
-`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the two option groups and Start Event. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
+`01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the three option groups and Start Event. The setup PNG was drawn before the Game mode group. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
 Event setup rules, including saved duration, are in `docs/prd.md`.
 

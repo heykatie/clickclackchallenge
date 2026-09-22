@@ -1,11 +1,18 @@
-import { openDB, type IDBPDatabase } from "idb";
+import { openDB, type IDBPDatabase, type IDBPTransaction } from "idb";
+import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 
 export type TestDuration = 30 | 60;
+export type TestMode = "words" | "race";
+
+export function passageSetIdFor(testMode: TestMode): string {
+  return testMode === "words" ? WORD_LIST_ID : PASSAGE_SET_ID;
+}
 
 export interface EventRecord {
   id: string;
   durationSeconds: TestDuration;
+  testMode: TestMode;
   passageSetId: string;
   status: "active" | "archived";
   createdAt: string;
@@ -23,6 +30,8 @@ export interface ScoreRecord {
   correctAttempts: number;
   incorrectAttempts: number;
   durationSeconds: TestDuration;
+  testMode: TestMode;
+  passageSetId: string;
   createdAt: string;
 }
 
@@ -47,6 +56,8 @@ export interface NewScore {
   correctAttempts: number;
   incorrectAttempts: number;
   durationSeconds: TestDuration;
+  testMode: TestMode;
+  passageSetId: string;
 }
 
 interface TypingTestDB {
@@ -68,7 +79,7 @@ interface TypingTestDB {
 
 export const DB_NAME = "typing-test-db";
 export const SETTINGS_KEY = "app";
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 let databasePromise: Promise<IDBPDatabase<TypingTestDB>> | null = null;
 
@@ -83,16 +94,24 @@ function defaultSettings(): AppSettings {
 export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
   if (!databasePromise) {
     databasePromise = openDB<TypingTestDB>(DB_NAME, SCHEMA_VERSION, {
-      upgrade(database) {
-        const events = database.createObjectStore("events", { keyPath: "id" });
-        events.createIndex("createdAt", "createdAt");
-        events.createIndex("status", "status");
+      async upgrade(database, oldVersion, _newVersion, transaction) {
+        if (oldVersion < 1) {
+          const events = database.createObjectStore("events", { keyPath: "id" });
+          events.createIndex("createdAt", "createdAt");
+          events.createIndex("status", "status");
 
-        const scores = database.createObjectStore("scores", { keyPath: "id" });
-        scores.createIndex("eventId", "eventId");
-        scores.createIndex("createdAt", "createdAt");
+          const scores = database.createObjectStore("scores", { keyPath: "id" });
+          scores.createIndex("eventId", "eventId");
+          scores.createIndex("createdAt", "createdAt");
 
-        database.createObjectStore("settings");
+          database.createObjectStore("settings");
+        }
+
+        if (oldVersion === 1) {
+          await backfillTestMode(
+            transaction as IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+          );
+        }
       },
       terminated() {
         databasePromise = null;
@@ -103,6 +122,49 @@ export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
     });
   }
   return databasePromise;
+}
+
+async function backfillTestMode(
+  transaction: IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+): Promise<void> {
+  let eventCursor = await transaction.objectStore("events").openCursor();
+  while (eventCursor) {
+    if (!eventCursor.value.testMode) {
+      await eventCursor.update({ ...eventCursor.value, testMode: "race" });
+    }
+    eventCursor = await eventCursor.continue();
+  }
+
+  let scoreCursor = await transaction.objectStore("scores").openCursor();
+  while (scoreCursor) {
+    const value = scoreCursor.value;
+    if (!value.testMode || !value.passageSetId) {
+      await scoreCursor.update({
+        ...value,
+        testMode: value.testMode ?? "race",
+        passageSetId: value.passageSetId || PASSAGE_SET_ID,
+      });
+    }
+    scoreCursor = await scoreCursor.continue();
+  }
+}
+
+function normalizeEvent(event: EventRecord): EventRecord {
+  const testMode = event.testMode ?? "race";
+  return {
+    ...event,
+    testMode,
+    passageSetId: event.passageSetId || passageSetIdFor(testMode),
+  };
+}
+
+function normalizeScore(score: ScoreRecord): ScoreRecord {
+  const testMode = score.testMode ?? "race";
+  return {
+    ...score,
+    testMode,
+    passageSetId: score.passageSetId || passageSetIdFor(testMode),
+  };
 }
 
 export async function closeDatabase(): Promise<void> {
@@ -128,10 +190,13 @@ export async function loadBooth(): Promise<BoothState> {
     return { settings: cleared, activeEvent: null };
   }
 
-  return { settings, activeEvent: event };
+  return { settings, activeEvent: normalizeEvent(event) };
 }
 
-export async function startFreshEvent(durationSeconds: TestDuration): Promise<EventRecord> {
+export async function startFreshEvent(
+  durationSeconds: TestDuration,
+  testMode: TestMode = "race",
+): Promise<EventRecord> {
   const database = await openDatabase();
   const transaction = database.transaction(["events", "settings"], "readwrite");
   const events = transaction.objectStore("events");
@@ -146,7 +211,8 @@ export async function startFreshEvent(durationSeconds: TestDuration): Promise<Ev
   const event: EventRecord = {
     id: crypto.randomUUID(),
     durationSeconds,
-    passageSetId: PASSAGE_SET_ID,
+    testMode,
+    passageSetId: passageSetIdFor(testMode),
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -165,22 +231,25 @@ export async function startFreshEvent(durationSeconds: TestDuration): Promise<Ev
   return event;
 }
 
-export async function updateEventDuration(
+export async function updateActiveEvent(
   eventId: string,
-  durationSeconds: TestDuration,
+  next: { durationSeconds: TestDuration; testMode: TestMode },
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const event = await database.get("events", eventId);
   if (!event || event.status !== "active") {
     throw new Error("No active event to update");
   }
-  if (event.durationSeconds === durationSeconds) {
-    return event;
+  const current = normalizeEvent(event);
+  if (current.durationSeconds === next.durationSeconds && current.testMode === next.testMode) {
+    return current;
   }
 
   const updated: EventRecord = {
-    ...event,
-    durationSeconds,
+    ...current,
+    durationSeconds: next.durationSeconds,
+    testMode: next.testMode,
+    passageSetId: passageSetIdFor(next.testMode),
     updatedAt: new Date().toISOString(),
   };
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -188,7 +257,7 @@ export async function updateEventDuration(
   const settings = await transaction.objectStore("settings").get(SETTINGS_KEY);
   if (settings) {
     await transaction.objectStore("settings").put(
-      { ...settings, lastSelectedDuration: durationSeconds },
+      { ...settings, lastSelectedDuration: next.durationSeconds },
       SETTINGS_KEY,
     );
   }
@@ -198,7 +267,8 @@ export async function updateEventDuration(
 
 export async function listScores(eventId: string): Promise<ScoreRecord[]> {
   const database = await openDatabase();
-  return database.getAllFromIndex("scores", "eventId", eventId);
+  const scores = await database.getAllFromIndex("scores", "eventId", eventId);
+  return scores.map(normalizeScore);
 }
 
 export async function saveScore(input: NewScore): Promise<ScoreRecord> {

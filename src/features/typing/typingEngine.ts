@@ -7,6 +7,7 @@ export interface TypedCharacter {
 export interface TestSession {
   sentences: readonly string[];
   durationSeconds: 30 | 60;
+  testMode: "words" | "race";
   sentenceIndex: number;
   characterIndex: number;
   expectedSentence: string;
@@ -42,6 +43,7 @@ const IGNORED_KEYS = new Set([
 export function createTestSession(
   sentences: readonly string[],
   durationSeconds: 30 | 60,
+  testMode: "words" | "race" = "race",
 ): TestSession {
   const expectedSentence = sentences[0];
   if (!expectedSentence) {
@@ -51,6 +53,7 @@ export function createTestSession(
   return {
     sentences,
     durationSeconds,
+    testMode,
     sentenceIndex: 0,
     characterIndex: 0,
     expectedSentence,

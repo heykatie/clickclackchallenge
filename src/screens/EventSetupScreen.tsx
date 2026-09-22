@@ -1,30 +1,38 @@
 import { useState } from "react";
-import type { TestDuration } from "../db/persistence";
+import type { TestDuration, TestMode } from "../db/persistence";
 import { planEventStart, type SetupMode } from "../state/setupRules";
 
 type EventSetupScreenProps = {
   storedDuration: TestDuration | null;
+  storedTestMode: TestMode | null;
   saving: boolean;
-  onStartFresh: (durationSeconds: TestDuration) => void;
-  onContinue: (durationSeconds: TestDuration) => void;
+  onStartFresh: (durationSeconds: TestDuration, testMode: TestMode) => void;
+  onContinue: (durationSeconds: TestDuration, testMode: TestMode) => void;
 };
 
 export function EventSetupScreen({
   storedDuration,
+  storedTestMode,
   saving,
   onStartFresh,
   onContinue,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
+  const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "race");
 
   function startEvent() {
-    const plan = planEventStart(mode, storedDuration !== null, selectedDuration);
+    const plan = planEventStart(
+      mode,
+      storedDuration !== null,
+      selectedDuration,
+      selectedTestMode,
+    );
     if (plan.mode === "continue") {
-      onContinue(plan.durationSeconds);
+      onContinue(plan.durationSeconds, plan.testMode);
       return;
     }
-    onStartFresh(plan.durationSeconds);
+    onStartFresh(plan.durationSeconds, plan.testMode);
   }
 
   return (
@@ -51,6 +59,29 @@ export function EventSetupScreen({
             onChange={() => setSelectedDuration(60)}
           />
           60 seconds
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Game mode</legend>
+        <label>
+          <input
+            type="radio"
+            name="text"
+            value="words"
+            checked={selectedTestMode === "words"}
+            onChange={() => setSelectedTestMode("words")}
+          />
+          Standard
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="text"
+            value="race"
+            checked={selectedTestMode === "race"}
+            onChange={() => setSelectedTestMode("race")}
+          />
+          Race
         </label>
       </fieldset>
       <fieldset>

@@ -5,6 +5,7 @@ import { appReducer, initialState } from "./appState";
 const event60: EventRecord = {
   id: "event-60",
   durationSeconds: 60,
+  testMode: "race",
   passageSetId: "common-sentences-v1",
   status: "active",
   createdAt: "2026-09-22T00:00:00.000Z",
@@ -87,6 +88,22 @@ describe("appReducer", () => {
     });
     expect(typing.durationSeconds).toBe(60);
     expect(typing.currentTest?.durationSeconds).toBe(60);
+    expect(typing.currentTest?.testMode).toBe("race");
+    expect(typing.currentTest?.expectedSentence.startsWith("The little dog")).toBe(true);
+  });
+
+  it("starts a Standard test from a new draw of common words", () => {
+    const withEvent = appReducer(initialState, {
+      type: "SET_ACTIVE_EVENT",
+      event: { ...event60, testMode: "words", passageSetId: "common-words-v1" },
+    });
+    const typing = appReducer(appReducer(withEvent, { type: "ENTER_READY" }), {
+      type: "ENTER_TYPING",
+    });
+    const sentence = typing.currentTest?.expectedSentence ?? "";
+    expect(typing.currentTest?.testMode).toBe("words");
+    expect(sentence).toMatch(/^[a-z]+( [a-z]+)* $/);
+    expect(sentence.startsWith("The")).toBe(false);
   });
 
   it("keeps the high score when a waiting test returns to Ready", () => {

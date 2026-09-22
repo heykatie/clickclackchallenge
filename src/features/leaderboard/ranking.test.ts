@@ -13,6 +13,8 @@ function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm
     correctAttempts: 10,
     incorrectAttempts: 0,
     durationSeconds: 30,
+    testMode: "race",
+    passageSetId: "common-sentences-v1",
     ...overrides,
   };
 }
@@ -97,5 +99,31 @@ describe("rankScores", () => {
     expect(ranked.map((entry) => entry.score.id)).toEqual(["thirty", "sixty"]);
     expect(ranked[1]?.score.displayedWpm).toBe(46);
     expect(ranked[1]?.score.durationSeconds).toBe(60);
+  });
+
+  it("ranks Standard and Race scores by the WPM each attempt stored", () => {
+    const ranked = rankScores([
+      score({
+        id: "race",
+        testMode: "race",
+        passageSetId: "common-sentences-v1",
+        displayedWpm: 54,
+        accuracy: 99,
+        createdAt: "2026-09-22T00:00:00.000Z",
+      }),
+      score({
+        id: "words",
+        testMode: "words",
+        passageSetId: "common-words-v1",
+        displayedWpm: 80,
+        accuracy: 90,
+        createdAt: "2026-09-22T00:05:00.000Z",
+      }),
+    ]);
+    expect(ranked.map((entry) => entry.score.id)).toEqual(["words", "race"]);
+    expect(ranked[0]?.score.testMode).toBe("words");
+    expect(ranked[0]?.score.displayedWpm).toBe(80);
+    expect(ranked[1]?.score.testMode).toBe("race");
+    expect(ranked[1]?.score.displayedWpm).toBe(54);
   });
 });

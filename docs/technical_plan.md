@@ -373,6 +373,7 @@ The model must preserve historical event data, associate every score with the ev
 
 ```ts
 type TestDuration = 30 | 60;
+type TestMode = "words" | "race";
 ```
 
 ### Event Record
@@ -384,6 +385,7 @@ interface EventRecord {
   id: string;
 
   durationSeconds: TestDuration;
+  testMode: TestMode;
   passageSetId: string;
 
   status: "active" | "archived";
@@ -402,14 +404,23 @@ Field behavior:
 
 `durationSeconds`
 
-- fixed event duration
+- the length for the next contestant while this event stays active
 - valid values: `30` or `60`
-- remains the source of truth when continuing the event
+- a later change does not rewrite `durationSeconds` on scores already saved
+
+`testMode`
+
+- `"race"` uses the bundled sentences, in the same order for every attempt
+- `"words"` uses a new random draw from `common-words-v1` for each attempt
+- the choice for the next contestant while this event stays active
+- a later change does not rewrite `testMode` on scores already saved
 
 `passageSetId`
 
-- identifies the passage-set version used by the event
-- example: `common-sentences-v1`
+- identifies the text version the next contestant will use
+- `common-sentences-v1` for Race
+- `common-words-v1` for Standard
+- updated with `testMode` so the event record matches the next attempt
 
 `status`
 
@@ -431,6 +442,7 @@ Example:
 const event: EventRecord = {
   id: crypto.randomUUID(),
   durationSeconds: 30,
+  testMode: "race",
   passageSetId: "common-sentences-v1",
   status: "active",
   createdAt: "2026-09-22T07:18:00.000Z",
@@ -458,6 +470,8 @@ interface ScoreRecord {
   incorrectAttempts: number;
 
   durationSeconds: TestDuration;
+  testMode: TestMode;
+  passageSetId: string;
 
   createdAt: string;
 }
@@ -521,6 +535,17 @@ Field behavior:
 - unchanged when the operator later picks the other length for the same event
 - the duration that produced this score's WPM; ranking uses the stored WPM rather than recomputing it from the event's current duration
 
+`testMode`
+
+- snapshot of Standard (`"words"`) or Race (`"race"`) when the score was earned
+- unchanged when the operator later picks the other mode for the same event
+
+`passageSetId`
+
+- snapshot of the text version that produced this score
+- `common-words-v1` or `common-sentences-v1`
+- ranking does not reload that text to recompute WPM
+
 `createdAt`
 
 - ISO submission timestamp
@@ -543,6 +568,8 @@ const score: ScoreRecord = {
   incorrectAttempts: 9,
 
   durationSeconds: 30,
+  testMode: "race",
+  passageSetId: "common-sentences-v1",
 
   createdAt: "2026-09-22T07:43:12.000Z"
 };
@@ -595,11 +622,11 @@ Example:
 const settings: AppSettings = {
   activeEventId: "event-id",
   lastSelectedDuration: 30,
-  schemaVersion: 1
+  schemaVersion: 2
 };
 ```
 
-When continuing an existing event, `event.durationSeconds` is the length for the next contestant. The operator may change it without archiving the event. Earlier `ScoreRecord.durationSeconds` values, and the WPM stored on those scores, stay as they were when each score was saved.
+When continuing an existing event, `event.durationSeconds` and `event.testMode` are the length and text for the next contestant. The operator may change either without archiving the event. Earlier scores keep the duration, mode, passage set, and WPM stored when each score was saved. Ranking uses that stored WPM.
 
 Start fresh is required only when the operator wants a new empty leaderboard.
 
@@ -1809,8 +1836,10 @@ continue does not create a new event
 continue restores existing scores
 duration persists when continuing without a change
 changing duration while continuing keeps the same event and its scores
-each score keeps the duration and WPM from the attempt that earned it
-ranking uses stored WPM when scores in one event have different durations
+changing game mode while continuing keeps the same event and its scores
+each score keeps the duration, mode, passage set, and WPM from the attempt that earned it
+ranking uses stored WPM when scores in one event have different durations or modes
+an event saved before game modes is read as Race without changing its WPM
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
 ```

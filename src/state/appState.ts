@@ -1,4 +1,5 @@
 import { passages } from "../data/passages";
+import { createWordLines } from "../data/wordLines";
 import type { EventRecord } from "../db/persistence";
 import {
   calculateAccuracy,
@@ -84,15 +85,18 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         return state;
       }
       return { ...state, screen: "setup", currentTest: null };
-    case "ENTER_TYPING":
+    case "ENTER_TYPING": {
+      const testMode = state.activeEvent?.testMode ?? "race";
       return {
         ...state,
         screen: "typing",
         currentTest: createTestSession(
-          passages,
+          testMode === "words" ? createWordLines() : passages,
           state.activeEvent?.durationSeconds ?? state.durationSeconds,
+          testMode,
         ),
       };
+    }
     case "TYPE_KEY": {
       if (state.screen !== "typing" || state.currentTest === null) {
         return state;

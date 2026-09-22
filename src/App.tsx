@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
-import { startFreshEvent, listScores, loadBooth, updateEventDuration, type EventRecord, type TestDuration } from "./db/persistence";
+import { startFreshEvent, listScores, loadBooth, updateActiveEvent, type EventRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
@@ -45,7 +45,7 @@ function App() {
     });
   }
 
-  async function continueEvent(durationSeconds: TestDuration) {
+  async function continueEvent(durationSeconds: TestDuration, testMode: TestMode) {
     const event = state.activeEvent;
     if (!event) {
       return;
@@ -53,9 +53,9 @@ function App() {
     setSaving(true);
     try {
       const active =
-        durationSeconds === event.durationSeconds
+        durationSeconds === event.durationSeconds && testMode === event.testMode
           ? event
-          : await updateEventDuration(event.id, durationSeconds);
+          : await updateActiveEvent(event.id, { durationSeconds, testMode });
       await openReady(active);
     } catch {
       setStatus("failed");
@@ -64,10 +64,10 @@ function App() {
     }
   }
 
-  async function startFresh(durationSeconds: TestDuration) {
+  async function startFresh(durationSeconds: TestDuration, testMode: TestMode) {
     setSaving(true);
     try {
-      const event = await startFreshEvent(durationSeconds);
+      const event = await startFreshEvent(durationSeconds, testMode);
       await openReady(event);
     } catch {
       setStatus("failed");
@@ -94,12 +94,13 @@ function App() {
       return (
         <EventSetupScreen
           storedDuration={state.activeEvent?.durationSeconds ?? null}
+          storedTestMode={state.activeEvent?.testMode ?? null}
           saving={saving}
-          onStartFresh={(durationSeconds) => {
-            void startFresh(durationSeconds);
+          onStartFresh={(durationSeconds, testMode) => {
+            void startFresh(durationSeconds, testMode);
           }}
-          onContinue={(durationSeconds) => {
-            void continueEvent(durationSeconds);
+          onContinue={(durationSeconds, testMode) => {
+            void continueEvent(durationSeconds, testMode);
           }}
         />
       );
