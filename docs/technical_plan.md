@@ -1800,6 +1800,7 @@ incorrect final character still completes the sentence
 sentence completion loads the next sentence
 one space between sentences is ignored and the next letter still scores
 a second space between sentences is an incorrect character
+a leading space on the first sentence is an incorrect character
 sentence completion preserves cumulative score counters
 Backspace cannot reopen the previous committed sentence
 passage order remains deterministic
@@ -1822,6 +1823,31 @@ rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
+```
+
+---
+
+### Unit Tests — Results
+
+Required cases:
+
+```text
+rank 1 headline is NEW HIGH SCORE! with no Top 5 line
+rank 1 above 50 WPM adds You win a Plinko drop!
+rank 1 at 50 WPM or below is NEW HIGH SCORE! only
+places 2 through 5 use Nice typing! and You made the Top 5!
+sixth through tenth use Nice typing! and You made the Top 10!
+a Top 5 or Top 10 score above 50 shows the place line and the Plinko line
+an unplaced score above 50 uses Nice typing! and the Plinko line only
+an unplaced score at 50 WPM or below is Thanks for playing! only
+the first eligible score is the high score and a Top 10
+accuracy below 80, including 79.99, hides name entry
+a tie keeps the earlier score as the high score
+sixth place is Top 10 and not Top 5
+ten scores already ahead hide name entry
+preview placement does not change the WPM stored on earlier scores
+a name is trimmed and kept up to 20 characters
+an empty name and a name past 20 characters are rejected
 ```
 
 ---

@@ -213,7 +213,7 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 │                             84 WPM                               │
 │                          97% ACCURACY                            │
 │                                                                  │
-│                    You earned a Plinko drop!                     │
+│                    You win a Plinko drop!                       │
 │                       You made the Top 10!                        │
 │                                                                  │
 │                         Name                                     │
@@ -226,7 +226,7 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 
 Keep the WPM dominant and the name field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a name is saved, is in `docs/prd.md`.
 
-`04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” only when the result is a new high score. Show “You earned a Plinko drop!” only when the contestant qualifies. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
+`04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” as the headline for rank 1, without “You made the Top 5!” Use “Nice typing!” for places 2 through 5, a Top 10 result, or any result above 50 WPM. Add “You made the Top 5!” or “You made the Top 10!” for those places. Show “You win a Plinko drop!” only when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows “NEW HIGH SCORE!” and the Plinko line only. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 50 or below. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
 When name entry is omitted, show a large View Leaderboard button. When name entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
@@ -304,7 +304,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Every passage fits on one centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
-- [ ] Results show WPM, accuracy, the Plinko line when displayed WPM is above 50, high-score status when applicable, and qualification status.
+- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
 - [ ] Name entry is on Results and offered to Top 10 qualifiers, including ranks 6–10.
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.

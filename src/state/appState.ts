@@ -39,6 +39,7 @@ export interface AppState {
   currentTest: TestSession | null;
   latestResult: TestResult | null;
   highScore: HighScoreSummary | null;
+  currentScoreId: string | null;
 }
 
 export type AppAction =
@@ -49,6 +50,7 @@ export type AppAction =
   | { type: "ENTER_TYPING" }
   | { type: "TYPE_KEY"; key: string; repeat: boolean; now: number }
   | { type: "FINISH_TEST" }
+  | { type: "SHOW_LEADERBOARD"; currentScoreId: string }
   | { type: "RETURN_TO_READY" };
 
 export const initialState: AppState = {
@@ -58,6 +60,7 @@ export const initialState: AppState = {
   currentTest: null,
   latestResult: null,
   highScore: null,
+  currentScoreId: null,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -78,18 +81,28 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         screen: "ready",
         currentTest: null,
+        latestResult: null,
+        currentScoreId: null,
         highScore: action.highScore === undefined ? state.highScore : action.highScore,
       };
     case "ENTER_SETUP":
       if (state.screen !== "ready" && state.screen !== "leaderboard") {
         return state;
       }
-      return { ...state, screen: "setup", currentTest: null };
+      return {
+        ...state,
+        screen: "setup",
+        currentTest: null,
+        latestResult: null,
+        currentScoreId: null,
+      };
     case "ENTER_TYPING": {
       const testMode = state.activeEvent?.testMode ?? "race";
       return {
         ...state,
         screen: "typing",
+        latestResult: null,
+        currentScoreId: null,
         currentTest: createTestSession(
           testMode === "words" ? createWordLines() : passages,
           state.activeEvent?.durationSeconds ?? state.durationSeconds,
@@ -116,6 +129,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         return state;
       }
       return finishTest(state, { ...state.currentTest, isFinished: true });
+    case "SHOW_LEADERBOARD":
+      if (state.screen !== "results") {
+        return state;
+      }
+      return {
+        ...state,
+        screen: "leaderboard",
+        currentTest: null,
+        currentScoreId: action.currentScoreId,
+      };
     case "RETURN_TO_READY":
       if (
         state.screen !== "typing" ||

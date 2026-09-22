@@ -126,4 +126,21 @@ describe("appReducer", () => {
     expect(setup.screen).toBe("setup");
     expect(setup.activeEvent?.id).toBe(event60.id);
   });
+
+  it("opens the leaderboard for the saved score and clears it on the way back to Ready", () => {
+    const results = appReducer(
+      appReducer(initialState, { type: "ENTER_TYPING" }),
+      { type: "TYPE_KEY", key: "T", repeat: false, now: 0 },
+    );
+    const finished = appReducer(results, { type: "FINISH_TEST" });
+    const board = appReducer(finished, { type: "SHOW_LEADERBOARD", currentScoreId: "score-1" });
+    expect(board.screen).toBe("leaderboard");
+    expect(board.currentScoreId).toBe("score-1");
+    expect(board.currentTest).toBeNull();
+
+    const ready = appReducer(board, { type: "ENTER_READY", highScore: null });
+    expect(ready.screen).toBe("ready");
+    expect(ready.currentScoreId).toBeNull();
+    expect(ready.latestResult).toBeNull();
+  });
 });

@@ -240,3 +240,123 @@ label {
   margin: 0;
   font-size: 1.125rem;
 }
+
+.results-screen,
+.leaderboard-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.results-screen {
+  justify-content: flex-start;
+  gap: 0.75rem;
+}
+
+.results-screen .stat-value {
+  margin: 0;
+  font-size: 4.5rem;
+}
+
+.results-screen h1,
+.leaderboard-screen h1 {
+  margin: 0;
+}
+
+.name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(100%, 22rem);
+  font-weight: 700;
+  text-align: left;
+}
+
+.name-field input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 3.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--tiny-lavender);
+  border-radius: 1rem;
+  background: var(--tiny-white);
+  color: var(--tiny-charcoal);
+  font: inherit;
+}
+
+.results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+button:disabled {
+  opacity: 0.55;
+}
+
+.leaderboard-screen {
+  gap: 1rem;
+}
+
+.leaderboard-kicker,
+.leaderboard-screen h1 {
+  margin: 0;
+}
+
+.leaderboard-kicker {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: var(--tiny-mint);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.leaderboard-rows {
+  width: min(100%, 40rem);
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+}
+
+.leaderboard-row.is-first {
+  background: var(--tiny-lavender-light);
+}
+
+.leaderboard-row.is-current {
+  outline: 3px solid var(--tiny-mint-strong);
+}
+
+.leaderboard-rank,
+.leaderboard-wpm {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.leaderboard-name {
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.you-pill {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--tiny-mint);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
