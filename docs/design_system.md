@@ -242,7 +242,7 @@ Visual order:
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. Returning to Event Setup is a long-press on the logo badge, specified in `docs/prd.md` §9.
 
 ## 11. Typing
 
@@ -307,9 +307,7 @@ Nickname
 
 Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
 
-Nickname eligibility, validation, and saving are defined in `docs/prd.md`. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible.
-
-**Proposed non-qualifier action:** “VIEW LEADERBOARD.” The flow requires access to the leaderboard, but this label and any Results idle timeout have not been finalized.
+Nickname eligibility, validation, saving, and the non-qualifier action are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. When nickname entry is omitted, the action label is “VIEW LEADERBOARD” from Brand voice.
 
 Skip behavior and abandonment handling remain open. See section 20.
 
@@ -336,7 +334,7 @@ Returning to ready screen in 10s
 
 ### Layout and emphasis
 
-- Place a small logo-only badge near the upper-left safe margin.
+- Place a small logo-only badge near the upper-left safe margin. Long-press behavior is in `docs/prd.md` §9.
 - Center the “TOP 5” pill and “Leaderboard” heading.
 - Use one wide soft-white rounded panel with five consistent row positions.
 - Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.
@@ -401,6 +399,7 @@ Nice typing!
 NEW HIGH SCORE!
 You made the Top 10!
 SAVE SCORE
+VIEW LEADERBOARD
 TOP 5
 NEXT PLAYER
 ```
@@ -465,15 +464,13 @@ This checklist records what to verify; it does not claim the implementation has 
 
 ## 20. Product decisions still open
 
-Settled product rules live in `docs/prd.md`: scoring, nickname validation, the empty high-score string’s behavior, continue-event duration, the 80% accuracy gate, and the leaderboard reset duration. The empty high-score words themselves are in Brand voice above. Keep the open items below in sync with `docs/wireframes.md`.
+Settled product rules live in `docs/prd.md`: scoring, nickname validation, the empty high-score string’s behavior, continue-event duration, the 80% accuracy gate, the leaderboard reset duration, the non-qualifier Results action, and operator return to Event Setup. The empty high-score words and “VIEW LEADERBOARD” are in Brand voice above. Keep the open items below in sync with `docs/wireframes.md`.
 
 ### Still open
 
 - Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`.
 - How a valid long name is visually truncated in a row.
 - Nickname skip behavior and abandonment handling.
-- Non-qualifier Results action and any Results idle behavior.
 - Which options are selected when Event Setup first opens.
-- How the operator returns to Event Setup after starting an event.
 
 The visual system remains usable while these details are resolved. Do not confuse sample values or proposed states with approved product rules.

@@ -54,7 +54,7 @@ TYPING — running                                            │
     ▼                                                       │
 RESULTS + NICKNAME                                          │
     │ Top 10: nickname entry and Save Score                  │
-    │ Other results: continue without nickname entry        │
+    │ Other results: View Leaderboard                        │
     ▼                                                       │
 TOP 5 LEADERBOARD                                           │
     └── Next Player or automatic reset ─────────────────────┘
@@ -68,7 +68,7 @@ There are five screens. Waiting and running are states of Typing; nickname entry
 | Ready → Typing | Show the whole sentence; consume the opening keypress without entering it into the passage or starting the timer. |
 | Waiting → Running | Start timing on the first valid typing keystroke. |
 | Running → Results | End the test at the selected duration and show final WPM, accuracy, and qualification status. |
-| Results → Leaderboard | Let eligible players save a nickname; all contestants can proceed to the Top 5. The non-qualifier control is proposed in section 7. |
+| Results → Leaderboard | Top 10 contestants save a nickname. Other contestants use View Leaderboard. Both open the Top 5. The control is in `docs/prd.md` §15. |
 | Leaderboard → Ready | Clear contestant state, retain event data, and return without refreshing the browser. |
 
 ## 3. Shared visual system
@@ -144,7 +144,7 @@ The strings on this screen live in `docs/design_system.md` (Brand voice). The di
 
 Show the duration and the current high-score block. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-Do not show the Top 5, operator settings, or a Start button on this screen.
+Do not show the Top 5, operator settings, or a Start button on this screen. Returning to Event Setup is a long-press on the logo badge, specified in `docs/prd.md` §9.
 
 ## 6. Screen 03 — Typing
 
@@ -222,7 +222,7 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 
 Keep the WPM dominant and the nickname field clear of celebration motifs. Result strings are in `docs/design_system.md`. Who qualifies, and how a nickname is saved, is in `docs/prd.md`.
 
-**Proposed non-qualifier action:** show a large “VIEW LEADERBOARD” button when nickname entry is not offered. That label and any Results idle timeout are still open.
+When nickname entry is omitted, show a large View Leaderboard button. That action is in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 ## 8. Screen 05 — Top 5 Leaderboard
 
@@ -252,7 +252,7 @@ Keep the WPM dominant and the nickname field clear of celebration motifs. Result
 
 ### Required visual treatment
 
-- Small logo-only badge near the upper-left safe margin.
+- Small logo-only badge near the upper-left safe margin. Long-press behavior is in `docs/prd.md` §9.
 - Centered “TOP 5” pill and “Leaderboard” heading.
 - One wide white rounded panel with five consistent row positions, aligned ranks, left-aligned nicknames, and right-aligned WPM values.
 - Rank 1 uses a light lavender row and mint rank accent. A small crown is optional; the numeral and score remain explicit.
@@ -309,9 +309,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 | --- | --- | --- |
 | Typing input | Timing, incorrect-input, and Backspace rules live in `docs/prd.md`. | Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`. |
 | Nickname policy | Validation lives in `docs/prd.md`. | Long-name display inside a row, skip behavior, and abandonment handling. |
-| Results progression | Every contestant can reach the leaderboard. | Confirm the proposed VIEW LEADERBOARD control for non-qualifiers and any Results idle behavior. |
 | Setup defaults | Continue-event duration behavior lives in `docs/prd.md`. | Which options are selected when Event Setup first opens. |
-| Operator re-entry | Settings are separate from contestant gameplay. | How the operator returns to Setup after starting an event. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.
 

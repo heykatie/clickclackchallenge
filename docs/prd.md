@@ -211,7 +211,7 @@ Ready
 → contestant types
 → timer expires
 → Results screen
-→ nickname entry if Top 10 eligible
+→ Save Score if Top 10 eligible, otherwise View Leaderboard
 → Leaderboard
 → Next Player or automatic reset
 → Ready
@@ -286,6 +286,10 @@ Continuing should:
 If no previous event exists, the Continue option should be unavailable.
 
 If the operator wants to change the test duration, they should start a fresh event.
+
+### Returning to Event Setup
+
+After Start Event, the operator returns to Event Setup by long-pressing the logo-only badge on Ready or the Leaderboard. The active event stays as it is. Keyboard input does not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -835,6 +839,8 @@ If the contestant's score:
 then show nickname entry.
 
 If the contestant does not qualify for the Top 10, nickname entry should not be shown.
+
+When nickname entry is not shown, Results shows one action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results. A Top 10 contestant leaves Results by saving a nickname. The label is in `docs/design_system.md` (Brand voice).
 
 ### Nickname Rules
 
@@ -1535,6 +1541,24 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 ---
 
+### Non-Qualifier Leaves Results
+
+**Given**
+
+- the contestant does not qualify for the Top 10
+- nickname entry is not shown
+
+**When**
+
+- the contestant selects View Leaderboard
+
+**Then**
+
+- the Top 5 leaderboard appears
+- Results does not advance on its own
+
+---
+
 ### Nickname Entry Is Not Interrupted
 
 **Given**
@@ -1659,6 +1683,25 @@ A server connection must not be required.
 - the typing sentence remains visually centered and readable
 
 Any sentence that does not fit must be rewritten or removed.
+
+---
+
+### Operator Returns to Event Setup
+
+**Given**
+
+- an event has already been started
+- Ready or the Leaderboard is visible
+
+**When**
+
+- the operator long-presses the logo-only badge
+
+**Then**
+
+- Event Setup opens
+- the active event is unchanged
+- a keypress does not open Event Setup
 
 ---
 
