@@ -261,6 +261,10 @@ The Event Setup screen must allow the operator to:
 - start a fresh event
 - continue the current/most recently active event when one exists
 
+When Event Setup opens and no event exists, Start Fresh and `30 seconds` are selected. Continue is unavailable.
+
+When an event already exists, including when the operator returns from Ready or the Leaderboard, Continue is selected. The duration control shows that event's stored duration.
+
 ### Start Fresh
 
 Starting fresh should:
@@ -333,6 +337,8 @@ The timer starts only when the contestant presses the first valid typing charact
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
 While the first valid key has not been pressed, a long-press on the logo badge returns to Ready and does not save a score. The badge is present in that waiting state so the screen has a way back. After the timer starts, that long-press does not leave the test.
+
+The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
 ### Sentence
 
@@ -844,6 +850,8 @@ Nickname input should:
 - use a reasonable maximum length for layout safety
 - display nickname content as plain text
 
+The stored nickname is the trimmed value, up to the maximum below. A row may show an ellipsis when the name does not fit. That display does not change the stored value. The truncation is in `docs/design_system.md`.
+
 Recommended maximum:
 
 ```text
@@ -865,8 +873,10 @@ Top 5
 Each leaderboard row should include:
 
 - rank
-- nickname
+- nickname, or a dash when the score has no nickname
 - displayed WPM
+
+Do not invent a name for a null nickname. A long name may be truncated in the row. The stored nickname stays complete. The dash and the ellipsis are in `docs/design_system.md`.
 
 The leaderboard may:
 
@@ -890,7 +900,7 @@ The current high score is the rank #1 eligible score for the active event.
 The Ready screen should show:
 
 - high-score WPM
-- nickname
+- nickname, or a dash when that score has no nickname
 
 If the active event has no eligible scores yet, show “Be the first high score!”
 

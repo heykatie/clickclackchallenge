@@ -825,7 +825,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The non-typing keys excluded from the first scored attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace is handled separately.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started.
 
 Scoring, nickname, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
@@ -1740,6 +1740,8 @@ held-key repeat events are ignored, including when KeyboardEvent.repeat is true
 separate physical presses of the same key still count
 Ready-screen start key is not scored
 first valid Typing-screen key starts the timer and is scored
+a printable character, including space or punctuation, can be that key
+Shift and the other excluded non-typing keys do not start the timer
 ```
 
 ---

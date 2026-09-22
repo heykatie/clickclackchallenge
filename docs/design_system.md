@@ -17,7 +17,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
 
-This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. Screen layout and the PNG inventory live in `docs/wireframes.md`. Product behavior lives in `docs/prd.md`. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions. Section 20 lists decisions that are still open.
+This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. Screen layout and the PNG inventory live in `docs/wireframes.md`. Product behavior lives in `docs/prd.md`. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions.
 
 ## 1. Brand direction
 
@@ -189,7 +189,7 @@ Make WPM the strongest element, with the unit explicit. Keep nickname and suppor
 
 ### Leaderboard rows
 
-Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the nickname maximum in `docs/prd.md` so a name does not push the WPM value off-screen. How a long name is visually truncated inside the row is still open.
+Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the nickname maximum in `docs/prd.md` so a name does not push the WPM value off-screen. When the visible name still does not fit, truncate it with an ellipsis. The stored nickname stays the full saved value. A score with no nickname shows a dash in the name column. Do not invent a guest name.
 
 ## 8. Typing feedback
 
@@ -227,15 +227,15 @@ Display two option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration, is defined in `docs/prd.md`. While Continue is selected, show the stored duration and do not let the operator highlight the other length. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+Fresh-event and continue-event behavior, including saved duration and which options are selected, is defined in `docs/prd.md`. When no event exists, Start Fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration control shows the stored duration. While Continue is selected, do not let the operator highlight the other length. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
 
-**Proposed empty state:** if there is no previous event, disable that option and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
+**No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
 ## 10. Ready / Attract
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!”
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no nickname, show a dash instead of a name.
 
 Visual order:
 
@@ -470,14 +470,11 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Essential text has sufficient contrast, focus is visible, and state is not conveyed by color alone.
 - [ ] Required fonts, images, icons, and passages are available offline.
 
-## 20. Product decisions still open
+## 20. Settled product decisions
 
-Settled product rules live in `docs/prd.md`: scoring, nickname validation, the empty high-score string’s behavior, continue-event duration, the 80% accuracy gate, the leaderboard reset duration, the non-qualifier Results action, and operator return to Event Setup. The empty high-score words and “VIEW LEADERBOARD” are in Brand voice above. Keep the open items below in sync with `docs/wireframes.md`.
+These choices are settled. Product behavior is in `docs/prd.md`.
 
-### Still open
-
-- Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`.
-- How a valid long name is visually truncated in a row.
-- Which options are selected when Event Setup first opens.
-
-The visual system remains usable while these details are resolved. Do not confuse sample values or proposed states with approved product rules.
+- The first printable character starts the timer. Space and punctuation count. The excluded non-typing keys are in `docs/prd.md` §11.
+- A long nickname is truncated with an ellipsis in the row. The stored name is unchanged.
+- When no event exists, Event Setup selects Start Fresh and 30 seconds, and Continue is unavailable. When an event exists, Continue is selected.
+- A ranked score with no nickname shows a dash. Do not invent a guest name.

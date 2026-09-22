@@ -34,8 +34,8 @@ This document specifies the five-screen experience for an offline typing contest
   - Results: [04-results.png](./wireframes/04-results.png), 1600 × 1200. This export is the new-high-score state described in section 7, not the ordinary result in the diagram there.
   - Leaderboard: [05-leaderboard.png](./wireframes/05-leaderboard.png), 1448 × 1086
 - `01-setup.png`, `02-ready.png`, and `04-results.png` contain missing-glyph boxes on the logo, Start Event, Press Any Key, Top 10, and Save Score. Those boxes are export defects. Layout, hierarchy, and placement in the PNGs still count. Implementation uses a clean logo-only keycap badge and the real strings from `docs/design_system.md`. The button text in the PNGs is not the label: `01-setup.png` shows title-case “Start Event,” and `04-results.png` shows “SAVE SCORE” with a trailing missing glyph. Implementation uses `START EVENT` and `SAVE SCORE` from `docs/design_system.md` §7, with no glyph.
-- Names, scores, accuracy values, and selected options in examples are sample data. They are not seeded event records or confirmed defaults.
-- Details marked **Proposed** complete a gap in the wireframe specification. Unresolved product decisions are collected in section 11.
+- Names, scores, and accuracy values in examples are sample data. They are not seeded event records. The Setup diagram's 30 seconds and Start fresh match the first-open default in `docs/prd.md`.
+- Details marked **Proposed** complete a gap in the wireframe specification.
 
 ## 2. Screen flow
 
@@ -101,7 +101,7 @@ Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `d
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Use two clear option groups with visible selected states and one large mint action. The example selections do not establish a default duration or event mode.
+Use two clear option groups with visible selected states and one large mint action. When no event exists, the selected options are Start fresh and 30 seconds, as in `docs/prd.md`. Continue is unavailable.
 
 | Control | Layout |
 | --- | --- |
@@ -110,7 +110,7 @@ Use two clear option groups with visible selected states and one large mint acti
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. |
 
-**Proposed empty state:** disable “Continue previous event” when none exists and show “No previous event yet.”
+**No previous event:** disable “Continue previous event” and show “No previous event yet.”
 
 `01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the two option groups and Start Event. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
@@ -191,11 +191,11 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 ### Behavior
 
 1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. A long-press on the logo badge returns to Ready and does not save a score. That path is in `docs/prd.md` §11.
-2. **Running:** the first valid typing keystroke starts timing. Incorrect input must not increase WPM.
+2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The excluded keys are in `docs/prd.md` §11.
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
 
-Bundle passages and fonts locally. Do not add pause/restart controls, a leaderboard, scrolling passages, or continuous decoration to this screen. Accuracy and correction counting live in `docs/prd.md`. Which keys can start the timer remains open in section 11.
+Bundle passages and fonts locally. Do not add pause/restart controls, a leaderboard, scrolling passages, or continuous decoration to this screen. Accuracy and correction counting live in `docs/prd.md`. Which key starts the timer is in `docs/prd.md` §11.
 
 ## 7. Screen 04 — Results + Nickname
 
@@ -265,13 +265,14 @@ Focusing the nickname field can open the iPad software keyboard over SAVE SCORE,
 - Rank 1 uses a light lavender row and mint rank accent. A small crown is optional; the numeral and score remain explicit.
 - Other ranks use calm white surfaces and subtle separators, not a different bright color per rank.
 - When the current player's result is in the Top 5, a subtle mint row treatment and “YOU” pill may identify it. Match the actual result, not just the nickname, because names may repeat.
+- A saved score with no nickname still occupies its rank. Show a dash in the name column. Do not invent a guest name. Truncate a long nickname with an ellipsis. The stored name stays the full saved value. Both rules are in `docs/design_system.md`.
 - Keep rank 1 the strongest ranking emphasis even when another row has the current-player treatment. If the player is first, combine the treatments in that one row.
 - Place one large mint “NEXT PLAYER” button below the panel, followed by a readable automatic-reset message.
 - Keep pink, peach, and other organic motifs at the edges. No heavy shadows or shop-name text.
 
 ### Data and timing
 
-- Rank by WPM descending. Accuracy and submission time are proposed tie-breakers from the PRD, not a separately weighted score; their final use remains to be confirmed.
+- Rank by displayed WPM, then displayed accuracy rounded to a whole number, then the earlier submission. That order is in `docs/prd.md`. Do not sort on the stored accuracy tenths.
 - Show only the Top 5. Do not append the current player as a sixth row if they rank lower.
 - The PNG's five contestants are sample data. **Proposed sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, include “No scores yet.”
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored nickname.
@@ -312,14 +313,12 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Required assets, fonts, passages, and stored data work offline on the target iPad.
 - [ ] Essential text has sufficient contrast, controls have visible focus, and state is not conveyed by color alone.
 
-## 11. Decisions still to finalize
+## 11. Settled layout decisions
 
-| Topic | What is established | What remains open |
-| --- | --- | --- |
-| Typing input | Timing, incorrect-input, and Backspace rules live in `docs/prd.md`. | Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`. |
-| Nickname policy | Validation, empty rejection, and leaving without a nickname live in `docs/prd.md`. | Long-name display inside a row. |
-| Setup defaults | Continue-event duration behavior lives in `docs/prd.md`. | Which options are selected when Event Setup first opens. |
+| Topic | Rule |
+| --- | --- |
+| Typing input | The first printable character starts the timer, including space and punctuation. The excluded non-typing keys are in `docs/prd.md` §11. |
+| Nickname display | A missing nickname is a dash. A long nickname is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
+| Setup defaults | With no event, Start fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected. Behavior is in `docs/prd.md` §9. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.
-
-Until the remaining open items are resolved, do not treat illustrative values or proposed controls as previously approved product rules.
