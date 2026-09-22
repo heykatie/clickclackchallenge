@@ -2395,15 +2395,623 @@ Avoid:
 
 ---
 
-## 27. Suggested Component and Module Structure
+## Component and Module Boundaries
+
+V1 should use a small, explicit structure with clear responsibilities.
+
+The goal is to keep the code easy to understand and test without creating unnecessary abstractions.
+
+Use the following rule:
+
+```text
+Screens
+→ control user flow
+
+Components
+→ focused reusable UI
+
+Services
+→ event and score operations / persistence coordination
+
+Pure functions
+→ typing, scoring, and ranking logic
+
+Data modules
+→ bundled passages
+```
+
+Do not split the app into additional layers unless the implementation actually needs them.
+
+---
+
+### EventSetupScreen
+
+Suggested file:
+
+```text
+src/screens/EventSetupScreen.tsx
+```
+
+Responsibility:
+
+- operator setup before contestants begin
+
+Handles:
+
+- 30-second / 60-second selection
+- Start Fresh
+- Continue Previous Event
+- displaying whether a previous event is available
+- calling `EventService` to create or restore an event
+- transitioning to `ReadyScreen`
+
+It should not:
+
+- calculate scores
+- rank leaderboard entries
+- contain IndexedDB implementation details
+- handle typing-test input
+- render contestant results
+
+Conceptual flow:
+
+```text
+select duration
+→ Start Fresh or Continue
+→ EventService
+→ active event available
+→ ReadyScreen
+```
+
+---
+
+### ReadyScreen
+
+Suggested file:
+
+```text
+src/screens/ReadyScreen.tsx
+```
+
+Responsibility:
+
+- attract / ready state between contestants
+
+Displays:
+
+- contest messaging
+- Plinko threshold message
+- current high score
+- logo / allowed decorative branding
+- `PRESS ANY KEY TO START`
+
+Handles:
+
+```text
+contestant keypress
+→ consume Ready-screen key
+→ transition to TypingScreen
+```
+
+The key used to leave the Ready screen must not:
+
+- start the timer
+- count as a typing attempt
+- affect WPM
+- affect accuracy
+
+It should not:
+
+- display the Top 5 leaderboard
+- save scores
+- create or archive events
+- contain scoring logic
+
+---
+
+### TypingScreen
+
+Suggested file:
+
+```text
+src/screens/TypingScreen.tsx
+```
+
+Responsibility:
+
+- run the active typing test
+
+Handles:
+
+- current sentence display
+- typed-character state
+- current character position
+- current-word highlighting
+- caret position
+- correct / incorrect character feedback
+- Backspace
+- sentence progression
+- first-valid-key timer start
+- live WPM
+- live accuracy
+- remaining time
+- timeout
+- transition to Results
+
+The screen should use pure typing/scoring functions rather than embedding all logic directly inside JSX.
+
+It should not:
+
+- persist final scores directly
+- decide Top 10 nickname eligibility by itself
+- render the final leaderboard
+- create or archive events
+
+Conceptual flow:
+
+```text
+sentence visible
+→ first valid typing key
+→ timer starts
+→ typing engine processes input
+→ scoring functions update live metrics
+→ timer expires
+→ TestResult created
+→ ResultsScreen
+```
+
+---
+
+### ResultsScreen
+
+Suggested file:
+
+```text
+src/screens/ResultsScreen.tsx
+```
+
+Responsibility:
+
+- present the completed contestant result
+- coordinate the post-test save flow
+
+Displays:
+
+- final displayed WPM
+- final accuracy
+- new-high-score state when applicable
+- Plinko qualification when applicable
+- Top 10 qualification when applicable
+
+If the contestant is Top 10 eligible, render:
+
+```text
+NicknameForm
+```
+
+The Results screen should coordinate score saving through `ScoreService`.
+
+Conceptual flow:
+
+```text
+receive TestResult
+→ determine result messaging
+→ if Top 10, show NicknameForm
+→ save score / nickname
+→ LeaderboardScreen
+```
+
+Nickname entry remains part of the Results screen.
+
+Do not add a separate app-level `"nickname"` screen state.
+
+It should not:
+
+- contain IndexedDB implementation details
+- contain typing-engine logic
+- permanently store leaderboard rank
+
+---
+
+### NicknameForm
+
+Suggested file:
+
+```text
+src/components/NicknameForm.tsx
+```
+
+Responsibility:
+
+- collect and validate a qualifying contestant's nickname
+
+Handles:
+
+- text input
+- trimming leading/trailing whitespace
+- rejecting empty values
+- maximum-length validation
+- submit action
+
+Recommended V1 limit:
+
+```ts
+export const MAX_NICKNAME_LENGTH = 20;
+```
+
+Suggested props:
+
+```ts
+interface NicknameFormProps {
+  onSubmit: (nickname: string) => void;
+}
+```
+
+The component should receive submission behavior through props.
+
+It should not:
+
+- access IndexedDB directly
+- calculate leaderboard rank
+- decide whether the contestant is Top 10
+- calculate WPM or accuracy
+
+The parent `ResultsScreen` determines whether `NicknameForm` should be shown.
+
+---
+
+### LeaderboardScreen
+
+Suggested file:
+
+```text
+src/screens/LeaderboardScreen.tsx
+```
+
+Responsibility:
+
+- present the active event's visible leaderboard
+- control transition to the next contestant
+
+Displays:
+
+- Top 5
+- rank
+- nickname
+- displayed WPM
+- optional emphasis for rank #1
+- optional highlight for the newest contestant
+- Next Player action
+- automatic-reset status/countdown if shown
+
+Handles:
+
+```text
+NEXT PLAYER
+→ ReadyScreen
+```
+
+and:
+
+```text
+auto-reset timeout
+→ ReadyScreen
+```
+
+The screen should receive or request ranked score data derived from the active event.
+
+It should not:
+
+- store leaderboard position permanently
+- calculate raw typing metrics
+- create new events
+- mutate prior scores except through an explicit service call
+
+---
+
+### EventService
+
+Suggested file:
+
+```text
+src/services/EventService.ts
+```
+
+`EventService` is not a React component.
+
+Responsibility:
+
+- coordinate event lifecycle operations
+
+Suggested responsibilities:
+
+```text
+create fresh event
+archive previous active event
+load active event
+continue active event
+update activeEventId
+```
+
+Suggested API:
+
+```ts
+createEvent(
+  durationSeconds: TestDuration,
+  passageSetId: string
+): Promise<EventRecord>;
+
+getActiveEvent(): Promise<EventRecord | null>;
+
+continueEvent(): Promise<EventRecord | null>;
+```
+
+Starting fresh should perform:
+
+```text
+load existing active event
+→ archive it if present
+→ create new EventRecord
+→ set status = active
+→ update settings.activeEventId
+→ preserve old event and score data
+```
+
+`EventService` should coordinate with the local persistence layer rather than embedding UI behavior.
+
+It should not:
+
+- render UI
+- calculate WPM
+- rank scores
+- generate passages
+
+---
+
+### ScoreService
+
+Suggested file:
+
+```text
+src/services/ScoreService.ts
+```
+
+`ScoreService` is not a React component.
+
+Responsibility:
+
+- coordinate score persistence and score retrieval
+
+Suggested responsibilities:
+
+```text
+save completed score
+update nickname
+load scores for an event
+```
+
+Suggested API:
+
+```ts
+saveScore(score: ScoreRecord): Promise<void>;
+
+getScoresForEvent(
+  eventId: string
+): Promise<ScoreRecord[]>;
+
+updateScoreNickname(
+  scoreId: string,
+  nickname: string
+): Promise<void>;
+```
+
+`ScoreService` may call local repository/database functions.
+
+It should not:
+
+- render UI
+- calculate typing input state
+- permanently store leaderboard rank
+- generate passages
+
+Leaderboard sorting should remain a pure helper rather than becoming a large additional service.
+
+---
+
+### Typing Engine
+
+Suggested file:
+
+```text
+src/features/typing/typingEngine.ts
+```
+
+Responsibility:
+
+- pure typing-state transitions
+
+Handles:
+
+- expected character comparison
+- character insertion
+- Backspace behavior
+- caret / character index movement
+- sentence completion
+- transition to the next sentence
+- current editable sentence state
+
+The typing engine should not:
+
+- render React UI
+- save to IndexedDB
+- control app navigation
+- rank leaderboard scores
+
+Keeping this logic pure makes it easier to unit test.
+
+---
+
+### Scoring Module
+
+Suggested file:
+
+```text
+src/features/typing/scoring.ts
+```
+
+Responsibility:
+
+- pure score calculations
+
+Contains functions such as:
+
+```ts
+calculateWpm(
+  correctCharacters: number,
+  elapsedSeconds: number
+): number;
+
+calculateAccuracy(
+  correctAttempts: number,
+  incorrectAttempts: number
+): number;
+
+meetsLeaderboardAccuracy(
+  accuracy: number
+): boolean;
+```
+
+It should not:
+
+- persist scores
+- render UI
+- manage event state
+- process IndexedDB directly
+
+---
+
+### Ranking Module
+
+Suggested file:
+
+```text
+src/features/leaderboard/ranking.ts
+```
+
+Responsibility:
+
+- derive leaderboard order from saved scores
+
+Handles:
+
+```text
+filter minimum-accuracy scores
+→ sort by displayed WPM
+→ break ties by accuracy
+→ break remaining ties by earlier createdAt
+→ derive rank
+→ derive Top 10
+→ derive Top 5
+```
+
+Suggested ranking order:
+
+```text
+1. displayedWpm descending
+2. accuracy descending
+3. createdAt ascending
+```
+
+This should be a pure module.
+
+Do not create a separate persistent leaderboard model or leaderboard database store.
+
+---
+
+### Passages Module
+
+Suggested file:
+
+```text
+src/data/passages.ts
+```
+
+This is a local data module, not a React component or service.
+
+Responsibility:
+
+- provide prewritten bundled typing passages
+- provide a stable passage-set ID
+- preserve deterministic sentence order
+
+Example:
+
+```ts
+export const commonSentencesV1: PassageSet = {
+  id: "common-sentences-v1",
+  sentences: [
+    "The little dog ran across the yard today.",
+    "We went down the road to see our old friend.",
+    "The sun came out as we walked back home."
+  ]
+};
+```
+
+The module should not:
+
+- fetch passages from an API
+- generate passages at runtime
+- shuffle sentences per contestant
+- contain UI logic
+
+---
+
+### Local Persistence Layer
+
+The component boundaries above still require a small persistence layer for IndexedDB.
+
+Suggested files:
+
+```text
+src/db/
+├── database.ts
+├── eventRepository.ts
+├── scoreRepository.ts
+└── settingsRepository.ts
+```
+
+Responsibilities:
+
+`database.ts`
+
+- initialize/open IndexedDB
+- define schema/object stores/indexes
+- handle schema version upgrades
+
+`eventRepository.ts`
+
+- low-level event reads/writes
+
+`scoreRepository.ts`
+
+- low-level score reads/writes
+
+`settingsRepository.ts`
+
+- low-level settings reads/writes
+
+Services coordinate business operations across repositories.
+
+Screens/components should not contain raw IndexedDB calls.
+
+---
+
+## Recommended V1 Structure
+
+Use this as the initial structure:
 
 ```text
 src/
-├── app/
-│   ├── App.tsx
-│   ├── appReducer.ts
-│   └── appTypes.ts
-│
 ├── screens/
 │   ├── EventSetupScreen.tsx
 │   ├── ReadyScreen.tsx
@@ -2412,28 +3020,20 @@ src/
 │   └── LeaderboardScreen.tsx
 │
 ├── components/
-│   ├── Logo.tsx
-│   ├── HighScore.tsx
-│   ├── Timer.tsx
-│   ├── LiveStats.tsx
-│   ├── NicknameInput.tsx
-│   ├── Leaderboard.tsx
-│   └── DecorativeShapes.tsx
+│   └── NicknameForm.tsx
+│
+├── services/
+│   ├── EventService.ts
+│   └── ScoreService.ts
 │
 ├── features/
 │   ├── typing/
 │   │   ├── typingEngine.ts
 │   │   ├── scoring.ts
-│   │   ├── typingTypes.ts
-│   │   └── typingEngine.test.ts
+│   │   └── typingTypes.ts
 │   │
-│   ├── leaderboard/
-│   │   ├── ranking.ts
-│   │   └── ranking.test.ts
-│   │
-│   └── events/
-│       ├── eventService.ts
-│       └── eventTypes.ts
+│   └── leaderboard/
+│       └── ranking.ts
 │
 ├── db/
 │   ├── database.ts
@@ -2444,24 +3044,116 @@ src/
 ├── data/
 │   └── passages.ts
 │
-├── hooks/
-│   ├── useTypingTest.ts
-│   └── useAutoReset.ts
+├── app/
+│   ├── App.tsx
+│   ├── appReducer.ts
+│   └── appTypes.ts
 │
 ├── styles/
 │   ├── tokens.css
 │   └── global.css
 │
-├── types/
-│   └── index.ts
-│
-├── main.tsx
-└── vite-env.d.ts
+└── main.tsx
 ```
 
-Keep abstractions small during V1.
+Additional small shared files may be added when implementation requires them, but they should not be created merely to match an abstract architecture.
 
-Do not create modules that do not serve a concrete requirement.
+---
+
+## Boundary Rules
+
+Use these rules when deciding where code belongs:
+
+```text
+Screen changes the user flow
+→ screen
+
+Reusable focused UI
+→ component
+
+Event or score business operation
+→ service
+
+IndexedDB read/write
+→ repository / db layer
+
+Typing state transformation
+→ typingEngine
+
+WPM / accuracy calculation
+→ scoring
+
+Leaderboard ordering
+→ ranking
+
+Static sentence content
+→ passages
+```
+
+Avoid mixing these responsibilities.
+
+Examples:
+
+```text
+TypingScreen should not call IndexedDB directly.
+
+NicknameForm should not calculate Top 10 eligibility.
+
+ScoreService should not render leaderboard rows.
+
+EventService should not calculate WPM.
+
+ranking.ts should not save scores.
+
+passages.ts should not shuffle content per contestant.
+```
+
+---
+
+## Avoid Over-Architecture
+
+Do not add extra layers unless a concrete implementation need appears.
+
+V1 does not need separate abstractions such as:
+
+```text
+LeaderboardService
+PassageService
+TimerService
+NavigationService
+StorageManager
+GameManager
+ContestantRepository
+HighScoreService
+```
+
+unless actual code complexity later justifies them.
+
+Likewise, do not automatically split every visual element into its own React component.
+
+Avoid creating files such as:
+
+```text
+WpmDisplay.tsx
+AccuracyDisplay.tsx
+TimerLabel.tsx
+SentenceWord.tsx
+Character.tsx
+RankNumber.tsx
+```
+
+unless reuse, readability, testing, or complexity makes the extraction useful.
+
+The V1 architecture should remain:
+
+```text
+small
+explicit
+testable
+easy to trace
+```
+
+rather than maximizing the number of files or abstractions.
 
 ---
 
