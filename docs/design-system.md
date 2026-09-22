@@ -1,977 +1,495 @@
-```md
 # Typing Test Design System
 
-## 1. Brand Direction
+This document defines the V1 visual system for an offline typing contest played on a giant physical keyboard and displayed on a landscape iPad. It reflects the latest agreed palette, screen layouts, and logo-only branding.
 
-The typing test should visually align with brand.
+Use it alongside `docs/PRD.md` for product behavior and `docs/wireframes.md` for screen flow, layouts, and unresolved decisions. Example names and scores are illustrative, not default event data. Details explicitly marked **Proposed** remain design suggestions.
 
-The brand aesthetic is:
+## 1. Brand direction
 
-- Playful
-- Handmade
-- Pastel
-- Rounded
-- Friendly
-- Cute without feeling childish
-- Slightly retro
-- Keyboard-focused
-- Retail/event-oriented
-- Light and approachable rather than dark or gamer-styled
+The interface should feel like a playful event flyer translated into a readable, functional experience.
 
-The interface should feel like an interactive extension of event flyers and physical booth.
+Core qualities:
 
----
+- Light, airy, and pastel.
+- Friendly, rounded, and slightly handmade.
+- Playful without feeling childish.
+- Keyboard-focused and suitable for a busy event booth.
+- Flat and uncluttered, with one clear purpose per screen.
 
-## 2. Design Principles
+Ready, Results, and Leaderboard can carry the strongest decorative personality. Event Setup should emphasize clear choices. Typing should be the quietest screen.
 
-### Prioritize readability
+### Logo and visible naming
 
-The typing test will be used on a landscape iPad viewed from approximately two feet away.
+- A small logo-only keycap badge is allowed.
+- Retain the established brand-inspired visual style without adding a replacement wordmark.
+- Use a clean logo asset with no embedded shop-name text. Do not reproduce missing-glyph boxes found in older mockups.
+- The internal `--tiny-*` token prefix may remain; it is not visible interface branding.
+- On Typing, omit the badge or keep it small enough that it does not compete with the passage.
 
-Important information should be:
+## 2. Device and layout
 
-- Large
-- High contrast
-- Easy to scan
-- Uncluttered
-- Readable without leaning close to the screen
+| Requirement | Direction |
+| --- | --- |
+| Primary device | Landscape iPad |
+| Design aspect ratio | 4:3 |
+| Viewing distance | Approximately two feet |
+| Screen composition | One main purpose and clear central focal point |
+| Scrolling | Keep each contestant screen within one viewport |
+| Content placement | Generous safe margins; no clipped text, rows, or actions |
+| Export sizing | PNG pixels are not CSS layout dimensions |
 
-### Keep the typing screen minimal
+Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including nickname entry with the physical keyboard connected.
 
-Decorative branding should be strongest on:
+Do not rely on shrinking important text to make a crowded screen fit. Reduce content and decoration first.
 
-- Ready / Attract
-- Results
-- Leaderboard
-- Event Setup
+## 3. Color palette
 
-During active typing, visual decoration should be reduced so it does not compete with the passage.
+These are the latest documented design values. They are approximate visual matches to the brand references, not verified official brand colors. Use the tokens below for implementation rather than sampling slightly different colors from generated PNGs.
 
-### Keep the interface playful
+| Color | Token | Hex | Primary use |
+| --- | --- | --- | --- |
+| Blush | `--tiny-blush` | `#FBEDEF` | Main background |
+| Soft white | `--tiny-white` | `#FFFDFC` | Panels, inputs, ordinary leaderboard rows |
+| Mint | `--tiny-mint` | `#9DDED8` | Accent surfaces, rank badges, decorative forms |
+| Strong mint | `--tiny-mint-strong` | `#6CCFC7` | Primary controls, caret, focus accents |
+| Lavender | `--tiny-lavender` | `#AA9AD4` | Borders, current-word emphasis, selected-state accents |
+| Light lavender | `--tiny-lavender-light` | `#D9D0ED` | First-place row, soft highlights, prompt panels |
+| Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
+| Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
+| Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
+| Muted gray | `--tiny-muted` | `#8C8788` | Secondary text where contrast is sufficient |
+| Error red | `--tiny-error` | `#D95D5D` | Incorrect characters and validation feedback |
 
-Use:
+### Color hierarchy
 
-- Rounded shapes
-- Soft pastel colors
-- Organic blobs
-- Stars
-- Swirls
-- Dots
-- Small hand-drawn-style accents
+1. Blush and soft white establish the main surfaces.
+2. Mint provides the main interactive accent.
+3. Lavender provides secondary emphasis and first-place styling.
+4. Pink and peach support decoration and celebration.
+5. Charcoal keeps essential content readable.
 
-Avoid excessive decoration around important controls or typing content.
+Use fewer colors during Typing. Do not assign a different bright color to every leaderboard rank. Cream, sky blue, coral, and lime are not part of the current core palette.
 
-### Make competition obvious
+### Contrast and functional use
 
-The user should quickly understand:
+- Use charcoal for important reading and labels on pastel controls.
+- Do not assume a pastel foreground is readable simply because it belongs to the palette.
+- Check lavender word styling, muted passage text, error text, and focus indicators against their actual backgrounds.
+- Where an accent foreground is too faint, keep the accent in a border or tinted background and use darker text.
+- Pair errors with an underline or another non-color indicator. Pair selection with a radio/check indicator, and current-player emphasis with a “YOU” label.
 
-- This is a giant keyboard typing contest
-- 50 WPM qualifies for a Plinko drop
-- There is a high score to beat
-- There is a leaderboard
+## 4. Typography
 
----
+Use three primary font families. Required font files must be packaged or cached locally so the app does not depend on a font CDN during events.
 
-# 3. Color Palette
+| Role | Family | Weights | Use |
+| --- | --- | --- | --- |
+| Display | Fredoka | 600, 700 | Headlines, large scores, primary actions, leaderboard headings |
+| Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, nicknames, helper copy |
+| Typing passage | Atkinson Hyperlegible | 400, 700 | Sentences and character-level feedback |
 
-These colors are approximate visual matches based on existing graphics.
+The passage prioritizes clear character recognition, including `I`, `l`, `1`, `O`, and `0`. Do not substitute a decorative display face for passage text. Do not add a fourth primary handwritten font in V1.
 
-## Core Colors
+### Initial type scale
 
-### Teal
+These are starting CSS layout sizes. Validate readability and fit on the actual iPad.
 
-Primary brand color.
+| Element | Size |
+| --- | --- |
+| Main headline | 44–64 px |
+| Large result WPM | 72–100 px |
+| Section heading | 28–40 px |
+| Primary action text | 24–34 px |
+| Primary labels and leaderboard names | 20–24 px |
+| Body copy | 18–22 px |
+| Helper copy | 14–18 px; enlarge when needed for distance reading |
+| Typing sentence | 32–36 px |
+| Typing timer | 36–48 px |
+| Live WPM and accuracy | 22–30 px |
+| High-score target during Typing | 18–24 px |
 
-```css
---tiny-teal: #9DDEDA;
-```
+Keep the passage font size consistent between sentences and contestants. Names, scores, required instructions, and the reset message must remain easy to read without leaning toward the screen.
 
-Use for:
+## 5. Shapes, spacing, and surfaces
 
-- Primary interactive states
-- Selected controls
-- Highlights
-- Typing caret
-- Decorative accents
-- Status indicators
+Use rounded rectangles, pill labels, circles, organic blobs, arcs, and loose hand-drawn forms.
 
-### Strong Teal
+| Element | Corner radius |
+| --- | --- |
+| Small controls | 12–16 px |
+| Buttons | 18–26 px |
+| Cards | 24–32 px |
+| Large panels | 28–36 px |
 
-More saturated teal for buttons or stronger emphasis.
+Group related information with whitespace, soft surfaces, and fine borders. Avoid surrounding every small piece of content with its own card.
 
-```css
---tiny-teal-strong: #55C8C5;
-```
+- Panels and inputs generally use soft white.
+- Primary controls use strong mint with charcoal text.
+- Use mint or light lavender for emphasis without obscuring text.
+- Keep consistent row heights, column alignment, and padding within repeated components.
+- Prefer flat fills. Avoid heavy shadows, strong gradients, glass effects, glossy effects, and floating dashboard-style cards.
+- A very subtle shadow is acceptable only when it improves separation; it is not the main source of visual hierarchy.
 
-Use for:
+## 6. Decorative motifs
 
-- Primary buttons
-- Active states
-- Important accents
+Allowed motifs include organic pastel blobs, swirls, arcs, dots, stars, sparkles, hearts, confetti, and simple keycap-inspired forms.
 
----
+Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge; essential content may not.
 
-### Lavender
+During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and nickname field clear.
 
-Primary secondary brand color.
+## 7. Controls and reusable components
 
-```css
---tiny-lavender: #A99AD7;
-```
+### Primary actions
 
-Use for:
+Use Fredoka 600–700, a strong mint fill, charcoal text, and rounded corners.
 
-- Major headings
-- Secondary highlights
-- Leaderboard emphasis
-- Decorative elements
+Confirmed action labels:
 
-### Light Lavender
+- “START EVENT”
+- “SAVE SCORE”
+- “NEXT PLAYER”
 
-```css
---tiny-lavender-light: #D7CFF1;
-```
+Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for major actions. Provide visible keyboard focus and clear pressed, disabled, and saving states where relevant. Prevent repeated submission from creating duplicate results.
 
-Use for:
+### Ready prompt
 
-- Selected cards
-- Background fills
-- Secondary surfaces
+“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. It may sit on a light lavender or mint panel with large charcoal display text.
 
----
+### Option groups
 
-### Pink
+Use labeled, mutually exclusive choices for test duration and leaderboard mode. A selected option needs a visible radio/check indicator as well as its mint or lavender treatment. Do not make color the only selection cue.
 
-```css
---tiny-pink: #F5C2D5;
-```
+### Nickname field
 
-Use for:
+Use a large soft-white field with a persistent “Nickname” label, Nunito text, and a clear focus indicator. Keep the field and Save Score action visible while editing. Support the physical keyboard and reachable keyboard/touch controls.
 
-- Celebration states
-- Decorative accents
-- New high-score moments
-- Secondary buttons or labels
+### Score panel
 
----
+Make WPM the strongest element, with the unit explicit. Keep nickname and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
 
-### Cream
+### Leaderboard rows
 
-Primary background color.
+Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Long names must not push scores off-screen; the exact name-length and overflow policy remains to be finalized.
 
-```css
---tiny-cream: #FFF3DE;
-```
+## 8. Typing feedback
 
-Use for:
+| State | Visual treatment |
+| --- | --- |
+| Completed words | Charcoal; visually settled |
+| Current word | Lavender emphasis across the whole active word |
+| Caret | Strong mint at the exact current character position inside the active word |
+| Upcoming words | Secondary but fully readable text |
+| Incorrect characters | Error red plus underline or another non-color cue |
 
-- Main app background
-- Large surfaces
-- Warm visual contrast against teal and lavender
+For the active word, use `--tiny-lavender` where foreground contrast is sufficient. If it is too faint, preserve the lavender emphasis with a light-lavender surface and charcoal text. Apply the same readable treatment consistently across the passage set.
 
----
+Incorrect-character feedback takes precedence over the ordinary word treatment. The caret must remain clearly visible against both the passage background and the active-word treatment.
 
-### Soft White
-
-```css
---tiny-white: #FFFDFC;
-```
-
-Use for:
-
-- Cards
-- Input surfaces
-- High-contrast content areas
-
----
-
-### Charcoal
-
-Primary text color.
-
-```css
---tiny-charcoal: #403738;
-```
-
-Use for:
-
-- Headings
-- Body text
-- Scores
-- Important labels
-
-Avoid pure black unless necessary for accessibility.
-
----
-
-### Muted Gray
-
-```css
---tiny-muted: #8B8582;
-```
-
-Use for:
-
-- Secondary text
-- Helper text
-- Labels
-- Inactive states
-
----
-
-## Optional Accent Colors
-
-These appear in some graphics but should not dominate the core application.
-
-### Coral
-
-```css
---tiny-coral: #E97868;
-```
-
-Possible uses:
-
-- Special event accents
-- Warning states
-- Small decorative details
-
-### Lime
-
-```css
---tiny-lime: #C8D96B;
-```
-
-Possible uses:
-
-- Seasonal graphics
-- Special event themes
-
-Do not use lime as a default core UI color.
-
----
-
-# 4. Color Usage Hierarchy
-
-Recommended order of importance:
-
-1. Teal
-2. Lavender
-3. Pink
-4. Cream
-5. Sky / light blue accents
-6. Coral or lime only when appropriate
-
-The app should not use all colors equally.
-
-A typical screen should use:
-
-- Cream background
-- Charcoal text
-- Teal primary action
-- Lavender or pink secondary accent
-
----
-
-# 5. Typography
-
-The app should use three typography roles.
-
-## Display Font
-
-### Fredoka
-
-Recommended weights:
-
-- 600
-- 700
-
-Use for:
-
-- Main headings
-- Scores
-- Buttons
-- Leaderboard headings
-- High-score messages
-- Large event text
-
-Examples:
+Example caret position:
 
 ```text
-GIANT keyboard typing contest!
-NEW HIGH SCORE!
-92 WPM
-TOP 5
-START
+acr│oss
 ```
 
-Fredoka reflects the rounded, chunky, playful type used throughout event graphics.
+The caret is inside `across`, after `acr`. It is not a character the contestant should type. Character colors, highlighting, and caret placement must not change the centered line's width or cause it to jump.
 
----
+## 9. Event Setup
 
-## UI Font
+**Purpose:** configure the event before contestant play.
 
-### Nunito
+Display two option groups and one main action:
 
-Recommended weights:
+| Group | Choices |
+| --- | --- |
+| Test length | 30 seconds; 60 seconds |
+| Leaderboard | Start fresh; Continue previous event |
+| Primary action | START EVENT |
 
-- 400
-- 600
-- 700
+Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Use for:
+Starting fresh creates a new empty event and preserves prior event data. Continuing resumes the most recently active event and its saved data. Keep operator settings out of contestant screens.
 
-- Body copy
-- Instructions
-- Settings
-- Form labels
-- Nicknames
-- Helper text
-- Leaderboard rows
+Do not add event-history browsing, manual score deletion, or a Clear Leaderboard control to V1.
 
-Nunito should handle most functional interface text.
+**Proposed empty state:** if there is no previous event, disable that option and show “No previous event yet.” If an offline-ready status is displayed, it must reflect actual cached readiness.
 
----
+## 10. Ready / Attract
 
-## Typing Passage Font
+**Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-### Atkinson Hyperlegible
-
-Recommended weights:
-
-- 400
-- 700
-
-Use only for:
-
-- Typing passages
-- Character-level typing feedback
-
-Reason:
-
-The typing passage prioritizes readability and character distinction over decorative branding.
-
-It should clearly distinguish characters such as:
+Required content:
 
 ```text
-I
-l
-1
-
-O
-0
-```
-
----
-
-# 6. Type Scale
-
-Initial landscape iPad targets:
-
-## Display
-
-```text
-Main headline:        44–56 px
-Large score:          72–100 px
-Section heading:      28–36 px
-```
-
-## UI
-
-```text
-Primary button:       22–28 px
-Leaderboard names:    20–24 px
-Body text:            18–22 px
-Helper text:          14–18 px
-```
-
-## Typing Test
-
-```text
-Typing passage:       30–36 px
-Timer:                30–40 px
-Live WPM:             24–32 px
-High-score target:    20–28 px
-```
-
-Exact sizes should be validated on the actual iPad.
-
----
-
-# 7. Shape Language
-
-Brand graphics frequently use soft, organic shapes.
-
-Use:
-
-- Rounded cards
-- Rounded buttons
-- Pill labels
-- Organic blobs
-- Soft circles
-- Wavy forms
-- Rounded speech-bubble shapes
-
-Recommended border radii:
-
-```text
-Small controls:      12–16 px
-Buttons:             18–24 px
-Cards:               24–32 px
-Large panels:        28–36 px
-```
-
-Avoid sharp rectangular UI where possible.
-
----
-
-# 8. Decorative Motifs
-
-Approved visual motifs:
-
-- Stars
-- Sparkles
-- Hearts
-- Swirls
-- Dots
-- Confetti
-- Hand-drawn lines
-- Organic pastel blobs
-- Small keycap-inspired shapes
-
-Decorative elements should generally stay near:
-
-- Corners
-- Edges
-- Empty background areas
-
-They should not overlap:
-
-- Typing passages
-- Timers
-- Score values
-- Form controls
-- Leaderboard data
-
----
-
-# 9. Buttons
-
-## Primary Button
-
-Use strong teal.
-
-Example:
-
-```text
-START
-START EVENT
-SAVE SCORE
-NEXT PLAYER
-```
-
-Style:
-
-- Strong teal background
-- Charcoal or high-contrast text
-- Rounded corners
-- Large touch target
-- Fredoka Bold
-
-Minimum touch target:
-
-```text
-44 × 44 px
-```
-
-Prefer approximately:
-
-```text
-56+ px height
-```
-
-for major booth actions.
-
----
-
-## Secondary Button
-
-Use:
-
-- Soft white or lavender-light background
-- Charcoal text
-- Teal or lavender border
-
-Examples:
-
-```text
-Continue Event
-Back
-```
-
----
-
-# 10. Cards and Surfaces
-
-Cards should generally use:
-
-```css
-background: #FFFDFC;
-border: 1–2px solid soft neutral or brand color;
-border-radius: 24–32px;
-```
-
-Avoid heavy drop shadows.
-
-If depth is needed, use:
-
-- subtle borders
-- slight tonal contrast
-- layered pastel backgrounds
-
-rather than strong shadows.
-
----
-
-# 11. Ready / Attract Screen Style
-
-This screen can be highly branded and playful.
-
-Primary content hierarchy:
-
-```text
-
 GIANT keyboard typing contest!
 
 Type above 50 WPM for a Plinko drop.
 
-Current High Score
+CURRENT HIGH SCORE
 92 WPM
+Alex
 
-START
-
-Top 5
+PRESS ANY KEY TO START
 ```
 
-Visual emphasis:
+Also show the selected duration, for example “30 SECOND TEST” or “60 SECOND TEST.” The score and name above are sample content.
 
-1. Contest name
-2. 50 WPM prize threshold
-3. Current high score
-4. Start button
-5. Top 5 leaderboard
+Visual order:
 
-Use:
+1. Contest headline.
+2. Plinko message on a clear mint-accented surface.
+3. Current high-score WPM and nickname.
+4. Large keyboard invitation.
 
-- Fredoka
-- Teal
-- Lavender
-- Pink accents
-- Organic edge decorations
+A small logo-only badge and organic edge motifs are appropriate. Optional helper copy: “Your timer starts when you begin typing.”
 
----
+- Do not show the Top 5 leaderboard, a Start button, or operator controls here.
+- The opening keypress reveals the Typing screen and is consumed. It must not enter a character or start the timer.
+- Show the complete sentence before the first valid typing keystroke starts timing.
+- “Above 50 WPM” means strictly greater than 50 WPM. Do not change the message to “50 WPM or more.” Prize messaging and leaderboard eligibility are separate rules.
 
-# 12. Typing Screen Style
+**Proposed empty state:** show “Be the first to set a score!” in place of a fictional high-score value and name.
 
-This should be the most visually restrained screen.
+## 11. Typing
 
-Display:
+**Purpose:** keep the reading target stable and readable while showing essential progress.
 
-- High score to beat
-- Timer
-- Typing passage
-- Live WPM
+| Position | Content |
+| --- | --- |
+| Top | Small current high-score target |
+| Center | One complete sentence on one line |
+| Bottom left | Live WPM |
+| Bottom center | Countdown timer |
+| Bottom right | Live accuracy |
 
-Avoid:
+### Sentence layout
 
-- Large decorative illustrations
-- Full leaderboard
-- Multiple buttons
-- Strong background patterns
-- Distracting animation
+- Center the entire sentence as one text block, horizontally and near the vertical center.
+- Keep equal visual space between the sentence ends and the left/right screen edges.
+- Start with approximately 10% horizontal safe margins. Validate the actual text width on the target iPad.
+- Use short, natural sentences made primarily from common words, initially around 35–50 characters.
+- Measured fit matters more than character count: every sentence must fit completely at the selected font size.
+- Do not wrap, crop, horizontally scroll, or shrink the passage between sentences.
+- When a sentence is complete, replace it with the next full sentence at the same focal point. Continue the existing timer.
 
-Recommended structure:
+### Screen states
+
+| State | Behavior |
+| --- | --- |
+| Waiting | Full sentence visible; selected duration remaining; timer stopped |
+| Running | First valid typing keystroke starts timing; live WPM and accuracy update |
+| Time expired | Stop test input, finalize the result, and open Results |
+
+Incorrect keystrokes must not increase WPM. The precise starting-key and correction rules belong in the PRD and remain to be finalized.
+
+Use the feedback treatments in section 8. Keep the passage dominant. Do not show a leaderboard, large logo, dense instructions, decorative panels, or continuously animated elements.
+
+## 12. Results + Nickname
+
+**Purpose:** present the final result and collect a nickname from Top 10 qualifiers on the same screen.
+
+Required hierarchy:
+
+1. Large final WPM.
+2. Accuracy.
+3. New-high-score and Top 10 qualification status when applicable.
+4. Nickname field and Save Score action for eligible contestants.
+
+Example eligible result:
 
 ```text
-HIGH SCORE TO BEAT: 92 WPM
+Nice typing!
 
-              0:24
-
-The little dog ran across the yard and
-came back when someone called.
-
-             73 WPM
-```
-
----
-
-## 13. Typing Feedback Colors
-
-### Upcoming text
-
-Use muted gray.
-
-```css
-color: #8B8582;
-```
-
-### Correct text
-
-Use charcoal.
-
-```css
-color: #403738;
-```
-
-### Active caret
-
-Use strong teal.
-
-```css
-color: #55C8C5;
-```
-
-### Incorrect characters
-
-Use coral or a stronger accessible error color.
-
-Suggested starting point:
-
-```css
-color: #D95D5D;
-```
-
-Errors must remain clearly distinguishable for accessibility.
-
----
-
-# 14. Results Screen Style
-
-Results should feel rewarding and celebratory.
-
-Primary hierarchy:
-
-```text
-92 WPM
-
-96% ACCURACY
-
-NEW HIGH SCORE!
-```
-
-or:
-
-```text
 84 WPM
-
 97% ACCURACY
 
-Nice typing!
-```
-
-Use stronger decorative elements here:
-
-- Stars
-- Confetti
-- Pink/lavender accents
-- Small animated keycaps
-- Sparkles
-
-Do not let animation prevent nickname entry.
-
----
-
-# 15. Nickname Entry
-
-Nickname entry appears on the results screen for contestants who qualify for the Top 10.
-
-Style:
-
-- Large input
-- Nunito
-- High contrast
-- Large touch target
-- Clear Save Score button
-
-Example:
-
-```text
 You made the Top 10!
 
 Nickname
-[________________]
+[ Morgan________________ ]
 
 [ SAVE SCORE ]
 ```
 
----
+Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
 
-# 16. Leaderboard Style
+- Nickname entry is part of Results, not a separate screen.
+- Offer free-form nickname entry to valid Top 10 qualifiers. Players ranked 6–10 qualify even though only the Top 5 appear on the next screen.
+- Show a clear qualification explanation when a result is not eligible; do not show an unusable nickname field.
+- Keep the result and entered nickname intact during saving or recoverable errors.
+- Do not run the leaderboard reset countdown while the contestant is entering a nickname.
+- Save the nickname with the existing result; do not duplicate the score.
 
-Visible leaderboard displays the Top 5.
+**Proposed non-qualifier action:** “VIEW LEADERBOARD.” The flow requires access to the leaderboard, but this label and any Results idle timeout have not been finalized.
 
-Recommended structure:
+Nickname length, blank-name handling, skip behavior, and abandonment handling remain open product decisions. Do not introduce arbitrary limits through styling alone.
+
+## 13. Top 5 Leaderboard
+
+**Purpose:** show the event's five highest qualifying scores and prepare for the next contestant.
+
+Example structure, matching the latest leaderboard wireframe:
 
 ```text
 TOP 5
+Leaderboard
 
-1   Alex          92 WPM
-2   Mia           86 WPM
-3   Sam           81 WPM
-4   KeycapCat     78 WPM
-5   ClickClack    74 WPM
+1   Alex                 92 WPM
+2   Jamie                88 WPM
+3   Morgan  [YOU]        84 WPM
+4   Riley                78 WPM
+5   Casey                73 WPM
+
+[ NEXT PLAYER → ]
+
+Returning to ready screen in 10s
 ```
 
-The #1 score may use:
+### Layout and emphasis
 
-- Lavender highlight
-- Teal outline
-- Small star or trophy marker
+- Place a small logo-only badge near the upper-left safe margin.
+- Center the “TOP 5” pill and “Leaderboard” heading.
+- Use one wide soft-white rounded panel with five consistent row positions.
+- Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.
+- Keep the other rows quiet and easy to scan.
+- Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its nickname.
+- If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
+- Place a large mint NEXT PLAYER button below the panel, with the automatic-return message beneath it.
+- Keep peripheral motifs sparse and separate from the rows and button.
 
-Avoid using five different colors for five ranks.
+### Empty and partial boards
 
-The leaderboard should remain easy to scan.
+Show actual event data rather than filling missing places with sample contestants.
 
----
+**Proposed treatment:** preserve five row positions, use dashes for unoccupied places, and show “No scores yet” when the board is empty. Do not style an empty placeholder as a winning score.
 
-# 17. Event Setup Style
+### Automatic return
 
-Operator controls should remain simpler than contestant-facing screens.
+- Start the return countdown when the leaderboard appears.
+- The latest wireframe shows 10 seconds. Keep **10 seconds as the proposed default** until the final delay is confirmed.
+- In the live app, update “Returning to ready screen in {seconds}s” as time passes; do not leave “10s” static.
+- NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
+- Cancel the outgoing countdown when leaving the screen.
+- Clear contestant input, result, nickname field, and temporary YOU state. Preserve the active event, duration, stored scores, high score, and rankings.
+- Return without refreshing the browser.
 
-Primary elements:
+## 14. Motion
 
-- Test length
-  - 30 seconds
-  - 60 seconds
-- Leaderboard mode
-  - Start fresh
-  - Continue previous event
-- Start Event
+Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition.
 
-Use brand styling, but prioritize clarity over decoration.
+- Do not animate the passage position or use moving backgrounds during Typing.
+- Do not let celebrations obscure scores, delay controls, or interfere with nickname entry.
+- Respect `prefers-reduced-motion`; essential feedback must remain understandable without animation.
+- A visible timer and reset message provide information independently of decorative motion.
 
-Operator settings should never appear during contestant gameplay.
+## 15. Accessibility and readability
 
----
+- Validate important content from approximately two feet away on the target iPad.
+- Check real foreground/background combinations rather than treating palette membership as proof of sufficient contrast.
+- Use large touch targets, visible keyboard focus, and persistent input labels.
+- Give selected options, errors, and the current-player row non-color identifiers.
+- Keep the active word and caret recognizable throughout the passage.
+- Do not hide essential instructions in small, pale helper text.
+- Keep the nickname field and action usable with the physical keyboard connected.
+- Keep controls and state changes understandable without animation or sound.
+- Ensure long names, larger text, and empty states do not obscure scores or primary actions.
 
-# 18. Motion and Animation
+## 16. Offline assets
 
-Animation should be limited and purposeful.
+The completed app must work without internet after initial installation and caching.
 
-Good uses:
+Locally package or cache the required fonts, logo, icons, decorative assets, interface files, and typing passages. Do not depend on remotely loaded assets during an event.
 
-- New high-score celebration
-- Subtle button feedback
-- Small sparkle motion
-- Score reveal
-- Leaderboard rank transition
+Confirm that fonts and icons render correctly in airplane mode. Avoid fallback glyph boxes and significant font changes that could cause sentences to overflow. Local event and score persistence is defined in the PRD.
 
-Avoid:
+## 17. Brand voice
 
-- Continuous background animation
-- Moving text during typing
-- Excessive bounce effects
-- Anything that makes the passage harder to read
+Use short, friendly, casual copy that is immediately understandable at an event.
 
-Respect:
-
-```css
-prefers-reduced-motion
-```
-
----
-
-# 19. Accessibility
-
-The app should prioritize usability in a noisy event environment.
-
-Requirements:
-
-- High contrast text
-- Large typography
-- Large controls
-- Visible focus states
-- No information communicated only by color
-- Clear error feedback
-- Readable from approximately two feet away
-- Landscape iPad first
-
-Typing feedback should remain understandable without relying solely on:
-
-- red
-- green
-- animation
-
----
-
-# 20. Layout Target
-
-Primary device:
-
-```text
-Landscape iPad
-4:3 aspect ratio
-```
-
-Design should prioritize:
-
-- horizontal space
-- centered primary interaction
-- large text
-- minimal scrolling
-
-The main contestant workflow should ideally fit within a single screen per state.
-
----
-
-# 21. Brand Voice
-
-Copy should feel:
-
-- Friendly
-- Casual
-- Playful
-- Short
-- Slightly quirky
-- Easy to understand immediately
-
-Examples:
+Confirmed examples:
 
 ```text
 GIANT keyboard typing contest!
-
 Type above 50 WPM for a Plinko drop.
-
-Ready to type?
-
+CURRENT HIGH SCORE
+PRESS ANY KEY TO START
 Nice typing!
-
 NEW HIGH SCORE!
-
 You made the Top 10!
-
-Next player
+SAVE SCORE
+TOP 5
+NEXT PLAYER
 ```
 
-Avoid:
+Keep wording consistent across screens. Avoid corporate language, technical jargon, long instructions, and overly childish copy. Do not add shop-name text to the interface.
 
-- Formal corporate language
-- Technical jargon
-- Long instructions
-- Overly childish copy
-
----
-
-# 22. Visual Hierarchy
-
-Each screen should have one obvious primary purpose.
-
-## Event Setup
-
-```text
-Choose settings → Start Event
-```
-
-## Ready
-
-```text
-Understand challenge → Start
-```
-
-## Typing
-
-```text
-Read → Type
-```
-
-## Results
-
-```text
-Understand score → Enter nickname if eligible
-```
-
-## Leaderboard
-
-```text
-See rankings → Next Player
-```
-
----
-
-# 23. Things to Avoid
-
-Do not use:
-
-- Dark gamer interfaces
-- RGB/neon styling
-- Black backgrounds
-- Sharp/angular typography
-- Corporate dashboard aesthetics
-- Heavy gradients
-- Excessive shadows
-- Tiny UI text
-- Dense menus
-- Overly complicated settings
-- Decorative elements inside the typing passage
-- Multiple competing primary buttons
-
----
-
-# 24. CSS Design Tokens
-
-Recommended starting variables:
+## 18. CSS design tokens
 
 ```css
 :root {
-  --tiny-teal: #9DDEDA;
-  --tiny-teal-strong: #55C8C5;
-
-  --tiny-lavender: #A99AD7;
-  --tiny-lavender-light: #D7CFF1;
-
-  --tiny-pink: #F5C2D5;
-
-  --tiny-cream: #FFF3DE;
+  /* Surfaces */
+  --tiny-blush: #FBEDEF;
   --tiny-white: #FFFDFC;
 
+  /* Primary accents */
+  --tiny-mint: #9DDED8;
+  --tiny-mint-strong: #6CCFC7;
+
+  /* Secondary accents */
+  --tiny-lavender: #AA9AD4;
+  --tiny-lavender-light: #D9D0ED;
+
+  /* Decorative accents */
+  --tiny-pink: #F4C1D4;
+  --tiny-peach: #F5CFC0;
+
+  /* Text and feedback */
   --tiny-charcoal: #403738;
-  --tiny-muted: #8B8582;
-
-  --tiny-coral: #E97868;
-  --tiny-lime: #C8D96B;
-
+  --tiny-muted: #8C8788;
   --tiny-error: #D95D5D;
-}
-```
 
----
-
-# 25. Typography Tokens
-
-```css
-:root {
+  /* Typography */
   --font-display: "Fredoka", sans-serif;
   --font-ui: "Nunito", sans-serif;
   --font-typing: "Atkinson Hyperlegible", sans-serif;
 }
 ```
 
----
+The table in section 3 and this token block must remain synchronized. Font declarations require actual locally available font files; fallback fonts alone do not establish the intended typography.
 
-# 26. Brand Reference Summary
+## 19. Design review checklist
 
-The design direction is based on recurring visual patterns in brand materials:
+This checklist records what to verify; it does not claim the implementation has already passed review.
 
-- Aqua / teal
-- Lavender
-- Pink
-- Cream backgrounds
-- Rounded chunky typography
-- Friendly sans-serif body text
-- Organic pastel shapes
-- Swirls
-- Dots
-- Stars
-- Handmade illustrations
-- Playful event-focused layouts
+- [ ] All screens use the current palette and the three defined font roles.
+- [ ] Visible branding is limited to the optional logo-only badge.
+- [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet.
+- [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
+- [ ] Ready shows the contest message, current high score and nickname, duration, and keyboard invitation.
+- [ ] Ready contains no Start button, Top 5, or operator controls.
+- [ ] The opening keypress is consumed; the full sentence appears before timing begins.
+- [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
+- [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
+- [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
+- [ ] Results display score, accuracy, and applicable qualification/high-score status.
+- [ ] Top 10 nickname entry stays on Results and is protected from automatic reset.
+- [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
+- [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.
+- [ ] Empty states contain no fabricated scores or contestants.
+- [ ] Essential text has sufficient contrast, focus is visible, and state is not conveyed by color alone.
+- [ ] Required fonts, images, icons, and passages are available offline.
 
-The typing test should feel recognizably connected to while remaining more functional and restrained than a promotional poster.
+## 20. Product decisions still open
+
+Keep these decisions in sync with the PRD and wireframes instead of silently fixing them in visual examples:
+
+- Minimum accuracy/validity threshold for competitive scores.
+- Exact valid-start-key, correction, and character-counting behavior.
+- WPM display precision and final tie-breaking policy.
+- Nickname length, overflow, blank-name, skip, and abandonment rules.
+- Non-qualifier Results action and any Results idle behavior.
+- Final leaderboard reset duration; 10 seconds is currently proposed.
+- Initial setup selections and duration changes when continuing an event.
+- How the operator returns to Event Setup after starting an event.
+
+The visual system remains usable while these details are resolved. Do not confuse sample values or proposed states with approved product rules.
