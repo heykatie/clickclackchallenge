@@ -1,6 +1,6 @@
 # Typing Test — V1 Technical Plan
 
-This file owns implementation: stack, application state, the IndexedDB schema, module boundaries, the service worker, precache, navigation fallback, and implementation order.
+This file owns implementation: stack, application state, the IndexedDB schema, module boundaries, the service worker, precache, navigation fallback, implementation order, and the automated test map.
 
 ## Document ownership
 
@@ -12,7 +12,8 @@ Each fact has one owner. Other documents link to that owner instead of restating
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
-| Booth acceptance tests, automated test map, giant-keyboard and airplane-mode checks | `docs/testing.md` |
+| Booth acceptance tests and the pre-event checklist | `docs/prd.md` |
+| Automated test map and hardware check lists | `docs/technical_plan.md` |
 
 If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
 
@@ -24,10 +25,9 @@ The product is an offline-first typing competition designed for repeated use at 
 
 Implementation should follow:
 
-- `docs/prd.md` for product behavior
+- `docs/prd.md` for product behavior and booth acceptance tests
 - `docs/design_system.md` for visual design and contestant-facing strings
 - `docs/wireframes.md` for screen layout
-- `docs/testing.md` for the test catalog
 
 V1 priorities:
 
@@ -592,7 +592,7 @@ The current cached version should remain usable if the device is offline.
 
 ### Installation and airplane-mode checks
 
-The iPad installation steps and the airplane-mode acceptance test live in `docs/testing.md`.
+The airplane-mode acceptance test lives in `docs/prd.md`. The installation steps are in the Testing Plan section below.
 
 ## 5. Application State Model
 
@@ -2079,7 +2079,7 @@ rather than maximizing the number of files or abstractions.
 
 ## 28. PWA, caching, and persistence
 
-Service-worker, precache, navigation-fallback, and IndexedDB behavior are specified in Offline Behavior Implementation Specification above. What must survive a restart is specified in `docs/prd.md`. The installation and airplane-mode checks live in `docs/testing.md`.
+Service-worker, precache, navigation-fallback, and IndexedDB behavior are specified in Offline Behavior Implementation Specification above. What must survive a restart, and the airplane-mode acceptance test, are specified in `docs/prd.md`. The installation steps are in the Testing Plan section below.
 
 ## 32. Error Handling
 
@@ -2185,11 +2185,280 @@ A profanity/moderation system is not required for V1 unless requested later.
 
 ## Testing Plan
 
-Vitest and React Testing Library are the V1 test tools. Playwright is optional after the core booth loop works.
+Vitest covers the unit and persistence cases. React Testing Library covers the component cases. Playwright is optional after the core booth loop works.
 
-Acceptance scenarios, unit and component cases, persistence checks, and hardware tests live in `docs/testing.md`.
+Booth acceptance tests live in `docs/prd.md`. This section lists the automated cases and hardware checks.
+
+Ignore browser key-repeat when `KeyboardEvent.repeat` is true. Separate physical presses of the same key still count.
+
+### Unit Tests — Scoring
+
+Add unit tests for the pure scoring logic.
+
+Required cases:
+
+```text
+perfect typing produces expected WPM
+30-second final WPM is correct
+60-second final WPM is correct
+incorrect characters do not increase WPM
+incorrect attempts lower accuracy
+zero-attempt accuracy calculation does not return NaN
+Backspace itself does not affect accuracy
+correcting an error does not erase the original accuracy penalty
+removing a credited character removes current correct-character credit
+correcting a removed position restores correct-character credit
+partial words count toward WPM
+incorrect characters do not block later correct input
+80% accuracy meets the development threshold
+79.99% accuracy does not meet the development threshold
+late input after timeout is ignored
+held-key repeat events are ignored, including when KeyboardEvent.repeat is true
+separate physical presses of the same key still count
+Ready-screen start key is not scored
+first valid Typing-screen key starts the timer and is scored
+```
 
 ---
+
+### Unit Tests — Typing Engine
+
+Required cases:
+
+```text
+correct character advances caret
+incorrect character advances caret
+incorrect character is marked incorrect
+Backspace removes the most recent current-sentence character
+Backspace moves caret backward
+Backspace cannot move before the start of the current sentence
+sentence completes after every expected position has an entered character
+incorrect final character still completes the sentence
+sentence completion loads the next sentence
+sentence completion preserves cumulative score counters
+Backspace cannot reopen the previous committed sentence
+passage order remains deterministic
+```
+
+---
+
+### Unit Tests — Ranking
+
+Required cases:
+
+```text
+higher displayed WPM ranks first
+accuracy breaks displayed-WPM ties
+earlier createdAt breaks remaining ties
+scores below minimum accuracy are excluded
+rank is derived rather than stored
+Top 10 selection is correct
+Top 5 selection is correct
+high score is the first eligible ranked score
+```
+
+---
+
+### Unit Tests — Events
+
+Required cases:
+
+```text
+fresh event is created with selected duration
+fresh event stores current passageSetId
+fresh event starts with no scores
+starting fresh archives the previous active event
+starting fresh preserves prior event data
+starting fresh preserves prior scores
+activeEventId changes to the new event
+continue restores the active event
+continue does not create a new event
+continue restores existing scores
+duration persists when continuing
+passageSetId persists when continuing
+Continue is unavailable when no valid active event exists
+```
+
+---
+
+### Unit Tests — Passages
+
+Required cases:
+
+```text
+passage set has a stable ID
+passage set is not empty
+all sentence entries are strings
+sentence order is deterministic
+passage set contains enough total text for fast 60-second tests
+```
+
+Content validation should also check the intended character-length range where useful.
+
+The final one-line fit must still be verified visually on the target iPad because character count alone cannot guarantee rendered width.
+
+---
+
+### Persistence Tests
+
+Verify IndexedDB behavior independently of UI rendering.
+
+Required cases:
+
+```text
+event can be written and read
+score can be written and read
+multiple scores can be retrieved by eventId
+settings can save activeEventId
+settings can restore activeEventId
+nickname persists after update
+fresh event does not delete archived events
+fresh event does not delete old scores
+leaderboard can be reconstructed from persisted scores
+data survives page reload
+```
+
+---
+
+### Component Tests
+
+Use React Testing Library for high-value UI behavior rather than testing every visual detail.
+
+Required cases:
+
+```text
+EventSetup disables Continue when no event exists
+EventSetup can select 30-second mode
+EventSetup can select 60-second mode
+Ready screen responds to a key press
+Ready-screen key is not passed into Typing as contestant input
+Typing screen renders the full sentence before timer starts
+Typing screen waits for first valid typing character before timer starts
+Typing screen displays live WPM
+Typing screen displays live accuracy
+Typing screen displays remaining time
+Top 10 result shows NicknameForm
+non-Top-10 result does not show NicknameForm
+nickname validation rejects empty values
+Next Player returns to Ready
+auto reset begins only on Leaderboard
+auto reset does not run while nickname entry is active
+Leaderboard renders no more than five rows
+```
+
+Do not over-test static decorative styling through component tests.
+
+---
+
+### Manual Layout Tests
+
+Required on the actual target landscape iPad:
+
+```text
+Event Setup fits without clipping
+Ready screen is readable from approximately two feet away
+typing sentence remains on one line
+typing sentence does not clip at either side
+typing sentence remains visually centered
+current-word highlight is visible
+caret is easy to locate
+incorrect-character state is distinguishable without relying only on color
+live WPM is readable
+timer is readable at bottom center
+accuracy is readable
+Results / Nickname layout fits
+Top 5 leaderboard fits
+Next Player is easy for the operator to use
+```
+
+Test all production passage sentences at the final font size.
+
+Any sentence that does not safely fit on one line should be rewritten or removed rather than dynamically shrinking its font.
+
+---
+
+### Manual Giant-Keyboard Tests
+
+Test with the actual giant physical keyboard.
+
+Required cases:
+
+```text
+normal typing
+fast typing
+slow typing
+incorrect typing
+Backspace
+multiple corrections
+held key
+repeated letters
+spacebar input
+punctuation input used by passages
+button mashing
+first key from Ready
+first scored key on Typing
+30-second test
+60-second test
+partial word at timeout
+sentence transition
+```
+
+Use this testing to validate whether the provisional 80% leaderboard accuracy threshold is appropriate.
+
+Do not treat 80% as final until giant-keyboard testing is complete.
+
+---
+
+### Offline / Airplane-Mode Test
+
+Before V1 is considered finished:
+
+```text
+1. Connect the target iPad to the internet.
+2. Open the deployed HTTPS app.
+3. Allow the app and required assets to finish loading/caching.
+4. Add the app to the Home Screen.
+5. Launch the installed PWA once while online.
+6. Enable airplane mode.
+7. Close and relaunch the installed PWA.
+8. Create a fresh event.
+9. Complete a full typing test.
+10. Save a qualifying nickname.
+11. Confirm the leaderboard updates.
+12. Use Next Player.
+13. Complete another test.
+14. Close the app.
+15. Reopen the app while airplane mode remains enabled.
+16. Continue the active event.
+17. Confirm previously saved scores remain.
+18. Confirm the high score remains correct.
+19. Confirm the Top 5 is reconstructed.
+20. Confirm passages, fonts, icons, and required visual assets still load.
+```
+
+Repeat the test with a previously created event to verify **Continue Previous Event** also works fully offline.
+
+---
+
+### Definition of Testing Complete
+
+Testing for V1 is complete only when:
+
+- all required scoring unit tests pass
+- all required typing-engine unit tests pass
+- all required ranking tests pass
+- all required event tests pass
+- persistence tests pass
+- high-value component tests pass
+- final passage layout has been checked on the actual iPad
+- giant-keyboard behavior has been tested
+- the minimum accuracy threshold has been reviewed using real keyboard behavior
+- the full booth workflow passes in airplane mode
+- saved event and score data survive offline app relaunch
+- no known issue prevents reliable repeated contestant use
+
+---
+
 
 ## 37. Deployment
 
@@ -2418,7 +2687,7 @@ V1 is technically complete when:
 
 - the React + TypeScript app builds successfully
 - the implementation matches `docs/prd.md`, `docs/design_system.md`, and `docs/wireframes.md`
-- the checks in `docs/testing.md` pass, including the airplane-mode test on the target iPad
+- the acceptance tests in `docs/prd.md` and the Testing Plan in this document pass, including the airplane-mode test on the target iPad
 
 ---
 

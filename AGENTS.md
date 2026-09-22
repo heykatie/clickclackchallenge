@@ -33,7 +33,8 @@ Use the following sources in this priority order:
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
-| Booth acceptance tests, automated test map, giant-keyboard and airplane-mode checks | `docs/testing.md` |
+| Booth acceptance tests and the pre-event checklist | `docs/prd.md` |
+| Automated test map and hardware check lists | `docs/technical_plan.md` |
 
 4. Existing components, styles, utilities, and patterns.
 5. This `AGENTS.md`.
@@ -507,7 +508,7 @@ For small, isolated changes, proceed without unnecessary planning overhead.
 
 ## Documentation
 
-Update the document that owns the changed topic. Keep `docs/technical_plan.md` accurate when the work changes architecture, data flow, or the implementation plan. Keep `docs/prd.md` accurate when product behavior changes. Keep `docs/testing.md` accurate when acceptance or test coverage changes.
+Update the document that owns the changed topic. Keep `docs/technical_plan.md` accurate when the work changes architecture, data flow, the implementation plan, or the automated test map. Keep `docs/prd.md` accurate when product behavior or booth acceptance tests change.
 
 Do not update documentation merely because code formatting or insignificant implementation details changed.
 

@@ -12,7 +12,8 @@ Each fact has one owner. Other documents link to that owner instead of restating
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
-| Booth acceptance tests, automated test map, giant-keyboard and airplane-mode checks | `docs/testing.md` |
+| Booth acceptance tests and the pre-event checklist | `docs/prd.md` |
+| Automated test map and hardware check lists | `docs/technical_plan.md` |
 
 If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
 

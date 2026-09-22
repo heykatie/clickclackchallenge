@@ -8,11 +8,10 @@ This repository contains the V1 specification. Implementation has not started, s
 
 | Document | What it owns |
 | --- | --- |
-| [Product requirements](docs/prd.md) | Scoring, nickname rules, persistence, and offline requirements |
-| [Technical plan](docs/technical_plan.md) | Planned stack, application state, IndexedDB, service worker, and implementation order |
+| [Product requirements](docs/prd.md) | Scoring, nickname rules, persistence, offline requirements, and booth acceptance tests |
+| [Technical plan](docs/technical_plan.md) | Planned stack, application state, IndexedDB, service worker, implementation order, and the automated test map |
 | [Design system](docs/design_system.md) | Palette, type, tokens, and contestant-facing strings |
 | [Wireframes](docs/wireframes.md) | Screen layout and the five PNGs in `docs/wireframes/` |
-| [Testing](docs/testing.md) | Acceptance tests, the automated test map, and hardware checks |
 
 The planned React, TypeScript, Vite, and PWA choices are described in the technical plan. They are not part of this repository yet.
 
