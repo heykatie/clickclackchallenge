@@ -258,7 +258,7 @@ No application server is required for V1 booth operation.
 
 ---
 
-## PWA and IndexedDB
+## 5. PWA and IndexedDB
 
 Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS tokens are in `docs/design_system.md`.
 
@@ -278,7 +278,7 @@ Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist 
 
 The airplane-mode acceptance test is in `docs/prd.md`. Installation steps are in the Testing Plan section below.
 
-## 5. Application State Model
+## 6. Application State Model
 
 Use explicit screen states.
 
@@ -321,7 +321,7 @@ The key used to leave the Ready screen must not count as the contestant's first 
 
 ---
 
-## 6. State Management Strategy
+## 7. State Management Strategy
 
 Use React state plus `useReducer`.
 
@@ -356,7 +356,7 @@ State transitions should remain explicit and testable.
 
 ---
 
-## 7. Data Model
+## 8. Data Model
 
 V1 uses four core data concepts:
 
@@ -728,7 +728,7 @@ Do not derive IDs from:
 - timestamp alone
 
 ---
-## 8. IndexedDB Structure
+## 9. IndexedDB Structure
 
 Recommended database:
 
@@ -775,7 +775,7 @@ Historical events and their scores must remain stored when Start Fresh creates a
 ---
 Passage rules and same-sequence fairness are in `docs/prd.md` (Passage Rules). The `PassageSet` shape is in the data model above.
 
-## 11. Typing Engine
+## 10. Typing Engine
 
 Create typing logic as a pure, testable module separate from visual components.
 
@@ -837,7 +837,7 @@ Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`
 
 Scoring, nickname, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
-## Component and Module Boundaries
+## 11. Component and Module Boundaries
 
 V1 should use a small, explicit structure with clear responsibilities.
 
@@ -1437,7 +1437,7 @@ Screens/components should not contain raw IndexedDB calls.
 
 ---
 
-## Recommended V1 Structure
+## 12. Recommended V1 Structure
 
 Use this as the initial structure:
 
@@ -1491,7 +1491,7 @@ Additional small shared files may be added when implementation requires them, bu
 
 ---
 
-## Boundary Rules
+## 13. Boundary Rules
 
 Use these rules when deciding where code belongs:
 
@@ -1541,7 +1541,7 @@ passages.ts should not shuffle content per contestant.
 
 ---
 
-## Avoid Over-Architecture
+## 14. Avoid Over-Architecture
 
 Do not add extra layers unless a concrete implementation need appears.
 
@@ -1588,11 +1588,7 @@ rather than maximizing the number of files or abstractions.
 
 ---
 
-## 28. PWA, caching, and persistence
-
-Service-worker, precache, navigation-fallback, and IndexedDB behavior are in PWA and IndexedDB above. What must survive a restart, and the airplane-mode acceptance test, are in `docs/prd.md`. Installation steps are in the Testing Plan section below.
-
-## 32. Error Handling
+## 15. Error Handling
 
 ### IndexedDB Failure
 
@@ -1628,7 +1624,7 @@ If an "Offline ready" indicator exists, it should reflect actual readiness rathe
 
 ---
 
-## 33. Accessibility
+## 16. Accessibility
 
 Requirements:
 
@@ -1649,7 +1645,7 @@ The operator must still be able to use touch controls.
 
 ---
 
-## 34. Performance
+## 17. Performance
 
 The app should feel immediate.
 
@@ -1669,7 +1665,7 @@ Scoring calculations should remain pure, lightweight functions.
 
 ---
 
-## 35. Privacy and Security
+## 18. Privacy and Security
 
 V1 stores contestant data locally on the event iPad.
 
@@ -1694,7 +1690,7 @@ A profanity/moderation system is not required for V1 unless requested later.
 
 ---
 
-## Testing Plan
+## 19. Testing Plan
 
 Vitest covers the unit and persistence cases. React Testing Library covers the component cases. Playwright is optional after the core booth loop works.
 
@@ -1971,7 +1967,7 @@ Testing for V1 is complete only when:
 ---
 
 
-## 37. Deployment
+## 20. Deployment
 
 V1 is a static frontend application.
 
@@ -1993,7 +1989,7 @@ Deployment should prioritize simplicity and reliable HTTPS.
 
 ---
 
-## 38. Environment Configuration
+## 21. Environment Configuration
 
 V1 should not require secrets because there is no backend/API.
 
@@ -2009,7 +2005,7 @@ and keep actual secret files ignored.
 
 ---
 
-## 39. Git Workflow
+## 22. Git Workflow
 
 Primary branch:
 
@@ -2050,7 +2046,7 @@ Do not force-push shared history unless necessary.
 
 ---
 
-## 40. V1 Implementation Order
+## 23. V1 Implementation Order
 
 Build the working booth loop before visual polish.
 
@@ -2192,7 +2188,7 @@ Fix reliability issues before optional polish.
 
 ---
 
-## 41. Definition of Done for V1
+## 24. Definition of Done for V1
 
 V1 is technically complete when:
 
@@ -2202,7 +2198,7 @@ V1 is technically complete when:
 
 ---
 
-## 42. Post-V1 Full-Stack Roadmap
+## 25. Post-V1 Full-Stack Roadmap
 
 After V1, the project can evolve into a full-stack application without replacing the offline-first booth architecture.
 
@@ -2261,7 +2257,7 @@ Gameplay must never wait for synchronization.
 
 ---
 
-## 43. Post-V1 Enhancements
+## 26. Post-V1 Enhancements
 
 Possible future work:
 
@@ -2288,7 +2284,7 @@ These should be added only after the core booth workflow is proven reliable.
 
 ---
 
-## 44. Primary Engineering Principle
+## 27. Primary Engineering Principle
 
 The central technical requirement is:
 
