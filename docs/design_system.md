@@ -231,7 +231,7 @@ Fresh-event and continue-event behavior, including saved duration, is defined in
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, use the empty high-score string from that list.
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!”
 
 Visual order:
 

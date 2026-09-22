@@ -140,7 +140,7 @@ Event setup rules, including saved duration, are in `docs/prd.md`. If an offline
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. Start behavior and the Plinko rule are in `docs/prd.md`.
+The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. When there is no eligible score, the high-score block shows “Be the first high score!” Start behavior and the Plinko rule are in `docs/prd.md`.
 
 Show the duration and the current high-score block. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 

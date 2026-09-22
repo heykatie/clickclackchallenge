@@ -900,7 +900,7 @@ The Ready screen should show:
 - high-score WPM
 - nickname
 
-If the active event has no eligible scores yet, show the empty high-score string from `docs/design_system.md` (Brand voice).
+If the active event has no eligible scores yet, show “Be the first high score!”
 
 ---
 
