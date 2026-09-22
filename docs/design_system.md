@@ -292,7 +292,7 @@ Required hierarchy:
 
 1. Large final WPM.
 2. Accuracy.
-3. New-high-score and Top 10 qualification status when applicable.
+3. New-high-score, Plinko, and Top 10 qualification status when applicable.
 4. Nickname field and Save Score action for eligible contestants.
 
 Example eligible result:
@@ -303,6 +303,7 @@ Nice typing!
 84 WPM
 97% ACCURACY
 
+You earned a Plinko drop!
 You made the Top 10!
 
 Nickname
@@ -311,9 +312,9 @@ Nickname
 [ SAVE SCORE ]
 ```
 
-Use “NEW HIGH SCORE!” when applicable. Both that line and “Nice typing!” are charcoal. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
+Use “NEW HIGH SCORE!” when applicable. Use “You earned a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “NEW HIGH SCORE!”, and the Plinko line are charcoal. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
 
-Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. The label is “VIEW LEADERBOARD” from Brand voice.
+Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. That exit still writes one score row with a null nickname. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
 
 ## 13. Top 5 Leaderboard
 
@@ -379,6 +380,7 @@ Motion should be brief and purposeful: button feedback, a result reveal, a new-h
 - Keep the active word and caret recognizable throughout the passage.
 - Do not hide essential instructions in small, pale helper text.
 - Keep the nickname field and action usable with the physical keyboard connected.
+- Keep SAVE SCORE visible when the iPad software keyboard is open. The upper-half placement is in `docs/wireframes.md` §7.
 - Keep controls and state changes understandable without animation or sound.
 - Ensure long names, larger text, and empty states do not obscure scores or primary actions.
 
@@ -402,6 +404,7 @@ Your timer starts when you begin typing.
 Turn sideways and use the full screen.
 Nice typing!
 NEW HIGH SCORE!
+You earned a Plinko drop!
 You made the Top 10!
 SAVE SCORE
 VIEW LEADERBOARD
@@ -459,7 +462,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
-- [ ] Results display score, accuracy, and applicable qualification/high-score status.
+- [ ] Results display score, accuracy, the Plinko line when it applies, and applicable qualification/high-score status.
 - [ ] Top 10 nickname entry stays on Results and is protected from automatic reset.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.

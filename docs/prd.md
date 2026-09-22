@@ -423,6 +423,7 @@ Rules:
 - correcting a mistake does not erase the original incorrect attempt
 - accuracy should be hidden or shown as `—%` before the contestant begins typing
 - do not display 100, or any other percentage, when there have been no attempts
+- accuracy is displayed as a rounded whole number, the same way WPM is
 
 ### Character-Level Scoring
 
@@ -512,10 +513,12 @@ A contestant below the threshold:
 Leaderboard ranking uses:
 
 1. displayed WPM descending
-2. accuracy descending
+2. displayed accuracy descending
 3. earlier submission first
 
-Accuracy acts as a tie-breaker when displayed WPM is equal.
+Displayed accuracy is the rounded whole number the contestant sees. It is not a second stored field. Two scores that round to the same whole percent are tied on accuracy, and the earlier submission ranks first. Hidden tenths do not order them.
+
+The accuracy gate still uses the stored percentage. A score of 79.99% is not eligible, even though it displays as 80%.
 
 ### Held-Key Behavior
 
@@ -540,7 +543,7 @@ An event must retain:
 - the event creation time
 - the event's most recent update time
 
-A human-readable event name may be supported later, but it is not required for V1.
+V1 does not store a human-readable event name. Add that field only when an event-history screen exists.
 
 The event's creation timestamp is sufficient to preserve its date and time.
 
@@ -552,7 +555,8 @@ A score should retain:
 
 - a unique score ID
 - the event ID it belongs to
-- nickname, when applicable
+- nickname, when the contestant saves one
+- null nickname when a Top 10 contestant leaves through View Leaderboard
 - final WPM
 - final accuracy
 - score submission time
@@ -808,8 +812,10 @@ The Results screen should display:
 - final WPM
 - final accuracy
 - new-high-score status when applicable
-- Plinko qualification status when applicable
+- Plinko qualification status when the contestant qualifies
 - Top 10 qualification status when applicable
+
+Show “You earned a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The words are in `docs/design_system.md` (Brand voice).
 
 Results and nickname entry should remain on the **same screen**.
 
@@ -826,7 +832,7 @@ If the contestant does not qualify for the Top 10, nickname entry should not be 
 
 When nickname entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
 
-When nickname entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It keeps the score with no nickname and opens the Top 5. Automatic next-player reset must not interrupt nickname entry. The label is in `docs/design_system.md` (Brand voice).
+When nickname entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null nickname and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt nickname entry. The label is in `docs/design_system.md` (Brand voice).
 
 ### Nickname Rules
 
@@ -1433,9 +1439,11 @@ scores are ordered by:
 
 ```text
 1. displayed WPM descending
-2. accuracy descending
+2. displayed accuracy descending
 3. earlier submission first
 ```
+
+Displayed accuracy is the rounded whole number from §12. Do not sort these ties on the stored tenths.
 
 Only the first five ranked scores are shown on the visible leaderboard.
 
@@ -1526,7 +1534,9 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 **Then**
 
 - Save Score would still reject the empty name
-- the score is kept with no nickname
+- one score row is written
+- its nickname is null
+- that score stays eligible for ranking
 - the Top 5 leaderboard appears
 - automatic reset has not moved the screen on its own
 

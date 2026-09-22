@@ -383,8 +383,6 @@ Each booth event is stored as its own record.
 interface EventRecord {
   id: string;
 
-  name: string | null;
-
   durationSeconds: TestDuration;
   passageSetId: string;
 
@@ -401,13 +399,6 @@ Field behavior:
 
 - unique event identifier
 - generated with `crypto.randomUUID()`
-
-`name`
-
-- optional human-readable event label
-- not required from the operator in V1
-- may remain `null`
-- supports future event-history features without changing the model
 
 `durationSeconds`
 
@@ -439,7 +430,6 @@ Example:
 ```ts
 const event: EventRecord = {
   id: crypto.randomUUID(),
-  name: null,
   durationSeconds: 30,
   passageSetId: "common-sentences-v1",
   status: "active",
@@ -469,8 +459,6 @@ interface ScoreRecord {
 
   durationSeconds: TestDuration;
 
-  meetsAccuracyThreshold: boolean;
-
   createdAt: string;
 }
 ```
@@ -489,7 +477,9 @@ Field behavior:
 `nickname`
 
 - nickname for a Top 10 qualifying score
-- may remain `null` for scores outside the Top 10
+- null when that contestant leaves through View Leaderboard
+- null for scores outside the Top 10
+- the score row is still written in both null cases
 
 `rawWpm`
 
@@ -504,6 +494,10 @@ Field behavior:
 `accuracy`
 
 - final typing accuracy percentage
+- the only accuracy fact stored on the score
+- the gate compares this value with `MIN_LEADERBOARD_ACCURACY`
+- display and WPM tie-breaks use this value rounded to a whole number
+- do not store that rounded number separately
 
 `correctCharacters`
 
@@ -525,15 +519,10 @@ Field behavior:
 
 - snapshot of the test duration when the score was earned
 
-`meetsAccuracyThreshold`
-
-- indicates whether the score passed the configured minimum leaderboard accuracy threshold
-- does not imply Top 10 or Top 5 status
-
 `createdAt`
 
 - ISO submission timestamp
-- final tie-breaker when displayed WPM and accuracy are equal
+- final tie-breaker when displayed WPM and displayed accuracy are equal
 
 Example:
 
@@ -553,11 +542,11 @@ const score: ScoreRecord = {
 
   durationSeconds: 30,
 
-  meetsAccuracyThreshold: true,
-
   createdAt: "2026-09-22T07:43:12.000Z"
 };
 ```
+
+`96.4` is the stored percentage. It displays as 96%, and that 96 is what breaks a displayed-WPM tie. A stored `96.2` ties with it on accuracy.
 
 ### Derived Ranking Data
 
@@ -567,11 +556,12 @@ Do not permanently store:
 rank: number;
 isTop5: boolean;
 isTop10: boolean;
+meetsAccuracyThreshold: boolean;
 ```
 
-These values can become stale whenever a new score is added.
+Rank and Top 5 / Top 10 change whenever a new score is added. `meetsAccuracyThreshold` goes stale if `MIN_LEADERBOARD_ACCURACY` changes after giant-keyboard testing. Do not store that boolean.
 
-Derive them from current event scores. Ranking order is in `docs/prd.md`.
+At rank time, a score is eligible when `accuracy >= MIN_LEADERBOARD_ACCURACY`. Keep the numeric `accuracy` field. The threshold value is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). Ranking order is in `docs/prd.md`.
 
 ### App Settings
 
@@ -1032,9 +1022,13 @@ Conceptual flow:
 receive TestResult
 → determine result messaging
 → if Top 10, show NicknameForm
-→ save score / nickname
+→ one exit writes one score row:
+    Save Score, with the nickname
+    or View Leaderboard, with nickname null
 → LeaderboardScreen
 ```
+
+Both Results exits write one score row. View Leaderboard does that with a null nickname, as in `docs/prd.md` §15.
 
 Nickname entry remains part of the Results screen.
 
@@ -1092,6 +1086,8 @@ It should not:
 - calculate WPM or accuracy
 
 The parent `ResultsScreen` determines whether `NicknameForm` should be shown.
+
+Focusing this field can open the iPad software keyboard. SAVE SCORE must stay visible. If the keyboard covers it, keep the field and button in the upper half, as in `docs/wireframes.md` §7. Do not add a keyboard library.
 
 ---
 
@@ -1316,6 +1312,8 @@ meetsLeaderboardAccuracy(
 ): boolean;
 ```
 
+`meetsLeaderboardAccuracy` is `accuracy >= MIN_LEADERBOARD_ACCURACY`. `MIN_LEADERBOARD_ACCURACY` is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). Do not persist the boolean result.
+
 Return `null` when `correctAttempts + incorrectAttempts` is 0. Do not return 100 for that case. The live UI follows `docs/prd.md`: hide accuracy or show `—%`, and do not display 100 before the contestant has made an attempt.
 
 It should not:
@@ -1342,9 +1340,9 @@ Responsibility:
 Handles:
 
 ```text
-filter minimum-accuracy scores
+keep scores where accuracy >= MIN_LEADERBOARD_ACCURACY
 → sort by displayed WPM
-→ break ties by accuracy
+→ break ties by displayed accuracy, rounded to a whole number
 → break remaining ties by earlier createdAt
 → derive rank
 → derive Top 10
@@ -1355,9 +1353,11 @@ Suggested ranking order:
 
 ```text
 1. displayedWpm descending
-2. accuracy descending
+2. displayed accuracy descending, rounded to a whole number
 3. createdAt ascending
 ```
+
+Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gate still uses the stored percentage, so 79.99 stays below `MIN_LEADERBOARD_ACCURACY` even though it displays as 80. Ranking order is in `docs/prd.md`.
 
 This should be a pure module.
 
@@ -1771,9 +1771,11 @@ Required cases:
 
 ```text
 higher displayed WPM ranks first
-accuracy breaks displayed-WPM ties
+displayed accuracy, rounded to a whole number, breaks displayed-WPM ties
+two scores that round to the same accuracy are not ordered by hidden tenths
 earlier createdAt breaks remaining ties
 scores below minimum accuracy are excluded
+eligibility uses accuracy >= MIN_LEADERBOARD_ACCURACY and ignores a stored meetsAccuracyThreshold flag
 rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
@@ -1839,6 +1841,8 @@ fresh event does not delete archived events
 fresh event does not delete old scores
 leaderboard can be reconstructed from persisted scores
 data survives page reload
+submitting Save Score twice for the same result inserts one score row
+View Leaderboard with no nickname inserts one score row with nickname null
 ```
 
 ---
@@ -1853,16 +1857,21 @@ Required cases:
 EventSetup disables Continue when no event exists
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
+while Continue is selected, choosing the other duration leaves the stored duration unchanged
 Ready screen responds to a key press through a window-level keydown listener
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
+long-press on the logo while Typing is waiting returns to Ready and saves no score
+after the timer starts, that long-press stays on Typing
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time
 Top 10 result shows NicknameForm
 non-Top-10 result does not show NicknameForm
+non-Top-10 View Leaderboard opens the Top 5
 nickname validation rejects empty values
+View Leaderboard with an empty nickname writes one score row with a null nickname and opens the Top 5
 Next Player returns to Ready
 auto reset begins only on Leaderboard
 auto reset does not run while nickname entry is active
@@ -1891,6 +1900,7 @@ live WPM is readable
 timer is readable at bottom center
 accuracy is readable
 Results / Nickname layout fits
+iPad software keyboard does not cover SAVE SCORE; if it does, the field and button stay in the upper half
 Top 5 leaderboard fits
 Next Player is easy for the operator to use
 ```
@@ -2065,7 +2075,7 @@ Do not force-push shared history unless necessary.
 
 ## 23. V1 Implementation Order
 
-Build the working booth loop before visual polish. The first build is the five screens, one pure typing and scoring module, a ranking helper, one persistence module, and bundled passages, as in section 12. Later phases add behavior inside those modules. Do not add a library to start a phase.
+Build the working booth loop before visual polish. The typing engine comes first. Then Event Setup, Ready, Results, and the Leaderboard, in that order. Ready comes before Results and the Leaderboard so the loop can be walked: Event Setup, Ready, Typing, Results, Leaderboard. The first build is the five screens, one pure typing and scoring module, a ranking helper, one persistence module, and bundled passages, as in section 12. Later phases add behavior inside those modules. Do not add a library to start a phase.
 
 ### Phase 1 — Project Foundation
 
@@ -2121,7 +2131,7 @@ Plinko qualification
 
 Add unit tests before continuing.
 
-### Phase 5 — IndexedDB and Event Persistence
+### Phase 5 — IndexedDB and Event Setup
 
 Implement:
 
@@ -2131,9 +2141,21 @@ scores
 settings
 fresh event
 continue event
+Event Setup screen
+Start Event
 ```
 
-### Phase 6 — Results
+### Phase 6 — Ready Screen
+
+Implement:
+
+```text
+contest messaging
+current high score
+Press Any Key to Start
+```
+
+### Phase 7 — Results
 
 Implement:
 
@@ -2146,7 +2168,7 @@ nickname entry
 Plinko result
 ```
 
-### Phase 7 — Leaderboard
+### Phase 8 — Leaderboard
 
 Implement:
 
@@ -2156,16 +2178,6 @@ Top 5 display
 rank #1 emphasis
 Next Player
 auto reset
-```
-
-### Phase 8 — Ready Screen
-
-Implement:
-
-```text
-contest messaging
-current high score
-Press Any Key to Start
 ```
 
 ### Phase 9 — PWA
