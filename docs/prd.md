@@ -993,6 +993,240 @@ open installed app
 
 ---
 
+## Offline Behavior Specification
+
+The Typing Test must support the complete booth workflow without an active internet connection after the application has been successfully loaded, installed, and cached on the event iPad.
+
+Offline operation is a core V1 requirement, not an optional enhancement.
+
+### Offline Launch
+
+After the app has been loaded and cached while online, it must be able to launch when:
+
+- Wi-Fi is disabled
+- cellular data is unavailable
+- airplane mode is enabled
+- event Wi-Fi is slow, unstable, or completely unavailable
+
+The app must not require a network connection to reach or use:
+
+- Event Setup
+- Ready / Attract
+- Typing
+- Results / Nickname
+- Leaderboard
+
+A temporary or complete loss of connectivity must not prevent the booth from continuing to operate.
+
+### Offline Contestant Flow
+
+The complete contestant flow must work without connectivity:
+
+```text
+open app
+→ create or continue event
+→ Ready screen
+→ press any key
+→ Typing screen
+→ complete typing test
+→ calculate WPM and accuracy
+→ determine leaderboard eligibility
+→ enter nickname when eligible
+→ save score locally
+→ update leaderboard
+→ show Leaderboard screen
+→ reset for next contestant
+```
+
+No core gameplay action may depend on:
+
+- a remote API
+- a backend server
+- a cloud database
+- authentication
+- a remote passage service
+- remote fonts or required visual assets
+
+### Required Offline Assets
+
+All resources required for normal V1 booth operation must be bundled with the application or cached before offline use.
+
+Required offline resources include:
+
+- HTML
+- CSS
+- JavaScript
+- typing passages
+- fonts
+- app icons
+- logo
+- required images
+- decorative interface assets
+- web app manifest
+- other files required to render and operate the V1 experience
+
+Typing passages must remain available offline.
+
+Fonts required by the design system must remain available offline.
+
+The app must not depend on Google Fonts, a CDN, or another remote source for assets that are required during booth operation.
+
+### Offline Event and Score Persistence
+
+All event and score data must save locally without connectivity.
+
+Offline persistence must include:
+
+- event records
+- score records
+- nicknames
+- active-event reference
+- event duration
+- passage-set identifier
+- app settings required to restore or continue the active event
+
+A network connection must not be required to:
+
+- create an event
+- continue an event
+- save a score
+- save a nickname
+- calculate the current high score
+- calculate Top 10 eligibility
+- generate the Top 5 leaderboard
+- reset for the next contestant
+
+The visible leaderboard should be derived from locally stored event scores.
+
+### Persistence Across App Restarts
+
+Data saved while offline must remain available after:
+
+- navigating between app screens
+- refreshing/reloading the app
+- closing and reopening the installed app
+- temporary network loss
+- normal iPad restart
+
+After reopening the app, the operator must be able to continue the active event with its previously saved scores.
+
+A partially completed contestant test does not need to be restored after an unexpected app close. Returning to the Ready screen is acceptable as long as previously completed event and score data remain intact.
+
+### Connection Loss During Active Use
+
+If internet connectivity disappears while the app is already running, the local booth workflow should continue normally.
+
+The contestant must not be interrupted because of:
+
+- Wi-Fi loss
+- poor event Wi-Fi
+- network timeout
+- loss of internet access after the app has already launched
+
+V1 should not display blocking network errors for functionality that does not require the network.
+
+### Fresh and Continued Events While Offline
+
+The operator must be able to start a fresh event while offline.
+
+Starting fresh must:
+
+- create a new local event
+- begin with an empty leaderboard
+- preserve prior event data
+- make the new event active
+
+The operator must also be able to continue the active event while offline.
+
+Continuing must restore:
+
+- event duration
+- passage-set identifier
+- saved scores
+- current high score
+- derived leaderboard
+
+### Offline Readiness
+
+The app should only be considered ready for event use after all required application resources have been successfully installed or cached.
+
+If required offline assets are missing, the app should not falsely indicate that it is fully offline-ready.
+
+If an offline-readiness indicator is included, it should represent actual readiness rather than being decorative.
+
+### PWA Installation Requirement
+
+Before relying on the app at an event, the target iPad should be prepared while internet access is available.
+
+Recommended preparation flow:
+
+```text
+1. Open the deployed HTTPS application in Safari.
+2. Allow the application and required assets to finish loading.
+3. Add the application to the iPad Home Screen.
+4. Open the installed app at least once while online.
+5. Confirm Event Setup and required visual assets load correctly.
+6. Confirm the app has completed any required offline caching.
+```
+
+The app should not be considered event-ready until offline behavior has been verified on the actual iPad.
+
+### Airplane Mode Acceptance Test
+
+Offline support is not complete until the application passes a full end-to-end test on the target iPad.
+
+Required test:
+
+```text
+1. Connect the iPad to the internet.
+2. Open the deployed application.
+3. Allow the application and required assets to finish loading/caching.
+4. Add the app to the Home Screen if it is not already installed.
+5. Launch the installed app once while online.
+6. Enable airplane mode.
+7. Close and relaunch the installed app.
+8. Create a fresh event or continue an existing event.
+9. Reach the Ready screen.
+10. Start a typing test using the physical keyboard.
+11. Complete the full timed test.
+12. Confirm WPM and accuracy are calculated.
+13. Save a qualifying nickname when applicable.
+14. Confirm the leaderboard updates.
+15. Use Next Player or allow automatic reset.
+16. Confirm the app returns to Ready.
+17. Close the app while airplane mode remains enabled.
+18. Reopen the app.
+19. Confirm the active event still exists.
+20. Confirm previously saved scores and leaderboard data still exist.
+```
+
+The MVP must not be considered complete until this test succeeds.
+
+### Offline Acceptance Criteria
+
+V1 satisfies the offline requirement only when all of the following are true:
+
+- the installed app launches with no internet connection
+- Event Setup works offline
+- a fresh event can be created offline
+- an existing event can be continued offline
+- passages load offline
+- required fonts and visual assets load offline
+- the Ready screen works offline
+- the Typing screen works offline
+- scoring works offline
+- nickname entry works offline
+- scores save offline
+- the high score updates offline
+- the Top 5 leaderboard updates offline
+- Next Player works offline
+- automatic reset works offline
+- saved event data survives app close/reopen while offline
+- saved event data survives a normal iPad restart
+- the complete contestant flow passes in airplane mode on the target iPad
+
+---
+
 ## 20. Persistence Requirements
 
 The app should preserve event data across:
