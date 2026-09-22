@@ -87,7 +87,8 @@ Use fewer colors during Typing. Do not assign a different bright color to every 
 
 ### Contrast and functional use
 
-- Use charcoal for important reading and labels on pastel controls.
+- Use charcoal for important reading, headlines, scores, and labels on pastel controls.
+- Do not copy lavender display type from the wireframe PNGs. Where that type is too faint, keep lavender in a border or tinted surface and use charcoal for the text.
 - Do not assume a pastel foreground is readable simply because it belongs to the palette.
 - Check lavender word styling, muted passage text, error text, and focus indicators against their actual backgrounds.
 - Where an accent foreground is too faint, keep the accent in a border or tinted background and use darker text.
