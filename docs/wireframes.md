@@ -190,7 +190,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 ### Behavior
 
-1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped.
+1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. A long-press on the logo badge returns to Ready and does not save a score. That path is in `docs/prd.md` §11.
 2. **Running:** the first valid typing keystroke starts timing. Incorrect input must not increase WPM.
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
@@ -226,7 +226,7 @@ Keep the WPM dominant and the nickname field clear of celebration motifs. Result
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy. Both use sample numbers. Use “NEW HIGH SCORE!” only when the result is a new high score.
 
-When nickname entry is omitted, show a large View Leaderboard button. That action is in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When nickname entry is omitted, show a large View Leaderboard button. When nickname entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 ## 8. Screen 05 — Top 5 Leaderboard
 
@@ -312,7 +312,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 | Topic | What is established | What remains open |
 | --- | --- | --- |
 | Typing input | Timing, incorrect-input, and Backspace rules live in `docs/prd.md`. | Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`. |
-| Nickname policy | Validation lives in `docs/prd.md`. | Long-name display inside a row, skip behavior, and abandonment handling. |
+| Nickname policy | Validation, empty rejection, and leaving without a nickname live in `docs/prd.md`. | Long-name display inside a row. |
 | Setup defaults | Continue-event duration behavior lives in `docs/prd.md`. | Which options are selected when Event Setup first opens. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.

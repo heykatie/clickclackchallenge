@@ -211,7 +211,7 @@ Ready
 → contestant types
 → timer expires
 → Results screen
-→ Save Score if Top 10 eligible, otherwise View Leaderboard
+→ Save Score, or View Leaderboard with no nickname, if Top 10 eligible; otherwise View Leaderboard
 → Leaderboard
 → Next Player or automatic reset
 → Ready
@@ -329,6 +329,8 @@ The timer starts only when the contestant presses the first valid typing charact
 ## 11. Typing Screen Requirements
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
+
+While the first valid key has not been pressed, a long-press on the logo badge returns to Ready and does not save a score. The badge is present in that waiting state so the screen has a way back. After the timer starts, that long-press does not leave the test.
 
 ### Sentence
 
@@ -820,7 +822,9 @@ then show nickname entry.
 
 If the contestant does not qualify for the Top 10, nickname entry should not be shown.
 
-When nickname entry is not shown, Results shows one action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results. A Top 10 contestant leaves Results by saving a nickname. The label is in `docs/design_system.md` (Brand voice).
+When nickname entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
+
+When nickname entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It keeps the score with no nickname and opens the Top 5. Automatic next-player reset must not interrupt nickname entry. The label is in `docs/design_system.md` (Brand voice).
 
 ### Nickname Rules
 
@@ -1503,6 +1507,46 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 - automatic reset must not interrupt the nickname flow
 - the contestant remains on Results until the nickname flow is completed
+
+---
+
+### Nickname Can Be Skipped
+
+**Given**
+
+- a qualifying contestant is on Results
+- the nickname field is empty
+
+**When**
+
+- the contestant selects View Leaderboard
+
+**Then**
+
+- Save Score would still reject the empty name
+- the score is kept with no nickname
+- the Top 5 leaderboard appears
+- automatic reset has not moved the screen on its own
+
+---
+
+### Waiting Typing Can Return to Ready
+
+**Given**
+
+- the Typing screen is showing the sentence
+- the timer has not started
+
+**When**
+
+- the logo badge is long-pressed
+
+**Then**
+
+- Ready appears
+- no score is saved
+
+After the timer has started, that long-press does not leave the test.
 
 ---
 

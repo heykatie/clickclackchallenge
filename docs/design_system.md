@@ -309,9 +309,7 @@ Nickname
 
 Use “NEW HIGH SCORE!” when applicable. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form.
 
-Nickname eligibility, validation, saving, and the non-qualifier action are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. When nickname entry is omitted, the action label is “VIEW LEADERBOARD” from Brand voice.
-
-Skip behavior and abandonment handling remain open. See section 20.
+Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. The label is “VIEW LEADERBOARD” from Brand voice.
 
 ## 13. Top 5 Leaderboard
 
@@ -472,7 +470,6 @@ Settled product rules live in `docs/prd.md`: scoring, nickname validation, the e
 
 - Which keys count as the first valid typing key, beyond the non-typing keys excluded by `docs/technical_plan.md`.
 - How a valid long name is visually truncated in a row.
-- Nickname skip behavior and abandonment handling.
 - Which options are selected when Event Setup first opens.
 
 The visual system remains usable while these details are resolved. Do not confuse sample values or proposed states with approved product rules.

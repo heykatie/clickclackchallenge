@@ -2021,7 +2021,7 @@ Typical workflow:
 
 ```bash
 git pull
-git add .
+git add docs/prd.md docs/technical_plan.md
 git commit -m "meaningful message"
 git push
 ```
