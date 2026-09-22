@@ -280,7 +280,7 @@ The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do
 | Running | First valid typing keystroke starts timing; live WPM and accuracy update |
 | Time expired | Stop test input, finalize the result, and open Results |
 
-Incorrect keystrokes must not increase WPM. The precise starting-key and correction rules belong in the PRD and remain to be finalized.
+Incorrect keystrokes must not increase WPM. Starting-key and correction rules are in `docs/prd.md`.
 
 Use the feedback treatments in section 8. Keep the passage dominant. Do not show a leaderboard, large logo, dense instructions, decorative panels, or continuously animated elements.
 

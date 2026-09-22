@@ -12,14 +12,35 @@ function App() {
   switch (state.screen) {
     case "setup":
       return (
-        <EventSetupScreen onStart={() => dispatch({ type: "ENTER_READY" })} />
+        <EventSetupScreen
+          durationSeconds={state.durationSeconds}
+          onDurationChange={(durationSeconds) =>
+            dispatch({ type: "SELECT_DURATION", durationSeconds })
+          }
+          onStart={() => dispatch({ type: "ENTER_READY" })}
+        />
       );
     case "ready":
-      return <ReadyScreen />;
+      return (
+        <ReadyScreen onStart={() => dispatch({ type: "ENTER_TYPING" })} />
+      );
     case "typing":
-      return <TypingScreen />;
+      if (state.currentTest === null) {
+        return null;
+      }
+      return (
+        <TypingScreen
+          session={state.currentTest}
+          onType={(key) => dispatch({ type: "TYPE_KEY", ...key })}
+          onExpire={() => dispatch({ type: "FINISH_TEST" })}
+          onAbort={() => dispatch({ type: "RETURN_TO_READY" })}
+        />
+      );
     case "results":
-      return <ResultsScreen />;
+      if (state.latestResult === null) {
+        return null;
+      }
+      return <ResultsScreen result={state.latestResult} />;
     case "leaderboard":
       return <LeaderboardScreen />;
   }

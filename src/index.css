@@ -44,8 +44,70 @@ h1,
   color: var(--tiny-charcoal);
 }
 
-.passage {
+.passage,
+.passage-line {
   font-family: var(--font-typing);
+}
+
+.typing-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-badge {
+  width: 3rem;
+  height: 3rem;
+  min-height: 3rem;
+  padding: 0;
+  border-radius: 1rem;
+  background: var(--tiny-white);
+  border: 2px solid var(--tiny-lavender);
+}
+
+.passage-line {
+  margin: auto;
+  font-size: 2rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.passage-char.correct {
+  font-weight: 700;
+}
+
+.passage-char.incorrect {
+  color: var(--tiny-error);
+  text-decoration: underline;
+}
+
+.passage-char.current-word {
+  background: var(--tiny-lavender-light);
+}
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 1.1em;
+  margin-right: -3px;
+  border-left: 3px solid var(--tiny-mint-strong);
+  vertical-align: text-bottom;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  text-align: center;
+}
+
+.stat-label,
+.stat-value {
+  display: block;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .screen {
