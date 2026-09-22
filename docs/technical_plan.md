@@ -224,65 +224,9 @@ Vite provides:
 - optimized production bundles
 - straightforward PWA plugin integration
 
-### PWA / Service Worker
+### PWA and local storage
 
-Recommended:
-
-```text
-vite-plugin-pwa
-Workbox
-```
-
-`vite-plugin-pwa` should generate/register the service worker and Workbox precache manifest.
-
-### Local Structured Storage — IndexedDB
-
-Use:
-
-```text
-IndexedDB
-```
-
-Recommended wrapper:
-
-```text
-idb
-```
-
-IndexedDB stores:
-
-```text
-events
-scores
-settings
-```
-
-Use IndexedDB instead of `localStorage` for core application data because:
-
-- events contain multiple related scores
-- historical events are retained
-- the data is structured
-- indexes are useful
-- future schema migrations are expected
-- future cloud synchronization can build on the same model
-
-### Passages
-
-Passage rules are in `docs/prd.md`. Import the set from local application data. Do not fetch passages at runtime.
-
-### Fonts and Visual Assets
-
-Fonts, icons, logos, and required images must be bundled locally.
-
-Recommended font packages:
-
-```text
-@fontsource/fredoka
-@fontsource/nunito
-@fontsource/atkinson-hyperlegible
-```
-
-Roles are defined in `docs/design_system.md`. Do not depend on Google Fonts or another remote CDN during booth use.
+Service worker, precache, navigation fallback, IndexedDB, and local font packages are in PWA and IndexedDB below. Passage rules are in `docs/prd.md`. Visual roles are in `docs/design_system.md`.
 
 ### Testing
 
@@ -314,76 +258,13 @@ No application server is required for V1 booth operation.
 
 ---
 
-## Offline Behavior Implementation Specification
+## PWA and IndexedDB
 
-The booth must work offline after caching. That requirement is in `docs/prd.md` (Offline Requirements). What must be saved is in `docs/prd.md` (Persistence Requirements).
+Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS tokens are in `docs/design_system.md`.
 
-### Offline Architecture Responsibilities
+Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
-Offline behavior is split between two local systems:
-
-```text
-Service Worker / PWA Cache
-→ keeps application code and required static assets available offline
-
-IndexedDB
-→ keeps structured event, score, and settings data available offline
-```
-
-These systems solve different problems and both are required.
-
-### PWA and Service Worker Strategy
-
-Use:
-
-```text
-vite-plugin-pwa
-Workbox
-```
-
-The service worker should be generated and registered through the Vite PWA configuration.
-
-The service worker is responsible for making the application shell and required static resources available when the network is unavailable.
-
-Required PWA resources include:
-
-- web app manifest
-- app icons
-- service worker
-- application shell
-- offline-cached build assets
-
-The installed app should remain usable after Safari or the Home Screen PWA is relaunched without connectivity.
-
-### Required Offline Assets
-
-Bundle the assets listed in `docs/prd.md` (Offline Requirements). Load fonts from local packages:
-
-```text
-@fontsource/fredoka
-@fontsource/nunito
-@fontsource/atkinson-hyperlegible
-```
-
-Typing passages should be imported from local application data rather than fetched at runtime.
-
-### Precache Strategy
-
-Use Workbox precaching for the generated application shell and versioned build assets.
-
-Precache resources required for booth operation.
-
-Conceptually:
-
-```text
-build output
-→ Workbox precache manifest
-→ service-worker cache
-```
-
-Because Vite generates hashed/versioned production assets, the service worker should use those generated revisions rather than manually versioning files.
-
-Passages imported into the application bundle are included with that versioned code. If passage data is emitted as a separate static asset, precache that asset too.
+Load fonts with `@fontsource/fredoka`, `@fontsource/nunito`, and `@fontsource/atkinson-hyperlegible`. Import passages from local application data. If passage data is emitted as a separate static asset, precache that asset too.
 
 ```text
 application code + static assets
@@ -393,128 +274,9 @@ structured event, score, and settings data
 → IndexedDB
 ```
 
-Core required assets should be available immediately after a successful installation/cache cycle.
+Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist a separate leaderboard record. Do not reload for a service-worker update during Ready-to-Typing, an active test, or nickname entry. Apply updates on a later launch or while the app is idle.
 
-### Navigation Fallback
-
-Because the application is a client-side React app, offline navigation should resolve back to the application entry point where appropriate.
-
-Configure an SPA navigation fallback so launching or reopening the installed application offline still loads the React app shell.
-
-Do not rely on the server to generate individual application screens.
-
-### Runtime Network Requests
-
-Core V1 functionality should make **no required runtime API requests**.
-
-Therefore, V1 does not require a runtime API caching strategy for gameplay.
-
-If optional network functionality is introduced later, it must fail non-blockingly and must not interfere with the local booth flow.
-
-### IndexedDB Offline Persistence
-
-Use IndexedDB for structured local application data.
-
-Recommended wrapper:
-
-```text
-idb
-```
-
-Required object stores:
-
-```text
-events
-scores
-settings
-```
-
-Which records must survive offline use is defined in `docs/prd.md`.
-
-### Offline Leaderboard Behavior
-
-Do not persist a separate leaderboard record. Derive it from stored scores using the ranking rules in `docs/prd.md`.
-
-```text
-load active event scores from IndexedDB
-→ filter and sort
-→ derive Top 10, Top 5, and the current high score
-```
-
-### Fresh Event While Offline
-
-The operator must be able to start a fresh event without internet access.
-
-Expected local behavior:
-
-```text
-existing active event
-→ archive locally
-
-new event
-→ create in IndexedDB
-→ selected duration saved
-→ passageSetId saved
-→ status = active
-
-settings.activeEventId
-→ update locally
-```
-
-Previous event records and scores must remain stored.
-
-### Continue Event While Offline
-
-The operator must be able to continue the active event without internet access.
-
-Restore from IndexedDB:
-
-- event ID
-- duration
-- passage-set ID
-- saved scores
-- derived high score
-- derived leaderboard
-
-If no valid active event exists, Continue should be unavailable.
-
-### Connection loss and restart
-
-What must survive a dropped network or an app restart is defined in `docs/prd.md` (Persistence Requirements and Offline Requirements). Do not show a blocking network error for local booth actions.
-
-If the app closes during a test, restore the active event and return to Ready. Leave completed scores intact.
-
-### Offline Readiness
-
-The app should not be considered event-ready merely because it opened successfully while online.
-
-Offline readiness requires the application shell and all required V1 assets to be available from the local cache.
-
-If an offline-readiness indicator is implemented, it should represent actual readiness rather than being decorative.
-
-Do not display an affirmative offline-ready state until required caching has completed successfully.
-
-### Service Worker Update Behavior
-
-A new deployed version may become available when the device regains connectivity.
-
-Do not force an update or reload during:
-
-- Ready-to-Typing transition
-- active typing session
-- Results nickname entry
-- any other contestant-critical state
-
-Prefer applying updates:
-
-- on a future application launch, or
-- while the application is safely idle
-
-The current cached version should remain usable if the device is offline.
-
-### Installation and airplane-mode checks
-
-The airplane-mode acceptance test lives in `docs/prd.md`. The installation steps are in the Testing Plan section below.
+The airplane-mode acceptance test is in `docs/prd.md`. Installation steps are in the Testing Plan section below.
 
 ## 5. Application State Model
 
@@ -1011,37 +773,7 @@ Leaderboard state should always be derived from the current event's saved scores
 Historical events and their scores must remain stored when Start Fresh creates a new active event.
 
 ---
-## 9. Passage Architecture
-
-All typing content must be prewritten, local, deterministic, and bundled with the application.
-
-Recommended structure:
-
-```ts
-interface PassageSet {
-  id: string;
-  sentences: string[];
-}
-```
-
-Example:
-
-```ts
-const passageSet: PassageSet = {
-  id: "common-sentences-v1",
-  sentences: [
-    "The little dog ran across the yard today.",
-    "We went down the road to see our old friend.",
-    "The sun came out as we walked back home."
-  ]
-};
-```
-
-Passage wording, length, and versioning rules live in `docs/prd.md` (Passage Rules). Load the set from local application data. Do not fetch passages at runtime.
-
-## 10. Competitive Fairness
-
-Same-sequence fairness is defined in `docs/prd.md` (Passage Rules). Do not shuffle `PassageSet.sentences` per contestant.
+Passage rules and same-sequence fairness are in `docs/prd.md` (Passage Rules). The `PassageSet` shape is in the data model above.
 
 ## 11. Typing Engine
 
@@ -1101,122 +833,9 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-## 12. Starting the Test
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The non-typing keys excluded from the first scored attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace is handled separately.
 
-### Ready Screen
-
-The Ready screen listens for keyboard input.
-
-The Ready string is in `docs/design_system.md` (Brand voice).
-
-On the first key event:
-
-```text
-consume the Ready-screen key event
-→ transition to Typing
-→ render the first sentence
-→ wait for a valid typing key
-```
-
-Do not start the timer on the Ready-screen key.
-
-The Ready-screen key must not propagate into the Typing-screen input handler.
-
-### Typing Screen
-
-The first valid typing character:
-
-```text
-starts the timer
-+
-counts as the first typing attempt
-```
-
-Keys that should not count as typing attempts include:
-
-- Shift by itself
-- Control
-- Option / Alt
-- Command / Meta
-- Caps Lock
-- Tab
-- Escape
-- arrow keys
-- function keys
-
-Backspace is handled separately.
-
----
-
-## 13. Scoring and screen behavior
-
-Scoring rules, nickname rules, Plinko qualification, high-score behavior, and reset behavior live in `docs/prd.md`. Screen layout lives in `docs/wireframes.md`. Visual states and contestant-facing strings live in `docs/design_system.md`.
-
-Implementation constants:
-
-```ts
-export const MIN_LEADERBOARD_ACCURACY = 80;
-export const PLINKO_WPM_THRESHOLD = 50;
-export const LEADERBOARD_AUTO_RESET_MS = 10_000;
-export const NICKNAME_MAX_LENGTH = 20;
-```
-
-`MIN_LEADERBOARD_ACCURACY` and `LEADERBOARD_AUTO_RESET_MS` are the V1 values. Booth and giant-keyboard testing may change them later. Plinko qualification uses `displayedWpm > PLINKO_WPM_THRESHOLD`, matching the “above 50 WPM” string. Changing that comparison requires changing the string in `docs/design_system.md` in the same change.
-
-```ts
-function calculateWpm(correctCharacters: number, elapsedSeconds: number): number {
-  if (elapsedSeconds <= 0) return 0;
-  const elapsedMinutes = elapsedSeconds / 60;
-  return (correctCharacters / 5) / elapsedMinutes;
-}
-
-function calculateAccuracy(correctAttempts: number, incorrectAttempts: number): number {
-  const totalAttempts = correctAttempts + incorrectAttempts;
-  if (totalAttempts === 0) return 100;
-  return (correctAttempts / totalAttempts) * 100;
-}
-
-function meetsLeaderboardAccuracy(accuracy: number): boolean {
-  return accuracy >= MIN_LEADERBOARD_ACCURACY;
-}
-```
-
-Scoring rules are in `docs/prd.md`. Store `rawWpm` and rank with `displayedWpm` (`Math.round(rawWpm)`). `calculateAccuracy` returns `100` when there are no attempts so the result is not `NaN`; the UI still follows the PRD before the first attempt.
-
-```ts
-function compareScores(a: ScoreRecord, b: ScoreRecord): number {
-  if (b.displayedWpm !== a.displayedWpm) {
-    return b.displayedWpm - a.displayedWpm;
-  }
-  if (b.accuracy !== a.accuracy) {
-    return b.accuracy - a.accuracy;
-  }
-  return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-}
-```
-
-```ts
-interface TestResult {
-  rawWpm: number;
-  displayedWpm: number;
-  accuracy: number;
-  correctCharacters: number;
-  correctAttempts: number;
-  incorrectAttempts: number;
-  meetsAccuracyThreshold: boolean;
-}
-```
-
-Ignore events with `event.repeat === true`. Separate physical presses still count. Stop scoring when `performance.now() >= endsAt`.
-
-```ts
-const startedAt = performance.now();
-const endsAt = startedAt + durationSeconds * 1000;
-```
-
-Derive elapsed time from those timestamps. A `requestAnimationFrame` or short interval may refresh the UI. Do not treat the interval tick itself as the clock.
-
-Render nicknames as plain text. Do not use `dangerouslySetInnerHTML`.
+Scoring, nickname, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
 ## Component and Module Boundaries
 
@@ -1971,7 +1590,7 @@ rather than maximizing the number of files or abstractions.
 
 ## 28. PWA, caching, and persistence
 
-Service-worker, precache, navigation-fallback, and IndexedDB behavior are specified in Offline Behavior Implementation Specification above. What must survive a restart, and the airplane-mode acceptance test, are specified in `docs/prd.md`. The installation steps are in the Testing Plan section below.
+Service-worker, precache, navigation-fallback, and IndexedDB behavior are in PWA and IndexedDB above. What must survive a restart, and the airplane-mode acceptance test, are in `docs/prd.md`. Installation steps are in the Testing Plan section below.
 
 ## 32. Error Handling
 
