@@ -1,4 +1,3 @@
-```md
 # Typing Test — V1 Product Requirements Document
 
 ## 1. Overview
@@ -486,4 +485,3 @@ Internet access must not be required to:
 - Reset for the next contestant
 
 The completed V1 should be tested in airplane mode on the target iPad before event use.
-```
