@@ -624,30 +624,7 @@ The app's settings point to the currently active event.
 
 Passage content is bundled with the app, while each event stores only the identifier of the passage-set version it used.
 
-### Persistence Requirements
-
-The following data must survive:
-
-- browser refresh
-- closing and reopening the installed app
-- temporary loss of connectivity
-- normal iPad restart
-
-Persist:
-
-- events
-- scores
-- nicknames
-- active-event reference
-- event duration
-- passage-set identifier
-- app settings required to continue an event
-
-The leaderboard itself does not need to be stored separately.
-
-It should be recalculated from the event's saved scores.
-
-A partially completed contestant test does not need to be restored if the app closes unexpectedly. Returning to the Ready screen is acceptable.
+What must survive a refresh, restart, or loss of connectivity is in §20. Persistence Requirements.
 
 ### Historical Data Retention
 
@@ -1029,17 +1006,7 @@ The app must not depend on Google Fonts, a CDN, or another remote source for ass
 
 ### Offline Event and Score Persistence
 
-All event and score data must save locally without connectivity.
-
-Offline persistence must include:
-
-- event records
-- score records
-- nicknames
-- active-event reference
-- event duration
-- passage-set identifier
-- app settings required to restore or continue the active event
+All event and score data must save locally without connectivity. The records that must persist are in §20. Persistence Requirements.
 
 A network connection must not be required to:
 
@@ -1056,17 +1023,7 @@ The visible leaderboard should be derived from locally stored event scores.
 
 ### Persistence Across App Restarts
 
-Data saved while offline must remain available after:
-
-- navigating between app screens
-- refreshing/reloading the app
-- closing and reopening the installed app
-- temporary network loss
-- normal iPad restart
-
-After reopening the app, the operator must be able to continue the active event with its previously saved scores.
-
-A partially completed contestant test does not need to be restored after an unexpected app close. Returning to the Ready screen is acceptable as long as previously completed event and score data remain intact.
+Data saved while offline must still be there when the app is reopened, including after a normal iPad restart. The operator must be able to continue the active event with its previously saved scores. What else must survive, including an in-progress test, is in §20.
 
 ### Connection Loss During Active Use
 
@@ -1125,38 +1082,7 @@ Recommended preparation flow:
 6. Confirm the app has completed any required offline caching.
 ```
 
-The app should not be considered event-ready until offline behavior has been verified on the actual iPad.
-
-### Airplane Mode Acceptance Test
-
-Offline support is not complete until the application passes a full end-to-end test on the target iPad.
-
-Required test:
-
-```text
-1. Connect the iPad to the internet.
-2. Open the deployed application.
-3. Allow the application and required assets to finish loading/caching.
-4. Add the app to the Home Screen if it is not already installed.
-5. Launch the installed app once while online.
-6. Enable airplane mode.
-7. Close and relaunch the installed app.
-8. Create a fresh event or continue an existing event.
-9. Reach the Ready screen.
-10. Start a typing test using the physical keyboard.
-11. Complete the full timed test.
-12. Confirm WPM and accuracy are calculated.
-13. Save a qualifying nickname when applicable.
-14. Confirm the leaderboard updates.
-15. Use Next Player or allow automatic reset.
-16. Confirm the app returns to Ready.
-17. Close the app while airplane mode remains enabled.
-18. Reopen the app.
-19. Confirm the active event still exists.
-20. Confirm previously saved scores and leaderboard data still exist.
-```
-
-The MVP must not be considered complete until this test succeeds.
+The app should not be considered event-ready until the airplane-mode acceptance test in the V1 Testing Plan has passed on the actual iPad.
 
 ### Offline Acceptance Criteria
 
@@ -1197,9 +1123,10 @@ Persist:
 - events
 - scores
 - nicknames
-- active event
+- active-event reference
 - event duration
 - passage-set identifier
+- app settings required to continue an event
 
 A fresh event must not delete old event data.
 
