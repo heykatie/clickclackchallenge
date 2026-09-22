@@ -1,14 +1,33 @@
+import { useState } from "react";
+import type { TestDuration } from "../db/persistence";
+import { durationChoice, type SetupMode } from "../state/setupRules";
+
 type EventSetupScreenProps = {
-  durationSeconds: 30 | 60;
-  onDurationChange: (durationSeconds: 30 | 60) => void;
-  onStart: () => void;
+  storedDuration: TestDuration | null;
+  saving: boolean;
+  onStartFresh: (durationSeconds: TestDuration) => void;
+  onContinue: () => void;
 };
 
 export function EventSetupScreen({
-  durationSeconds,
-  onDurationChange,
-  onStart,
+  storedDuration,
+  saving,
+  onStartFresh,
+  onContinue,
 }: EventSetupScreenProps) {
+  const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
+  const [freshDuration, setFreshDuration] = useState<TestDuration>(storedDuration ?? 30);
+  const shownDuration = durationChoice(mode, storedDuration, freshDuration);
+  const durationLocked = mode === "continue" && storedDuration !== null;
+
+  function startEvent() {
+    if (mode === "continue" && storedDuration !== null) {
+      onContinue();
+      return;
+    }
+    onStartFresh(freshDuration);
+  }
+
   return (
     <main className="screen">
       <h1>Event setup</h1>
@@ -19,8 +38,9 @@ export function EventSetupScreen({
             type="radio"
             name="duration"
             value="30"
-            checked={durationSeconds === 30}
-            onChange={() => onDurationChange(30)}
+            checked={shownDuration === 30}
+            disabled={durationLocked}
+            onChange={() => setFreshDuration(30)}
           />
           30 seconds
         </label>
@@ -29,8 +49,9 @@ export function EventSetupScreen({
             type="radio"
             name="duration"
             value="60"
-            checked={durationSeconds === 60}
-            onChange={() => onDurationChange(60)}
+            checked={shownDuration === 60}
+            disabled={durationLocked}
+            onChange={() => setFreshDuration(60)}
           />
           60 seconds
         </label>
@@ -38,16 +59,29 @@ export function EventSetupScreen({
       <fieldset>
         <legend>Leaderboard</legend>
         <label>
-          <input type="radio" name="event-mode" value="fresh" defaultChecked />
+          <input
+            type="radio"
+            name="event-mode"
+            value="fresh"
+            checked={mode === "fresh"}
+            onChange={() => setMode("fresh")}
+          />
           Start fresh
         </label>
         <label>
-          <input type="radio" name="event-mode" value="continue" disabled />
+          <input
+            type="radio"
+            name="event-mode"
+            value="continue"
+            checked={mode === "continue"}
+            disabled={storedDuration === null}
+            onChange={() => setMode("continue")}
+          />
           Continue previous event
         </label>
-        <p>No previous event yet.</p>
+        {storedDuration === null ? <p>No previous event yet.</p> : null}
       </fieldset>
-      <button type="button" onClick={onStart}>
+      <button type="button" onClick={startEvent} disabled={saving}>
         START EVENT
       </button>
     </main>

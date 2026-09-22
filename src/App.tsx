@@ -1,4 +1,5 @@
-import { useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { startFreshEvent, loadBooth, type TestDuration } from "./db/persistence";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -8,16 +9,68 @@ import { appReducer, initialState } from "./state/appState";
 
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBooth().then(
+      (booth) => {
+        if (cancelled) {
+          return;
+        }
+        if (booth.activeEvent) {
+          dispatch({ type: "SET_ACTIVE_EVENT", event: booth.activeEvent });
+        }
+        setStatus("ready");
+      },
+      () => {
+        if (!cancelled) {
+          setStatus("failed");
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function startFresh(durationSeconds: TestDuration) {
+    setSaving(true);
+    try {
+      const event = await startFreshEvent(durationSeconds);
+      dispatch({ type: "SET_ACTIVE_EVENT", event });
+      dispatch({ type: "ENTER_READY" });
+    } catch {
+      setStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (status === "loading") {
+    return <main className="screen" aria-busy="true" />;
+  }
+
+  if (status === "failed") {
+    return (
+      <main className="screen">
+        <h1>Scores can't be saved</h1>
+        <p>This iPad can't store the event. Don't start a competition until storage is working.</p>
+      </main>
+    );
+  }
 
   switch (state.screen) {
     case "setup":
       return (
         <EventSetupScreen
-          durationSeconds={state.durationSeconds}
-          onDurationChange={(durationSeconds) =>
-            dispatch({ type: "SELECT_DURATION", durationSeconds })
-          }
-          onStart={() => dispatch({ type: "ENTER_READY" })}
+          storedDuration={state.activeEvent?.durationSeconds ?? null}
+          saving={saving}
+          onStartFresh={(durationSeconds) => {
+            void startFresh(durationSeconds);
+          }}
+          onContinue={() => dispatch({ type: "ENTER_READY" })}
         />
       );
     case "ready":

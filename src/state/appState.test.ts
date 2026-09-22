@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
+import type { EventRecord } from "../db/persistence";
 import { appReducer, initialState } from "./appState";
+
+const event60: EventRecord = {
+  id: "event-60",
+  durationSeconds: 60,
+  passageSetId: "common-sentences-v1",
+  status: "active",
+  createdAt: "2026-09-22T00:00:00.000Z",
+  updatedAt: "2026-09-22T00:00:00.000Z",
+};
 
 describe("appReducer", () => {
   it("opens typing with an unstarted test, so the Ready key is not scored", () => {
@@ -65,5 +75,17 @@ describe("appReducer", () => {
     expect(finished.latestResult?.displayedWpm).toBe(
       Math.round((1 / 5) / 0.5),
     );
+  });
+
+  it("uses the active event duration for the test", () => {
+    const withEvent = appReducer(initialState, {
+      type: "SET_ACTIVE_EVENT",
+      event: event60,
+    });
+    const typing = appReducer(appReducer(withEvent, { type: "ENTER_READY" }), {
+      type: "ENTER_TYPING",
+    });
+    expect(typing.durationSeconds).toBe(60);
+    expect(typing.currentTest?.durationSeconds).toBe(60);
   });
 });

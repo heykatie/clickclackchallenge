@@ -1,4 +1,5 @@
 import { passages } from "../data/passages";
+import type { EventRecord } from "../db/persistence";
 import {
   calculateAccuracy,
   calculateWpm,
@@ -28,13 +29,14 @@ export interface TestResult {
 export interface AppState {
   screen: AppScreen;
   durationSeconds: 30 | 60;
-  activeEvent: null;
+  activeEvent: EventRecord | null;
   currentTest: TestSession | null;
   latestResult: TestResult | null;
 }
 
 export type AppAction =
   | { type: "SELECT_DURATION"; durationSeconds: 30 | 60 }
+  | { type: "SET_ACTIVE_EVENT"; event: EventRecord }
   | { type: "ENTER_READY" }
   | { type: "ENTER_TYPING" }
   | { type: "TYPE_KEY"; key: string; repeat: boolean; now: number }
@@ -56,13 +58,22 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         return state;
       }
       return { ...state, durationSeconds: action.durationSeconds };
+    case "SET_ACTIVE_EVENT":
+      return {
+        ...state,
+        activeEvent: action.event,
+        durationSeconds: action.event.durationSeconds,
+      };
     case "ENTER_READY":
       return { ...state, screen: "ready", currentTest: null };
     case "ENTER_TYPING":
       return {
         ...state,
         screen: "typing",
-        currentTest: createTestSession(passages, state.durationSeconds),
+        currentTest: createTestSession(
+          passages,
+          state.activeEvent?.durationSeconds ?? state.durationSeconds,
+        ),
       };
     case "TYPE_KEY": {
       if (state.screen !== "typing" || state.currentTest === null) {
