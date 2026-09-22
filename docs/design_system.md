@@ -70,8 +70,10 @@ These are the latest documented design values. They are approximate visual match
 | Soft white | `--tiny-white` | `#FFFDFC` | Panels, inputs, ordinary leaderboard rows |
 | Mint | `--tiny-mint` | `#9DDED8` | Accent surfaces, rank badges, decorative forms |
 | Strong mint | `--tiny-mint-strong` | `#6CCFC7` | Primary controls, caret, focus accents |
+| Deep mint | `--tiny-mint-deep` | `#24756E` | Ready “PRESS ANY KEY TO START” |
 | Lavender | `--tiny-lavender` | `#AA9AD4` | Borders, current-word emphasis, selected-state accents |
 | Light lavender | `--tiny-lavender-light` | `#D9D0ED` | First-place row, soft highlights, prompt panels |
+| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Ready high-score name |
 | Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
 | Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
@@ -201,7 +203,7 @@ Use aligned rank, name, and WPM columns. Names are left-aligned; WPM values are 
 | Upcoming words | Charcoal, in the regular passage weight. Not muted gray. |
 | Incorrect characters | Error red plus underline or another non-color cue |
 
-The active word uses a light-lavender surface and charcoal text. Do not paint it in lavender type. `--tiny-lavender` (`#AA9AD4`) is about 2.23:1 on blush and 2.50:1 on white, so it fails WCAG AA even for large text. Lavender stays a surface, border, or selected-state accent. Apply the same treatment across the passage set.
+The active word uses a light-lavender surface and charcoal text. Do not paint it in lavender type. `--tiny-lavender` (`#AA9AD4`) is about 2.23:1 on blush and 2.50:1 on white, so it fails WCAG AA even for large text. Lavender stays a surface, border, or selected-state accent. The Ready high-score name is the exception and uses `--tiny-lavender-deep` instead. Apply the same treatment across the passage set.
 
 Incorrect-character feedback takes precedence over the ordinary word treatment. Correct characters already typed stay charcoal even when they sit inside the active word. The caret must remain clearly visible against both the passage background and the active-word treatment.
 
@@ -242,8 +244,8 @@ Visual order:
 
 1. Contest headline.
 2. Plinko message on a clear mint-accented surface.
-3. Current high-score WPM and name.
-4. Large keyboard invitation.
+3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
+4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
@@ -430,10 +432,12 @@ Keep wording consistent across screens. Avoid corporate language, technical jarg
   /* Primary accents */
   --tiny-mint: #9DDED8;
   --tiny-mint-strong: #6CCFC7;
+  --tiny-mint-deep: #24756E;
 
   /* Secondary accents */
   --tiny-lavender: #AA9AD4;
   --tiny-lavender-light: #D9D0ED;
+  --tiny-lavender-deep: #6B5A9A;
 
   /* Decorative accents */
   --tiny-pink: #F4C1D4;

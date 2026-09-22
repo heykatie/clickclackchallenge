@@ -53,7 +53,9 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
           {highScore ? (
             <>
               <p className="stat-value">{highScore.displayedWpm} WPM</p>
-              <p className="high-score-name">{highScore.name ?? "—"}</p>
+              <p className={highScore.name ? "high-score-name has-name" : "high-score-name"}>
+                {highScore.name ?? "—"}
+              </p>
             </>
           ) : (
             <p className="high-score-empty">Be the first high score!</p>

@@ -6,10 +6,12 @@
   /* Primary accents */
   --tiny-mint: #9dded8;
   --tiny-mint-strong: #6ccfc7;
+  --tiny-mint-deep: #24756e;
 
   /* Secondary accents */
   --tiny-lavender: #aa9ad4;
   --tiny-lavender-light: #d9d0ed;
+  --tiny-lavender-deep: #6b5a9a;
 
   /* Decorative accents */
   --tiny-pink: #f4c1d4;
@@ -231,9 +233,14 @@ label {
   white-space: nowrap;
 }
 
+.high-score-name.has-name {
+  color: var(--tiny-lavender-deep);
+}
+
 .ready-prompt {
   margin: 0;
   font-size: 2rem;
+  color: var(--tiny-mint-deep);
 }
 
 .ready-helper {
