@@ -339,7 +339,7 @@ Leaderboard
 
 [ NEXT PLAYER → ]
 
-Returning to ready screen in 15s
+Returning to ready screen in 5s
 ```
 
 ### Layout and emphasis
@@ -363,7 +363,7 @@ Show actual event data rather than filling missing places with sample contestant
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
-- The countdown duration and what reset preserves are defined in `docs/prd.md`. Show the remaining seconds. Do not leave the number static.
+- The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
 - NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 

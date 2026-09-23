@@ -3,6 +3,7 @@ import type { ScoreRecord } from "../db/persistence";
 import { rankScores } from "../features/leaderboard/ranking";
 
 const RESET_SECONDS = 15;
+const RESET_COUNTDOWN_AT = 5;
 
 type LeaderboardScreenProps = {
   scores: readonly ScoreRecord[];
@@ -100,7 +101,9 @@ export function LeaderboardScreen({
       <button type="button" onClick={leave}>
         NEXT PLAYER
       </button>
-      <p>Returning to ready screen in {secondsLeft}s</p>
+      {secondsLeft <= RESET_COUNTDOWN_AT && secondsLeft > 0 ? (
+        <p className="leaderboard-countdown">Returning to ready screen in {secondsLeft}s</p>
+      ) : null}
     </main>
   );
 }

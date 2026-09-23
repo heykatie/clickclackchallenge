@@ -330,6 +330,12 @@ button:disabled {
   gap: 1rem;
 }
 
+.leaderboard-countdown {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
 .leaderboard-kicker,
 .leaderboard-screen h1 {
   margin: 0;

@@ -938,7 +938,7 @@ Initial target:
 approximately 15 seconds
 ```
 
-The exact duration may be adjusted after booth testing.
+Show “Returning to ready screen in {n}s” only for the last 5 seconds. The message is small. The exact duration may be adjusted after booth testing.
 
 Reset contestant-specific state:
 
