@@ -47,14 +47,17 @@ function App() {
       dispatch({ type: "ENTER_SETUP" });
     });
     const onKeyDown = (event: KeyboardEvent) => {
-      if (screenRef.current === "setup" || statusRef.current !== "ready") {
+      if (
+        screenRef.current === "setup" ||
+        screenRef.current === "leaderboard" ||
+        statusRef.current !== "ready"
+      ) {
         return;
       }
       if (!hold.keyDown(event)) {
         return;
       }
       event.preventDefault();
-      event.stopImmediatePropagation();
     };
     const onKeyUp = (event: KeyboardEvent) => {
       if (screenRef.current === "setup" || statusRef.current !== "ready") {
@@ -303,6 +306,7 @@ function App() {
             void leaveResults(null);
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          claimShortEscape={claimShortEscape}
         />
       );
     case "leaderboard":

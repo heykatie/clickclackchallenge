@@ -253,7 +253,7 @@ After 2 minutes of idle, replace this screen with the all-time roll from `docs/p
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9. Holding Escape does the same from those screens and from the rolling high-score list.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
 
 ## 11. Typing
 
@@ -323,7 +323,7 @@ Name
 
 Use “NEW HIGH SCORE!” as the only headline for rank 1. Add “You win a Plinko drop!” when that score is above 50 WPM, and do not add “You made the Top 5!” Use “Nice typing!” with “You made the Top 5!” for places 2 through 5, and with “You made the Top 10!” for sixth through tenth. Use “Nice typing!” with “You win a Plinko drop!” when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Use “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. Use “You win a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “Thanks for playing!”, “Casper, is that you?”, and “NEW HIGH SCORE!” stay charcoal. “You win a Plinko drop!” uses the same mint pill as Ready, with charcoal text. “You made the Top 5!” and “You made the Top 10!” use a light lavender pill, with charcoal text. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
 
-Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Focus the name field when it appears so the first letter from the giant keyboard goes into the name. Enter saves the score with that name. When the name is still empty or blocked, show “Opening the leaderboard in {n}s” only for the last 5 seconds of the 15-second wait, then leave through View Leaderboard. Hide that countdown once the name is allowed. A blocked name also shows “Pick a different name.” Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted. Enter and Space select it on that screen. It is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
+Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Focus the name field when it appears so the first letter from the giant keyboard goes into the name. Enter saves the score with that name. When the name is still empty or blocked, show “Opening the leaderboard in {n}s” only for the last 5 seconds of the 15-second wait, then leave through View Leaderboard. Hide that countdown once the name is allowed. A blocked name also shows “Pick a different name.” Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted. Enter, Space, and a short Escape press select it on that screen. It is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
 
 ## 13. Top 5 Leaderboard
 
@@ -368,7 +368,7 @@ Show actual event data rather than filling missing places with sample contestant
 
 - Start the return countdown when the leaderboard appears.
 - The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
-- NEXT PLAYER returns immediately to Ready. A short Escape press, Enter, and Space do the same. Holding Escape opens Event Setup. Countdown completion performs the same reset.
+- NEXT PLAYER returns immediately to Ready. Space, Enter, and Escape do the same. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 
 ## 14. Motion
@@ -480,9 +480,9 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” When name entry is omitted, Enter and Space select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
+- [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” When name entry is omitted, Enter, Space, and a short Escape press select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
-- [ ] NEXT PLAYER, a short Escape press, Enter, Space, and the visible countdown return to Ready while preserving event data. Holding Escape opens Event Setup.
+- [ ] NEXT PLAYER, Space, Enter, Escape, and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.
 - [ ] Essential text has sufficient contrast, focus is visible, and state is not conveyed by color alone.
 - [ ] Required fonts, images, icons, and passages are available offline.

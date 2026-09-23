@@ -3,6 +3,7 @@ import { listAllScores } from "../db/persistence";
 import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
 import { HOLD_SETUP_MS } from "../state/escapeHold";
+import { readyKeyDown } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
 
 const READY_IDLE_MS = 120_000;
@@ -71,21 +72,24 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        return;
-      }
-      event.preventDefault();
-      const onRoll = event.target instanceof Element && event.target.closest(".screensaver") !== null;
-      if (asleepRef.current || onRoll) {
+      const rolling =
+        asleepRef.current ||
+        (event.target instanceof Element && event.target.closest(".screensaver") !== null);
+      const action = readyKeyDown(event.key, rolling);
+      if (action === "wake") {
+        if (event.key !== "Escape") {
+          event.preventDefault();
+        }
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);
         }
         return;
       }
-      if (event.repeat) {
+      if (action === "ignore" || event.repeat) {
         return;
       }
+      event.preventDefault();
       onStartRef.current(event.key);
     };
     window.addEventListener("keydown", onKeyDown, true);

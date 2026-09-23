@@ -963,7 +963,7 @@ contestant keypress
 → transition to TypingScreen
 ```
 
-A short Escape press does not start the test. Holding Escape opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list.
+A short Escape press does not start the test. Holding Escape opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
 
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
@@ -1961,7 +1961,7 @@ Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test
 holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
-a short Escape press, Space, any other key, or a tap on that list returns to Ready and does not start the test
+any key or a tap on that list returns to Ready and does not start the test
 holding Escape on that list opens Event Setup
 Ready-screen key is not passed into Typing as contestant input
 a key still held from Ready is ignored until that key is released
@@ -1970,8 +1970,7 @@ Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
 a short Escape press during Typing returns to Ready and saves no score
 holding Escape during Typing opens Event Setup and saves no score
-a short Escape press, Enter, or Space during the Leaderboard returns to Ready and keeps the saved scores
-holding Escape during the Leaderboard opens Event Setup and keeps the saved scores
+Space, Enter, or Escape during the Leaderboard returns to Ready and keeps the saved scores
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result
@@ -1981,7 +1980,7 @@ Typing screen displays remaining time
 a result ranked through 20th shows the name field, focused
 Enter on Results saves the score with the typed name
 a result outside 20th does not show the name field
-Enter or Space on Results without name entry opens the leaderboard
+Enter, Space, or a short Escape press on Results without name entry opens the leaderboard
 non-Top-10 View Leaderboard opens the Top 5
 name validation rejects empty values
 View Leaderboard with an empty name writes one score row with a null name and opens the Top 5

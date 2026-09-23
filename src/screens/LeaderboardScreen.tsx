@@ -67,14 +67,14 @@ export function LeaderboardScreen({
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" || event.repeat || !isLeaderboardLeaveKey(event)) {
+      if (event.repeat || !isLeaderboardLeaveKey(event)) {
         return;
       }
       event.preventDefault();
       leave();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   function beginHold() {

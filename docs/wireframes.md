@@ -147,7 +147,7 @@ The strings on this screen live in `docs/design_system.md` (Brand voice). The di
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-Do not show the event Top 5, operator settings, or a Start button on this screen. After 2 minutes of idle, a rolling all-time list may replace this screen. That state is specified in `docs/prd.md` and `docs/design_system.md`. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9. Holding Escape opens Event Setup the same way from those screens and from the rolling high-score list.
+Do not show the event Top 5, operator settings, or a Start button on this screen. After 2 minutes of idle, a rolling all-time list may replace this screen. Any key or a tap returns to Ready and does not start the test. That state is specified in `docs/prd.md` and `docs/design_system.md`. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9. Holding Escape opens Event Setup the same way from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
 
 ## 6. Screen 03 — Typing
 
@@ -228,7 +228,7 @@ Keep the WPM dominant and the name field clear of celebration motifs. Result str
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” as the headline for rank 1, without “You made the Top 5!” Use “Nice typing!” for places 2 through 5, a Top 10 result, or any result above 50 WPM. Add “You made the Top 5!” or “You made the Top 10!” for those places. Show “You win a Plinko drop!” only when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows “NEW HIGH SCORE!” and the Plinko line only. Use “Casper, is that you?” when displayed WPM is 0. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
-When name entry is omitted, show a large View Leaderboard button. Enter and Space select it. When name entry is shown, focus the name field so the first letter goes into it. Enter saves the score with that name. Show View Leaderboard beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When name entry is omitted, show a large View Leaderboard button. Enter, Space, and a short Escape press select it. When name entry is shown, focus the name field so the first letter goes into it. Enter saves the score with that name. Show View Leaderboard beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 Focusing the name field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the name field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
 
@@ -279,7 +279,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.
-- NEXT PLAYER returns immediately to Ready. A short Escape press, Enter, and Space do the same. Holding Escape opens Event Setup. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
+- NEXT PLAYER returns immediately to Ready. Space, Enter, and Escape do the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 
@@ -299,17 +299,17 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Fresh creates a new event without deleting prior scores; Continue restores saved event data.
 - [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score. The headline bounces a little and the start line pulses. Reduced motion keeps both still.
 - [ ] Ready has no leaderboard or Start button.
-- [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup from Ready, Typing, Results, and the Leaderboard. A short Escape press does not.
+- [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup from Ready, Typing, and Results. A short Escape press does not.
 - [ ] The full first sentence is visible before the first valid typing keystroke starts the timer.
 - [ ] Every passage fits on one centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry is on Results and offered through 20th place. The field is focused, so the first letter goes into the name. Enter saves that name with the score. When name entry is omitted, Enter and Space select View Leaderboard. The Top 10 line stops at 10th.
+- [ ] Name entry is on Results and offered through 20th place. The field is focused, so the first letter goes into the name. Enter saves that name with the score. When name entry is omitted, Enter, Space, and a short Escape press select View Leaderboard. The Top 10 line stops at 10th.
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.
-- [ ] NEXT PLAYER, a short Escape press, Enter, Space, and the countdown return to Ready with event data intact. Holding Escape opens Event Setup.
+- [ ] NEXT PLAYER, Space, Enter, Escape, and the countdown return to Ready with event data intact.
 - [ ] Empty events do not display fabricated names or scores.
 - [ ] Required assets, fonts, passages, and stored data work offline on the target iPad.
 - [ ] Essential text has sufficient contrast, controls have visible focus, and state is not conveyed by color alone.
