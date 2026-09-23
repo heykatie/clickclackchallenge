@@ -76,8 +76,9 @@ V1 supports:
 - Backspace
 - Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
+- Story, one fixed short story with a 60-second cap
 - minimum leaderboard accuracy
-- Top 10 name eligibility
+- name entry through 20th place
 - Top 5 leaderboard display
 - Plinko/prize qualification
 - manual Next Player reset
@@ -422,6 +423,7 @@ Field behavior:
 - identifies the text version the next contestant will use
 - `common-sentences-v2` for Famous Lines
 - `common-words-v1` for Standard
+- `story-v1` for Story
 - updated with `testMode` so the event record matches the next attempt
 
 `status`
@@ -545,7 +547,8 @@ Field behavior:
 `passageSetId`
 
 - snapshot of the text version that produced this score
-- `common-words-v1`, `common-sentences-v1`, or `common-sentences-v2`
+- `common-words-v1`, `common-sentences-v1`, `common-sentences-v2`, or `story-v1`
+- `common-sentences-v1` is the earlier everyday set; current Famous Lines scores use `common-sentences-v2`
 - ranking does not reload that text to recompute WPM
 
 `createdAt`
@@ -571,7 +574,7 @@ const score: ScoreRecord = {
 
   durationSeconds: 30,
   testMode: "famous-lines",
-  passageSetId: "common-sentences-v1",
+  passageSetId: "common-sentences-v2",
 
   createdAt: "2026-09-22T07:43:12.000Z"
 };
@@ -1003,7 +1006,7 @@ The screen should use pure typing/scoring functions rather than embedding all lo
 It should not:
 
 - persist final scores directly
-- decide Top 10 name eligibility by itself
+- decide name eligibility by itself
 - render the final leaderboard
 - create or archive events
 
@@ -1015,7 +1018,7 @@ sentence visible
 → timer starts
 → typing engine processes input
 → scoring functions update live metrics
-→ timer expires
+→ timer expires, or Story is finished
 → TestResult created
 → ResultsScreen
 ```
@@ -1429,7 +1432,7 @@ export const commonSentencesV2: PassageSet = {
 };
 ```
 
-Famous Lines sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list.
+Famous Lines sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list. The Story passage lives in `src/data/story.ts`.
 
 The modules should not:
 
@@ -1528,7 +1531,8 @@ src/
 ├── data/
 │   ├── passages.ts
 │   ├── commonWords.ts
-│   └── wordLines.ts
+│   ├── wordLines.ts
+│   └── story.ts
 │
 ├── app/
 │   ├── App.tsx
@@ -1583,7 +1587,7 @@ Examples:
 ```text
 TypingScreen should not call IndexedDB directly.
 
-NameForm should not calculate Top 10 eligibility.
+NameForm should not calculate name eligibility.
 
 ScoreService should not render leaderboard rows.
 
@@ -1742,7 +1746,7 @@ Do not collect:
 
 Name content must render as plain text and never as HTML.
 
-A profanity/moderation system is not required for V1 unless requested later.
+Names are checked before they are saved. Profanity and slurs are rejected, including spaces, punctuation, and numbers standing in for letters. The name rules are in `docs/prd.md` §15.
 
 ---
 
@@ -1882,6 +1886,7 @@ each score keeps the duration, mode, passage set, and WPM from the attempt that 
 ranking uses stored WPM when scores in one event have different durations or modes
 an event saved before game modes is read as Famous Lines without changing its WPM
 a stored "race" mode is read as Famous Lines without changing its WPM
+starting Story stores 60 seconds even when the timed-mode length is 30
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
 ```

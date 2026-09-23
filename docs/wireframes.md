@@ -105,7 +105,7 @@ Use three clear option groups with visible selected states and one large mint ac
 
 | Control | Layout |
 | --- | --- |
-| Test length | One choice: 30 or 60 seconds. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. Behavior is in `docs/prd.md`. |
+| Test length | One choice: 30 or 60 seconds, for Standard and Famous Lines. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. While Story is selected, it shows 60 seconds and cannot be changed. Behavior is in `docs/prd.md`. |
 | Game mode | One choice: Standard, Famous Lines, or Story. On Continue, the control opens on the event's current mode and still accepts the other modes for the next contestant. Story shows Test length fixed at 60 seconds. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
@@ -322,4 +322,4 @@ This is a review checklist for the intended interface, not a claim that the app 
 | Name display | A missing name is a dash. A long name is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
 | Setup defaults | With no event, Start fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices. Behavior is in `docs/prd.md` §9. |
 
-Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.
+Provisional numbers, including the 80% accuracy gate and the 15-second reset, live in `docs/prd.md`. Testing may change them later.

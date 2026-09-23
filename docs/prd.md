@@ -120,12 +120,12 @@ V1 should:
 5. prevent incorrect typing from inflating WPM
 6. prevent very low-accuracy button mashing from entering the leaderboard
 7. retain event scores locally
-8. support a Top 10 name flow
+8. support name entry through 20th place
 9. display a Top 5 leaderboard
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
 12. maintain a simple, readable landscape-iPad interface
-13. keep each game mode fair: Famous Lines uses one sentence sequence, and Standard draws from one fixed word list
+13. keep each game mode fair: Famous Lines uses one sentence sequence, Standard draws from one fixed word list, and Story uses one fixed short story
 14. follow the documented visual design system
 
 ---
@@ -139,7 +139,7 @@ V1 includes:
 - event setup
 - 30-second mode
 - 60-second mode
-- operator-selected Standard and Famous Lines game modes
+- operator-selected Standard, Famous Lines, and Story game modes
 - fresh event creation
 - continue previous/current active event
 - Ready / Attract screen
@@ -152,10 +152,11 @@ V1 includes:
 - Backspace support
 - Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
+- Story, one fixed short story with a 60-second cap
 - results screen
 - high-score detection
 - minimum leaderboard accuracy requirement
-- Top 10 name eligibility
+- name entry through 20th place
 - name entry
 - Top 5 leaderboard
 - Next Player action
@@ -204,6 +205,8 @@ operator opens app
 → Ready screen
 ```
 
+Story ignores a 30-second choice and uses 60 seconds. Standard and Famous Lines use the length selected here.
+
 ### Contestant Flow
 
 ```text
@@ -212,7 +215,7 @@ Ready
 → Typing screen appears
 → first valid typing key starts timer
 → contestant types
-→ timer expires
+→ timer expires, or Story is finished
 → Results screen
 → Save Score, or View Leaderboard with no name, if ranked through 20th; otherwise View Leaderboard
 → Leaderboard
@@ -244,7 +247,7 @@ As a qualifying contestant, I want to enter a name so my result can appear on th
 
 ### Booth Operator
 
-As an operator, I want to choose 30 or 60 seconds before the event starts.
+As an operator, I want to choose 30 or 60 seconds before the event starts. Story always uses 60 seconds.
 
 As an operator, I want to start a fresh leaderboard without deleting old event data.
 
@@ -758,7 +761,7 @@ Famous Lines sentences are not shuffled per contestant. Every attempt, including
 
 Standard uses the same list of the 200 most common English words for every attempt. Each attempt gets a new random draw from that list. Words are lowercase and have no punctuation. A line ends with the space that joins it to the next word, and that space is scored like any other character. The draw changes per attempt. The word list does not.
 
-A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Famous Lines score with the Standard word list, or a Standard score with the Famous Lines sentences. Standard and Famous Lines scores in the same event stay on one leaderboard.
+A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Famous Lines score with the Standard word list, a Standard score with the Famous Lines sentences, or a Story score from either of those. Standard, Famous Lines, and Story scores in the same event stay on one leaderboard.
 
 ### Sentence Progression
 
@@ -787,7 +790,7 @@ A Standard line includes the space after its last word. That space is a scored c
 
 ### Passage Length
 
-Both game modes must contain enough text for 30-second and 60-second tests, including fast typists.
+Standard and Famous Lines must contain enough text for 30-second and 60-second tests, including fast typists. Story is the short passage described above and does not use that length target.
 
 Famous Lines target:
 
@@ -814,9 +817,10 @@ Example:
 ```text
 common-sentences-v2
 common-words-v1
+story-v1
 ```
 
-`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. Saved scores keep the identifier from the attempt that earned them.
+`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. `story-v1` is the Story passage. Saved scores keep the identifier from the attempt that earned them.
 
 If the passage set changes later, create a new version rather than silently replacing the existing set.
 
@@ -1667,8 +1671,9 @@ Starting fresh must never delete old event data.
 **Then**
 
 - the same event is restored
-- the event's current duration is shown, and the operator can select the other length for the next contestant
-- the event's current game mode is shown, and the operator can select the other mode for the next contestant
+- the event's current duration is shown, and the operator can select the other length for the next contestant in Standard or Famous Lines
+- while Story is selected, Test length shows 60 seconds and cannot be changed
+- the event's current game mode is shown, and the operator can select another mode for the next contestant
 - all saved scores remain available
 - Start Event after a duration or game-mode change keeps the same event
 - earlier scores keep the duration, game mode, passage set, and WPM from the attempt that earned them
@@ -1717,6 +1722,7 @@ A server connection must not be required.
 - Famous Lines gives every contestant the same ordered sentence sequence
 - Famous Lines passages are not shuffled per contestant
 - Standard gives every attempt a new draw from the same 200-word list
+- Story gives every attempt the same short story
 - a score keeps the mode and WPM from the attempt that earned it
 
 ---
@@ -1921,6 +1927,9 @@ continue event behavior passes
 score persistence passes
 Famous Lines uses the same sentence sequence for every attempt
 Standard draws each attempt from the same 200-word list
+Story uses the same short story and a 60-second cap
+a finished Story scores the time taken
+an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
 automatic reset passes

@@ -230,7 +230,7 @@ Display three option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Both lengths and all three game modes stay selectable on Continue. Those choices apply to the next contestant. They keep the event and its leaderboard.
+Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
 
 **No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
