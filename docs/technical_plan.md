@@ -865,7 +865,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. Escape during Typing returns to Ready and discards the attempt. A short Escape press does not leave Ready. Holding Escape on Ready opens Event Setup.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. Escape during Typing returns to Ready and discards the attempt. A short Escape press does not leave Ready. Holding Escape on Ready opens Event Setup.
 
 Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
@@ -1961,6 +1961,7 @@ holding Escape on Ready opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 Escape, Space, any other key, or a tap on that list returns to Ready and does not start the test
 Ready-screen key is not passed into Typing as contestant input
+a key still held from Ready is ignored until that key is released
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score

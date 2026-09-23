@@ -17,6 +17,7 @@ const WAITING_RETURN_MS = 5000;
 type TypingScreenProps = {
   session: TestSession;
   onType: (key: { key: string; repeat: boolean; now: number }) => void;
+  ignoreHeldKey: (key: string) => boolean;
   onExpire: () => void;
   onSetup: () => void;
   onReturnToReady: () => void;
@@ -25,12 +26,14 @@ type TypingScreenProps = {
 export function TypingScreen({
   session,
   onType,
+  ignoreHeldKey,
   onExpire,
   onSetup,
   onReturnToReady,
 }: TypingScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const onTypeRef = useRef(onType);
+  const ignoreHeldKeyRef = useRef(ignoreHeldKey);
   const onExpireRef = useRef(onExpire);
   const onReturnRef = useRef(onReturnToReady);
   const [now, setNow] = useState(() => performance.now());
@@ -38,6 +41,7 @@ export function TypingScreen({
 
   useEffect(() => {
     onTypeRef.current = onType;
+    ignoreHeldKeyRef.current = ignoreHeldKey;
     onExpireRef.current = onExpire;
     onReturnRef.current = onReturnToReady;
   });
@@ -54,6 +58,9 @@ export function TypingScreen({
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
+      if (ignoreHeldKeyRef.current(event.key)) {
+        return;
+      }
       onTypeRef.current({
         key: event.key,
         repeat: event.repeat,

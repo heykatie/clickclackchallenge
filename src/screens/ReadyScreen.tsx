@@ -9,7 +9,7 @@ const HOLD_SETUP_MS = 600;
 
 type ReadyScreenProps = {
   highScore: HighScoreSummary | null;
-  onStart: () => void;
+  onStart: (key: string) => void;
   onSetup: () => void;
 };
 
@@ -91,7 +91,7 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
       if (event.repeat) {
         return;
       }
-      onStartRef.current();
+      onStartRef.current(event.key);
     };
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === "Escape") {

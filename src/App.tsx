@@ -8,6 +8,7 @@ import { ReadyScreen } from "./screens/ReadyScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState } from "./state/appState";
+import { createStartKeyGate } from "./state/startKey";
 
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -16,6 +17,7 @@ function App() {
   const [standing, setStanding] = useState<ResultStanding | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
+  const startKeyGate = useRef(createStartKeyGate(window));
   const saveRequest = useRef<Promise<ScoreRecord> | null>(null);
   const savedResult = useRef<typeof state.latestResult>(null);
   if (trackedScreen !== state.screen) {
@@ -204,7 +206,10 @@ function App() {
       return (
         <ReadyScreen
           highScore={state.highScore}
-          onStart={() => dispatch({ type: "ENTER_TYPING" })}
+          onStart={(key) => {
+            startKeyGate.current.arm(key);
+            dispatch({ type: "ENTER_TYPING" });
+          }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
         />
       );
@@ -215,6 +220,7 @@ function App() {
       return (
         <TypingScreen
           session={state.currentTest}
+          ignoreHeldKey={(key) => startKeyGate.current.isBlocked(key)}
           onType={(key) => {
             if (key.key === "Escape") {
               if (!key.repeat) {
