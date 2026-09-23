@@ -374,7 +374,7 @@ The model must preserve historical event data, associate every score with the ev
 
 ```ts
 type TestDuration = 30 | 60;
-type TestMode = "words" | "famous-lines";
+type TestMode = "words" | "famous-lines" | "story";
 ```
 
 ### Event Record
@@ -412,6 +412,7 @@ Field behavior:
 `testMode`
 
 - `"famous-lines"` is Famous Lines. It uses the bundled sentences, in the same order for every attempt
+- `"story"` is Story. It uses one short story. Finishing the last line ends the attempt and the saved WPM uses the elapsed time. The selected timer still ends an unfinished attempt and that saved WPM uses the full duration
 - `"words"` uses a new random draw from `common-words-v1` for each attempt
 - the choice for the next contestant while this event stays active
 - a later change does not rewrite `testMode` on scores already saved
@@ -538,7 +539,7 @@ Field behavior:
 
 `testMode`
 
-- snapshot of Standard (`"words"`) or Famous Lines (`"famous-lines"`) when the score was earned
+- snapshot of Standard (`"words"`), Famous Lines (`"famous-lines"`), or Story (`"story"`) when the score was earned
 - unchanged when the operator later picks the other mode for the same event
 
 `passageSetId`
@@ -1853,6 +1854,8 @@ a name is trimmed and kept up to 20 characters
 an empty name and a name past 20 characters are rejected
 a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept
+a finished story scores the time from the first character to the last
+an unfinished story scores the full selected duration
 ```
 
 ---

@@ -7,7 +7,7 @@ export interface TypedCharacter {
 export interface TestSession {
   sentences: readonly string[];
   durationSeconds: 30 | 60;
-  testMode: "words" | "famous-lines";
+  testMode: "words" | "famous-lines" | "story";
   sentenceIndex: number;
   characterIndex: number;
   expectedSentence: string;
@@ -43,7 +43,7 @@ const IGNORED_KEYS = new Set([
 export function createTestSession(
   sentences: readonly string[],
   durationSeconds: 30 | 60,
-  testMode: "words" | "famous-lines" = "famous-lines",
+  testMode: "words" | "famous-lines" | "story" = "famous-lines",
 ): TestSession {
   const expectedSentence = sentences[0];
   if (!expectedSentence) {
@@ -196,6 +196,7 @@ function typeCharacter(session: TestSession, typed: string): TestSession {
       ...counters,
       typedCharacters,
       characterIndex: typedCharacters.length,
+      isFinished: session.testMode === "story",
     };
   }
 

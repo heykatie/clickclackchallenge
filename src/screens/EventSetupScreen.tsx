@@ -83,6 +83,16 @@ export function EventSetupScreen({
           />
           Famous Lines
         </label>
+        <label>
+          <input
+            type="radio"
+            name="text"
+            value="story"
+            checked={selectedTestMode === "story"}
+            onChange={() => setSelectedTestMode("story")}
+          />
+          Story
+        </label>
       </fieldset>
       <fieldset>
         <legend>Leaderboard</legend>

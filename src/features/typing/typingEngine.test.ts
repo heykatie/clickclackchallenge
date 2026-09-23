@@ -176,6 +176,19 @@ describe("typing engine", () => {
     expect(erased.correctAttempts).toBe(2);
   });
 
+  it("ends a story when the last sentence is committed", () => {
+    const session = type(createTestSession(["ab", "cd"], 60, "story"), "abcd", 0);
+    expect(session.isFinished).toBe(true);
+    expect(session.expectedSentence).toBe("cd");
+    expect(session.correctCharacters).toBe(4);
+  });
+
+  it("keeps Famous Lines open after its last sentence is committed", () => {
+    const session = type(createTestSession(["ab"], 60, "famous-lines"), "ab", 0);
+    expect(session.isFinished).toBe(false);
+    expect(session.correctCharacters).toBe(2);
+  });
+
   it("follows the passage array in order", () => {
     const first = type(createTestSession(["one", "two"], 30), "one");
     const second = type(createTestSession(["one", "two"], 30), "one");

@@ -1,12 +1,19 @@
 import { openDB, type IDBPDatabase, type IDBPTransaction } from "idb";
 import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
+import { STORY_ID } from "../data/story";
 
 export type TestDuration = 30 | 60;
-export type TestMode = "words" | "famous-lines";
+export type TestMode = "words" | "famous-lines" | "story";
 
 export function passageSetIdFor(testMode: TestMode): string {
-  return testMode === "words" ? WORD_LIST_ID : PASSAGE_SET_ID;
+  if (testMode === "words") {
+    return WORD_LIST_ID;
+  }
+  if (testMode === "story") {
+    return STORY_ID;
+  }
+  return PASSAGE_SET_ID;
 }
 
 export interface EventRecord {
@@ -177,7 +184,10 @@ async function renameStoredRaceMode(
 }
 
 function asTestMode(value: string | undefined): TestMode {
-  return value === "words" ? "words" : "famous-lines";
+  if (value === "words" || value === "story" || value === "famous-lines") {
+    return value;
+  }
+  return "famous-lines";
 }
 
 function normalizeEvent(event: EventRecord): EventRecord {

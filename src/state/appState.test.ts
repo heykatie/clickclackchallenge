@@ -110,6 +110,46 @@ describe("appReducer", () => {
     expect(typing.currentTest?.expectedSentence.startsWith("It's dangerous to go alone")).toBe(true);
   });
 
+  it("ends a story when the last line is finished and scores the time taken", () => {
+    const withEvent = appReducer(initialState, {
+      type: "SET_ACTIVE_EVENT",
+      event: { ...event60, testMode: "story", passageSetId: "story-v1" },
+    });
+    let state = appReducer(appReducer(withEvent, { type: "ENTER_READY" }), {
+      type: "ENTER_TYPING",
+    });
+    const sentences = state.currentTest?.sentences ?? [];
+    expect(sentences[0]).toBe("A child fell down into the dark.");
+    let now = 1_000;
+    for (const sentence of sentences) {
+      for (const key of sentence) {
+        state = appReducer(state, { type: "TYPE_KEY", key, repeat: false, now });
+        now += 100;
+      }
+    }
+    const characters = sentences.reduce((total, sentence) => total + sentence.length, 0);
+    const elapsedSeconds = ((characters - 1) * 100) / 1000;
+    expect(state.screen).toBe("results");
+    expect(state.latestResult?.displayedWpm).toBe(
+      Math.round(characters / 5 / (elapsedSeconds / 60)),
+    );
+    expect(state.latestResult?.displayedWpm).toBeGreaterThan(Math.round(characters / 5));
+  });
+
+  it("scores an unfinished story from the full timer", () => {
+    const withEvent = appReducer(initialState, {
+      type: "SET_ACTIVE_EVENT",
+      event: { ...event60, testMode: "story", passageSetId: "story-v1" },
+    });
+    const typing = appReducer(appReducer(withEvent, { type: "ENTER_READY" }), {
+      type: "ENTER_TYPING",
+    });
+    const started = appReducer(typing, { type: "TYPE_KEY", key: "A", repeat: false, now: 1_000 });
+    const finished = appReducer(started, { type: "FINISH_TEST" });
+    expect(finished.screen).toBe("results");
+    expect(finished.latestResult?.displayedWpm).toBe(Math.round((1 / 5) / 1));
+  });
+
   it("starts a Standard test from a new draw of common words", () => {
     const withEvent = appReducer(initialState, {
       type: "SET_ACTIVE_EVENT",

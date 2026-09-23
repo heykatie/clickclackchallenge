@@ -1,6 +1,7 @@
 import { passages } from "../data/passages";
+import { story } from "../data/story";
 import { createWordLines } from "../data/wordLines";
-import type { EventRecord } from "../db/persistence";
+import type { EventRecord, TestMode } from "../db/persistence";
 import {
   calculateAccuracy,
   calculateWpm,
@@ -103,7 +104,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         latestResult: null,
         currentScoreId: null,
         currentTest: createTestSession(
-          testMode === "words" ? createWordLines() : passages,
+          sentencesFor(testMode),
           state.activeEvent?.durationSeconds ?? state.durationSeconds,
           testMode,
         ),
@@ -119,7 +120,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         action.now,
       );
       if (currentTest.isFinished) {
-        return finishTest(state, currentTest);
+        return finishTest(state, currentTest, action.now);
       }
       return { ...state, currentTest };
     }
@@ -127,7 +128,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (state.currentTest === null || state.currentTest.startedAt === null) {
         return state;
       }
-      return finishTest(state, { ...state.currentTest, isFinished: true });
+      return finishTest(state, { ...state.currentTest, isFinished: true }, null);
     case "SHOW_LEADERBOARD":
       if (state.screen !== "results") {
         return state;
@@ -141,10 +142,34 @@ export function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-function finishTest(state: AppState, currentTest: TestSession): AppState {
+function sentencesFor(testMode: TestMode): readonly string[] {
+  if (testMode === "words") {
+    return createWordLines();
+  }
+  if (testMode === "story") {
+    return story;
+  }
+  return passages;
+}
+
+function scoreWindowSeconds(session: TestSession, now: number | null): number {
+  const storyFinished =
+    session.testMode === "story" &&
+    now !== null &&
+    session.startedAt !== null &&
+    session.sentenceIndex === session.sentences.length - 1 &&
+    session.characterIndex === session.expectedSentence.length;
+  if (!storyFinished || session.startedAt === null || now === null) {
+    return session.durationSeconds;
+  }
+  const elapsed = Math.max(0, (now - session.startedAt) / 1000);
+  return Math.min(session.durationSeconds, Math.max(elapsed, 0.001));
+}
+
+function finishTest(state: AppState, currentTest: TestSession, now: number | null): AppState {
   const rawWpm = calculateWpm(
     currentTest.correctCharacters,
-    currentTest.durationSeconds,
+    scoreWindowSeconds(currentTest, now),
   );
   const accuracy = calculateAccuracy(
     currentTest.correctAttempts,

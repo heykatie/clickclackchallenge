@@ -198,7 +198,7 @@ V1 does not include:
 ```text
 operator opens app
 → selects 30 seconds or 60 seconds
-→ selects Standard or Famous Lines
+→ selects Standard, Famous Lines, or Story
 → selects Start Fresh or Continue Previous Event
 → event begins
 → Ready screen
@@ -261,7 +261,7 @@ As an operator, I want the app to work without Wi-Fi.
 The Event Setup screen must allow the operator to:
 
 - select `30 seconds` or `60 seconds`
-- select a game mode: `Standard` or `Famous Lines`
+- select a game mode: `Standard`, `Famous Lines`, or `Story`
 - start a fresh event
 - continue the current/most recently active event when one exists
 
@@ -293,7 +293,7 @@ Continuing should:
 
 If no previous event exists, the Continue option should be unavailable.
 
-`30 seconds` and `60 seconds` stay selectable while Continue is selected. `Standard` and `Famous Lines` stay selectable too. Either choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
+`30 seconds` and `60 seconds` stay selectable while Continue is selected. `Standard`, `Famous Lines`, and `Story` stay selectable too. Either choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
 ### Returning to Event Setup
 
@@ -416,6 +416,7 @@ Rules:
 - incorrect characters do not increase WPM
 - correct characters in a partially completed word still count
 - final WPM uses the configured test duration
+- Story is the exception: finishing the last line ends the attempt, and final WPM uses the time from the first character to that last character. If the timer expires first, final WPM still uses the full selected duration
 - WPM is displayed as a rounded whole number
 
 ### Accuracy
@@ -707,6 +708,8 @@ V1 must not depend on:
 ### Sentence Style
 
 Famous Lines passages are short famous lines from games, anime, and technology. Prefer lines people already know: funny, popular, or thoughtful. Familiar names are part of those lines. Famous Lines does not use numbers.
+
+Story is one original short story, the same lines in the same order for every attempt. It follows the shape of a fall into another world, a kindness, and a way home. It does not copy text or names from those stories. The lines together are about 120–140 characters, so a 100 WPM attempt can finish in about 15 seconds and a 25 WPM attempt uses most of a 60-second timer. The selected 30- or 60-second timer still ends the attempt if the story is unfinished. One sentence shows at a time. The attempt ends when the last sentence is committed.
 
 Famous Lines sentences should:
 

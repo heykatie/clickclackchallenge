@@ -2,7 +2,7 @@
 
 An offline typing contest for a landscape iPad and a giant physical keyboard, intended for repeated use at an event booth.
 
-On Event Setup the operator chooses 30 or 60 seconds and a game mode: Standard or Famous Lines. A score keeps the length, mode, and WPM from the attempt that earned it.
+On Event Setup the operator chooses 30 or 60 seconds and a game mode: Standard, Famous Lines, or Story. A score keeps the length, mode, and WPM from the attempt that earned it. Story ends when the story is finished, and that WPM uses the time it took. The timer still ends a slow attempt.
 
 ## Run
 
