@@ -22,7 +22,7 @@ export function Screensaver({ scores, onWake }: ScreensaverProps) {
       tabIndex={-1}
       onPointerDown={onWake}
       onKeyDown={(event) => {
-        if (event.repeat || (event.key !== "Escape" && event.key !== " ")) {
+        if (event.repeat || event.key !== " ") {
           return;
         }
         event.preventDefault();

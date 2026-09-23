@@ -48,10 +48,10 @@ body {
 }
 
 #root {
-  min-height: 100svh;
+  min-height: 100dvh;
   display: grid;
-  place-items: center;
-  overflow: hidden;
+  place-items: safe center;
+  overflow: auto;
 }
 
 h1,
@@ -174,12 +174,12 @@ h1,
 .screen {
   box-sizing: border-box;
   position: relative;
-  /* One landscape stage. 4:3, and never taller or wider than the viewport, so the booth does not scroll. */
-  width: min(100vw, calc(100svh * 4 / 3));
-  height: min(100svh, calc(100vw * 3 / 4));
-  min-height: 0;
-  overflow: hidden;
-  padding: 5rem 2.5rem 2rem;
+  /* One landscape stage. At least 4:3, and no wider than the visible viewport. */
+  width: min(100vw, calc(100dvh * 4 / 3));
+  min-height: min(100dvh, calc(100vw * 3 / 4));
+  height: auto;
+  overflow: visible;
+  padding: 5rem 2.5rem calc(2rem + env(safe-area-inset-bottom));
 }
 
 .landscape-gate {

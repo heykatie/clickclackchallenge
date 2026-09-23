@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. Holding Escape on Ready for that same moment opens Event Setup too. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. Holding Escape for that same moment opens Event Setup from those screens and from the rolling high-score list. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -322,11 +322,11 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Escape or Space returns to Ready and does not start the test. Any other key or a tap does the same. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. A short Escape press or Space returns to Ready and does not start the test. Holding Escape opens Event Setup. Any other key or a tap returns to Ready and does not start the test. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
-Any key except Escape may transition from Ready to Typing. A short Escape press does not start a test. Holding Escape on Ready opens Event Setup. Escape is also the key that leaves a typing session for Ready.
+Any key except Escape may transition from Ready to Typing. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
 
 The key used to leave the Ready screen:
 
@@ -349,7 +349,7 @@ The Typing screen should be visually restrained so the contestant can focus on t
 
 A long-press on the logo badge opens Event Setup and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
 
-Escape returns to Ready and does not save a score. That also works while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
+A short Escape press returns to Ready and does not save a score. Holding Escape opens Event Setup and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
 
 The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
@@ -856,7 +856,7 @@ The place lines stay narrower. “You made the Top 5!” is places 2 through 5. 
 
 If the contestant ranks outside the top 20, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. Save Score and View Leaderboard remain the only ways a result is stored.
 
 When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing an allowed name stops that countdown. A blocked name shows “Pick a different name.” and does not stop it. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
@@ -935,7 +935,7 @@ The Leaderboard screen must include:
 NEXT PLAYER
 ```
 
-Selecting Next Player should immediately return to the Ready screen. Escape, Enter, and Space do the same. The saved scores stay.
+Selecting Next Player should immediately return to the Ready screen. A short Escape press, Enter, and Space do the same. Holding Escape opens Event Setup. The saved scores stay.
 
 The app should also automatically return to Ready after a short delay.
 
@@ -1604,7 +1604,7 @@ This is the same before and after the timer starts.
 
 **When**
 
-- Escape is pressed
+- Escape is pressed and released before the hold
 
 **Then**
 
@@ -1612,7 +1612,7 @@ This is the same before and after the timer starts.
 - the attempt is discarded
 - no score is saved
 
-A short Escape press does not leave Ready for Typing. Holding Escape on Ready opens Event Setup. On the Leaderboard, Escape, Enter, and Space return to Ready the same way Next Player does. The saved scores stay.
+A short Escape press does not leave Ready for Typing. Holding Escape opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list. A short Escape press during Typing returns to Ready. On the Leaderboard, a short Escape press, Enter, and Space return to Ready the same way Next Player does. The saved scores stay.
 
 ### Waiting Typing Returns to Ready
 
@@ -1759,7 +1759,7 @@ Any sentence that does not fit must be rewritten or removed.
 
 **When**
 
-- the operator long-presses the logo-only badge, or holds Escape on Ready
+- the operator long-presses the logo-only badge, or holds Escape
 
 **Then**
 
@@ -1935,8 +1935,8 @@ a finished Story scores the time taken
 an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
-Escape, Enter, or Space on the Leaderboard returns to Ready
-holding Escape on Ready opens Event Setup
+a short Escape press, Enter, or Space on the Leaderboard returns to Ready
+holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 a short Escape press on Ready does not start the test
 the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name

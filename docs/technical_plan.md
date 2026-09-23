@@ -867,7 +867,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. Escape during Typing returns to Ready and discards the attempt. A short Escape press does not leave Ready. Holding Escape on Ready opens Event Setup.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. A short Escape press during Typing returns to Ready and discards the attempt. Holding Escape opens Event Setup and discards the attempt. A short Escape press does not leave Ready.
 
 Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
@@ -963,7 +963,7 @@ contestant keypress
 → transition to TypingScreen
 ```
 
-A short Escape press does not start the test. Holding Escape opens Event Setup.
+A short Escape press does not start the test. Holding Escape opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list.
 
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
@@ -1959,16 +1959,19 @@ EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test
-holding Escape on Ready opens Event Setup
+holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
-Escape, Space, any other key, or a tap on that list returns to Ready and does not start the test
+a short Escape press, Space, any other key, or a tap on that list returns to Ready and does not start the test
+holding Escape on that list opens Event Setup
 Ready-screen key is not passed into Typing as contestant input
 a key still held from Ready is ignored until that key is released
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
-Escape during Typing returns to Ready and saves no score
-Escape, Enter, or Space during the Leaderboard returns to Ready and keeps the saved scores
+a short Escape press during Typing returns to Ready and saves no score
+holding Escape during Typing opens Event Setup and saves no score
+a short Escape press, Enter, or Space during the Leaderboard returns to Ready and keeps the saved scores
+holding Escape during the Leaderboard opens Event Setup and keeps the saved scores
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result

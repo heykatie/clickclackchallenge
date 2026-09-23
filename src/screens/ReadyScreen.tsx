@@ -2,31 +2,29 @@ import { useEffect, useRef, useState } from "react";
 import { listAllScores } from "../db/persistence";
 import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
+import { HOLD_SETUP_MS } from "../state/escapeHold";
 import { Screensaver } from "./Screensaver";
 
 const READY_IDLE_MS = 120_000;
-const HOLD_SETUP_MS = 600;
 
 type ReadyScreenProps = {
   highScore: HighScoreSummary | null;
   onStart: (key: string) => void;
   onSetup: () => void;
+  claimShortEscape: (handler: (() => void) | null) => void;
 };
 
-export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
+export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
-  const escapeHold = useRef<number | null>(null);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
-  const onSetupRef = useRef(onSetup);
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
   const [allTime, setAllTime] = useState<RankedScore[]>([]);
 
   useEffect(() => {
     onStartRef.current = onStart;
-    onSetupRef.current = onSetup;
   });
 
   useEffect(() => {
@@ -59,32 +57,29 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
     return () => window.clearTimeout(id);
   }, [asleep, activity, allTime.length]);
 
-  function clearEscapeHold() {
-    if (escapeHold.current !== null) {
-      window.clearTimeout(escapeHold.current);
-      escapeHold.current = null;
-    }
-  }
+  useEffect(() => {
+    claimShortEscape(() => {
+      if (!asleepRef.current) {
+        return;
+      }
+      asleepRef.current = false;
+      setAsleep(false);
+    });
+    return () => claimShortEscape(null);
+  }, [claimShortEscape]);
 
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        return;
+      }
       event.preventDefault();
       const onRoll = event.target instanceof Element && event.target.closest(".screensaver") !== null;
       if (asleepRef.current || onRoll) {
-        clearEscapeHold();
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);
-        }
-        return;
-      }
-      if (event.key === "Escape") {
-        if (!event.repeat && escapeHold.current === null) {
-          escapeHold.current = window.setTimeout(() => {
-            escapeHold.current = null;
-            onSetupRef.current();
-          }, HOLD_SETUP_MS);
         }
         return;
       }
@@ -93,18 +88,8 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
       }
       onStartRef.current(event.key);
     };
-    const onKeyUp = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        clearEscapeHold();
-      }
-    };
     window.addEventListener("keydown", onKeyDown, true);
-    window.addEventListener("keyup", onKeyUp, true);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown, true);
-      window.removeEventListener("keyup", onKeyUp, true);
-      clearEscapeHold();
-    };
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   function noteActivity() {

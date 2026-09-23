@@ -147,7 +147,7 @@ The strings on this screen live in `docs/design_system.md` (Brand voice). The di
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-Do not show the event Top 5, operator settings, or a Start button on this screen. After 2 minutes of idle, a rolling all-time list may replace this screen. That state is specified in `docs/prd.md` and `docs/design_system.md`. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9. Holding Escape on Ready opens Event Setup the same way.
+Do not show the event Top 5, operator settings, or a Start button on this screen. After 2 minutes of idle, a rolling all-time list may replace this screen. That state is specified in `docs/prd.md` and `docs/design_system.md`. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9. Holding Escape opens Event Setup the same way from those screens and from the rolling high-score list.
 
 ## 6. Screen 03 — Typing
 
@@ -192,7 +192,7 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 ### Behavior
 
 1. **Waiting:** the whole first sentence is visible; the selected duration is unchanged and the timer is stopped. If no key starts the timer within 5 seconds, Ready appears and no score is saved. A long-press on the logo badge opens Event Setup and does not save a score. That path is in `docs/prd.md` §11.
-2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press opens Event Setup and discards the attempt without saving a score. Escape returns to Ready and discards the attempt without saving a score. The excluded keys are in `docs/prd.md` §11.
+2. **Running:** the first printable character starts timing. Letters, spaces, and punctuation count. Incorrect input must not increase WPM. The same logo long-press opens Event Setup and discards the attempt without saving a score. A short Escape press returns to Ready and discards the attempt without saving a score. Holding Escape opens Event Setup and discards the attempt. The excluded keys are in `docs/prd.md` §11.
 3. **Sentence complete:** replace it with the next complete sentence at the same central position. Continue the same test and timer; do not wrap onto a second line.
 4. **Time expired:** stop accepting test input, finalize the result, and open Results.
 
@@ -279,7 +279,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.
-- NEXT PLAYER returns immediately to Ready. Escape, Enter, and Space do the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
+- NEXT PLAYER returns immediately to Ready. A short Escape press, Enter, and Space do the same. Holding Escape opens Event Setup. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 
@@ -299,7 +299,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Fresh creates a new event without deleting prior scores; Continue restores saved event data.
 - [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score. The headline bounces a little and the start line pulses. Reduced motion keeps both still.
 - [ ] Ready has no leaderboard or Start button.
-- [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup. A short Escape press does not.
+- [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup from Ready, Typing, Results, and the Leaderboard. A short Escape press does not.
 - [ ] The full first sentence is visible before the first valid typing keystroke starts the timer.
 - [ ] Every passage fits on one centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
@@ -309,7 +309,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.
-- [ ] NEXT PLAYER, Escape, Enter, Space, and the countdown return to Ready with event data intact.
+- [ ] NEXT PLAYER, a short Escape press, Enter, Space, and the countdown return to Ready with event data intact. Holding Escape opens Event Setup.
 - [ ] Empty events do not display fabricated names or scores.
 - [ ] Required assets, fonts, passages, and stored data work offline on the target iPad.
 - [ ] Essential text has sufficient contrast, controls have visible focus, and state is not conveyed by color alone.
