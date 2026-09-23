@@ -339,7 +339,7 @@ Leaderboard
 
 [ NEXT PLAYER → ]
 
-Returning to ready screen in 10s
+Returning to ready screen in 15s
 ```
 
 ### Layout and emphasis

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { rankScores } from "../features/leaderboard/ranking";
 
-const RESET_SECONDS = 10;
+const RESET_SECONDS = 15;
 
 type LeaderboardScreenProps = {
   scores: readonly ScoreRecord[];

@@ -935,7 +935,7 @@ The app should also automatically return to Ready after a short delay.
 Initial target:
 
 ```text
-approximately 10 seconds
+approximately 15 seconds
 ```
 
 The exact duration may be adjusted after booth testing.
