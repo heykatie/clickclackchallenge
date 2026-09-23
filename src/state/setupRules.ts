@@ -14,8 +14,9 @@ export function planEventStart(
   selectedDuration: TestDuration,
   selectedTestMode: TestMode,
 ): EventStart {
+  const durationSeconds = selectedTestMode === "story" ? 60 : selectedDuration;
   if (mode === "continue" && hasActiveEvent) {
-    return { mode: "continue", durationSeconds: selectedDuration, testMode: selectedTestMode };
+    return { mode: "continue", durationSeconds, testMode: selectedTestMode };
   }
-  return { mode: "fresh", durationSeconds: selectedDuration, testMode: selectedTestMode };
+  return { mode: "fresh", durationSeconds, testMode: selectedTestMode };
 }

@@ -224,7 +224,7 @@ Display three option groups and one main action:
 | Group | Choices |
 | --- | --- |
 | Test length | 30 seconds; 60 seconds |
-| Game mode | Standard; Famous Lines; Story |
+| Game mode | Standard; Famous Lines; Story. Story fixes Test length at 60 seconds. |
 | Leaderboard | Start fresh; Continue previous event |
 | Primary action | START EVENT |
 

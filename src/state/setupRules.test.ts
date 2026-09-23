@@ -18,6 +18,19 @@ describe("planEventStart", () => {
     });
   });
 
+  it("uses 60 seconds for Story and keeps the other duration for the timed modes", () => {
+    expect(planEventStart("continue", true, 30, "story")).toEqual({
+      mode: "continue",
+      durationSeconds: 60,
+      testMode: "story",
+    });
+    expect(planEventStart("fresh", false, 30, "story")).toEqual({
+      mode: "fresh",
+      durationSeconds: 60,
+      testMode: "story",
+    });
+  });
+
   it("opens a new event when Continue has no event to restore", () => {
     expect(planEventStart("continue", false, 30, "famous-lines")).toEqual({
       mode: "fresh",

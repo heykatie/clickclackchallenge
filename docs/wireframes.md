@@ -106,7 +106,7 @@ Use three clear option groups with visible selected states and one large mint ac
 | Control | Layout |
 | --- | --- |
 | Test length | One choice: 30 or 60 seconds. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. Behavior is in `docs/prd.md`. |
-| Game mode | One choice: Standard, Famous Lines, or Story. On Continue, the control opens on the event's current mode and still accepts the other modes for the next contestant. Behavior is in `docs/prd.md`. |
+| Game mode | One choice: Standard, Famous Lines, or Story. On Continue, the control opens on the event's current mode and still accepts the other modes for the next contestant. Story shows Test length fixed at 60 seconds. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. |

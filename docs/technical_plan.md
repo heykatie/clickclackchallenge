@@ -412,7 +412,7 @@ Field behavior:
 `testMode`
 
 - `"famous-lines"` is Famous Lines. It uses the bundled sentences, in the same order for every attempt
-- `"story"` is Story. It uses one short story. Finishing the last line ends the attempt and the saved WPM uses the elapsed time. The selected timer still ends an unfinished attempt and that saved WPM uses the full duration
+- `"story"` is Story. It uses one short story and always runs with a 60-second cap. Finishing the last line ends the attempt and the saved WPM uses the elapsed time. If 60 seconds expire first, the saved WPM uses that full minute
 - `"words"` uses a new random draw from `common-words-v1` for each attempt
 - the choice for the next contestant while this event stays active
 - a later change does not rewrite `testMode` on scores already saved

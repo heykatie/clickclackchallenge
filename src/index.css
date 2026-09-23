@@ -179,6 +179,10 @@ label {
   margin: 0.5rem 0;
 }
 
+label.is-fixed {
+  opacity: 0.55;
+}
+
 .ready-screen {
   display: flex;
   flex-direction: column;

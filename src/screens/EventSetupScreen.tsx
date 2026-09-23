@@ -20,12 +20,14 @@ export function EventSetupScreen({
   const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
   const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "famous-lines");
+  const storySelected = selectedTestMode === "story";
+  const visibleDuration: TestDuration = storySelected ? 60 : selectedDuration;
 
   function startEvent() {
     const plan = planEventStart(
       mode,
       storedDuration !== null,
-      selectedDuration,
+      visibleDuration,
       selectedTestMode,
     );
     if (plan.mode === "continue") {
@@ -40,22 +42,24 @@ export function EventSetupScreen({
       <h1>Event setup</h1>
       <fieldset>
         <legend>Test length</legend>
-        <label>
+        <label className={storySelected ? "is-fixed" : undefined}>
           <input
             type="radio"
             name="duration"
             value="30"
-            checked={selectedDuration === 30}
+            checked={visibleDuration === 30}
+            disabled={storySelected}
             onChange={() => setSelectedDuration(30)}
           />
           30 seconds
         </label>
-        <label>
+        <label className={storySelected ? "is-fixed" : undefined}>
           <input
             type="radio"
             name="duration"
             value="60"
-            checked={selectedDuration === 60}
+            checked={visibleDuration === 60}
+            disabled={storySelected}
             onChange={() => setSelectedDuration(60)}
           />
           60 seconds
