@@ -253,7 +253,7 @@ After 2 minutes of idle, replace this screen with the all-time roll from `docs/p
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9. Holding Escape on Ready does the same.
 
 ## 11. Typing
 

@@ -5,6 +5,7 @@ import type { HighScoreSummary } from "../state/appState";
 import { Screensaver } from "./Screensaver";
 
 const READY_IDLE_MS = 120_000;
+const HOLD_SETUP_MS = 600;
 
 type ReadyScreenProps = {
   highScore: HighScoreSummary | null;
@@ -15,14 +16,17 @@ type ReadyScreenProps = {
 export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
+  const escapeHold = useRef<number | null>(null);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
+  const onSetupRef = useRef(onSetup);
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
   const [allTime, setAllTime] = useState<RankedScore[]>([]);
 
   useEffect(() => {
     onStartRef.current = onStart;
+    onSetupRef.current = onSetup;
   });
 
   useEffect(() => {
@@ -55,25 +59,52 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
     return () => window.clearTimeout(id);
   }, [asleep, activity, allTime.length]);
 
+  function clearEscapeHold() {
+    if (escapeHold.current !== null) {
+      window.clearTimeout(escapeHold.current);
+      escapeHold.current = null;
+    }
+  }
+
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
       const onRoll = event.target instanceof Element && event.target.closest(".screensaver") !== null;
       if (asleepRef.current || onRoll) {
+        clearEscapeHold();
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);
         }
         return;
       }
-      if (event.repeat || event.key === "Escape") {
+      if (event.key === "Escape") {
+        if (!event.repeat && escapeHold.current === null) {
+          escapeHold.current = window.setTimeout(() => {
+            escapeHold.current = null;
+            onSetupRef.current();
+          }, HOLD_SETUP_MS);
+        }
+        return;
+      }
+      if (event.repeat) {
         return;
       }
       onStartRef.current();
     };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        clearEscapeHold();
+      }
+    };
     window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      clearEscapeHold();
+    };
   }, []);
 
   function noteActivity() {
@@ -82,7 +113,7 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
 
   function beginHold() {
     noteActivity();
-    holdTimer.current = window.setTimeout(onSetup, 600);
+    holdTimer.current = window.setTimeout(onSetup, HOLD_SETUP_MS);
   }
 
   function endHold() {

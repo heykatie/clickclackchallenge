@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. The active event stays as it is. An attempt that has not been saved is discarded. Keyboard input does not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. Holding Escape on Ready for that same moment opens Event Setup too. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -326,7 +326,7 @@ After 2 minutes with no key and no tap, and only when at least one qualifying sc
 
 ### Start Behavior
 
-Any key except Escape may transition from Ready to Typing. Escape is the key that leaves a typing session for Ready, so it does not start a test.
+Any key except Escape may transition from Ready to Typing. A short Escape press does not start a test. Holding Escape on Ready opens Event Setup. Escape is also the key that leaves a typing session for Ready.
 
 The key used to leave the Ready screen:
 
@@ -1612,7 +1612,7 @@ This is the same before and after the timer starts.
 - the attempt is discarded
 - no score is saved
 
-Escape does not leave Ready for Typing. On the Leaderboard, Escape returns to Ready the same way Next Player does. The saved scores stay.
+A short Escape press does not leave Ready for Typing. Holding Escape on Ready opens Event Setup. On the Leaderboard, Escape returns to Ready the same way Next Player does. The saved scores stay.
 
 ### Waiting Typing Returns to Ready
 
