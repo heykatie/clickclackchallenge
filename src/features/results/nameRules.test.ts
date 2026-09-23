@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nameCharacterFromKey, normalizeName } from "./nameRules";
+import { isEnterKey, nameCharacterFromKey, normalizeName } from "./nameRules";
 
 describe("normalizeName", () => {
   it("trims a name and keeps the saved value within 20 characters", () => {
@@ -30,6 +30,15 @@ describe("normalizeName", () => {
     expect(normalizeName("hello")).toBe("hello");
     expect(normalizeName("bass")).toBe("bass");
     expect(normalizeName("Dickey")).toBe("Dickey");
+  });
+});
+
+describe("isEnterKey", () => {
+  it("treats Return as the save key", () => {
+    expect(isEnterKey({ key: "Enter" })).toBe(true);
+    expect(isEnterKey({ key: "NumpadEnter" })).toBe(true);
+    expect(isEnterKey({ key: "Unidentified", code: "Enter" })).toBe(true);
+    expect(isEnterKey({ key: "a", code: "KeyA" })).toBe(false);
   });
 });
 

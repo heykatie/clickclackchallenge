@@ -17,7 +17,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 If two documents disagree, follow the owner in this table. The user's latest explicit instruction still takes priority over every document.
 
-This document specifies the five-screen experience for an offline typing contest on a giant physical keyboard, displayed on a landscape iPad. It describes the intended interface; application behavior has not been verified against running code in this workspace.
+This document specifies layout for the five screens on a landscape iPad with a giant keyboard. Product behavior lives in `docs/prd.md`.
 
 **Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling.
 
@@ -228,7 +228,7 @@ Keep the WPM dominant and the name field clear of celebration motifs. Result str
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” as the headline for rank 1, without “You made the Top 5!” Use “Nice typing!” for places 2 through 5, a Top 10 result, or any result above 50 WPM. Add “You made the Top 5!” or “You made the Top 10!” for those places. Show “You win a Plinko drop!” only when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows “NEW HIGH SCORE!” and the Plinko line only. Use “Casper, is that you?” when displayed WPM is 0. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
-When name entry is omitted, show a large View Leaderboard button. When name entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When name entry is omitted, show a large View Leaderboard button. When name entry is shown, focus the name field so the first letter goes into it. Enter saves the score with that name. Show View Leaderboard beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 Focusing the name field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the name field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
 
@@ -295,21 +295,21 @@ This is a review checklist for the intended interface, not a claim that the app 
 
 - [ ] All five screens fit a landscape 4:3 viewport and remain readable at approximately two feet.
 - [ ] The shared palette and font roles are consistent; only a logo-only badge is used.
-- [ ] Setup offers 30/60 seconds, fresh/continue, and Start Event.
+- [ ] Setup offers test length, game mode, fresh/continue, and Start Event. The keyboard cursor starts on Start Event. Arrow keys move. Enter selects. Story fixes the length at 60 seconds.
 - [ ] Fresh creates a new event without deleting prior scores; Continue restores saved event data.
 - [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score.
 - [ ] Ready has no leaderboard or Start button.
-- [ ] The key used to leave Ready neither enters the passage nor starts timing.
+- [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup. A short Escape press does not.
 - [ ] The full first sentence is visible before the first valid typing keystroke starts the timer.
 - [ ] Every passage fits on one centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry is on Results and offered through 20th place. The Top 10 line stops at 10th.
+- [ ] Name entry is on Results and offered through 20th place. The field is focused, so the first letter goes into the name. The Top 10 line stops at 10th.
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.
-- [ ] NEXT PLAYER and the countdown return to Ready with event data intact.
+- [ ] NEXT PLAYER, Escape, and the countdown return to Ready with event data intact.
 - [ ] Empty events do not display fabricated names or scores.
 - [ ] Required assets, fonts, passages, and stored data work offline on the target iPad.
 - [ ] Essential text has sufficient contrast, controls have visible focus, and state is not conveyed by color alone.

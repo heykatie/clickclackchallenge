@@ -20,6 +20,10 @@ export function normalizeName(input: string): string | null {
   return input.trim();
 }
 
+export function isEnterKey(key: { key: string; code?: string }): boolean {
+  return key.key === "Enter" || key.key === "NumpadEnter" || key.code === "Enter" || key.code === "NumpadEnter";
+}
+
 /** A letter to put in the name when the field is not focused yet. Null lets the browser handle the key. */
 export function nameCharacterFromKey(
   key: { key: string; repeat: boolean; metaKey: boolean; ctrlKey: boolean; altKey: boolean },

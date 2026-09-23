@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, normalizeName } from "../features/results/nameRules";
+import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, normalizeName } from "../features/results/nameRules";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
 
@@ -28,6 +28,8 @@ export function ResultsScreen({
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
   const onViewRef = useRef(onViewLeaderboard);
+  const onSaveRef = useRef(onSave);
+  const savingRef = useRef(saving);
   const nameRef = useRef<HTMLInputElement>(null);
   const pendingName = useRef("");
   const problem = nameProblem(name);
@@ -43,6 +45,8 @@ export function ResultsScreen({
 
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;
+    onSaveRef.current = onSave;
+    savingRef.current = saving;
   });
 
   useLayoutEffect(() => {
@@ -62,6 +66,16 @@ export function ResultsScreen({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isEnterKey(event) && standing?.showNameEntry && !event.repeat) {
+        const typed = nameRef.current?.value || pendingName.current;
+        const nameToSave = normalizeName(typed);
+        if (nameToSave !== null && !savingRef.current) {
+          event.preventDefault();
+          event.stopPropagation();
+          onSaveRef.current(nameToSave);
+        }
+        return;
+      }
       const field = nameRef.current;
       const character = nameCharacterFromKey(event, {
         fieldFocused: field !== null && document.activeElement === field,
@@ -150,9 +164,13 @@ export function ResultsScreen({
             onChange={(event) => setName(event.target.value)}
             aria-invalid={problem === "blocked"}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                saveScore();
+              if (!isEnterKey(event)) {
+                return;
+              }
+              event.preventDefault();
+              const nameToSave = normalizeName(event.currentTarget.value);
+              if (nameToSave !== null) {
+                onSave(nameToSave);
               }
             }}
           />

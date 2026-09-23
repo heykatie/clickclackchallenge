@@ -266,7 +266,9 @@ Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS
 
 Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
-Set the web app manifest `orientation` to `landscape`. That is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports.
+The manifest is configured in `vite.config.ts`. Its name and short name are “Typing test.” It starts at `/`, uses `display: "standalone"` and `orientation: "landscape"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button. Icons are not in the manifest yet.
+
+`orientation: "landscape"` is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports. That gate is not built yet.
 
 Load fonts with `@fontsource/fredoka`, `@fontsource/nunito`, and `@fontsource/atkinson-hyperlegible`. Import passages from local application data. If passage data is emitted as a separate static asset, precache that asset too.
 
@@ -959,6 +961,8 @@ contestant keypress
 → transition to TypingScreen
 ```
 
+A short Escape press does not start the test. Holding Escape opens Event Setup.
+
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
 Listen for that key with a `keydown` listener on `window`, and focus the page when Ready is shown. An installed iPad PWA in Safari often does not deliver keys unless the page has focus, so a listener on the prompt element alone can miss the giant keyboard.
@@ -1046,11 +1050,7 @@ Displays:
 - Plinko qualification when applicable
 - Top 10 qualification when applicable
 
-If the contestant is Top 10 eligible, render:
-
-```text
-NameForm
-```
+If the contestant ranks through 20th, focus the name field so the first letter goes into the name.
 
 The Results screen should coordinate score saving through `ScoreService`.
 
@@ -1059,7 +1059,7 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
-→ if ranked through 20th, show NameForm
+→ if ranked through 20th, focus the name field
 → one exit writes one score row:
     Save Score, with the name
     or View Leaderboard, with name null
@@ -1120,10 +1120,10 @@ It should not:
 
 - access IndexedDB directly
 - calculate leaderboard rank
-- decide whether the contestant is Top 10
+- decide whether name entry is shown
 - calculate WPM or accuracy
 
-The parent `ResultsScreen` determines whether `NameForm` should be shown.
+The parent `ResultsScreen` determines whether the name field is shown. That is rank through 20th, as in `docs/prd.md` §15. Focus it when it appears.
 
 Focusing this field can open the iPad software keyboard. SAVE SCORE must stay visible. If the keyboard covers it, keep the field and button in the upper half, as in `docs/wireframes.md` §7. Do not add a keyboard library.
 
@@ -1856,6 +1856,7 @@ twentieth place shows the name field and no Top 10 line
 preview placement does not change the WPM stored on earlier scores
 a name is trimmed and kept up to 20 characters
 the first letter on Results goes into the name when the field is not yet focused
+Enter on Results saves the score with the typed name
 an empty name and a name past 20 characters are rejected
 a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept
@@ -1955,6 +1956,8 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
+a short Escape press on Ready does not start the test
+holding Escape on Ready opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 Escape, Space, any other key, or a tap on that list returns to Ready and does not start the test
 Ready-screen key is not passed into Typing as contestant input
@@ -1969,8 +1972,9 @@ long-press on the logo from Results opens Event Setup and does not write the uns
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time
-Top 10 result shows NameForm
-non-Top-10 result does not show NameForm
+a result ranked through 20th shows the name field, focused
+Enter on Results saves the score with the typed name
+a result outside 20th does not show the name field
 non-Top-10 View Leaderboard opens the Top 5
 name validation rejects empty values
 View Leaderboard with an empty name writes one score row with a null name and opens the Top 5
