@@ -1935,7 +1935,7 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
-after 2 idle minutes, Ready shows a rolling all-time list of at most 50 eligible scores
+after 2 idle minutes, Ready shows a rolling all-time list of at most 50 scores that meet the accuracy gate and display at least 1 WPM
 a key or tap on that list returns to Ready and does not start the test
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts

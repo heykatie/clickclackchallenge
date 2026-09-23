@@ -162,4 +162,23 @@ describe("allTimeScores", () => {
     expect(rolled[0]?.rank).toBe(1);
     expect(rolled[0]?.score.displayedWpm).toBeGreaterThan(rolled[49]?.score.displayedWpm ?? 0);
   });
+
+  it("drops a displayed 0 WPM score and keeps 1 WPM", () => {
+    const rolled = allTimeScores([
+      score({
+        id: "zero",
+        displayedWpm: 0,
+        accuracy: 100,
+        createdAt: "2026-09-22T00:00:00.000Z",
+      }),
+      score({
+        id: "one",
+        displayedWpm: 1,
+        accuracy: 80,
+        createdAt: "2026-09-22T00:01:00.000Z",
+      }),
+    ]);
+    expect(rolled.map((entry) => entry.score.id)).toEqual(["one"]);
+    expect(rolled[0]?.rank).toBe(1);
+  });
 });

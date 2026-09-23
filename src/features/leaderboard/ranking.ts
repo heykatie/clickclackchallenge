@@ -46,5 +46,6 @@ export function allTimeScores(
   scores: readonly ScoreRecord[],
   cap = ALL_TIME_SCORE_CAP,
 ): RankedScore[] {
-  return rankScores(scores).slice(0, cap);
+  const scored = scores.filter((score) => score.displayedWpm > 0);
+  return rankScores(scored).slice(0, cap);
 }
