@@ -61,8 +61,8 @@ export function ResultsScreen({
       <p>
         {result.displayedAccuracy === null ? "—%" : `${result.displayedAccuracy}%`} ACCURACY
       </p>
-      {copy?.plinkoLine ? <p>{copy.plinkoLine}</p> : null}
-      {copy?.placedLine ? <p>{copy.placedLine}</p> : null}
+      {copy?.plinkoLine ? <p className="result-pill result-plinko">{copy.plinkoLine}</p> : null}
+      {copy?.placedLine ? <p className="result-pill result-place">{copy.placedLine}</p> : null}
       {standing?.showNameEntry ? (
         <label className="name-field">
           Name
