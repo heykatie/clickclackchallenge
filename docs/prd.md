@@ -1,6 +1,6 @@
 # Typing Test — V1 Product Requirements Document
 
-This file owns product behavior: scoring, the accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, the requirement that the booth works offline, and the booth acceptance tests.
+This file owns product behavior: scoring, the accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, the requirement that the booth works offline, and the booth acceptance tests.
 
 ## Document ownership
 
@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -65,7 +65,7 @@ Contestants should be able to:
 - type continuously without unnecessary interruptions
 - see live WPM, accuracy, and remaining time
 - see their final result
-- enter a nickname if they qualify for the Top 10
+- enter a name if they rank through 20th place
 - see the Top 5 leaderboard
 
 ### Secondary User — Booth Operator
@@ -101,7 +101,7 @@ Pain points:
 - unnecessary manual work
 - inconsistent reset behavior
 - no persistent local event leaderboard
-- no integrated nickname flow
+- no integrated name flow
 - no integrated Top 5 display
 - no booth-specific prize messaging
 - no guaranteed offline operation
@@ -120,12 +120,12 @@ V1 should:
 5. prevent incorrect typing from inflating WPM
 6. prevent very low-accuracy button mashing from entering the leaderboard
 7. retain event scores locally
-8. support a Top 10 nickname flow
+8. support name entry through 20th place
 9. display a Top 5 leaderboard
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
 12. maintain a simple, readable landscape-iPad interface
-13. use a deterministic passage sequence for fair competition
+13. keep each game mode fair: Famous Lines uses one sentence sequence, Standard draws from one fixed word list, and Story uses one fixed short story
 14. follow the documented visual design system
 
 ---
@@ -139,6 +139,7 @@ V1 includes:
 - event setup
 - 30-second mode
 - 60-second mode
+- operator-selected Standard, Famous Lines, and Story game modes
 - fresh event creation
 - continue previous/current active event
 - Ready / Attract screen
@@ -149,12 +150,14 @@ V1 includes:
 - countdown timer
 - character-level error feedback
 - Backspace support
-- deterministic local passage sequence
+- Famous Lines sentence sequence, the same for every attempt
+- Standard word list, with a new draw for each attempt
+- Story, one fixed short story with a 60-second cap
 - results screen
 - high-score detection
 - minimum leaderboard accuracy requirement
-- Top 10 nickname eligibility
-- nickname entry
+- name entry through 20th place
+- name entry
 - Top 5 leaderboard
 - Next Player action
 - automatic reset after leaderboard display
@@ -182,7 +185,7 @@ V1 does not include:
 - historical-event management UI
 - detailed analytics
 - AI-generated passages
-- contestant-selectable game modes
+- contestants choosing their own game mode
 - advanced anti-cheat systems
 - operator score deletion
 - multiple-device event management
@@ -196,10 +199,13 @@ V1 does not include:
 ```text
 operator opens app
 → selects 30 seconds or 60 seconds
+→ selects Standard, Famous Lines, or Story
 → selects Start Fresh or Continue Previous Event
 → event begins
 → Ready screen
 ```
+
+Story ignores a 30-second choice and uses 60 seconds. Standard and Famous Lines use the length selected here.
 
 ### Contestant Flow
 
@@ -209,9 +215,9 @@ Ready
 → Typing screen appears
 → first valid typing key starts timer
 → contestant types
-→ timer expires
+→ timer expires, or Story is finished
 → Results screen
-→ Save Score, or View Leaderboard with no nickname, if Top 10 eligible; otherwise View Leaderboard
+→ Save Score, or View Leaderboard with no name, if ranked through 20th; otherwise View Leaderboard
 → Leaderboard
 → Next Player or automatic reset
 → Ready
@@ -237,11 +243,11 @@ As a contestant, I want to see my WPM, accuracy, and remaining time while I type
 
 As a contestant, I want to see my result immediately when time expires.
 
-As a qualifying contestant, I want to enter a nickname so my result can appear on the leaderboard.
+As a qualifying contestant, I want to enter a name so my result can appear on the leaderboard.
 
 ### Booth Operator
 
-As an operator, I want to choose 30 or 60 seconds before the event starts.
+As an operator, I want to choose 30 or 60 seconds before the event starts. Story always uses 60 seconds.
 
 As an operator, I want to start a fresh leaderboard without deleting old event data.
 
@@ -258,12 +264,13 @@ As an operator, I want the app to work without Wi-Fi.
 The Event Setup screen must allow the operator to:
 
 - select `30 seconds` or `60 seconds`
+- select a game mode: `Standard`, `Famous Lines`, or `Story`
 - start a fresh event
 - continue the current/most recently active event when one exists
 
-When Event Setup opens and no event exists, Start Fresh and `30 seconds` are selected. Continue is unavailable.
+When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Famous Lines are selected. Continue is unavailable.
 
-When an event already exists, including when the operator returns from Ready or the Leaderboard, Continue is selected. The duration control shows that event's stored duration.
+When an event already exists, including when the operator returns from Ready, Typing, Results, or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
 
 ### Start Fresh
 
@@ -271,6 +278,7 @@ Starting fresh should:
 
 - create a new event
 - use the selected duration
+- use the selected game mode
 - begin with an empty leaderboard
 - preserve previous event data
 - make the new event the active event
@@ -284,18 +292,17 @@ Continuing should:
 - reopen the current/most recently active event
 - retain all existing scores
 - retain its leaderboard
-- retain its original duration
-- retain its passage set
+- use the duration and game mode selected on this screen for the next contestant
 
 If no previous event exists, the Continue option should be unavailable.
 
-If the operator wants to change the test duration, they should start a fresh event.
+`30 seconds` and `60 seconds` stay selectable while Continue is selected, for Standard and Famous Lines. `Standard`, `Famous Lines`, and `Story` stay selectable too. Story always uses 60 seconds. While Story is selected, Test length shows 60 seconds and cannot be changed. Switching back to Standard or Famous Lines restores the length that was selected for those modes. That length applies to the next contestant in those modes. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
-While Continue is selected, the test-length control shows the stored duration and does not accept another choice. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+The operator can do this from the giant keyboard. The cursor starts on START EVENT. Arrow keys move it. Enter selects the choice under the cursor. Enter on START EVENT starts the event. The length choices are skipped while Story is selected. Continue is skipped when no event exists. Touch still works. The hint is in `docs/design_system.md`.
 
 ### Returning to Event Setup
 
-After Start Event, the operator returns to Event Setup by long-pressing the logo-only badge on Ready or the Leaderboard. The active event stays as it is. Keyboard input does not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. Holding Escape on Ready for that same moment opens Event Setup too. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -305,19 +312,21 @@ The Ready screen should clearly communicate the contest and current high score.
 
 Required strings live in `docs/design_system.md` (Brand voice).
 
-When a high score exists, show the nickname and WPM from the eligible rank #1 score.
+When a high score exists, show the name and WPM from the eligible rank #1 score.
 
 Ready does not need to show the test duration. The Typing screen shows the remaining time before the timer starts.
 
 The Ready screen must **not** show:
 
-- Top 5 leaderboard
+- the event Top 5
 - Start button
 - operator settings
 
+After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Escape or Space returns to Ready and does not start the test. Any other key or a tap does the same. The next key starts it, the same way a key does from the normal Ready screen.
+
 ### Start Behavior
 
-Any key may transition from Ready to Typing.
+Any key except Escape may transition from Ready to Typing. A short Escape press does not start a test. Holding Escape on Ready opens Event Setup. Escape is also the key that leaves a typing session for Ready.
 
 The key used to leave the Ready screen:
 
@@ -330,13 +339,17 @@ The Typing screen appears first.
 
 The timer starts only when the contestant presses the first valid typing character on the Typing screen.
 
+If that key has not been pressed within 5 seconds, Ready appears again. No score is saved. Keys that do not start the timer do not reset those 5 seconds.
+
 ---
 
 ## 11. Typing Screen Requirements
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
-While the first valid key has not been pressed, a long-press on the logo badge returns to Ready and does not save a score. The badge is present in that waiting state so the screen has a way back. After the timer starts, that long-press does not leave the test.
+A long-press on the logo badge opens Event Setup and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
+
+Escape returns to Ready and does not save a score. That also works while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
 
 The first valid typing key is the first printable character. Letters, spaces, and punctuation count. Digits count too, and a digit that is not in the passage is an incorrect attempt. These keys do not start the timer and are not that first attempt: Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer.
 
@@ -408,6 +421,7 @@ Rules:
 - incorrect characters do not increase WPM
 - correct characters in a partially completed word still count
 - final WPM uses the configured test duration
+- Story is the exception: finishing the last line ends the attempt, and final WPM uses the time from the first character to that last character. If 60 seconds expire first, final WPM uses that full minute
 - WPM is displayed as a rounded whole number
 
 ### Accuracy
@@ -512,7 +526,9 @@ A contestant below the threshold:
 - still sees their WPM
 - still sees their accuracy
 - does not qualify for leaderboard ranking
-- is not prompted for a leaderboard nickname
+- is not prompted for a leaderboard name
+
+A score that displays as 0 WPM also stays off every board, including the event Top 5 and the all-time roll. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
 
 ### Ranking and Ties
 
@@ -543,8 +559,9 @@ Each event should be stored as a separate record.
 An event must retain:
 
 - a unique event ID
-- the selected test duration
-- the passage-set version used for that event
+- the selected test duration for the next contestant
+- the selected game mode for the next contestant
+- the passage-set version for that mode
 - whether the event is currently active or archived
 - the event creation time
 - the event's most recent update time
@@ -561,13 +578,16 @@ A score should retain:
 
 - a unique score ID
 - the event ID it belongs to
-- nickname, when the contestant saves one
-- null nickname when a Top 10 contestant leaves through View Leaderboard
+- name, when the contestant saves one
+- null name when the contestant leaves through View Leaderboard
 - final WPM
 - final accuracy
+- the duration of the attempt that produced the WPM
+- the game mode of that attempt
+- the passage-set version of that attempt
 - score submission time
 
-The technical implementation may retain additional scoring details such as raw WPM, correct-character counts, and correct/incorrect attempt counts.
+The technical implementation may retain additional scoring details such as raw WPM, correct-character counts, and correct/incorrect attempt counts. Ranking uses the stored WPM. It does not recalculate an earlier score from the event's later duration or game mode.
 
 Top 5 and Top 10 status should not be permanently stored on a score because rankings may change as new scores are added.
 
@@ -579,9 +599,9 @@ The app should keep track of the currently active event so the operator can cont
 
 Settings may also remember convenience preferences such as the most recently selected duration.
 
-An existing event's saved duration remains the source of truth when that event is continued.
+The event's saved duration and game mode are what the next contestant will use. The operator can change either while continuing the event. Each score keeps the duration, game mode, passage set, and WPM of the attempt that produced it. Ranking uses those stored results.
 
-Changing the duration requires starting a fresh event.
+Changing the duration or game mode does not start a fresh event. Start fresh is only for an empty leaderboard.
 
 ### Fresh Leaderboard Behavior
 
@@ -639,7 +659,7 @@ Event
 
 The app's settings point to the currently active event.
 
-Passage content is bundled with the app, while each event stores only the identifier of the passage-set version it used.
+Passage content is bundled with the app. The event stores the game mode and passage-set identifier for the next contestant. Each score stores the mode and passage-set identifier from the attempt that earned it.
 
 What must survive a refresh, restart, or loss of connectivity is in §20. Persistence Requirements.
 
@@ -681,32 +701,29 @@ Leaderboard accuracy requirements do not automatically determine prize qualifica
 
 ### Passage Source
 
-All typing passages must be prewritten and bundled locally with the application.
+Famous Lines sentences and the Standard word list are bundled locally with the application. Standard lines are assembled from that word list when an attempt starts. That assembly does not use the network.
 
 V1 must not depend on:
 
 - API-generated passages
 - AI-generated passages
 - internet-loaded text
-- runtime-generated sentence content
-
-This ensures the typing test works fully offline and uses consistent text across contestants.
+- runtime-written Famous Lines sentences
 
 ### Sentence Style
 
-Passages should use natural, grammatical English sentences.
+Famous Lines passages are short famous lines from games, anime, and technology. Prefer lines people already know: funny, popular, or thoughtful. Familiar names are part of those lines. Famous Lines does not use numbers.
 
-Sentences should:
+Story is one original short story, the same lines in the same order for every attempt. It follows the shape of a fall into another world, a kindness, and a way home. It does not copy text or names from those stories. The lines together are about 120–140 characters, so a 100 WPM attempt can finish in about 15 seconds and a 25 WPM attempt uses most of the timer. Story always ends at 60 seconds if the story is unfinished. One sentence shows at a time. The attempt ends when the last sentence is committed.
 
-- use common everyday vocabulary
-- avoid obscure or highly technical words
-- avoid unnecessary proper nouns
-- avoid numbers in V1
-- use simple punctuation
-- favor normal sentence structure
+Famous Lines sentences should:
+
+- keep the wording of the short famous line
+- use simple punctuation, including apostrophes
+- avoid numbers
 - be easy to read quickly
 
-Random disconnected word lists should not be used.
+Standard is the word-list mode. Its lines are lowercase, have no punctuation, and are drawn from the bundled 200 most common English words.
 
 ### Difficulty Consistency
 
@@ -715,16 +732,13 @@ Sentences should be reasonably similar in typing difficulty.
 Difficulty should be controlled through:
 
 - similar sentence length
-- common vocabulary
-- similar average word length
 - simple punctuation
-- normal capitalization
-- avoiding unusually long or rare words
+- a length close enough that one line is not much easier than the next
 
 Initial target sentence length:
 
 ```text
-approximately 35–50 characters
+approximately 30–50 characters
 ```
 
 This includes spaces and punctuation.
@@ -733,7 +747,7 @@ The final character limit should be validated using the final typing font and th
 
 ### Event Fairness
 
-All contestants within the same event must receive the same ordered sentence sequence.
+Famous Lines uses one ordered sentence sequence for every attempt in the event.
 
 Example:
 
@@ -745,9 +759,11 @@ Contestant B:
 Sentence 1 → Sentence 2 → Sentence 3 → ...
 ```
 
-Sentences should not be randomly shuffled for each contestant in V1.
+Famous Lines sentences are not shuffled per contestant. Every attempt, including a retake, starts again at the first sentence. That keeps Famous Lines difficulty consistent across competitors.
 
-This keeps text difficulty consistent across competitors and makes leaderboard scores more directly comparable.
+Standard uses the same list of the 200 most common English words for every attempt. Each attempt gets a new random draw from that list. Words are lowercase and have no punctuation. A line ends with the space that joins it to the next word, and that space is scored like any other character. The draw changes per attempt. The word list does not.
+
+A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Famous Lines score with the Standard word list, a Standard score with the Famous Lines sentences, or a Story score from either of those. Standard, Famous Lines, and Story scores in the same event stay on one leaderboard.
 
 ### Sentence Progression
 
@@ -770,26 +786,29 @@ The app should not:
 
 A sentence is considered complete when the contestant has entered a character for every position, even if some positions contain errors.
 
+Famous Lines sentences are stored without a trailing space. After a Famous Lines sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
+
+A Standard line includes the space after its last word. That space is a scored character. The same one-space ignore applies only to an extra space typed after the line is already complete.
+
 ### Passage Length
 
-The bundled passage set must contain enough text for both 30-second and 60-second tests, including fast typists.
+Standard and Famous Lines must contain enough text for 30-second and 60-second tests, including fast typists. Story is the short passage described above and does not use that length target.
 
-Initial V1 target:
+Famous Lines target:
 
 - at least 25–30 curated sentences
 - at least approximately 1,200–1,500 total characters
+- the same sentence sequence for 30-second and 60-second tests
 
-Both 30-second and 60-second tests should use the same sentence sequence.
-
-The 30-second test simply ends earlier.
+Standard uses the same 200-word list for both durations. Each attempt builds enough lines for a fast 60-second test. The 30-second test simply ends earlier.
 
 ### One-Line Requirement
 
-Every sentence must fit completely on one line at the final typing-screen font size on the target landscape iPad.
+Every Famous Lines sentence and every Standard line must fit completely on one line at the final typing-screen font size on the target landscape iPad.
 
-The app should not dynamically shrink the font to fit individual sentences.
+The app should not shrink one line relative to another. On a window narrower than that iPad, every line uses the same smaller size, chosen so the widest line still fits. The iPad size stays the standard size.
 
-If a sentence does not fit within the safe typing area, the sentence should be rewritten or removed.
+If a Famous Lines sentence does not fit within the safe typing area at the iPad size, the sentence should be rewritten or removed.
 
 ### Passage Set Versioning
 
@@ -798,20 +817,18 @@ Each passage collection should have a stable identifier so events can retain whi
 Example:
 
 ```text
-common-sentences-v1
+common-sentences-v2
+common-words-v1
+story-v1
 ```
+
+`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. `story-v1` is the Story passage. Saved scores keep the identifier from the attempt that earned them.
 
 If the passage set changes later, create a new version rather than silently replacing the existing set.
 
-Example:
-
-```text
-common-sentences-v2
-```
-
 ---
 
-## 15. Results and Nickname Screen
+## 15. Results and Name Screen
 
 The Results screen should display:
 
@@ -821,36 +838,40 @@ The Results screen should display:
 - Plinko qualification status when the contestant qualifies
 - Top 10 qualification status when applicable
 
-Show “You earned a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The words are in `docs/design_system.md` (Brand voice).
+Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
 
-Results and nickname entry should remain on the **same screen**.
+Results and name entry should remain on the **same screen**.
 
-### Top 10 Qualification
+### Name Qualification
 
 If the contestant's score:
 
-- meets the minimum accuracy threshold, and
-- ranks within the event's Top 10
+- meets the minimum accuracy threshold,
+- displays at least 1 WPM, and
+- ranks within the event's top 20
 
-then show nickname entry.
+then show name entry.
 
-If the contestant does not qualify for the Top 10, nickname entry should not be shown.
+The place lines stay narrower. “You made the Top 5!” is places 2 through 5. “You made the Top 10!” is places 6 through 10. Places 11 through 20 may enter a name and do not get a place line. Rank 1 still uses “NEW HIGH SCORE!” only.
 
-When nickname entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results.
+If the contestant ranks outside the top 20, name entry should not be shown.
 
-When nickname entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null nickname and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt nickname entry. The label is in `docs/design_system.md` (Brand voice).
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
-### Nickname Rules
+When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing an allowed name stops that countdown. A blocked name shows “Pick a different name.” and does not stop it. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
-Nickname input should:
+### Name Rules
 
-- allow any nickname
+Name input should:
+
+- allow ordinary names
+- reject profanity and slurs, including when spaces, punctuation, or numbers stand in for letters
 - trim leading/trailing whitespace
 - reject empty values
 - use a reasonable maximum length for layout safety
-- display nickname content as plain text
+- display name content as plain text
 
-The stored nickname is the trimmed value, up to the maximum below. A row may show an ellipsis when the name does not fit. That display does not change the stored value. The truncation is in `docs/design_system.md`.
+The stored name is the trimmed value, up to the maximum below. A row may show an ellipsis when the name does not fit. That display does not change the stored value. The truncation is in `docs/design_system.md`.
 
 Recommended maximum:
 
@@ -858,7 +879,7 @@ Recommended maximum:
 20 characters
 ```
 
-Automatic next-player reset must not interrupt nickname entry.
+Automatic next-player reset must not interrupt name entry.
 
 ---
 
@@ -873,10 +894,10 @@ Top 5
 Each leaderboard row should include:
 
 - rank
-- nickname, or a dash when the score has no nickname
+- name, or a dash when the score has no name
 - displayed WPM
 
-Do not invent a name for a null nickname. A long name may be truncated in the row. The stored nickname stays complete. The dash and the ellipsis are in `docs/design_system.md`.
+Do not invent a name for a null name. A long name may be truncated in the row. The stored name stays complete. The dash and the ellipsis are in `docs/design_system.md`.
 
 The leaderboard may:
 
@@ -889,7 +910,7 @@ The leaderboard should not expose:
 - internal IDs
 - database metadata
 
-Only scores meeting the minimum accuracy threshold are eligible for ranking.
+Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
 
 ---
 
@@ -900,7 +921,7 @@ The current high score is the rank #1 eligible score for the active event.
 The Ready screen should show:
 
 - high-score WPM
-- nickname, or a dash when that score has no nickname
+- name, or a dash when that score has no name
 
 If the active event has no eligible scores yet, show “Be the first high score!”
 
@@ -914,17 +935,17 @@ The Leaderboard screen must include:
 NEXT PLAYER
 ```
 
-Selecting Next Player should immediately return to the Ready screen.
+Selecting Next Player should immediately return to the Ready screen. Escape, Enter, and Space do the same. The saved scores stay.
 
 The app should also automatically return to Ready after a short delay.
 
 Initial target:
 
 ```text
-approximately 10 seconds
+approximately 15 seconds
 ```
 
-The exact duration may be adjusted after booth testing.
+Show “Returning to ready screen in {n}s” only for the last 5 seconds. The message is small. The exact duration may be adjusted after booth testing.
 
 Reset contestant-specific state:
 
@@ -934,12 +955,13 @@ Reset contestant-specific state:
 - live WPM
 - live accuracy
 - current result
-- nickname field
+- name field
 
 Preserve event state:
 
 - active event
 - duration
+- game mode
 - passage set
 - scores
 - high score
@@ -947,7 +969,7 @@ Preserve event state:
 
 Automatic reset should begin only after the Leaderboard screen is shown.
 
-It should not run while nickname entry is still in progress.
+It should not run while name entry is still in progress.
 
 ---
 
@@ -971,7 +993,7 @@ The app must not require a network connection to reach or use:
 - Event Setup
 - Ready / Attract
 - Typing
-- Results / Nickname
+- Results / Name
 - Leaderboard
 
 A temporary or complete loss of connectivity must not prevent the booth from continuing to operate.
@@ -989,7 +1011,7 @@ open app
 → complete typing test
 → calculate WPM and accuracy
 → determine leaderboard eligibility
-→ enter nickname when eligible
+→ enter name when eligible
 → save score locally
 → update leaderboard
 → show Leaderboard screen
@@ -1038,7 +1060,7 @@ A network connection must not be required to:
 - create an event
 - continue an event
 - save a score
-- save a nickname
+- save a name
 - calculate the current high score
 - calculate Top 10 eligibility
 - generate the Top 5 leaderboard
@@ -1122,7 +1144,7 @@ V1 satisfies the offline requirement only when all of the following are true:
 - the Ready screen works offline
 - the Typing screen works offline
 - scoring works offline
-- nickname entry works offline
+- name entry works offline
 - scores save offline
 - the high score updates offline
 - the Top 5 leaderboard updates offline
@@ -1147,7 +1169,7 @@ Persist:
 
 - events
 - scores
-- nicknames
+- names
 - active-event reference
 - event duration
 - passage-set identifier
@@ -1171,7 +1193,7 @@ V1 should include:
 - large text
 - large touch targets for operator controls
 - error feedback that does not rely on color alone
-- explicit nickname input label
+- explicit name input label
 - reduced-motion support where animation is used
 
 The contestant's primary interaction method is the physical keyboard.
@@ -1259,7 +1281,7 @@ The MVP is not complete until the required acceptance tests pass, including the 
 - the Ready-screen key does not affect WPM
 - the Ready-screen key does not affect accuracy
 
-The timer should begin only after the first valid typing character is entered on the Typing screen.
+A repeat of that key while it is still held is not scored. The next key after it is released is the first typing attempt. The timer should begin only after that character is entered on the Typing screen.
 
 ---
 
@@ -1419,8 +1441,10 @@ Separate physical presses of the same key must still work normally.
 - their accuracy is still shown
 - the score does not participate in leaderboard ranking
 - the contestant is not considered Top 10
-- nickname entry is not shown
+- name entry is not shown
 - the score cannot appear in the Top 5
+
+A displayed 0 WPM score follows the same exclusion even when accuracy is 80% or higher. Results shows “Casper, is that you?” instead of a place.
 
 Boundary cases:
 
@@ -1475,12 +1499,13 @@ Expected order:
 
 ---
 
-### Top 10 Nickname Eligibility
+### Name Eligibility
 
 **Given**
 
 - the contestant meets the minimum accuracy threshold
-- the completed score ranks within the event's Top 10
+- the displayed WPM is at least 1
+- the completed score ranks within the event's top 20
 
 **When**
 
@@ -1488,10 +1513,11 @@ Expected order:
 
 **Then**
 
-- nickname entry is shown
-- the contestant may enter and save a nickname
+- name entry is shown
+- the contestant may enter and save a name
+- a place line appears only for the Top 10
 
-If the contestant ranks outside the Top 10, nickname entry must not be shown.
+If the contestant ranks outside the top 20, name entry must not be shown.
 
 ---
 
@@ -1499,8 +1525,8 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 **Given**
 
-- the contestant does not qualify for the Top 10
-- nickname entry is not shown
+- the contestant does not qualify for a name
+- name entry is not shown
 
 **When**
 
@@ -1513,11 +1539,11 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 ---
 
-### Nickname Entry Is Not Interrupted
+### Name Entry Is Not Interrupted
 
 **Given**
 
-- a qualifying contestant is entering a nickname
+- a qualifying contestant is entering a name
 
 **When**
 
@@ -1525,17 +1551,17 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 **Then**
 
-- automatic reset must not interrupt the nickname flow
-- the contestant remains on Results until the nickname flow is completed
+- automatic reset must not interrupt the name flow
+- the contestant remains on Results until the name flow is completed
 
 ---
 
-### Nickname Can Be Skipped
+### Name Can Be Skipped
 
 **Given**
 
 - a qualifying contestant is on Results
-- the nickname field is empty
+- the name field is empty
 
 **When**
 
@@ -1545,14 +1571,50 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 - Save Score would still reject the empty name
 - one score row is written
-- its nickname is null
+- its name is null
 - that score stays eligible for ranking
 - the Top 5 leaderboard appears
 - automatic reset has not moved the screen on its own
 
 ---
 
-### Waiting Typing Can Return to Ready
+### Typing Returns to Event Setup
+
+**Given**
+
+- the Typing screen is showing the sentence
+
+**When**
+
+- the logo badge is long-pressed
+
+**Then**
+
+- Event Setup opens
+- the attempt is discarded
+- no score is saved
+
+This is the same before and after the timer starts.
+
+### Escape Returns to Ready
+
+**Given**
+
+- the Typing screen is showing the sentence
+
+**When**
+
+- Escape is pressed
+
+**Then**
+
+- Ready appears
+- the attempt is discarded
+- no score is saved
+
+A short Escape press does not leave Ready for Typing. Holding Escape on Ready opens Event Setup. On the Leaderboard, Escape, Enter, and Space return to Ready the same way Next Player does. The saved scores stay.
+
+### Waiting Typing Returns to Ready
 
 **Given**
 
@@ -1561,14 +1623,14 @@ If the contestant ranks outside the Top 10, nickname entry must not be shown.
 
 **When**
 
-- the logo badge is long-pressed
+- 5 seconds pass without a key that starts the timer
 
 **Then**
 
 - Ready appears
 - no score is saved
 
-After the timer has started, that long-press does not leave the test.
+Once the timer has started, those 5 seconds no longer apply.
 
 ---
 
@@ -1611,12 +1673,14 @@ Starting fresh must never delete old event data.
 **Then**
 
 - the same event is restored
-- the original duration is restored
-- the original passage set is restored
+- the event's current duration is shown, and the operator can select the other length for the next contestant in Standard or Famous Lines
+- while Story is selected, Test length shows 60 seconds and cannot be changed
+- the event's current game mode is shown, and the operator can select another mode for the next contestant
 - all saved scores remain available
+- Start Event after a duration or game-mode change keeps the same event
+- earlier scores keep the duration, game mode, passage set, and WPM from the attempt that earned them
 - the high score is restored
-- the Top 5 is recalculated correctly
-- a different duration highlighted while Continue is selected is ignored
+- the Top 5 is recalculated from those stored results
 
 Continuing must not create a new event.
 
@@ -1636,7 +1700,7 @@ Continuing must not create a new event.
 
 - the active event still exists
 - the saved score still exists
-- the nickname still exists when applicable
+- the name still exists when applicable
 - the high score remains correct
 - the leaderboard can be reconstructed from saved scores
 
@@ -1656,9 +1720,12 @@ A server connection must not be required.
 
 **Then**
 
-- every contestant starts with the same first sentence
-- every contestant receives the same ordered sentence sequence
-- passages are not shuffled per contestant
+- Famous Lines starts every contestant at the same first sentence
+- Famous Lines gives every contestant the same ordered sentence sequence
+- Famous Lines passages are not shuffled per contestant
+- Standard gives every attempt a new draw from the same 200-word list
+- Story gives every attempt the same short story
+- a score keeps the mode and WPM from the attempt that earned it
 
 ---
 
@@ -1688,17 +1755,18 @@ Any sentence that does not fit must be rewritten or removed.
 **Given**
 
 - an event has already been started
-- Ready or the Leaderboard is visible
+- Ready, Typing, Results, or the Leaderboard is visible
 
 **When**
 
-- the operator long-presses the logo-only badge
+- the operator long-presses the logo-only badge, or holds Escape on Ready
 
 **Then**
 
 - Event Setup opens
 - the active event is unchanged
-- a keypress does not open Event Setup
+- a short Escape press does not open Event Setup
+- other keys do not open Event Setup
 
 ---
 
@@ -1723,12 +1791,13 @@ the app returns to Ready and clears:
 - live WPM
 - live accuracy
 - current result
-- nickname input
+- name input
 
 The following must remain unchanged:
 
 - active event
 - duration
+- game mode
 - passage set
 - saved scores
 - current high score
@@ -1741,7 +1810,7 @@ The following must remain unchanged:
 **Given**
 
 - the Leaderboard screen is visible
-- nickname entry is no longer active
+- name entry is no longer active
 
 **When**
 
@@ -1801,7 +1870,7 @@ launch app
 → start typing test
 → complete test
 → calculate WPM and accuracy
-→ enter nickname when eligible
+→ enter name when eligible
 → save score
 → update leaderboard
 → Next Player or automatic reset
@@ -1819,7 +1888,7 @@ and confirm:
 
 - active event survives
 - saved scores survive
-- nicknames survive
+- names survive
 - high score is reconstructed
 - Top 5 is reconstructed
 - passages load
@@ -1837,7 +1906,7 @@ Before using the app at a real event, confirm:
 ```text
 30-second mode passes
 60-second mode passes
-Ready-screen key is not scored
+Ready-screen key is not scored, including while that key is still held
 first typing key starts the timer
 WPM calculation passes
 accuracy calculation passes
@@ -1846,15 +1915,33 @@ partial words count correctly
 Backspace behavior passes
 held-key repeat protection passes
 minimum accuracy gate passes
-Top 10 nickname behavior passes
+name entry through 20th place passes
+places 11 through 20 can enter a name and do not see a place line
 Top 5 sorting passes
 Plinko qualification passes
+rank 1 shows NEW HIGH SCORE! and, above 50 WPM, You win a Plinko drop!
+places 2 through 5 show Nice typing! and You made the Top 5!
+places 6 through 10 show Nice typing! and You made the Top 10!
+a Top 5 or Top 10 score above 50 WPM shows the place line and the Plinko line
+a score outside the Top 10 at 1 through 50 WPM shows Thanks for playing! only
+a displayed 0 WPM score shows Casper, is that you? and does not place
 fresh event behavior passes
 continue event behavior passes
 score persistence passes
-same passage sequence is used for all contestants
-all passages fit one line
+Famous Lines uses the same sentence sequence for every attempt
+Standard draws each attempt from the same 200-word list
+Story uses the same short story and a 60-second cap
+a finished Story scores the time taken
+an unfinished Story scores the full minute
+every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
+Escape, Enter, or Space on the Leaderboard returns to Ready
+holding Escape on Ready opens Event Setup
+a short Escape press on Ready does not start the test
+the operator can change Event Setup with the arrow keys and Enter
+the first letter on Results goes into the name
+Enter on Results saves the score with the typed name
+Enter or Space on Results without name entry opens the leaderboard
 automatic reset passes
 giant keyboard input passes
 PWA launches offline

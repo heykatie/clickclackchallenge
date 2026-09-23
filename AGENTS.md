@@ -29,7 +29,7 @@ Use the following sources in this priority order:
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, game mode, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -161,7 +161,7 @@ Use the existing `/wireframes` directory as a major visual reference when implem
 Important flows/screens include:
 
 - typing test
-- results / nickname
+- results / name
 - leaderboard
 
 When implementing a wireframed screen:
@@ -286,7 +286,7 @@ Before modifying logic related to metrics such as:
 - errors
 - elapsed time
 - completion state
-- nickname
+- name
 - score
 - ranking
 - leaderboard entries
@@ -297,13 +297,13 @@ Do not change formulas or scoring semantics solely as part of a visual change.
 
 ---
 
-## Results / Nickname Flow
+## Results / Name Flow
 
-The Results / Nickname screen should remain consistent with the approved wireframe and the rest of the typing-test flow.
+The Results / Name screen should remain consistent with the approved wireframe and the rest of the typing-test flow.
 
-Keep result data and nickname submission behavior separate enough that presentation changes do not accidentally change scoring behavior.
+Keep result data and name submission behavior separate enough that presentation changes do not accidentally change scoring behavior.
 
-Validate nickname input according to existing product requirements.
+Validate name input according to existing product requirements.
 
 Do not invent additional required user information unless explicitly requested.
 

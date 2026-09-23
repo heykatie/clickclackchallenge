@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -67,16 +67,18 @@ V1 supports:
 - continuing the current/most recently active event
 - Ready / Attract screen
 - Typing screen
-- Results + nickname screen
+- Results + name screen
 - Leaderboard screen
 - live WPM
 - live accuracy
 - timer
 - character-level typing feedback
 - Backspace
-- deterministic passage sequence
+- Famous Lines sentence sequence, the same for every attempt
+- Standard word list, with a new draw for each attempt
+- Story, one fixed short story with a 60-second cap
 - minimum leaderboard accuracy
-- Top 10 nickname eligibility
+- name entry through 20th place
 - Top 5 leaderboard display
 - Plinko/prize qualification
 - manual Next Player reset
@@ -151,7 +153,7 @@ create / continue event
 → run typing test
 → calculate score
 → save score
-→ collect nickname when eligible
+→ collect name when eligible
 → derive leaderboard
 → reset for next contestant
 ```
@@ -264,7 +266,9 @@ Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS
 
 Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
-Set the web app manifest `orientation` to `landscape`. That is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports.
+The manifest is configured in `vite.config.ts`. Its name and short name are “Typing test.” It starts at `/`, uses `display: "standalone"` and `orientation: "landscape"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button. Icons are not in the manifest yet.
+
+`orientation: "landscape"` is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports. That gate is not built yet.
 
 Load fonts with `@fontsource/fredoka`, `@fontsource/nunito`, and `@fontsource/atkinson-hyperlegible`. Import passages from local application data. If passage data is emitted as a separate static asset, precache that asset too.
 
@@ -276,7 +280,7 @@ structured event, score, and settings data
 → IndexedDB
 ```
 
-Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist a separate leaderboard record. Do not reload for a service-worker update during Ready-to-Typing, an active test, or nickname entry. Apply updates on a later launch or while the app is idle.
+Use `idb` with object stores `events`, `scores`, and `settings`. Do not persist a separate leaderboard record. Do not reload for a service-worker update during Ready-to-Typing, an active test, or name entry. Apply updates on a later launch or while the app is idle.
 
 The airplane-mode acceptance test is in `docs/prd.md`. Installation steps are in the Testing Plan section below.
 
@@ -310,7 +314,7 @@ TIMER STARTS
   ↓
 RESULTS
   ↓
-nickname if Top 10 eligible
+name if ranked through 20th
   ↓
 LEADERBOARD
   ↓
@@ -373,6 +377,7 @@ The model must preserve historical event data, associate every score with the ev
 
 ```ts
 type TestDuration = 30 | 60;
+type TestMode = "words" | "famous-lines" | "story";
 ```
 
 ### Event Record
@@ -384,6 +389,7 @@ interface EventRecord {
   id: string;
 
   durationSeconds: TestDuration;
+  testMode: TestMode;
   passageSetId: string;
 
   status: "active" | "archived";
@@ -402,14 +408,25 @@ Field behavior:
 
 `durationSeconds`
 
-- fixed event duration
+- the length for the next contestant while this event stays active
 - valid values: `30` or `60`
-- remains the source of truth when continuing the event
+- a later change does not rewrite `durationSeconds` on scores already saved
+
+`testMode`
+
+- `"famous-lines"` is Famous Lines. It uses the bundled sentences, in the same order for every attempt
+- `"story"` is Story. It uses one short story and always runs with a 60-second cap. Finishing the last line ends the attempt and the saved WPM uses the elapsed time. If 60 seconds expire first, the saved WPM uses that full minute
+- `"words"` uses a new random draw from `common-words-v1` for each attempt
+- the choice for the next contestant while this event stays active
+- a later change does not rewrite `testMode` on scores already saved
 
 `passageSetId`
 
-- identifies the passage-set version used by the event
-- example: `common-sentences-v1`
+- identifies the text version the next contestant will use
+- `common-sentences-v2` for Famous Lines
+- `common-words-v1` for Standard
+- `story-v1` for Story
+- updated with `testMode` so the event record matches the next attempt
 
 `status`
 
@@ -431,7 +448,8 @@ Example:
 const event: EventRecord = {
   id: crypto.randomUUID(),
   durationSeconds: 30,
-  passageSetId: "common-sentences-v1",
+  testMode: "famous-lines",
+  passageSetId: "common-sentences-v2",
   status: "active",
   createdAt: "2026-09-22T07:18:00.000Z",
   updatedAt: "2026-09-22T07:18:00.000Z"
@@ -447,7 +465,7 @@ interface ScoreRecord {
   id: string;
   eventId: string;
 
-  nickname: string | null;
+  name: string | null;
 
   rawWpm: number;
   displayedWpm: number;
@@ -458,6 +476,8 @@ interface ScoreRecord {
   incorrectAttempts: number;
 
   durationSeconds: TestDuration;
+  testMode: TestMode;
+  passageSetId: string;
 
   createdAt: string;
 }
@@ -474,11 +494,11 @@ Field behavior:
 
 - identifies the event this score belongs to
 
-`nickname`
+`name`
 
-- nickname for a Top 10 qualifying score
+- name for a Top 10 qualifying score
 - null when that contestant leaves through View Leaderboard
-- null for scores outside the Top 10
+- null for scores outside the top 20
 - the score row is still written in both null cases
 
 `rawWpm`
@@ -518,6 +538,20 @@ Field behavior:
 `durationSeconds`
 
 - snapshot of the test duration when the score was earned
+- unchanged when the operator later picks the other length for the same event
+- the duration that produced this score's WPM; ranking uses the stored WPM rather than recomputing it from the event's current duration
+
+`testMode`
+
+- snapshot of Standard (`"words"`), Famous Lines (`"famous-lines"`), or Story (`"story"`) when the score was earned
+- unchanged when the operator later picks the other mode for the same event
+
+`passageSetId`
+
+- snapshot of the text version that produced this score
+- `common-words-v1`, `common-sentences-v1`, `common-sentences-v2`, or `story-v1`
+- `common-sentences-v1` is the earlier everyday set; current Famous Lines scores use `common-sentences-v2`
+- ranking does not reload that text to recompute WPM
 
 `createdAt`
 
@@ -530,7 +564,7 @@ Example:
 const score: ScoreRecord = {
   id: crypto.randomUUID(),
   eventId: "event-id",
-  nickname: "Alex",
+  name: "Alex",
 
   rawWpm: 91.6,
   displayedWpm: 92,
@@ -541,6 +575,8 @@ const score: ScoreRecord = {
   incorrectAttempts: 9,
 
   durationSeconds: 30,
+  testMode: "famous-lines",
+  passageSetId: "common-sentences-v2",
 
   createdAt: "2026-09-22T07:43:12.000Z"
 };
@@ -561,7 +597,7 @@ meetsAccuracyThreshold: boolean;
 
 Rank and Top 5 / Top 10 change whenever a new score is added. `meetsAccuracyThreshold` goes stale if `MIN_LEADERBOARD_ACCURACY` changes after giant-keyboard testing. Do not store that boolean.
 
-At rank time, a score is eligible when `accuracy >= MIN_LEADERBOARD_ACCURACY`. Keep the numeric `accuracy` field. The threshold value is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). Ranking order is in `docs/prd.md`.
+At rank time, a score is eligible when `accuracy >= MIN_LEADERBOARD_ACCURACY` and `displayedWpm > 0`. Keep the numeric `accuracy` field. The threshold value is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). A displayed 0 WPM stays off the board. Ranking order is in `docs/prd.md`.
 
 ### App Settings
 
@@ -586,6 +622,7 @@ interface AppSettings {
 `schemaVersion`
 
 - supports future IndexedDB migrations
+- schema 3 renames a stored `"race"` mode to `"famous-lines"` and leaves WPM unchanged
 
 Example:
 
@@ -593,13 +630,13 @@ Example:
 const settings: AppSettings = {
   activeEventId: "event-id",
   lastSelectedDuration: 30,
-  schemaVersion: 1
+  schemaVersion: 3
 };
 ```
 
-When continuing an existing event, `event.durationSeconds` remains the source of truth.
+When continuing an existing event, `event.durationSeconds` and `event.testMode` are the length and text for the next contestant. The operator may change either without archiving the event. Continuing also writes the current passage-set id for that mode when the stored id is older. Earlier scores keep the duration, mode, passage set, and WPM stored when each score was saved. Ranking uses that stored WPM.
 
-Changing the duration requires starting a fresh event.
+Start fresh is required only when the operator wants a new empty leaderboard.
 
 ### Passage Set
 
@@ -613,19 +650,19 @@ interface PassageSet {
 Example:
 
 ```ts
-const commonSentencesV1: PassageSet = {
-  id: "common-sentences-v1",
+const commonSentencesV2: PassageSet = {
+  id: "common-sentences-v2",
   sentences: [
-    "The little dog ran across the yard today.",
-    "We went down the road to see our old friend.",
-    "The sun came out as we walked back home."
+    "It's dangerous to go alone! Take this.",
+    "I'm gonna be King of the Pirates!",
+    "Talk is cheap. Show me the code."
   ]
 };
 ```
 
 Passages are bundled with the application rather than downloaded at runtime.
 
-Each event stores only its `passageSetId`.
+The event stores `testMode` and `passageSetId` for the next contestant. Each score stores the mode and passage-set identifier from the attempt that earned it.
 
 ### Data Relationships
 
@@ -657,7 +694,8 @@ Rules:
 
 - one event may have many scores
 - one score belongs to exactly one event
-- one event references one passage-set version
+- the active event references the passage-set version for its current game mode
+- each score references the passage-set version from the attempt that earned it
 - settings reference the currently active event
 
 ### Fresh Event Behavior
@@ -690,11 +728,13 @@ Choosing **Continue Previous Event** restores the valid active event.
 Restore:
 
 - event ID
-- event duration
+- the event's current duration, which the operator can change for the next contestant
 - passage-set ID
-- saved scores
+- saved scores, each still carrying the duration and WPM from the attempt that earned it
 - derived current high score
 - derived leaderboard
+
+Changing the duration keeps this event. It does not create a new one and does not rewrite earlier scores.
 
 If no valid active event exists, Continue should be unavailable.
 
@@ -714,7 +754,7 @@ new Date().toISOString()
 
 Do not derive IDs from:
 
-- nickname
+- name
 - score
 - array index
 - timestamp alone
@@ -825,9 +865,9 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. Escape during Typing returns to Ready and discards the attempt. A short Escape press does not leave Ready. Holding Escape on Ready opens Event Setup.
 
-Scoring, nickname, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
+Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
 ## 11. Component and Module Boundaries
 
@@ -921,6 +961,8 @@ contestant keypress
 → transition to TypingScreen
 ```
 
+A short Escape press does not start the test. Holding Escape opens Event Setup.
+
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
 Listen for that key with a `keydown` listener on `window`, and focus the page when Ready is shown. An installed iPad PWA in Safari often does not deliver keys unless the page has focus, so a listener on the prompt element alone can miss the giant keyboard.
@@ -968,7 +1010,7 @@ The screen should use pure typing/scoring functions rather than embedding all lo
 It should not:
 
 - persist final scores directly
-- decide Top 10 nickname eligibility by itself
+- decide name eligibility by itself
 - render the final leaderboard
 - create or archive events
 
@@ -980,7 +1022,7 @@ sentence visible
 → timer starts
 → typing engine processes input
 → scoring functions update live metrics
-→ timer expires
+→ timer expires, or Story is finished
 → TestResult created
 → ResultsScreen
 ```
@@ -1008,11 +1050,7 @@ Displays:
 - Plinko qualification when applicable
 - Top 10 qualification when applicable
 
-If the contestant is Top 10 eligible, render:
-
-```text
-NicknameForm
-```
+If the contestant ranks through 20th, focus the name field so the first letter goes into the name.
 
 The Results screen should coordinate score saving through `ScoreService`.
 
@@ -1021,18 +1059,18 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
-→ if Top 10, show NicknameForm
+→ if ranked through 20th, focus the name field
 → one exit writes one score row:
-    Save Score, with the nickname
-    or View Leaderboard, with nickname null
+    Save Score, with the name
+    or View Leaderboard, with name null
 → LeaderboardScreen
 ```
 
-Both Results exits write one score row. View Leaderboard does that with a null nickname, as in `docs/prd.md` §15.
+Both Results exits write one score row. View Leaderboard does that with a null name, as in `docs/prd.md` §15.
 
-Nickname entry remains part of the Results screen.
+Name entry remains part of the Results screen.
 
-Do not add a separate app-level `"nickname"` screen state.
+Do not add a separate app-level `"name"` screen state.
 
 It should not:
 
@@ -1042,17 +1080,17 @@ It should not:
 
 ---
 
-### NicknameForm
+### NameForm
 
 Suggested file:
 
 ```text
-src/components/NicknameForm.tsx
+src/components/NameForm.tsx
 ```
 
 Responsibility:
 
-- collect and validate a qualifying contestant's nickname
+- collect and validate a qualifying contestant's name
 
 Handles:
 
@@ -1065,14 +1103,14 @@ Handles:
 Recommended V1 limit:
 
 ```ts
-export const MAX_NICKNAME_LENGTH = 20;
+export const MAX_NAME_LENGTH = 20;
 ```
 
 Suggested props:
 
 ```ts
-interface NicknameFormProps {
-  onSubmit: (nickname: string) => void;
+interface NameFormProps {
+  onSubmit: (name: string) => void;
 }
 ```
 
@@ -1082,10 +1120,10 @@ It should not:
 
 - access IndexedDB directly
 - calculate leaderboard rank
-- decide whether the contestant is Top 10
+- decide whether name entry is shown
 - calculate WPM or accuracy
 
-The parent `ResultsScreen` determines whether `NicknameForm` should be shown.
+The parent `ResultsScreen` determines whether the name field is shown. That is rank through 20th, as in `docs/prd.md` §15. Focus it when it appears.
 
 Focusing this field can open the iPad software keyboard. SAVE SCORE must stay visible. If the keyboard covers it, keep the field and button in the upper half, as in `docs/wireframes.md` §7. Do not add a keyboard library.
 
@@ -1108,7 +1146,7 @@ Displays:
 
 - Top 5
 - rank
-- nickname
+- name
 - displayed WPM
 - optional emphasis for rank #1
 - optional highlight for the newest contestant
@@ -1118,7 +1156,7 @@ Displays:
 Handles:
 
 ```text
-NEXT PLAYER
+NEXT PLAYER, Escape, Enter, or Space
 → ReadyScreen
 ```
 
@@ -1169,7 +1207,7 @@ Suggested API:
 ```ts
 createEvent(
   durationSeconds: TestDuration,
-  passageSetId: string
+  testMode: TestMode
 ): Promise<EventRecord>;
 
 getActiveEvent(): Promise<EventRecord | null>;
@@ -1217,7 +1255,7 @@ Suggested responsibilities:
 
 ```text
 save completed score
-update nickname
+update name
 load scores for an event
 ```
 
@@ -1230,9 +1268,9 @@ getScoresForEvent(
   eventId: string
 ): Promise<ScoreRecord[]>;
 
-updateScoreNickname(
+updateScoreName(
   scoreId: string,
-  nickname: string
+  name: string
 ): Promise<void>;
 ```
 
@@ -1340,7 +1378,7 @@ Responsibility:
 Handles:
 
 ```text
-keep scores where accuracy >= MIN_LEADERBOARD_ACCURACY
+keep scores where accuracy >= MIN_LEADERBOARD_ACCURACY and displayedWpm > 0
 → sort by displayed WPM
 → break ties by displayed accuracy, rounded to a whole number
 → break remaining ties by earlier createdAt
@@ -1384,21 +1422,23 @@ Responsibility:
 Example:
 
 ```ts
-export const commonSentencesV1: PassageSet = {
-  id: "common-sentences-v1",
+export const commonSentencesV2: PassageSet = {
+  id: "common-sentences-v2",
   sentences: [
-    "The little dog ran across the yard today.",
-    "We went down the road to see our old friend.",
-    "The sun came out as we walked back home."
+    "It's dangerous to go alone! Take this.",
+    "I'm gonna be King of the Pirates!",
+    "Talk is cheap. Show me the code."
   ]
 };
 ```
 
-The module should not:
+Famous Lines sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list. The Story passage lives in `src/data/story.ts`.
 
-- fetch passages from an API
-- generate passages at runtime
-- shuffle sentences per contestant
+The modules should not:
+
+- fetch passages or words from an API
+- write new Famous Lines sentences at runtime
+- shuffle Famous Lines sentences per contestant
 - contain UI logic
 
 ---
@@ -1467,7 +1507,7 @@ src/
 │   └── LeaderboardScreen.tsx
 │
 ├── components/
-│   └── NicknameForm.tsx
+│   └── NameForm.tsx
 │
 ├── services/
 │   ├── EventService.ts
@@ -1489,7 +1529,10 @@ src/
 │   └── settingsRepository.ts
 │
 ├── data/
-│   └── passages.ts
+│   ├── passages.ts
+│   ├── commonWords.ts
+│   ├── wordLines.ts
+│   └── story.ts
 │
 ├── app/
 │   ├── App.tsx
@@ -1544,7 +1587,7 @@ Examples:
 ```text
 TypingScreen should not call IndexedDB directly.
 
-NicknameForm should not calculate Top 10 eligibility.
+NameForm should not calculate name eligibility.
 
 ScoreService should not render leaderboard rows.
 
@@ -1552,7 +1595,8 @@ EventService should not calculate WPM.
 
 ranking.ts should not save scores.
 
-passages.ts should not shuffle content per contestant.
+passages.ts should not shuffle Famous Lines sentences per contestant.
+wordLines.ts builds a new Standard draw for each attempt from the bundled word list.
 ```
 
 ---
@@ -1651,7 +1695,7 @@ Requirements:
 - large touch targets for operator controls
 - no essential information communicated only through color
 - incorrect-character state includes a non-color indicator
-- nickname input has an explicit label
+- name input has an explicit label
 - reduced-motion support where animation exists
 - `aria-live` may be used for result announcements
 
@@ -1687,7 +1731,7 @@ V1 stores contestant data locally on the event iPad.
 
 Collected data is limited to:
 
-- nickname, if Top 10
+- name, if ranked through 20th
 - WPM
 - accuracy
 - timestamp
@@ -1700,9 +1744,9 @@ Do not collect:
 - location
 - device identity
 
-Nickname content must render as plain text and never as HTML.
+Name content must render as plain text and never as HTML.
 
-A profanity/moderation system is not required for V1 unless requested later.
+Names are checked before they are saved. Profanity and slurs are rejected, including spaces, punctuation, and numbers standing in for letters. The name rules are in `docs/prd.md` §15.
 
 ---
 
@@ -1760,6 +1804,9 @@ Backspace cannot move before the start of the current sentence
 sentence completes after every expected position has an entered character
 incorrect final character still completes the sentence
 sentence completion loads the next sentence
+one space between sentences is ignored and the next letter still scores
+a second space between sentences is an incorrect character
+a leading space on the first sentence is an incorrect character
 sentence completion preserves cumulative score counters
 Backspace cannot reopen the previous committed sentence
 passage order remains deterministic
@@ -1777,11 +1824,44 @@ displayed accuracy, rounded to a whole number, breaks displayed-WPM ties
 two scores that round to the same accuracy are not ordered by hidden tenths
 earlier createdAt breaks remaining ties
 scores below minimum accuracy are excluded
-eligibility uses accuracy >= MIN_LEADERBOARD_ACCURACY and ignores a stored meetsAccuracyThreshold flag
+eligibility uses accuracy >= MIN_LEADERBOARD_ACCURACY, displayedWpm > 0, and ignores a stored meetsAccuracyThreshold flag
 rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
+```
+
+---
+
+### Unit Tests — Results
+
+Required cases:
+
+```text
+rank 1 headline is NEW HIGH SCORE! with no Top 5 line
+rank 1 above 50 WPM adds You win a Plinko drop!
+rank 1 at 1 through 50 WPM is NEW HIGH SCORE! only
+places 2 through 5 use Nice typing! and You made the Top 5!
+sixth through tenth use Nice typing! and You made the Top 10!
+a Top 5 or Top 10 score above 50 shows the place line and the Plinko line
+an unplaced score above 50 uses Nice typing! and the Plinko line only
+an unplaced score at 1 through 50 WPM is Thanks for playing! only
+a displayed 0 WPM result is Casper, is that you? and does not place
+the first eligible score is the high score and a Top 10
+accuracy below 80, including 79.99, hides name entry
+a tie keeps the earlier score as the high score
+sixth place is Top 10 and not Top 5
+twenty scores already ahead hide name entry
+twentieth place shows the name field and no Top 10 line
+preview placement does not change the WPM stored on earlier scores
+a name is trimmed and kept up to 20 characters
+the first letter on Results goes into the name when the field is not yet focused
+Enter on Results saves the score with the typed name
+an empty name and a name past 20 characters are rejected
+a profane name is rejected, including spaces and number substitutions
+an ordinary name that only shares those letters, such as Cass or hello, is kept
+a finished story scores the time from the first character to the last
+an unfinished story scores the full selected duration
 ```
 
 ---
@@ -1801,9 +1881,21 @@ activeEventId changes to the new event
 continue restores the active event
 continue does not create a new event
 continue restores existing scores
-duration persists when continuing
+duration persists when continuing without a change
+changing duration while continuing keeps the same event and its scores
+changing game mode while continuing keeps the same event and its scores
+each score keeps the duration, mode, passage set, and WPM from the attempt that earned it
+ranking uses stored WPM when scores in one event have different durations or modes
+an event saved before game modes is read as Famous Lines without changing its WPM
+a stored "race" mode is read as Famous Lines without changing its WPM
+starting Story stores 60 seconds even when the timed-mode length is 30
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
+arrow keys move the Event Setup cursor without changing the selected choice
+Enter selects the Event Setup choice under the cursor
+Enter on START EVENT starts the event
+Story skips the Test length choices
+Continue is skipped when no event exists
 ```
 
 ---
@@ -1818,6 +1910,9 @@ passage set is not empty
 all sentence entries are strings
 sentence order is deterministic
 passage set contains enough total text for fast 60-second tests
+word list has a stable ID and 200 lowercase words
+Standard lines fit on one line and change with a new random sequence
+the same random sequence rebuilds the same Standard lines
 ```
 
 Content validation should also check the intended character-length range where useful.
@@ -1838,13 +1933,13 @@ score can be written and read
 multiple scores can be retrieved by eventId
 settings can save activeEventId
 settings can restore activeEventId
-nickname persists after update
+name persists after update
 fresh event does not delete archived events
 fresh event does not delete old scores
 leaderboard can be reconstructed from persisted scores
 data survives page reload
 submitting Save Score twice for the same result inserts one score row
-View Leaderboard with no nickname inserts one score row with nickname null
+View Leaderboard with no name inserts one score row with name null
 ```
 
 ---
@@ -1859,24 +1954,36 @@ Required cases:
 EventSetup disables Continue when no event exists
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
-while Continue is selected, choosing the other duration leaves the stored duration unchanged
+while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
+a short Escape press on Ready does not start the test
+holding Escape on Ready opens Event Setup
+after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
+Escape, Space, any other key, or a tap on that list returns to Ready and does not start the test
 Ready-screen key is not passed into Typing as contestant input
+a key still held from Ready is ignored until that key is released
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
-long-press on the logo while Typing is waiting returns to Ready and saves no score
-after the timer starts, that long-press stays on Typing
+if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
+Escape during Typing returns to Ready and saves no score
+Escape, Enter, or Space during the Leaderboard returns to Ready and keeps the saved scores
+long-press on the logo while Typing is waiting opens Event Setup and saves no score
+after the timer starts, that long-press opens Event Setup and saves no score
+long-press on the logo from Results opens Event Setup and does not write the unsaved result
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time
-Top 10 result shows NicknameForm
-non-Top-10 result does not show NicknameForm
+a result ranked through 20th shows the name field, focused
+Enter on Results saves the score with the typed name
+a result outside 20th does not show the name field
+Enter or Space on Results without name entry opens the leaderboard
 non-Top-10 View Leaderboard opens the Top 5
-nickname validation rejects empty values
-View Leaderboard with an empty nickname writes one score row with a null nickname and opens the Top 5
+name validation rejects empty values
+View Leaderboard with an empty name writes one score row with a null name and opens the Top 5
 Next Player returns to Ready
 auto reset begins only on Leaderboard
-auto reset does not run while nickname entry is active
+leaderboard auto reset does not run while name entry is active
+an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
 Leaderboard renders no more than five rows
 ```
 
@@ -1901,7 +2008,7 @@ incorrect-character state is distinguishable without relying only on color
 live WPM is readable
 timer is readable at bottom center
 accuracy is readable
-Results / Nickname layout fits
+Results / Name layout fits
 iPad software keyboard does not cover SAVE SCORE; if it does, the field and button stay in the upper half
 Top 5 leaderboard fits
 Next Player is easy for the operator to use
@@ -1959,7 +2066,7 @@ Before V1 is considered finished:
 7. Close and relaunch the installed PWA.
 8. Create a fresh event.
 9. Complete a full typing test.
-10. Save a qualifying nickname.
+10. Save a qualifying name.
 11. Confirm the leaderboard updates.
 12. Use Next Player.
 13. Complete another test.
@@ -2065,7 +2172,7 @@ Add timer and scoring
 Add leaderboard ranking
 Add IndexedDB persistence
 Add event setup flow
-Add results and nickname entry
+Add results and name entry
 Add offline PWA support
 Add scoring and ranking tests
 Apply final wireframe styling
@@ -2143,6 +2250,8 @@ scores
 settings
 fresh event
 continue event
+duration change for the next contestant
+game mode change for the next contestant
 Event Setup screen
 Start Event
 ```
@@ -2166,7 +2275,7 @@ WPM
 accuracy
 high-score detection
 Top 10 qualification
-nickname entry
+name entry
 Plinko result
 ```
 

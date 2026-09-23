@@ -8,7 +8,7 @@ Each fact has one owner. Other documents link to that owner instead of restating
 
 | Topic | Owner |
 | --- | --- |
-| Scoring, accuracy gate, ranking, nickname rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
+| Scoring, accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, offline must-work | `docs/prd.md` |
 | Palette, type scale, CSS tokens, motifs, component styling, required contestant-facing strings | `docs/design_system.md` |
 | Screen layout and the five PNG wireframes | `docs/wireframes.md` |
 | Stack, application state, IndexedDB schema, module boundaries, service worker, precache, navigation fallback, implementation order | `docs/technical_plan.md` |
@@ -56,7 +56,7 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 
 The five screens are landscape 4:3 only. Portrait and Split View must not show them. Show “Turn sideways and use the full screen.” The manifest lock and that gate are in `docs/technical_plan.md`.
 
-Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including nickname entry with the physical keyboard connected.
+Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including name entry with the physical keyboard connected.
 
 Do not rely on shrinking important text to make a crowded screen fit. Reduce content and decoration first.
 
@@ -70,8 +70,10 @@ These are the latest documented design values. They are approximate visual match
 | Soft white | `--tiny-white` | `#FFFDFC` | Panels, inputs, ordinary leaderboard rows |
 | Mint | `--tiny-mint` | `#9DDED8` | Accent surfaces, rank badges, decorative forms |
 | Strong mint | `--tiny-mint-strong` | `#6CCFC7` | Primary controls, caret, focus accents |
+| Deep mint | `--tiny-mint-deep` | `#24756E` | Ready “PRESS ANY KEY TO START” |
 | Lavender | `--tiny-lavender` | `#AA9AD4` | Borders, current-word emphasis, selected-state accents |
 | Light lavender | `--tiny-lavender-light` | `#D9D0ED` | First-place row, soft highlights, prompt panels |
+| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Ready high-score name |
 | Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
 | Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
@@ -104,7 +106,7 @@ Use three primary font families. Required font files must be packaged or cached 
 | Role | Family | Weights | Use |
 | --- | --- | --- | --- |
 | Display | Fredoka | 600, 700 | Headlines, large scores, primary actions, leaderboard headings |
-| Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, nicknames, helper copy |
+| Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, names, helper copy |
 | Typing passage | Atkinson Hyperlegible | 400, 700 | Sentences and character-level feedback |
 
 The passage prioritizes clear character recognition, including `I`, `l`, `1`, `O`, and `0`. Do not substitute a decorative display face for passage text. Do not add a fourth primary handwritten font in V1.
@@ -127,7 +129,7 @@ These are starting CSS layout sizes. Validate readability and fit on the actual 
 | Live WPM and accuracy | 22–30 px |
 | High-score target during Typing | 18–24 px |
 
-Keep the passage font size consistent between sentences and contestants. Names, scores, required instructions, and the reset message must remain easy to read without leaning toward the screen.
+Keep the passage font size consistent between sentences and contestants on the same screen size. A narrower window may use one smaller size for every line, as in the Typing section. Names, scores, required instructions, and the reset message must remain easy to read without leaning toward the screen.
 
 ## 5. Shapes, spacing, and surfaces
 
@@ -155,7 +157,7 @@ Allowed motifs include organic pastel blobs, swirls, arcs, dots, stars, sparkles
 
 Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge; essential content may not.
 
-During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and nickname field clear.
+During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and name field clear.
 
 ## 7. Controls and reusable components
 
@@ -173,23 +175,23 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. It may sit on a light lavender or mint panel with large charcoal display text.
+“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
 Use labeled, mutually exclusive choices for test duration and leaderboard mode. A selected option needs a visible radio/check indicator as well as its mint or lavender treatment. Do not make color the only selection cue.
 
-### Nickname field
+### Name field
 
-Use a large soft-white field with a persistent “Nickname” label, Nunito text, and a clear focus indicator. Keep the field and Save Score action visible while editing. Support the physical keyboard and reachable keyboard/touch controls.
+Use a large soft-white field with a persistent “Name” label, Nunito text, and a clear focus indicator. Focus the field when name entry appears so the first letter from the giant keyboard goes into the name. Enter saves the score with that name. Keep the field and Save Score action visible while editing. Support the physical keyboard and reachable keyboard/touch controls.
 
 ### Score panel
 
-Make WPM the strongest element, with the unit explicit. Keep nickname and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
+Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
 
 ### Leaderboard rows
 
-Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the nickname maximum in `docs/prd.md` so a name does not push the WPM value off-screen. When the visible name still does not fit, truncate it with an ellipsis. The stored nickname stays the full saved value. A score with no nickname shows a dash in the name column. Do not invent a guest name.
+Use aligned rank, name, and WPM columns. Names are left-aligned; WPM values are right-aligned. Keep row heights consistent and use subtle separators. Honor the name maximum in `docs/prd.md` so a name does not push the WPM value off-screen. When the visible name still does not fit, truncate it with an ellipsis. The stored name stays the full saved value. A score with no name shows a dash in the name column. Do not invent a guest name.
 
 ## 8. Typing feedback
 
@@ -201,7 +203,7 @@ Use aligned rank, nickname, and WPM columns. Names are left-aligned; WPM values 
 | Upcoming words | Charcoal, in the regular passage weight. Not muted gray. |
 | Incorrect characters | Error red plus underline or another non-color cue |
 
-The active word uses a light-lavender surface and charcoal text. Do not paint it in lavender type. `--tiny-lavender` (`#AA9AD4`) is about 2.23:1 on blush and 2.50:1 on white, so it fails WCAG AA even for large text. Lavender stays a surface, border, or selected-state accent. Apply the same treatment across the passage set.
+The active word uses a light-lavender surface and charcoal text. Do not paint it in lavender type. `--tiny-lavender` (`#AA9AD4`) is about 2.23:1 on blush and 2.50:1 on white, so it fails WCAG AA even for large text. Lavender stays a surface, border, or selected-state accent. The Ready high-score name is the exception and uses `--tiny-lavender-deep` instead. Apply the same treatment across the passage set.
 
 Incorrect-character feedback takes precedence over the ordinary word treatment. Correct characters already typed stay charcoal even when they sit inside the active word. The caret must remain clearly visible against both the passage background and the active-word treatment.
 
@@ -217,17 +219,20 @@ The caret is inside `across`, after `acr`. It is not a character the contestant 
 
 **Purpose:** configure the event before contestant play.
 
-Display two option groups and one main action:
+Display three option groups and one main action:
 
 | Group | Choices |
 | --- | --- |
 | Test length | 30 seconds; 60 seconds |
+| Game mode | Standard; Famous Lines; Story. Story fixes Test length at 60 seconds. |
 | Leaderboard | Start fresh; Continue previous event |
 | Primary action | START EVENT |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration and which options are selected, is defined in `docs/prd.md`. When no event exists, Start Fresh and 30 seconds are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration control shows the stored duration. While Continue is selected, do not let the operator highlight the other length. `30 seconds` and `60 seconds` are selectable only while Start Fresh is selected.
+Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
+
+The operator can move through these choices with the arrow keys. Show “Arrow keys move. Enter selects.” The cursor starts on START EVENT and uses a charcoal outline, separate from the filled radio. Keyboard behavior is in `docs/prd.md` §9.
 
 **No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
@@ -235,18 +240,20 @@ Fresh-event and continue-event behavior, including saved duration and which opti
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no nickname, show a dash instead of a name.
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no name, show a dash instead of a name.
 
 Visual order:
 
-1. Contest headline.
+1. Contest headline. It bounces a little. Reduced motion keeps it still.
 2. Plinko message on a clear mint-accented surface.
-3. Current high-score WPM and nickname.
-4. Large keyboard invitation.
+3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
+4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
+
+After 2 minutes of idle, replace this screen with the all-time roll from `docs/prd.md`. Keep a small “HIGH SCORES” label. Roll rank, name, and WPM upward in a loop. Names use deep lavender. Rank 1 keeps the light lavender row. A missing name stays a charcoal dash. Respect reduced motion by showing the list still.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. Returning to Event Setup is a long-press on the logo badge, specified in `docs/prd.md` §9.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9. Holding Escape on Ready does the same.
 
 ## 11. Typing
 
@@ -267,9 +274,9 @@ The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do
 - Center the entire sentence as one text block, horizontally and near the vertical center.
 - Keep equal visual space between the sentence ends and the left/right screen edges.
 - Start with approximately 10% horizontal safe margins. Validate the actual text width on the target iPad.
-- Use short, natural sentences made primarily from common words, initially around 35–50 characters.
+- Famous Lines uses short famous quotes, about 30–50 characters, so each one fits on one line.
 - Measured fit matters more than character count: every sentence must fit completely at the selected font size.
-- Do not wrap, crop, horizontally scroll, or shrink the passage between sentences.
+- Do not wrap, crop, or horizontally scroll the passage. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
 - When a sentence is complete, replace it with the next full sentence at the same focal point. Continue the existing timer.
 
 ### Screen states
@@ -280,20 +287,22 @@ The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do
 | Running | First valid typing keystroke starts timing; live WPM and accuracy update |
 | Time expired | Stop test input, finalize the result, and open Results |
 
-Incorrect keystrokes must not increase WPM. The precise starting-key and correction rules belong in the PRD and remain to be finalized.
+Incorrect keystrokes must not increase WPM. Starting-key and correction rules are in `docs/prd.md`.
 
 Use the feedback treatments in section 8. Keep the passage dominant. Do not show a leaderboard, large logo, dense instructions, decorative panels, or continuously animated elements.
 
-## 12. Results + Nickname
+## 12. Results + Name
 
-**Purpose:** present the final result and collect a nickname from Top 10 qualifiers on the same screen.
+**Purpose:** present the final result and collect a name from contestants through 20th place on the same screen. The Top 10 cheer stops at 10th.
 
 Required hierarchy:
 
-1. Large final WPM.
-2. Accuracy.
-3. New-high-score, Plinko, and Top 10 qualification status when applicable.
-4. Nickname field and Save Score action for eligible contestants.
+1. Headline.
+2. Large final WPM.
+3. Accuracy.
+4. Plinko line when displayed WPM is above 50.
+5. Place line for Top 5 or Top 10, except rank 1.
+6. Name field and Save Score action for eligible contestants.
 
 Example eligible result:
 
@@ -303,18 +312,18 @@ Nice typing!
 84 WPM
 97% ACCURACY
 
-You earned a Plinko drop!
+You win a Plinko drop!
 You made the Top 10!
 
-Nickname
+Name
 [ Morgan________________ ]
 
 [ SAVE SCORE ]
 ```
 
-Use “NEW HIGH SCORE!” when applicable. Use “You earned a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “NEW HIGH SCORE!”, and the Plinko line are charcoal. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
+Use “NEW HIGH SCORE!” as the only headline for rank 1. Add “You win a Plinko drop!” when that score is above 50 WPM, and do not add “You made the Top 5!” Use “Nice typing!” with “You made the Top 5!” for places 2 through 5, and with “You made the Top 10!” for sixth through tenth. Use “Nice typing!” with “You win a Plinko drop!” when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Use “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. Use “You win a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “Thanks for playing!”, “Casper, is that you?”, and “NEW HIGH SCORE!” stay charcoal. “You win a Plinko drop!” uses the same mint pill as Ready, with charcoal text. “You made the Top 5!” and “You made the Top 10!” use a light lavender pill, with charcoal text. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
 
-Nickname eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Do not invent a different length limit in the field styling. Do not show an unusable nickname field when the result is not eligible. View Leaderboard is the leave action when nickname entry is omitted, and it is also the way to leave without a nickname when entry is shown. That exit still writes one score row with a null nickname. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
+Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. Focus the name field when it appears so the first letter from the giant keyboard goes into the name. Enter saves the score with that name. When the name is still empty or blocked, show “Opening the leaderboard in {n}s” only for the last 5 seconds of the 15-second wait, then leave through View Leaderboard. Hide that countdown once the name is allowed. A blocked name also shows “Pick a different name.” Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted. Enter and Space select it on that screen. It is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
 
 ## 13. Top 5 Leaderboard
 
@@ -334,7 +343,7 @@ Leaderboard
 
 [ NEXT PLAYER → ]
 
-Returning to ready screen in 10s
+Returning to ready screen in 5s
 ```
 
 ### Layout and emphasis
@@ -344,7 +353,7 @@ Returning to ready screen in 10s
 - Use one wide soft-white rounded panel with five consistent row positions.
 - Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.
 - Keep the other rows quiet and easy to scan.
-- Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its nickname.
+- Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its name.
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
 - Place a large mint NEXT PLAYER button below the panel, with the automatic-return message beneath it.
 - Keep peripheral motifs sparse and separate from the rows and button.
@@ -358,16 +367,16 @@ Show actual event data rather than filling missing places with sample contestant
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
-- The countdown duration and what reset preserves are defined in `docs/prd.md`. Show the remaining seconds. Do not leave the number static.
-- NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
+- The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
+- NEXT PLAYER returns immediately to Ready. Escape, Enter, and Space do the same. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 
 ## 14. Motion
 
-Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition.
+Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. Reduced motion keeps both still.
 
 - Do not animate the passage position or use moving backgrounds during Typing.
-- Do not let celebrations obscure scores, delay controls, or interfere with nickname entry.
+- Do not let celebrations obscure scores, delay controls, or interfere with name entry.
 - Respect `prefers-reduced-motion`; essential feedback must remain understandable without animation.
 - A visible timer and reset message provide information independently of decorative motion.
 
@@ -379,7 +388,7 @@ Motion should be brief and purposeful: button feedback, a result reveal, a new-h
 - Give selected options, errors, and the current-player row non-color identifiers.
 - Keep the active word and caret recognizable throughout the passage.
 - Do not hide essential instructions in small, pale helper text.
-- Keep the nickname field and action usable with the physical keyboard connected.
+- Keep the name field and action usable with the physical keyboard connected.
 - Keep SAVE SCORE visible when the iPad software keyboard is open. The upper-half placement is in `docs/wireframes.md` §7.
 - Keep controls and state changes understandable without animation or sound.
 - Ensure long names, larger text, and empty states do not obscure scores or primary actions.
@@ -399,15 +408,21 @@ GIANT keyboard typing contest!
 Type above 50 WPM for a Plinko drop.
 CURRENT HIGH SCORE
 Be the first high score!
+Arrow keys move. Enter selects.
 PRESS ANY KEY TO START
 Your timer starts when you begin typing.
 Turn sideways and use the full screen.
 Nice typing!
+Thanks for playing!
+Casper, is that you?
 NEW HIGH SCORE!
-You earned a Plinko drop!
+You win a Plinko drop!
+You made the Top 5!
 You made the Top 10!
 SAVE SCORE
 VIEW LEADERBOARD
+Opening the leaderboard in 5s
+Pick a different name.
 TOP 5
 NEXT PLAYER
 ```
@@ -425,10 +440,12 @@ Keep wording consistent across screens. Avoid corporate language, technical jarg
   /* Primary accents */
   --tiny-mint: #9DDED8;
   --tiny-mint-strong: #6CCFC7;
+  --tiny-mint-deep: #24756E;
 
   /* Secondary accents */
   --tiny-lavender: #AA9AD4;
   --tiny-lavender-light: #D9D0ED;
+  --tiny-lavender-deep: #6B5A9A;
 
   /* Decorative accents */
   --tiny-pink: #F4C1D4;
@@ -455,17 +472,17 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] All screens use the current palette and the three defined font roles.
 - [ ] Visible branding is limited to the optional logo-only badge.
 - [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
-- [ ] Event Setup contains only the required duration and leaderboard choices plus Start Event.
-- [ ] Ready shows the contest message, current high score and nickname, and keyboard invitation.
+- [ ] Event Setup contains the duration, game mode, and leaderboard choices plus Start Event.
+- [ ] Ready shows the contest message, current high score and name, and keyboard invitation. The headline bounces a little and the invitation pulses. Reduced motion keeps both still.
 - [ ] Ready contains no Start button, Top 5, or operator controls.
 - [ ] The opening keypress is consumed; the full sentence appears before timing begins.
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
-- [ ] Results display score, accuracy, the Plinko line when it applies, and applicable qualification/high-score status.
-- [ ] Top 10 nickname entry stays on Results and is protected from automatic reset.
+- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
+- [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” When name entry is omitted, Enter and Space select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
-- [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.
+- [ ] NEXT PLAYER, Escape, Enter, Space, and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.
 - [ ] Essential text has sufficient contrast, focus is visible, and state is not conveyed by color alone.
 - [ ] Required fonts, images, icons, and passages are available offline.
@@ -475,6 +492,6 @@ This checklist records what to verify; it does not claim the implementation has 
 These choices are settled. Product behavior is in `docs/prd.md`.
 
 - The first printable character starts the timer. Space and punctuation count. The excluded non-typing keys are in `docs/prd.md` §11.
-- A long nickname is truncated with an ellipsis in the row. The stored name is unchanged.
-- When no event exists, Event Setup selects Start Fresh and 30 seconds, and Continue is unavailable. When an event exists, Continue is selected.
-- A ranked score with no nickname shows a dash. Do not invent a guest name.
+- A long name is truncated with an ellipsis in the row. The stored name is unchanged.
+- When no event exists, Event Setup selects Start Fresh, 30 seconds, and Famous Lines, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices.
+- A ranked score with no name shows a dash. Do not invent a guest name.
