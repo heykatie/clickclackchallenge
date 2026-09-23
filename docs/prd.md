@@ -125,7 +125,7 @@ V1 should:
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
 12. maintain a simple, readable landscape-iPad interface
-13. keep each game mode fair: Race uses one sentence sequence, and Standard draws from one fixed word list
+13. keep each game mode fair: Famous Lines uses one sentence sequence, and Standard draws from one fixed word list
 14. follow the documented visual design system
 
 ---
@@ -139,7 +139,7 @@ V1 includes:
 - event setup
 - 30-second mode
 - 60-second mode
-- operator-selected Standard and Race game modes
+- operator-selected Standard and Famous Lines game modes
 - fresh event creation
 - continue previous/current active event
 - Ready / Attract screen
@@ -150,7 +150,7 @@ V1 includes:
 - countdown timer
 - character-level error feedback
 - Backspace support
-- Race sentence sequence, the same for every attempt
+- Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
 - results screen
 - high-score detection
@@ -198,7 +198,7 @@ V1 does not include:
 ```text
 operator opens app
 → selects 30 seconds or 60 seconds
-→ selects Standard or Race
+→ selects Standard or Famous Lines
 → selects Start Fresh or Continue Previous Event
 → event begins
 → Ready screen
@@ -261,11 +261,11 @@ As an operator, I want the app to work without Wi-Fi.
 The Event Setup screen must allow the operator to:
 
 - select `30 seconds` or `60 seconds`
-- select a game mode: `Standard` or `Race`
+- select a game mode: `Standard` or `Famous Lines`
 - start a fresh event
 - continue the current/most recently active event when one exists
 
-When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Race are selected. Continue is unavailable.
+When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Famous Lines are selected. Continue is unavailable.
 
 When an event already exists, including when the operator returns from Ready, Typing, Results, or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
 
@@ -293,7 +293,7 @@ Continuing should:
 
 If no previous event exists, the Continue option should be unavailable.
 
-`30 seconds` and `60 seconds` stay selectable while Continue is selected. `Standard` and `Race` stay selectable too. Either choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
+`30 seconds` and `60 seconds` stay selectable while Continue is selected. `Standard` and `Famous Lines` stay selectable too. Either choice applies to the next contestant. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
 ### Returning to Event Setup
 
@@ -695,27 +695,24 @@ Leaderboard accuracy requirements do not automatically determine prize qualifica
 
 ### Passage Source
 
-Race sentences and the Standard word list are bundled locally with the application. Standard lines are assembled from that word list when an attempt starts. That assembly does not use the network.
+Famous Lines sentences and the Standard word list are bundled locally with the application. Standard lines are assembled from that word list when an attempt starts. That assembly does not use the network.
 
 V1 must not depend on:
 
 - API-generated passages
 - AI-generated passages
 - internet-loaded text
-- runtime-written Race sentences
+- runtime-written Famous Lines sentences
 
 ### Sentence Style
 
-Race passages should use natural, grammatical English sentences.
+Famous Lines passages are short famous lines from games, anime, and technology. Prefer lines people already know: funny, popular, or thoughtful. Familiar names are part of those lines. Famous Lines does not use numbers.
 
-Sentences should:
+Famous Lines sentences should:
 
-- use common everyday vocabulary
-- avoid obscure or highly technical words
-- avoid unnecessary proper nouns
-- avoid numbers in V1
-- use simple punctuation
-- favor normal sentence structure
+- keep the wording of the short famous line
+- use simple punctuation, including apostrophes
+- avoid numbers
 - be easy to read quickly
 
 Standard is the word-list mode. Its lines are lowercase, have no punctuation, and are drawn from the bundled 200 most common English words.
@@ -727,16 +724,13 @@ Sentences should be reasonably similar in typing difficulty.
 Difficulty should be controlled through:
 
 - similar sentence length
-- common vocabulary
-- similar average word length
 - simple punctuation
-- normal capitalization
-- avoiding unusually long or rare words
+- a length close enough that one line is not much easier than the next
 
 Initial target sentence length:
 
 ```text
-approximately 35–50 characters
+approximately 30–50 characters
 ```
 
 This includes spaces and punctuation.
@@ -745,7 +739,7 @@ The final character limit should be validated using the final typing font and th
 
 ### Event Fairness
 
-Race uses one ordered sentence sequence for every attempt in the event.
+Famous Lines uses one ordered sentence sequence for every attempt in the event.
 
 Example:
 
@@ -757,11 +751,11 @@ Contestant B:
 Sentence 1 → Sentence 2 → Sentence 3 → ...
 ```
 
-Race sentences are not shuffled per contestant. Every attempt, including a retake, starts again at the first sentence. That keeps Race difficulty consistent across competitors.
+Famous Lines sentences are not shuffled per contestant. Every attempt, including a retake, starts again at the first sentence. That keeps Famous Lines difficulty consistent across competitors.
 
 Standard uses the same list of the 200 most common English words for every attempt. Each attempt gets a new random draw from that list. Words are lowercase and have no punctuation. A line ends with the space that joins it to the next word, and that space is scored like any other character. The draw changes per attempt. The word list does not.
 
-A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Race score with the Standard word list, or a Standard score with the Race sentences. Standard and Race scores in the same event stay on one leaderboard.
+A score stores the mode, passage set, duration, and WPM from the attempt that earned it. Ranking uses that stored WPM. It does not recompute a Famous Lines score with the Standard word list, or a Standard score with the Famous Lines sentences. Standard and Famous Lines scores in the same event stay on one leaderboard.
 
 ### Sentence Progression
 
@@ -784,7 +778,7 @@ The app should not:
 
 A sentence is considered complete when the contestant has entered a character for every position, even if some positions contain errors.
 
-Race sentences are stored without a trailing space. After a Race sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
+Famous Lines sentences are stored without a trailing space. After a Famous Lines sentence is committed, one space typed before the next sentence is ignored. It does not move the caret, change WPM, or change accuracy. The following character is scored normally, including when the contestant types the next letter with no space. A second space is an ordinary incorrect character. The first sentence does not ignore a leading space.
 
 A Standard line includes the space after its last word. That space is a scored character. The same one-space ignore applies only to an extra space typed after the line is already complete.
 
@@ -792,7 +786,7 @@ A Standard line includes the space after its last word. That space is a scored c
 
 Both game modes must contain enough text for 30-second and 60-second tests, including fast typists.
 
-Race target:
+Famous Lines target:
 
 - at least 25–30 curated sentences
 - at least approximately 1,200–1,500 total characters
@@ -802,11 +796,11 @@ Standard uses the same 200-word list for both durations. Each attempt builds eno
 
 ### One-Line Requirement
 
-Every Race sentence and every Standard line must fit completely on one line at the final typing-screen font size on the target landscape iPad.
+Every Famous Lines sentence and every Standard line must fit completely on one line at the final typing-screen font size on the target landscape iPad.
 
 The app should not shrink one line relative to another. On a window narrower than that iPad, every line uses the same smaller size, chosen so the widest line still fits. The iPad size stays the standard size.
 
-If a Race sentence does not fit within the safe typing area at the iPad size, the sentence should be rewritten or removed.
+If a Famous Lines sentence does not fit within the safe typing area at the iPad size, the sentence should be rewritten or removed.
 
 ### Passage Set Versioning
 
@@ -815,17 +809,13 @@ Each passage collection should have a stable identifier so events can retain whi
 Example:
 
 ```text
-common-sentences-v1
+common-sentences-v2
 common-words-v1
 ```
 
+`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. Saved scores keep the identifier from the attempt that earned them.
+
 If the passage set changes later, create a new version rather than silently replacing the existing set.
-
-Example:
-
-```text
-common-sentences-v2
-```
 
 ---
 
@@ -859,13 +849,14 @@ If the contestant ranks outside the top 20, name entry should not be shown.
 
 When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
-When name entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing a name stops that countdown. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
+When name entry is shown, Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing an allowed name stops that countdown. A blocked name shows “Pick a different name.” and does not stop it. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
 ### Name Rules
 
 Name input should:
 
-- allow any name
+- allow ordinary names
+- reject profanity and slurs, including when spaces, punctuation, or numbers stand in for letters
 - trim leading/trailing whitespace
 - reject empty values
 - use a reasonable maximum length for layout safety
@@ -1719,9 +1710,9 @@ A server connection must not be required.
 
 **Then**
 
-- Race starts every contestant at the same first sentence
-- Race gives every contestant the same ordered sentence sequence
-- Race passages are not shuffled per contestant
+- Famous Lines starts every contestant at the same first sentence
+- Famous Lines gives every contestant the same ordered sentence sequence
+- Famous Lines passages are not shuffled per contestant
 - Standard gives every attempt a new draw from the same 200-word list
 - a score keeps the mode and WPM from the attempt that earned it
 
@@ -1925,9 +1916,9 @@ a displayed 0 WPM score shows Casper, is that you? and does not place
 fresh event behavior passes
 continue event behavior passes
 score persistence passes
-Race uses the same sentence sequence for every attempt
+Famous Lines uses the same sentence sequence for every attempt
 Standard draws each attempt from the same 200-word list
-every Race sentence and Standard line fits on one line
+every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
 automatic reset passes
 giant keyboard input passes

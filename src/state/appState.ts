@@ -96,7 +96,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentScoreId: null,
       };
     case "ENTER_TYPING": {
-      const testMode = state.activeEvent?.testMode ?? "race";
+      const testMode = state.activeEvent?.testMode ?? "famous-lines";
       return {
         ...state,
         screen: "typing",

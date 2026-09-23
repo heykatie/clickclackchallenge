@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MAX_NAME_LENGTH, normalizeName } from "../features/results/nameRules";
+import { MAX_NAME_LENGTH, nameProblem, normalizeName } from "../features/results/nameRules";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
 
@@ -28,6 +28,7 @@ export function ResultsScreen({
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
   const onViewRef = useRef(onViewLeaderboard);
+  const problem = nameProblem(name);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
   const waitingForName = Boolean(standing?.showNameEntry) && savedName === null && !saving;
@@ -107,6 +108,7 @@ export function ResultsScreen({
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"
             onChange={(event) => setName(event.target.value)}
+            aria-invalid={problem === "blocked"}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
@@ -114,6 +116,7 @@ export function ResultsScreen({
               }
             }}
           />
+          {problem === "blocked" ? <p className="name-hint">Pick a different name.</p> : null}
         </label>
       ) : null}
       {standing ? (

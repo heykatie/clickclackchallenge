@@ -12,7 +12,7 @@ function saved(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "id" | "displ
     correctAttempts: 10,
     incorrectAttempts: 0,
     durationSeconds: 30,
-    testMode: "race",
+    testMode: "famous-lines",
     passageSetId: "common-sentences-v1",
     ...overrides,
   };
@@ -28,7 +28,7 @@ function attempt(overrides: Partial<AttemptSnapshot> = {}): AttemptSnapshot {
     correctAttempts: 200,
     incorrectAttempts: 8,
     durationSeconds: 30,
-    testMode: "race",
+    testMode: "famous-lines",
     passageSetId: "common-sentences-v1",
     ...overrides,
   };

@@ -19,7 +19,7 @@ export function EventSetupScreen({
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
-  const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "race");
+  const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "famous-lines");
 
   function startEvent() {
     const plan = planEventStart(
@@ -77,11 +77,11 @@ export function EventSetupScreen({
           <input
             type="radio"
             name="text"
-            value="race"
-            checked={selectedTestMode === "race"}
-            onChange={() => setSelectedTestMode("race")}
+            value="famous-lines"
+            checked={selectedTestMode === "famous-lines"}
+            onChange={() => setSelectedTestMode("famous-lines")}
           />
-          Race
+          Famous Lines
         </label>
       </fieldset>
       <fieldset>

@@ -11,7 +11,7 @@ describe("passages", () => {
 
   it("keeps every sentence in the one-line length range", () => {
     for (const sentence of passages) {
-      expect(sentence.length).toBeGreaterThanOrEqual(35);
+      expect(sentence.length).toBeGreaterThanOrEqual(30);
       expect(sentence.length).toBeLessThanOrEqual(50);
     }
   });

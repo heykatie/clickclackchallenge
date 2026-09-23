@@ -101,12 +101,12 @@ Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `d
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-Use three clear option groups with visible selected states and one large mint action. When no event exists, the selected options are Start fresh, 30 seconds, and Race, as in `docs/prd.md`. Continue is unavailable.
+Use three clear option groups with visible selected states and one large mint action. When no event exists, the selected options are Start fresh, 30 seconds, and Famous Lines, as in `docs/prd.md`. Continue is unavailable.
 
 | Control | Layout |
 | --- | --- |
 | Test length | One choice: 30 or 60 seconds. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. Behavior is in `docs/prd.md`. |
-| Game mode | One choice: Standard or Race. On Continue, the control opens on the event's current mode and still accepts the other mode for the next contestant. Behavior is in `docs/prd.md`. |
+| Game mode | One choice: Standard or Famous Lines. On Continue, the control opens on the event's current mode and still accepts the other mode for the next contestant. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. |
@@ -161,7 +161,7 @@ Do not show the event Top 5, operator settings, or a Start button on this screen
 │                                                                  │
 │                                                                  │
 │                                                                  │
-│              The little dog ran acr│oss the yard.                 │
+│         It's dangerous │to go alone! Take this.          │
 │                                                                  │
 │                                                                  │
 │                                                                  │
@@ -176,8 +176,8 @@ The diagram shows a running test. The `│` inside `across` represents the caret
 
 - Center the entire sentence as one text block, horizontally and near the vertical center. Character styling must not shift the line's position.
 - Display one complete sentence on one line. Keep the first and last characters fully visible with equal visual space on both sides.
-- Start with approximately 10% safe space at each horizontal edge. Curate Race sentences to fit at the iPad font size. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
-- Target roughly 35–50 characters using natural sentences and common words. Character count is a guide; measured fit on the iPad is the actual constraint.
+- Start with approximately 10% safe space at each horizontal edge. Curate Famous Lines sentences to fit at the iPad font size. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
+- Target roughly 30–50 characters. Famous Lines uses the famous quotes in the passage set. Character count is a guide; measured fit on the iPad is the actual constraint.
 - Put live WPM at the bottom left, the timer at the bottom center, and accuracy at the bottom right. Keep the high-score target small at the top.
 - Omit the large badge and decorative panels. A small logo-only mark is optional if it does not compete with the passage.
 
@@ -228,7 +228,7 @@ Keep the WPM dominant and the name field clear of celebration motifs. Result str
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” as the headline for rank 1, without “You made the Top 5!” Use “Nice typing!” for places 2 through 5, a Top 10 result, or any result above 50 WPM. Add “You made the Top 5!” or “You made the Top 10!” for those places. Show “You win a Plinko drop!” only when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows “NEW HIGH SCORE!” and the Plinko line only. Use “Casper, is that you?” when displayed WPM is 0. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
-When name entry is omitted, show a large View Leaderboard button. When name entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing a name hides the countdown. Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When name entry is omitted, show a large View Leaderboard button. When name entry is shown, show that same button beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 Focusing the name field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the name field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
 
@@ -320,6 +320,6 @@ This is a review checklist for the intended interface, not a claim that the app 
 | --- | --- |
 | Typing input | The first printable character starts the timer, including space and punctuation. The excluded non-typing keys are in `docs/prd.md` §11. |
 | Name display | A missing name is a dash. A long name is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
-| Setup defaults | With no event, Start fresh, 30 seconds, and Race are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices. Behavior is in `docs/prd.md` §9. |
+| Setup defaults | With no event, Start fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices. Behavior is in `docs/prd.md` §9. |
 
 Provisional numbers, including the 80% accuracy gate and the 10-second reset, live in `docs/prd.md`. Testing may change them later.

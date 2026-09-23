@@ -396,6 +396,13 @@ label {
   text-align: left;
 }
 
+.name-hint {
+  margin: 0;
+  color: var(--tiny-charcoal);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
 .name-field input {
   width: 100%;
   box-sizing: border-box;

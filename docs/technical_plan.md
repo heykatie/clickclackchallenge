@@ -74,7 +74,7 @@ V1 supports:
 - timer
 - character-level typing feedback
 - Backspace
-- Race sentence sequence, the same for every attempt
+- Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
 - minimum leaderboard accuracy
 - Top 10 name eligibility
@@ -374,7 +374,7 @@ The model must preserve historical event data, associate every score with the ev
 
 ```ts
 type TestDuration = 30 | 60;
-type TestMode = "words" | "race";
+type TestMode = "words" | "famous-lines";
 ```
 
 ### Event Record
@@ -411,7 +411,7 @@ Field behavior:
 
 `testMode`
 
-- `"race"` uses the bundled sentences, in the same order for every attempt
+- `"famous-lines"` is Famous Lines. It uses the bundled sentences, in the same order for every attempt
 - `"words"` uses a new random draw from `common-words-v1` for each attempt
 - the choice for the next contestant while this event stays active
 - a later change does not rewrite `testMode` on scores already saved
@@ -419,7 +419,7 @@ Field behavior:
 `passageSetId`
 
 - identifies the text version the next contestant will use
-- `common-sentences-v1` for Race
+- `common-sentences-v2` for Famous Lines
 - `common-words-v1` for Standard
 - updated with `testMode` so the event record matches the next attempt
 
@@ -443,8 +443,8 @@ Example:
 const event: EventRecord = {
   id: crypto.randomUUID(),
   durationSeconds: 30,
-  testMode: "race",
-  passageSetId: "common-sentences-v1",
+  testMode: "famous-lines",
+  passageSetId: "common-sentences-v2",
   status: "active",
   createdAt: "2026-09-22T07:18:00.000Z",
   updatedAt: "2026-09-22T07:18:00.000Z"
@@ -538,13 +538,13 @@ Field behavior:
 
 `testMode`
 
-- snapshot of Standard (`"words"`) or Race (`"race"`) when the score was earned
+- snapshot of Standard (`"words"`) or Famous Lines (`"famous-lines"`) when the score was earned
 - unchanged when the operator later picks the other mode for the same event
 
 `passageSetId`
 
 - snapshot of the text version that produced this score
-- `common-words-v1` or `common-sentences-v1`
+- `common-words-v1`, `common-sentences-v1`, or `common-sentences-v2`
 - ranking does not reload that text to recompute WPM
 
 `createdAt`
@@ -569,7 +569,7 @@ const score: ScoreRecord = {
   incorrectAttempts: 9,
 
   durationSeconds: 30,
-  testMode: "race",
+  testMode: "famous-lines",
   passageSetId: "common-sentences-v1",
 
   createdAt: "2026-09-22T07:43:12.000Z"
@@ -616,6 +616,7 @@ interface AppSettings {
 `schemaVersion`
 
 - supports future IndexedDB migrations
+- schema 3 renames a stored `"race"` mode to `"famous-lines"` and leaves WPM unchanged
 
 Example:
 
@@ -623,11 +624,11 @@ Example:
 const settings: AppSettings = {
   activeEventId: "event-id",
   lastSelectedDuration: 30,
-  schemaVersion: 2
+  schemaVersion: 3
 };
 ```
 
-When continuing an existing event, `event.durationSeconds` and `event.testMode` are the length and text for the next contestant. The operator may change either without archiving the event. Earlier scores keep the duration, mode, passage set, and WPM stored when each score was saved. Ranking uses that stored WPM.
+When continuing an existing event, `event.durationSeconds` and `event.testMode` are the length and text for the next contestant. The operator may change either without archiving the event. Continuing also writes the current passage-set id for that mode when the stored id is older. Earlier scores keep the duration, mode, passage set, and WPM stored when each score was saved. Ranking uses that stored WPM.
 
 Start fresh is required only when the operator wants a new empty leaderboard.
 
@@ -643,12 +644,12 @@ interface PassageSet {
 Example:
 
 ```ts
-const commonSentencesV1: PassageSet = {
-  id: "common-sentences-v1",
+const commonSentencesV2: PassageSet = {
+  id: "common-sentences-v2",
   sentences: [
-    "The little dog ran across the yard today.",
-    "We went down the road to see our old friend.",
-    "The sun came out as we walked back home."
+    "It's dangerous to go alone! Take this.",
+    "I'm gonna be King of the Pirates!",
+    "Talk is cheap. Show me the code."
   ]
 };
 ```
@@ -1417,23 +1418,23 @@ Responsibility:
 Example:
 
 ```ts
-export const commonSentencesV1: PassageSet = {
-  id: "common-sentences-v1",
+export const commonSentencesV2: PassageSet = {
+  id: "common-sentences-v2",
   sentences: [
-    "The little dog ran across the yard today.",
-    "We went down the road to see our old friend.",
-    "The sun came out as we walked back home."
+    "It's dangerous to go alone! Take this.",
+    "I'm gonna be King of the Pirates!",
+    "Talk is cheap. Show me the code."
   ]
 };
 ```
 
-Race sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list.
+Famous Lines sentences live in `src/data/passages.ts`. The Standard word list lives in `src/data/commonWords.ts`. `src/data/wordLines.ts` builds one attempt's lines from that list.
 
 The modules should not:
 
 - fetch passages or words from an API
-- write new Race sentences at runtime
-- shuffle Race sentences per contestant
+- write new Famous Lines sentences at runtime
+- shuffle Famous Lines sentences per contestant
 - contain UI logic
 
 ---
@@ -1589,7 +1590,7 @@ EventService should not calculate WPM.
 
 ranking.ts should not save scores.
 
-passages.ts should not shuffle Race sentences per contestant.
+passages.ts should not shuffle Famous Lines sentences per contestant.
 wordLines.ts builds a new Standard draw for each attempt from the bundled word list.
 ```
 
@@ -1850,6 +1851,8 @@ twentieth place shows the name field and no Top 10 line
 preview placement does not change the WPM stored on earlier scores
 a name is trimmed and kept up to 20 characters
 an empty name and a name past 20 characters are rejected
+a profane name is rejected, including spaces and number substitutions
+an ordinary name that only shares those letters, such as Cass or hello, is kept
 ```
 
 ---
@@ -1874,7 +1877,8 @@ changing duration while continuing keeps the same event and its scores
 changing game mode while continuing keeps the same event and its scores
 each score keeps the duration, mode, passage set, and WPM from the attempt that earned it
 ranking uses stored WPM when scores in one event have different durations or modes
-an event saved before game modes is read as Race without changing its WPM
+an event saved before game modes is read as Famous Lines without changing its WPM
+a stored "race" mode is read as Famous Lines without changing its WPM
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
 ```

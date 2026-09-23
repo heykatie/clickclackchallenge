@@ -30,7 +30,7 @@ function scoreInput(eventId: string, displayedWpm: number): NewScore {
     correctAttempts: 10,
     incorrectAttempts: 0,
     durationSeconds: 30,
-    testMode: "race",
+    testMode: "famous-lines",
     passageSetId: PASSAGE_SET_ID,
   };
 }
@@ -44,7 +44,7 @@ describe("persistence", () => {
   it("creates a fresh event with the selected duration, passage set, and no scores", async () => {
     const event = await startFreshEvent(60);
     expect(event.durationSeconds).toBe(60);
-    expect(event.testMode).toBe("race");
+    expect(event.testMode).toBe("famous-lines");
     expect(event.passageSetId).toBe(PASSAGE_SET_ID);
     expect(event.status).toBe("active");
     expect(event).not.toHaveProperty("name");
@@ -142,12 +142,12 @@ describe("persistence", () => {
       rawWpm: 45.8,
       displayedWpm: 46,
     });
-    const updated = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "race" });
+    const updated = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "famous-lines" });
 
     expect(updated.id).toBe(event.id);
     expect(updated.status).toBe("active");
     expect(updated.durationSeconds).toBe(30);
-    expect(updated.testMode).toBe("race");
+    expect(updated.testMode).toBe("famous-lines");
     const database = await openDatabase();
     expect(await database.count("events")).toBe(1);
 
@@ -155,15 +155,29 @@ describe("persistence", () => {
     expect(scores).toEqual([earned]);
     expect(scores[0]?.durationSeconds).toBe(60);
     expect(scores[0]?.displayedWpm).toBe(46);
-    expect(scores[0]?.testMode).toBe("race");
+    expect(scores[0]?.testMode).toBe("famous-lines");
     expect(rankScores(scores).map((entry) => entry.score.displayedWpm)).toEqual([46]);
   });
 
+  it("refreshes a stale Famous Lines passage set without rewriting an earlier score", async () => {
+    const event = await startFreshEvent(30, "famous-lines");
+    const database = await openDatabase();
+    await database.put("events", { ...event, passageSetId: "common-sentences-v1" });
+    const earned = await saveScore({
+      ...scoreInput(event.id, 40),
+      passageSetId: "common-sentences-v1",
+    });
+    const updated = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "famous-lines" });
+    expect(updated.id).toBe(event.id);
+    expect(updated.passageSetId).toBe(PASSAGE_SET_ID);
+    expect((await listScores(event.id))[0]).toEqual(earned);
+  });
+
   it("changes the next contestant's text without rewriting an earlier score", async () => {
-    const event = await startFreshEvent(30, "race");
+    const event = await startFreshEvent(30, "famous-lines");
     const earned = await saveScore({
       ...scoreInput(event.id, 54),
-      testMode: "race",
+      testMode: "famous-lines",
       passageSetId: PASSAGE_SET_ID,
     });
     const updated = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "words" });
@@ -174,29 +188,101 @@ describe("persistence", () => {
     const scores = await listScores(event.id);
     expect(scores).toEqual([earned]);
     expect(scores[0]?.displayedWpm).toBe(54);
-    expect(scores[0]?.testMode).toBe("race");
+    expect(scores[0]?.testMode).toBe("famous-lines");
     expect(scores[0]?.passageSetId).toBe(PASSAGE_SET_ID);
     expect(rankScores(scores).map((entry) => entry.score.id)).toEqual([earned.id]);
   });
 
-  it("reads an event saved before text modes as Race and keeps its WPM", async () => {
+  it("reads an event saved before text modes as Famous Lines and keeps its WPM", async () => {
     await openVersionOneBooth();
     const booth = await loadBooth();
     expect(booth.activeEvent).toMatchObject({
       id: "event-v1",
-      testMode: "race",
+      testMode: "famous-lines",
       passageSetId: PASSAGE_SET_ID,
       durationSeconds: 60,
     });
     const scores = await listScores("event-v1");
     expect(scores[0]).toMatchObject({
       displayedWpm: 92,
-      testMode: "race",
+      testMode: "famous-lines",
       passageSetId: PASSAGE_SET_ID,
       durationSeconds: 60,
     });
   });
+
+  it("reads a stored race mode as Famous Lines and keeps its WPM", async () => {
+    await openVersionTwoBooth();
+    const booth = await loadBooth();
+    expect(booth.activeEvent).toMatchObject({
+      id: "event-v2",
+      testMode: "famous-lines",
+      durationSeconds: 30,
+    });
+    const scores = await listScores("event-v2");
+    expect(scores[0]).toMatchObject({
+      displayedWpm: 100,
+      testMode: "famous-lines",
+      durationSeconds: 30,
+    });
+    const database = await openDatabase();
+    expect((await database.get("events", "event-v2"))?.testMode).toBe("famous-lines");
+  });
 });
+
+function openVersionTwoBooth(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 2);
+    request.onupgradeneeded = () => {
+      const database = request.result;
+      const events = database.createObjectStore("events", { keyPath: "id" });
+      events.createIndex("createdAt", "createdAt");
+      events.createIndex("status", "status");
+      const scores = database.createObjectStore("scores", { keyPath: "id" });
+      scores.createIndex("eventId", "eventId");
+      scores.createIndex("createdAt", "createdAt");
+      database.createObjectStore("settings");
+    };
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const database = request.result;
+      const transaction = database.transaction(["events", "scores", "settings"], "readwrite");
+      transaction.objectStore("events").put({
+        id: "event-v2",
+        durationSeconds: 30,
+        testMode: "race",
+        passageSetId: "common-sentences-v1",
+        status: "active",
+        createdAt: "2026-09-22T00:00:00.000Z",
+        updatedAt: "2026-09-22T00:00:00.000Z",
+      });
+      transaction.objectStore("scores").put({
+        id: "score-v2",
+        eventId: "event-v2",
+        name: "kt",
+        rawWpm: 100,
+        displayedWpm: 100,
+        accuracy: 98,
+        correctCharacters: 250,
+        correctAttempts: 250,
+        incorrectAttempts: 5,
+        durationSeconds: 30,
+        testMode: "race",
+        passageSetId: "common-sentences-v1",
+        createdAt: "2026-09-22T00:01:00.000Z",
+      });
+      transaction.objectStore("settings").put(
+        { activeEventId: "event-v2", lastSelectedDuration: 30, schemaVersion: 2 },
+        SETTINGS_KEY,
+      );
+      transaction.oncomplete = () => {
+        database.close();
+        resolve();
+      };
+      transaction.onerror = () => reject(transaction.error);
+    };
+  });
+}
 
 function openVersionOneBooth(): Promise<void> {
   return new Promise((resolve, reject) => {

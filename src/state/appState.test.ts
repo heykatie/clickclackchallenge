@@ -5,7 +5,7 @@ import { appReducer, initialState } from "./appState";
 const event60: EventRecord = {
   id: "event-60",
   durationSeconds: 60,
-  testMode: "race",
+  testMode: "famous-lines",
   passageSetId: "common-sentences-v1",
   status: "active",
   createdAt: "2026-09-22T00:00:00.000Z",
@@ -19,7 +19,7 @@ describe("appReducer", () => {
     expect(typing.screen).toBe("typing");
     expect(typing.currentTest?.startedAt).toBeNull();
     expect(typing.currentTest?.correctAttempts).toBe(0);
-    expect(typing.currentTest?.expectedSentence.startsWith("The little dog")).toBe(
+    expect(typing.currentTest?.expectedSentence.startsWith("It's dangerous to go alone")).toBe(
       true,
     );
   });
@@ -31,7 +31,7 @@ describe("appReducer", () => {
     );
     const typed = appReducer(typing, {
       type: "TYPE_KEY",
-      key: "T",
+      key: "I",
       repeat: false,
       now: 1000,
     });
@@ -106,8 +106,8 @@ describe("appReducer", () => {
     });
     expect(typing.durationSeconds).toBe(60);
     expect(typing.currentTest?.durationSeconds).toBe(60);
-    expect(typing.currentTest?.testMode).toBe("race");
-    expect(typing.currentTest?.expectedSentence.startsWith("The little dog")).toBe(true);
+    expect(typing.currentTest?.testMode).toBe("famous-lines");
+    expect(typing.currentTest?.expectedSentence.startsWith("It's dangerous to go alone")).toBe(true);
   });
 
   it("starts a Standard test from a new draw of common words", () => {

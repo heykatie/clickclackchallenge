@@ -11,18 +11,18 @@ describe("planEventStart", () => {
   });
 
   it("opens a new event when Start Fresh is selected", () => {
-    expect(planEventStart("fresh", true, 60, "race")).toEqual({
+    expect(planEventStart("fresh", true, 60, "famous-lines")).toEqual({
       mode: "fresh",
       durationSeconds: 60,
-      testMode: "race",
+      testMode: "famous-lines",
     });
   });
 
   it("opens a new event when Continue has no event to restore", () => {
-    expect(planEventStart("continue", false, 30, "race")).toEqual({
+    expect(planEventStart("continue", false, 30, "famous-lines")).toEqual({
       mode: "fresh",
       durationSeconds: 30,
-      testMode: "race",
+      testMode: "famous-lines",
     });
   });
 });

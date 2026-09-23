@@ -3,7 +3,7 @@ import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 
 export type TestDuration = 30 | 60;
-export type TestMode = "words" | "race";
+export type TestMode = "words" | "famous-lines";
 
 export function passageSetIdFor(testMode: TestMode): string {
   return testMode === "words" ? WORD_LIST_ID : PASSAGE_SET_ID;
@@ -79,7 +79,7 @@ interface TypingTestDB {
 
 export const DB_NAME = "typing-test-db";
 export const SETTINGS_KEY = "app";
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 let databasePromise: Promise<IDBPDatabase<TypingTestDB>> | null = null;
 
@@ -112,6 +112,12 @@ export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
             transaction as IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
           );
         }
+
+        if (oldVersion < 3) {
+          await renameStoredRaceMode(
+            transaction as IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+          );
+        }
       },
       terminated() {
         databasePromise = null;
@@ -130,7 +136,7 @@ async function backfillTestMode(
   let eventCursor = await transaction.objectStore("events").openCursor();
   while (eventCursor) {
     if (!eventCursor.value.testMode) {
-      await eventCursor.update({ ...eventCursor.value, testMode: "race" });
+      await eventCursor.update({ ...eventCursor.value, testMode: "famous-lines" });
     }
     eventCursor = await eventCursor.continue();
   }
@@ -141,7 +147,7 @@ async function backfillTestMode(
     if (!value.testMode || !value.passageSetId) {
       await scoreCursor.update({
         ...value,
-        testMode: value.testMode ?? "race",
+        testMode: value.testMode ?? "famous-lines",
         passageSetId: value.passageSetId || PASSAGE_SET_ID,
       });
     }
@@ -149,8 +155,33 @@ async function backfillTestMode(
   }
 }
 
+async function renameStoredRaceMode(
+  transaction: IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+): Promise<void> {
+  let eventCursor = await transaction.objectStore("events").openCursor();
+  while (eventCursor) {
+    // Schema 2 stored Famous Lines as "race".
+    if ((eventCursor.value as { testMode?: string }).testMode === "race") {
+      await eventCursor.update({ ...eventCursor.value, testMode: "famous-lines" });
+    }
+    eventCursor = await eventCursor.continue();
+  }
+
+  let scoreCursor = await transaction.objectStore("scores").openCursor();
+  while (scoreCursor) {
+    if ((scoreCursor.value as { testMode?: string }).testMode === "race") {
+      await scoreCursor.update({ ...scoreCursor.value, testMode: "famous-lines" });
+    }
+    scoreCursor = await scoreCursor.continue();
+  }
+}
+
+function asTestMode(value: string | undefined): TestMode {
+  return value === "words" ? "words" : "famous-lines";
+}
+
 function normalizeEvent(event: EventRecord): EventRecord {
-  const testMode = event.testMode ?? "race";
+  const testMode = asTestMode(event.testMode);
   return {
     ...event,
     testMode,
@@ -159,7 +190,7 @@ function normalizeEvent(event: EventRecord): EventRecord {
 }
 
 function normalizeScore(score: ScoreRecord): ScoreRecord {
-  const testMode = score.testMode ?? "race";
+  const testMode = asTestMode(score.testMode);
   return {
     ...score,
     testMode,
@@ -195,7 +226,7 @@ export async function loadBooth(): Promise<BoothState> {
 
 export async function startFreshEvent(
   durationSeconds: TestDuration,
-  testMode: TestMode = "race",
+  testMode: TestMode = "famous-lines",
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -241,7 +272,11 @@ export async function updateActiveEvent(
     throw new Error("No active event to update");
   }
   const current = normalizeEvent(event);
-  if (current.durationSeconds === next.durationSeconds && current.testMode === next.testMode) {
+  if (
+    current.durationSeconds === next.durationSeconds &&
+    current.testMode === next.testMode &&
+    current.passageSetId === passageSetIdFor(next.testMode)
+  ) {
     return current;
   }
 

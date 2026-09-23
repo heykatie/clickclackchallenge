@@ -224,13 +224,13 @@ Display three option groups and one main action:
 | Group | Choices |
 | --- | --- |
 | Test length | 30 seconds; 60 seconds |
-| Game mode | Standard; Race |
+| Game mode | Standard; Famous Lines |
 | Leaderboard | Start fresh; Continue previous event |
 | Primary action | START EVENT |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Race are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Both lengths and both game modes stay selectable on Continue. Those choices apply to the next contestant. They keep the event and its leaderboard.
+Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Both lengths and both game modes stay selectable on Continue. Those choices apply to the next contestant. They keep the event and its leaderboard.
 
 **No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
@@ -272,7 +272,7 @@ The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do
 - Center the entire sentence as one text block, horizontally and near the vertical center.
 - Keep equal visual space between the sentence ends and the left/right screen edges.
 - Start with approximately 10% horizontal safe margins. Validate the actual text width on the target iPad.
-- Use short, natural sentences made primarily from common words, initially around 35–50 characters.
+- Famous Lines uses short famous quotes, about 30–50 characters, so each one fits on one line.
 - Measured fit matters more than character count: every sentence must fit completely at the selected font size.
 - Do not wrap, crop, or horizontally scroll the passage. Do not shrink one line relative to another. On a window narrower than the landscape iPad, every line uses the same smaller size so the widest line still fits.
 - When a sentence is complete, replace it with the next full sentence at the same focal point. Continue the existing timer.
@@ -321,7 +321,7 @@ Name
 
 Use “NEW HIGH SCORE!” as the only headline for rank 1. Add “You win a Plinko drop!” when that score is above 50 WPM, and do not add “You made the Top 5!” Use “Nice typing!” with “You made the Top 5!” for places 2 through 5, and with “You made the Top 10!” for sixth through tenth. Use “Nice typing!” with “You win a Plinko drop!” when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Use “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. Use “You win a Plinko drop!” only when the contestant qualifies; omit it otherwise. That rule is in `docs/prd.md` §13. “Nice typing!”, “Thanks for playing!”, “Casper, is that you?”, and “NEW HIGH SCORE!” stay charcoal. “You win a Plinko drop!” uses the same mint pill as Ready, with charcoal text. “You made the Top 5!” and “You made the Top 10!” use a light lavender pill, with charcoal text. Do not use the pale purple headline in `04-results.png`. Lavender, mint, and small pink/peach celebration motifs may support the result without competing with the form. `04-results.png` omits the Plinko line. Do not copy that omission.
 
-Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. When the name is still empty, show “Opening the leaderboard in {n}s” only for the last 5 seconds of the 15-second wait, then leave through View Leaderboard. Hide that countdown once the name is non-empty. Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted, and it is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
+Name eligibility, validation, saving, and both Results exits are defined in `docs/prd.md` §15. When the name is still empty or blocked, show “Opening the leaderboard in {n}s” only for the last 5 seconds of the 15-second wait, then leave through View Leaderboard. Hide that countdown once the name is allowed. A blocked name also shows “Pick a different name.” Do not invent a different length limit in the field styling. Do not show an unusable name field when the result is not eligible. View Leaderboard is the leave action when name entry is omitted, and it is also the way to leave without a name when entry is shown. That exit still writes one score row with a null name. The label is “VIEW LEADERBOARD” from Brand voice. If the iPad software keyboard covers SAVE SCORE, keep the field and that button in the upper half, as in `docs/wireframes.md` §7.
 
 ## 13. Top 5 Leaderboard
 
@@ -419,6 +419,7 @@ You made the Top 10!
 SAVE SCORE
 VIEW LEADERBOARD
 Opening the leaderboard in 5s
+Pick a different name.
 TOP 5
 NEXT PLAYER
 ```
@@ -476,7 +477,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry through 20th place stays on Results. An empty name shows the leaderboard countdown for the last 5 seconds, then leaves. The leaderboard's return-to-ready countdown does not run during name entry.
+- [ ] Name entry through 20th place stays on Results. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.
@@ -489,5 +490,5 @@ These choices are settled. Product behavior is in `docs/prd.md`.
 
 - The first printable character starts the timer. Space and punctuation count. The excluded non-typing keys are in `docs/prd.md` §11.
 - A long name is truncated with an ellipsis in the row. The stored name is unchanged.
-- When no event exists, Event Setup selects Start Fresh, 30 seconds, and Race, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices.
+- When no event exists, Event Setup selects Start Fresh, 30 seconds, and Famous Lines, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices.
 - A ranked score with no name shows a dash. Do not invent a guest name.
