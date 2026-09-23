@@ -244,7 +244,7 @@ Ready strings are listed in Brand voice below. The score and name in layout exam
 
 Visual order:
 
-1. Contest headline.
+1. Contest headline. It bounces a little. Reduced motion keeps it still.
 2. Plinko message on a clear mint-accented surface.
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
 4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush.

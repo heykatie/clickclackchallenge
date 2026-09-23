@@ -213,6 +213,23 @@ button.is-cursor {
   margin: 0;
   font-size: 2.75rem;
   line-height: 1.1;
+  animation: ready-headline-bounce 2.2s ease-in-out infinite;
+}
+
+@keyframes ready-headline-bounce {
+  0%,
+  62%,
+  100% {
+    transform: translateY(0);
+  }
+
+  76% {
+    transform: translateY(-0.45rem);
+  }
+
+  88% {
+    transform: translateY(0.06rem);
+  }
 }
 
 .ready-plinko {
@@ -347,7 +364,8 @@ button.is-cursor {
     overflow: auto;
   }
 
-  .screensaver-track {
+  .screensaver-track,
+  .ready-copy h1 {
     animation: none;
   }
 
