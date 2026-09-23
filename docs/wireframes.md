@@ -109,7 +109,7 @@ Use three clear option groups with visible selected states and one large mint ac
 | Game mode | One choice: Standard, Famous Lines, or Story. On Continue, the control opens on the event's current mode and still accepts the other modes for the next contestant. Story shows Test length fixed at 60 seconds. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
 | Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
-| START EVENT | Opens Ready for the selected event. |
+| START EVENT | Opens Ready for the selected event. The keyboard cursor starts here. Arrow keys move through the choices. Enter selects. |
 
 **No previous event:** disable “Continue previous event” and show “No previous event yet.”
 
@@ -279,7 +279,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.
-- NEXT PLAYER returns immediately to Ready. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
+- NEXT PLAYER returns immediately to Ready. Escape does the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 

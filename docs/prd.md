@@ -298,6 +298,8 @@ If no previous event exists, the Continue option should be unavailable.
 
 `30 seconds` and `60 seconds` stay selectable while Continue is selected, for Standard and Famous Lines. `Standard`, `Famous Lines`, and `Story` stay selectable too. Story always uses 60 seconds. While Story is selected, Test length shows 60 seconds and cannot be changed. Switching back to Standard or Famous Lines restores the length that was selected for those modes. That length applies to the next contestant in those modes. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
+The operator can do this from the giant keyboard. The cursor starts on START EVENT. Arrow keys move it. Enter selects the choice under the cursor. Enter on START EVENT starts the event. The length choices are skipped while Story is selected. Continue is skipped when no event exists. Touch still works. The hint is in `docs/design_system.md`.
+
 ### Returning to Event Setup
 
 After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. The active event stays as it is. An attempt that has not been saved is discarded. Keyboard input does not open Event Setup. Ready still shows no operator settings.
@@ -933,7 +935,7 @@ The Leaderboard screen must include:
 NEXT PLAYER
 ```
 
-Selecting Next Player should immediately return to the Ready screen.
+Selecting Next Player should immediately return to the Ready screen. Escape does the same. The saved scores stay.
 
 The app should also automatically return to Ready after a short delay.
 
@@ -1610,7 +1612,7 @@ This is the same before and after the timer starts.
 - the attempt is discarded
 - no score is saved
 
-Escape does not leave Ready for Typing.
+Escape does not leave Ready for Typing. On the Leaderboard, Escape returns to Ready the same way Next Player does. The saved scores stay.
 
 ### Waiting Typing Returns to Ready
 

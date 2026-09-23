@@ -19,6 +19,7 @@ export function LeaderboardScreen({
   onSetup,
 }: LeaderboardScreenProps) {
   const [secondsLeft, setSecondsLeft] = useState(RESET_SECONDS);
+  const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
   const onNextPlayerRef = useRef(onNextPlayer);
@@ -49,6 +50,19 @@ export function LeaderboardScreen({
     }
   }, [secondsLeft]);
 
+  useEffect(() => {
+    screenRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.repeat || event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      leave();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   function beginHold() {
     holdTimer.current = window.setTimeout(() => {
       left.current = true;
@@ -64,7 +78,7 @@ export function LeaderboardScreen({
   }
 
   return (
-    <main className="screen leaderboard-screen">
+    <main className="screen leaderboard-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"

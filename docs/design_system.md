@@ -232,6 +232,8 @@ Use a blush or soft-white background, rounded option controls, clear selection i
 
 Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
 
+The operator can move through these choices with the arrow keys. Show “Arrow keys move. Enter selects.” The cursor starts on START EVENT and uses a charcoal outline, separate from the filled radio. Keyboard behavior is in `docs/prd.md` §9.
+
 **No previous event:** disable Continue and show “No previous event yet.” The “Offline-ready” chip in the Setup PNG is decoration. Do not copy it. If an indicator is shown, it must reflect real cache and service-worker readiness, as in `docs/prd.md`.
 
 ## 10. Ready / Attract
@@ -366,7 +368,7 @@ Show actual event data rather than filling missing places with sample contestant
 
 - Start the return countdown when the leaderboard appears.
 - The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
-- NEXT PLAYER returns immediately to Ready. Countdown completion performs the same reset.
+- NEXT PLAYER returns immediately to Ready. Escape does the same. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 
 ## 14. Motion
@@ -406,6 +408,7 @@ GIANT keyboard typing contest!
 Type above 50 WPM for a Plinko drop.
 CURRENT HIGH SCORE
 Be the first high score!
+Arrow keys move. Enter selects.
 PRESS ANY KEY TO START
 Your timer starts when you begin typing.
 Turn sideways and use the full screen.

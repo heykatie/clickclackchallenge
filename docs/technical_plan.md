@@ -1889,6 +1889,11 @@ a stored "race" mode is read as Famous Lines without changing its WPM
 starting Story stores 60 seconds even when the timed-mode length is 30
 passageSetId persists when continuing
 Continue is unavailable when no valid active event exists
+arrow keys move the Event Setup cursor without changing the selected choice
+Enter selects the Event Setup choice under the cursor
+Enter on START EVENT starts the event
+Story skips the Test length choices
+Continue is skipped when no event exists
 ```
 
 ---
@@ -1956,6 +1961,7 @@ Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
 Escape during Typing returns to Ready and saves no score
+Escape during the Leaderboard returns to Ready and keeps the saved scores
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result

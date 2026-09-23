@@ -183,6 +183,17 @@ label.is-fixed {
   opacity: 0.55;
 }
 
+.setup-hint {
+  margin-top: 0;
+  font-size: 1.125rem;
+}
+
+label.is-cursor,
+button.is-cursor {
+  outline: 3px solid var(--tiny-charcoal);
+  outline-offset: 3px;
+}
+
 .ready-screen {
   display: flex;
   flex-direction: column;
