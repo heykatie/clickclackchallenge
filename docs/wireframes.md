@@ -228,7 +228,7 @@ Keep the WPM dominant and the name field clear of celebration motifs. Result str
 
 `04-results.png` is a separate high-score state. It is 1600 × 1200, still 4:3, and a much smaller file than the other four exports. It shows “NEW HIGH SCORE!”, 97 WPM, and 96% accuracy, and it omits the Plinko line. 97 WPM qualifies, so that omission is not the layout. The diagram above is the ordinary Top 10 result: “Nice typing!”, 84 WPM, and 97% accuracy, with the Plinko line because 84 is above 50. Both use sample numbers. Use “NEW HIGH SCORE!” as the headline for rank 1, without “You made the Top 5!” Use “Nice typing!” for places 2 through 5, a Top 10 result, or any result above 50 WPM. Add “You made the Top 5!” or “You made the Top 10!” for those places. Show “You win a Plinko drop!” only when displayed WPM is above 50. A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows “NEW HIGH SCORE!” and the Plinko line only. Use “Casper, is that you?” when displayed WPM is 0. Use “Thanks for playing!” when the attempt is outside the Top 10 and displayed WPM is 1 through 50. The rule is in `docs/prd.md` §13, and the words are in `docs/design_system.md` (Brand voice).
 
-When name entry is omitted, show a large View Leaderboard button. When name entry is shown, focus the name field so the first letter goes into it. Enter saves the score with that name. Show View Leaderboard beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
+When name entry is omitted, show a large View Leaderboard button. Enter and Space select it. When name entry is shown, focus the name field so the first letter goes into it. Enter saves the score with that name. Show View Leaderboard beside Save Score so an empty name is not the only way off the screen. View Leaderboard writes one score row with a null name. If the name stays empty or blocked, show “Opening the leaderboard in {n}s” for the last 5 seconds of a 15-second wait, then take that same exit. Typing an allowed name hides the countdown. A blocked name shows “Pick a different name.” Both actions are in `docs/prd.md` §15. The label is in `docs/design_system.md` (Brand voice).
 
 Focusing the name field can open the iPad software keyboard over SAVE SCORE, even when the giant keyboard is attached. Check that on the target iPad, as in `docs/technical_plan.md` (Manual Layout Tests). If the keyboard covers the button, keep the name field and SAVE SCORE in the upper half. View Leaderboard sits on that same row, so it stays with them. Do not add a keyboard library.
 
@@ -279,7 +279,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.
-- NEXT PLAYER returns immediately to Ready. Escape does the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
+- NEXT PLAYER returns immediately to Ready. Escape, Enter, and Space do the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior
 
@@ -309,7 +309,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.
-- [ ] NEXT PLAYER, Escape, and the countdown return to Ready with event data intact.
+- [ ] NEXT PLAYER, Escape, Enter, Space, and the countdown return to Ready with event data intact.
 - [ ] Empty events do not display fabricated names or scores.
 - [ ] Required assets, fonts, passages, and stored data work offline on the target iPad.
 - [ ] Essential text has sufficient contrast, controls have visible focus, and state is not conveyed by color alone.

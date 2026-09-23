@@ -1156,7 +1156,7 @@ Displays:
 Handles:
 
 ```text
-NEXT PLAYER
+NEXT PLAYER, Escape, Enter, or Space
 → ReadyScreen
 ```
 
@@ -1966,7 +1966,7 @@ Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
 Escape during Typing returns to Ready and saves no score
-Escape during the Leaderboard returns to Ready and keeps the saved scores
+Escape, Enter, or Space during the Leaderboard returns to Ready and keeps the saved scores
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result
@@ -1976,6 +1976,7 @@ Typing screen displays remaining time
 a result ranked through 20th shows the name field, focused
 Enter on Results saves the score with the typed name
 a result outside 20th does not show the name field
+Enter or Space on Results without name entry opens the leaderboard
 non-Top-10 View Leaderboard opens the Top 5
 name validation rejects empty values
 View Leaderboard with an empty name writes one score row with a null name and opens the Top 5

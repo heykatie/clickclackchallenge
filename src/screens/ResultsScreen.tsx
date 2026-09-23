@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, normalizeName } from "../features/results/nameRules";
+import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
 
@@ -25,8 +26,10 @@ export function ResultsScreen({
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(NAME_IDLE_SECONDS);
+  const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
+  const standingRef = useRef(standing);
   const onViewRef = useRef(onViewLeaderboard);
   const onSaveRef = useRef(onSave);
   const savingRef = useRef(saving);
@@ -47,6 +50,25 @@ export function ResultsScreen({
     onViewRef.current = onViewLeaderboard;
     onSaveRef.current = onSave;
     savingRef.current = saving;
+    standingRef.current = standing;
+    if (standing && !standing.showNameEntry) {
+      screenRef.current?.focus();
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      const current = standingRef.current;
+      if (event.repeat || !current || current.showNameEntry || savingRef.current || left.current) {
+        return;
+      }
+      if (!isViewLeaderboardKey(event)) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      left.current = true;
+      onViewRef.current();
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   });
 
   useLayoutEffect(() => {
@@ -137,7 +159,7 @@ export function ResultsScreen({
   }
 
   return (
-    <main className="screen results-screen">
+    <main className="screen results-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"

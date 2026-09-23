@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
+import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
 import { rankScores } from "../features/leaderboard/ranking";
 
 const RESET_SECONDS = 15;
@@ -53,7 +54,7 @@ export function LeaderboardScreen({
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || event.key !== "Escape") {
+      if (event.repeat || !isLeaderboardLeaveKey(event)) {
         return;
       }
       event.preventDefault();

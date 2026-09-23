@@ -856,7 +856,7 @@ The place lines stay narrower. “You made the Top 5!” is places 2 through 5. 
 
 If the contestant ranks outside the top 20, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
 When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing an allowed name stops that countdown. A blocked name shows “Pick a different name.” and does not stop it. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
@@ -935,7 +935,7 @@ The Leaderboard screen must include:
 NEXT PLAYER
 ```
 
-Selecting Next Player should immediately return to the Ready screen. Escape does the same. The saved scores stay.
+Selecting Next Player should immediately return to the Ready screen. Escape, Enter, and Space do the same. The saved scores stay.
 
 The app should also automatically return to Ready after a short delay.
 
@@ -1935,7 +1935,7 @@ a finished Story scores the time taken
 an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
-Escape on the Leaderboard returns to Ready
+Escape, Enter, or Space on the Leaderboard returns to Ready
 holding Escape on Ready opens Event Setup
 a short Escape press on Ready does not start the test
 the operator can change Event Setup with the arrow keys and Enter
