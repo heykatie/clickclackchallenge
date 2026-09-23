@@ -46,10 +46,10 @@ describe("rankScores", () => {
     expect(ranked[0]?.score.createdAt).toBe("2026-09-22T00:01:00.000Z");
   });
 
-  it("excludes scores below 80 percent, including 79.99", () => {
+  it("excludes scores below 70 percent, including 69.99", () => {
     const ranked = rankScores([
-      score({ id: "low", displayedWpm: 99, accuracy: 79.99, createdAt: "2026-09-22T00:00:00.000Z" }),
-      score({ id: "eligible", displayedWpm: 40, accuracy: 80, createdAt: "2026-09-22T00:01:00.000Z" }),
+      score({ id: "low", displayedWpm: 99, accuracy: 69.99, createdAt: "2026-09-22T00:00:00.000Z" }),
+      score({ id: "eligible", displayedWpm: 40, accuracy: 70, createdAt: "2026-09-22T00:01:00.000Z" }),
     ]);
     expect(ranked.map((entry) => entry.score.id)).toEqual(["eligible"]);
   });
@@ -157,7 +157,7 @@ describe("allTimeScores", () => {
         id: "low",
         eventId: "older",
         displayedWpm: 90,
-        accuracy: 70,
+        accuracy: 69.99,
         createdAt: "2026-09-22T00:00:00.000Z",
       }),
       score({

@@ -130,8 +130,8 @@ describe("describeAttempt", () => {
     });
   });
 
-  it("hides the name when accuracy is below 80, including 79.99", () => {
-    expect(describeAttempt([], attempt({ accuracy: 79.99 }))).toEqual({
+  it("hides the name when accuracy is below 70, including 69.99", () => {
+    expect(describeAttempt([], attempt({ accuracy: 69.99 }))).toEqual({
       isNewHighScore: false,
       isTop5: false,
       isTop10: false,

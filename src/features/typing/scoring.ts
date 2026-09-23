@@ -1,4 +1,4 @@
-export const MIN_LEADERBOARD_ACCURACY = 80;
+export const MIN_LEADERBOARD_ACCURACY = 70;
 
 export function calculateWpm(
   correctCharacters: number,

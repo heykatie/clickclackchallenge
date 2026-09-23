@@ -516,7 +516,7 @@ A score must meet a minimum accuracy threshold to participate in leaderboard ran
 Initial V1 development threshold:
 
 ```text
-80% accuracy
+70% accuracy
 ```
 
 This value is provisional and should be validated using the physical giant keyboard before being treated as final.
@@ -540,7 +540,7 @@ Leaderboard ranking uses:
 
 Displayed accuracy is the rounded whole number the contestant sees. It is not a second stored field. Two scores that round to the same whole percent are tied on accuracy, and the earlier submission ranks first. Hidden tenths do not order them.
 
-The accuracy gate still uses the stored percentage. A score of 79.99% is not eligible, even though it displays as 80%.
+The accuracy gate still uses the stored percentage. A score of 69.99% is not eligible, even though it displays as 70%.
 
 ### Held-Key Behavior
 
@@ -1429,11 +1429,11 @@ Separate physical presses of the same key must still work normally.
 
 **Given**
 
-- the current development minimum leaderboard accuracy is 80%
+- the current development minimum leaderboard accuracy is 70%
 
 **When**
 
-- a contestant finishes below 80% accuracy
+- a contestant finishes below 70% accuracy
 
 **Then**
 
@@ -1444,16 +1444,16 @@ Separate physical presses of the same key must still work normally.
 - name entry is not shown
 - the score cannot appear in the Top 5
 
-A displayed 0 WPM score follows the same exclusion even when accuracy is 80% or higher. Results shows “Casper, is that you?” instead of a place.
+A displayed 0 WPM score follows the same exclusion even when accuracy is 70% or higher. Results shows “Casper, is that you?” instead of a place.
 
 Boundary cases:
 
 ```text
-80.00% → eligible
-79.99% → not eligible
+70.00% → eligible
+69.99% → not eligible
 ```
 
-The 80% threshold remains provisional until it is validated on the physical giant keyboard.
+The 70% threshold remains provisional until it is validated on the physical giant keyboard.
 
 ---
 

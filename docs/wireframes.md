@@ -322,4 +322,4 @@ This is a review checklist for the intended interface, not a claim that the app 
 | Name display | A missing name is a dash. A long name is truncated with an ellipsis. The stored name is unchanged. See `docs/design_system.md`. |
 | Setup defaults | With no event, Start fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode show the stored choices. Behavior is in `docs/prd.md` §9. |
 
-Provisional numbers, including the 80% accuracy gate and the 15-second reset, live in `docs/prd.md`. Testing may change them later.
+Provisional numbers, including the 70% accuracy gate and the 15-second reset, live in `docs/prd.md`. Testing may change them later.

@@ -1397,7 +1397,7 @@ Suggested ranking order:
 3. createdAt ascending
 ```
 
-Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gate still uses the stored percentage, so 79.99 stays below `MIN_LEADERBOARD_ACCURACY` even though it displays as 80. Ranking order is in `docs/prd.md`.
+Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gate still uses the stored percentage, so 69.99 stays below `MIN_LEADERBOARD_ACCURACY` even though it displays as 70. Ranking order is in `docs/prd.md`.
 
 This should be a pure module.
 
@@ -1779,8 +1779,8 @@ removing a credited character removes current correct-character credit
 correcting a removed position restores correct-character credit
 partial words count toward WPM
 incorrect characters do not block later correct input
-80% accuracy meets the development threshold
-79.99% accuracy does not meet the development threshold
+70% accuracy meets the development threshold
+69.99% accuracy does not meet the development threshold
 late input after timeout is ignored
 held-key repeat events are ignored, including when KeyboardEvent.repeat is true
 separate physical presses of the same key still count
@@ -1850,7 +1850,7 @@ an unplaced score above 50 uses Nice typing! and the Plinko line only
 an unplaced score at 1 through 50 WPM is Thanks for playing! only
 a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10
-accuracy below 80, including 79.99, hides name entry
+accuracy below 70, including 69.99, hides name entry
 a tie keeps the earlier score as the high score
 sixth place is Top 10 and not Top 5
 twenty scores already ahead hide name entry
@@ -2063,9 +2063,9 @@ partial word at timeout
 sentence transition
 ```
 
-Use this testing to validate whether the provisional 80% leaderboard accuracy threshold is appropriate.
+Use this testing to validate whether the provisional 70% leaderboard accuracy threshold is appropriate.
 
-Do not treat 80% as final until giant-keyboard testing is complete.
+Do not treat 70% as final until giant-keyboard testing is complete.
 
 ---
 

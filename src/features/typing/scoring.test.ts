@@ -41,14 +41,14 @@ describe("calculateAccuracy", () => {
   });
 
   it("keeps the precise percentage for the gate and rounds only for display", () => {
-    expect(calculateAccuracy(7999, 2001)).toBeCloseTo(79.99);
-    expect(displayedAccuracy(79.99)).toBe(80);
+    expect(calculateAccuracy(6999, 3001)).toBeCloseTo(69.99);
+    expect(displayedAccuracy(69.99)).toBe(70);
   });
 });
 
 describe("meetsLeaderboardAccuracy", () => {
-  it("accepts 80% and rejects 79.99%", () => {
-    expect(meetsLeaderboardAccuracy(80)).toBe(true);
-    expect(meetsLeaderboardAccuracy(79.99)).toBe(false);
+  it("accepts 70% and rejects 69.99%", () => {
+    expect(meetsLeaderboardAccuracy(70)).toBe(true);
+    expect(meetsLeaderboardAccuracy(69.99)).toBe(false);
   });
 });
