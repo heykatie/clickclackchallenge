@@ -1,10 +1,10 @@
-# Typing Test — Agent Instructions
+# clickclackchallenge — Agent Instructions
 
 ## Project Overview
 
-This repository contains a **typing test** for an in-person retail event.
+This repository contains **clickclackchallenge**, a typing test for an in-person retail event.
 
-Always refer to the product as the **"typing test."**
+Always refer to the product as **clickclackchallenge**.
 
 Do not call it:
 - typing kiosk game
@@ -275,9 +275,9 @@ If existing behavior appears broken or contradictory, investigate before rewriti
 
 ---
 
-## Typing Test Logic
+## clickclackchallenge logic
 
-Treat typing-test calculations and user results as product logic, not disposable UI state.
+Treat clickclackchallenge calculations and user results as product logic, not disposable UI state.
 
 Before modifying logic related to metrics such as:
 
@@ -299,7 +299,7 @@ Do not change formulas or scoring semantics solely as part of a visual change.
 
 ## Results / Name Flow
 
-The Results / Name screen should remain consistent with the approved wireframe and the rest of the typing-test flow.
+The Results / Name screen should remain consistent with the approved wireframe and the rest of the clickclackchallenge flow.
 
 Keep result data and name submission behavior separate enough that presentation changes do not accidentally change scoring behavior.
 

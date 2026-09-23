@@ -1,4 +1,4 @@
-# Typing Test Design System
+# clickclackchallenge Design System
 
 This file owns the visual system and required contestant-facing strings: palette, type scale, CSS tokens, motifs, and component styling.
 

@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       manifest: {
-        name: "Typing test",
-        short_name: "Typing test",
+        name: "clickclackchallenge",
+        short_name: "clickclackchallenge",
         description: "Offline typing contest for an event booth.",
         start_url: "/",
         display: "standalone",

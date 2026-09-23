@@ -1,4 +1,4 @@
-# Typing Test — V1 Technical Plan
+# clickclackchallenge — V1 Technical Plan
 
 This file owns implementation: stack, application state, the IndexedDB schema, module boundaries, the service worker, precache, navigation fallback, implementation order, and the automated test map.
 
@@ -19,7 +19,7 @@ If two documents disagree, follow the owner in this table. The user's latest exp
 
 ## 1. Purpose
 
-This document defines the technical implementation plan for V1 of the **Typing Test**.
+This document defines the technical implementation plan for V1 of **clickclackchallenge**.
 
 The product is an offline-first typing competition designed for repeated use at event booths on a **landscape iPad** connected to a giant physical keyboard.
 
@@ -266,7 +266,7 @@ Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS
 
 Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
-The manifest is configured in `vite.config.ts`. Its name and short name are “Typing test.” It starts at `/`, uses `display: "standalone"` and `orientation: "landscape"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button. Icons are not in the manifest yet.
+The manifest is configured in `vite.config.ts`. Its name and short name are “clickclackchallenge.” It starts at `/`, uses `display: "standalone"` and `orientation: "landscape"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button. Icons are not in the manifest yet.
 
 `orientation: "landscape"` is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but not the full screen, do not render the five screens. Show “Turn sideways and use the full screen.” from `docs/design_system.md`. Do not reflow the 4:3 layouts into those viewports. That gate is not built yet.
 
