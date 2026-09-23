@@ -247,7 +247,7 @@ Visual order:
 1. Contest headline. It bounces a little. Reduced motion keeps it still.
 2. Plinko message on a clear mint-accented surface.
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
-4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush.
+4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
 After 2 minutes of idle, replace this screen with the all-time roll from `docs/prd.md`. Keep a small “HIGH SCORES” label. Roll rank, name, and WPM upward in a loop. Names use deep lavender. Rank 1 keeps the light lavender row. A missing name stays a charcoal dash. Respect reduced motion by showing the list still.
 

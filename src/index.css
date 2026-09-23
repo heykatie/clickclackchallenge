@@ -273,6 +273,20 @@ button.is-cursor {
   margin: 0;
   font-size: 2rem;
   color: var(--tiny-mint-deep);
+  animation: ready-prompt-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ready-prompt-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.04);
+  }
 }
 
 .ready-helper {
@@ -365,7 +379,8 @@ button.is-cursor {
   }
 
   .screensaver-track,
-  .ready-copy h1 {
+  .ready-copy h1,
+  .ready-prompt {
     animation: none;
   }
 
