@@ -175,7 +175,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. It may sit on a light lavender or mint panel with large charcoal display text.
+“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
@@ -373,7 +373,7 @@ Show actual event data rather than filling missing places with sample contestant
 
 ## 14. Motion
 
-Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition.
+Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. Reduced motion keeps both still.
 
 - Do not animate the passage position or use moving backgrounds during Typing.
 - Do not let celebrations obscure scores, delay controls, or interfere with name entry.
@@ -473,14 +473,14 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Visible branding is limited to the optional logo-only badge.
 - [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
 - [ ] Event Setup contains the duration, game mode, and leaderboard choices plus Start Event.
-- [ ] Ready shows the contest message, current high score and name, and keyboard invitation.
+- [ ] Ready shows the contest message, current high score and name, and keyboard invitation. The headline bounces a little and the invitation pulses. Reduced motion keeps both still.
 - [ ] Ready contains no Start button, Top 5, or operator controls.
 - [ ] The opening keypress is consumed; the full sentence appears before timing begins.
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry through 20th place stays on Results. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” The leaderboard's return-to-ready countdown does not run during name entry.
+- [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” When name entry is omitted, Enter and Space select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER, Escape, Enter, Space, and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.

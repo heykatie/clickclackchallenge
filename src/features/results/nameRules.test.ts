@@ -32,6 +32,10 @@ describe("normalizeName", () => {
     expect(normalizeName("T1TTIES")).toBeNull();
     expect(normalizeName("penis")).toBeNull();
     expect(normalizeName("p3nis")).toBeNull();
+    expect(normalizeName("nipple")).toBeNull();
+    expect(normalizeName("nipples")).toBeNull();
+    expect(normalizeName("N1PPLE")).toBeNull();
+    expect(normalizeName("n i p p l e s")).toBeNull();
   });
 
   it("keeps an ordinary name that only shares those letters", () => {
@@ -43,6 +47,8 @@ describe("normalizeName", () => {
     expect(normalizeName("Book")).toBe("Book");
     expect(normalizeName("Titus")).toBe("Titus");
     expect(normalizeName("Penny")).toBe("Penny");
+    expect(normalizeName("Philip")).toBe("Philip");
+    expect(normalizeName("Nipper")).toBe("Nipper");
   });
 });
 

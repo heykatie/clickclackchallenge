@@ -143,7 +143,7 @@ Event setup rules, including saved duration and game mode, are in `docs/prd.md`.
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. When there is no eligible score, the high-score block shows “Be the first high score!” Start behavior and the Plinko rule are in `docs/prd.md`.
+The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. The headline bounces a little and the start line pulses. Reduced motion keeps both still. When there is no eligible score, the high-score block shows “Be the first high score!” Start behavior and the Plinko rule are in `docs/prd.md`.
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
@@ -297,7 +297,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] The shared palette and font roles are consistent; only a logo-only badge is used.
 - [ ] Setup offers test length, game mode, fresh/continue, and Start Event. The keyboard cursor starts on Start Event. Arrow keys move. Enter selects. Story fixes the length at 60 seconds.
 - [ ] Fresh creates a new event without deleting prior scores; Continue restores saved event data.
-- [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score.
+- [ ] Ready shows the contest copy, strictly-above-50-WPM message, and current high score. The headline bounces a little and the start line pulses. Reduced motion keeps both still.
 - [ ] Ready has no leaderboard or Start button.
 - [ ] The key used to leave Ready neither enters the passage nor starts timing. Holding Escape opens Event Setup. A short Escape press does not.
 - [ ] The full first sentence is visible before the first valid typing keystroke starts the timer.
@@ -305,7 +305,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry is on Results and offered through 20th place. The field is focused, so the first letter goes into the name. The Top 10 line stops at 10th.
+- [ ] Name entry is on Results and offered through 20th place. The field is focused, so the first letter goes into the name. Enter saves that name with the score. When name entry is omitted, Enter and Space select View Leaderboard. The Top 10 line stops at 10th.
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.

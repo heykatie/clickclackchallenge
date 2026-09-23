@@ -59,6 +59,8 @@ const INCLUDED = [
   "boobie",
   "boobies",
   "titties",
+  "nipple",
+  "nipples",
   "cocksuck",
   "dickhead",
   "dickface",

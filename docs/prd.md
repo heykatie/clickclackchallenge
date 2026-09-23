@@ -579,7 +579,7 @@ A score should retain:
 - a unique score ID
 - the event ID it belongs to
 - name, when the contestant saves one
-- null name when a Top 10 contestant leaves through View Leaderboard
+- null name when the contestant leaves through View Leaderboard
 - final WPM
 - final accuracy
 - the duration of the attempt that produced the WPM
@@ -1281,7 +1281,7 @@ The MVP is not complete until the required acceptance tests pass, including the 
 - the Ready-screen key does not affect WPM
 - the Ready-screen key does not affect accuracy
 
-The timer should begin only after the first valid typing character is entered on the Typing screen.
+A repeat of that key while it is still held is not scored. The next key after it is released is the first typing attempt. The timer should begin only after that character is entered on the Typing screen.
 
 ---
 
@@ -1612,7 +1612,7 @@ This is the same before and after the timer starts.
 - the attempt is discarded
 - no score is saved
 
-A short Escape press does not leave Ready for Typing. Holding Escape on Ready opens Event Setup. On the Leaderboard, Escape returns to Ready the same way Next Player does. The saved scores stay.
+A short Escape press does not leave Ready for Typing. Holding Escape on Ready opens Event Setup. On the Leaderboard, Escape, Enter, and Space return to Ready the same way Next Player does. The saved scores stay.
 
 ### Waiting Typing Returns to Ready
 
@@ -1906,7 +1906,7 @@ Before using the app at a real event, confirm:
 ```text
 30-second mode passes
 60-second mode passes
-Ready-screen key is not scored
+Ready-screen key is not scored, including while that key is still held
 first typing key starts the timer
 WPM calculation passes
 accuracy calculation passes
@@ -1941,6 +1941,7 @@ a short Escape press on Ready does not start the test
 the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
+Enter or Space on Results without name entry opens the leaderboard
 automatic reset passes
 giant keyboard input passes
 PWA launches offline
