@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { MAX_NAME_LENGTH, nameProblem, normalizeName } from "../features/results/nameRules";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, normalizeName } from "../features/results/nameRules";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
 
@@ -28,6 +28,8 @@ export function ResultsScreen({
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
   const onViewRef = useRef(onViewLeaderboard);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const pendingName = useRef("");
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
@@ -42,6 +44,43 @@ export function ResultsScreen({
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;
   });
+
+  useLayoutEffect(() => {
+    if (!standing?.showNameEntry) {
+      if (standing) {
+        pendingName.current = "";
+      }
+      return;
+    }
+    if (pendingName.current) {
+      const extra = pendingName.current;
+      pendingName.current = "";
+      setName((current) => (current + extra).slice(0, MAX_NAME_LENGTH));
+    }
+    nameRef.current?.focus();
+  }, [standing]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const field = nameRef.current;
+      const character = nameCharacterFromKey(event, {
+        fieldFocused: field !== null && document.activeElement === field,
+        buttonFocused: event.target instanceof HTMLButtonElement,
+      });
+      if (character === null || (standing !== null && !standing.showNameEntry)) {
+        return;
+      }
+      event.preventDefault();
+      if (!standing?.showNameEntry || field === null) {
+        pendingName.current = (pendingName.current + character).slice(0, MAX_NAME_LENGTH);
+        return;
+      }
+      setName((current) => (current + character).slice(0, MAX_NAME_LENGTH));
+      field.focus();
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [standing]);
 
   useEffect(() => {
     if (!waitingForName) {
@@ -104,6 +143,7 @@ export function ResultsScreen({
         <label className="name-field">
           Name
           <input
+            ref={nameRef}
             value={name}
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"

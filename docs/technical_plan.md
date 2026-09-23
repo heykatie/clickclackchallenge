@@ -1855,6 +1855,7 @@ twenty scores already ahead hide name entry
 twentieth place shows the name field and no Top 10 line
 preview placement does not change the WPM stored on earlier scores
 a name is trimmed and kept up to 20 characters
+the first letter on Results goes into the name when the field is not yet focused
 an empty name and a name past 20 characters are rejected
 a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept

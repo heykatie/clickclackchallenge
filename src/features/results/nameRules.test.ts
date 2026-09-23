@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName } from "./nameRules";
+import { nameCharacterFromKey, normalizeName } from "./nameRules";
 
 describe("normalizeName", () => {
   it("trims a name and keeps the saved value within 20 characters", () => {
@@ -30,5 +30,21 @@ describe("normalizeName", () => {
     expect(normalizeName("hello")).toBe("hello");
     expect(normalizeName("bass")).toBe("bass");
     expect(normalizeName("Dickey")).toBe("Dickey");
+  });
+});
+
+describe("nameCharacterFromKey", () => {
+  const plain = { repeat: false, metaKey: false, ctrlKey: false, altKey: false };
+
+  it("gives the first letter to the name when the field is not focused", () => {
+    expect(nameCharacterFromKey({ ...plain, key: "K" }, { fieldFocused: false, buttonFocused: false })).toBe("K");
+  });
+
+  it("leaves the key alone once the name field is focused", () => {
+    expect(nameCharacterFromKey({ ...plain, key: "K" }, { fieldFocused: true, buttonFocused: false })).toBeNull();
+  });
+
+  it("does not steal Space from a focused button", () => {
+    expect(nameCharacterFromKey({ ...plain, key: " " }, { fieldFocused: false, buttonFocused: true })).toBeNull();
   });
 });
