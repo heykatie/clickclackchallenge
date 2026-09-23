@@ -1834,7 +1834,7 @@ Required cases:
 ```text
 rank 1 headline is NEW HIGH SCORE! with no Top 5 line
 rank 1 above 50 WPM adds You win a Plinko drop!
-rank 1 at 50 WPM or below is NEW HIGH SCORE! only
+rank 1 at 1 through 50 WPM is NEW HIGH SCORE! only
 places 2 through 5 use Nice typing! and You made the Top 5!
 sixth through tenth use Nice typing! and You made the Top 10!
 a Top 5 or Top 10 score above 50 shows the place line and the Plinko line

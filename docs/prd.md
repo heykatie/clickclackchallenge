@@ -907,7 +907,7 @@ The leaderboard should not expose:
 - internal IDs
 - database metadata
 
-Only scores meeting the minimum accuracy threshold are eligible for ranking.
+Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
 
 ---
 
