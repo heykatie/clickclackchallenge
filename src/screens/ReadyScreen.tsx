@@ -1,5 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { listAllScores } from "../db/persistence";
+import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
+import { Screensaver } from "./Screensaver";
+
+const READY_IDLE_MS = 120_000;
 
 type ReadyScreenProps = {
   highScore: HighScoreSummary | null;
@@ -10,21 +15,72 @@ type ReadyScreenProps = {
 export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
+  const asleepRef = useRef(false);
+  const onStartRef = useRef(onStart);
+  const [asleep, setAsleep] = useState(false);
+  const [activity, setActivity] = useState(0);
+  const [allTime, setAllTime] = useState<RankedScore[]>([]);
+
+  useEffect(() => {
+    onStartRef.current = onStart;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    listAllScores().then(
+      (scores) => {
+        if (!cancelled) {
+          setAllTime(allTimeScores(scores));
+        }
+      },
+      () => {
+        if (!cancelled) {
+          setAllTime([]);
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (asleep || allTime.length === 0) {
+      return;
+    }
+    const id = window.setTimeout(() => {
+      asleepRef.current = true;
+      setAsleep(true);
+    }, READY_IDLE_MS);
+    return () => window.clearTimeout(id);
+  }, [asleep, activity, allTime.length]);
 
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
+      if (asleepRef.current) {
+        if (!event.repeat) {
+          asleepRef.current = false;
+          setAsleep(false);
+        }
+        return;
+      }
       if (event.repeat || event.key === "Escape") {
         return;
       }
-      onStart();
+      onStartRef.current();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onStart]);
+  }, []);
+
+  function noteActivity() {
+    setActivity((current) => current + 1);
+  }
 
   function beginHold() {
+    noteActivity();
     holdTimer.current = window.setTimeout(onSetup, 600);
   }
 
@@ -35,8 +91,20 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
     }
   }
 
+  if (asleep) {
+    return (
+      <Screensaver
+        scores={allTime}
+        onWake={() => {
+          asleepRef.current = false;
+          setAsleep(false);
+        }}
+      />
+    );
+  }
+
   return (
-    <main className="screen ready-screen" ref={screenRef} tabIndex={-1}>
+    <main className="screen ready-screen" ref={screenRef} tabIndex={-1} onPointerDown={noteActivity}>
       <button
         type="button"
         className="logo-badge"

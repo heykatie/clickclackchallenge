@@ -271,6 +271,12 @@ export async function listScores(eventId: string): Promise<ScoreRecord[]> {
   return scores.map(normalizeScore);
 }
 
+export async function listAllScores(): Promise<ScoreRecord[]> {
+  const database = await openDatabase();
+  const scores = await database.getAll("scores");
+  return scores.map(normalizeScore);
+}
+
 export async function saveScore(input: NewScore): Promise<ScoreRecord> {
   const database = await openDatabase();
   const score: ScoreRecord = {

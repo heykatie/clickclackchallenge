@@ -248,6 +248,95 @@ label {
   font-size: 1.125rem;
 }
 
+.screensaver {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.screensaver-kicker {
+  margin: 0;
+  align-self: center;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: var(--tiny-mint);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.screensaver-window {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.screensaver-track {
+  animation: score-roll linear infinite;
+}
+
+.screensaver-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.screensaver-row {
+  display: grid;
+  grid-template-columns: 4rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 1rem;
+}
+
+.screensaver-row.is-first {
+  background: var(--tiny-lavender-light);
+}
+
+.screensaver-rank,
+.screensaver-wpm {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.screensaver-name {
+  overflow: hidden;
+  font-size: 2rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screensaver-name.has-name {
+  color: var(--tiny-lavender-deep);
+}
+
+@keyframes score-roll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screensaver-window {
+    overflow: auto;
+  }
+
+  .screensaver-track {
+    animation: none;
+  }
+
+  .screensaver-track ol[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 .results-screen,
 .leaderboard-screen {
   display: flex;

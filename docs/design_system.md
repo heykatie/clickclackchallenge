@@ -247,6 +247,8 @@ Visual order:
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
 4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush.
 
+After 2 minutes of idle, replace this screen with the all-time roll from `docs/prd.md`. Keep a small “HIGH SCORES” label. Roll rank, name, and WPM upward in a loop. Names use deep lavender. Rank 1 keeps the light lavender row. A missing name stays a charcoal dash. Respect reduced motion by showing the list still.
+
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
 Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9.

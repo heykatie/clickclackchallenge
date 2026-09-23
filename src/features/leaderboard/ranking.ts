@@ -38,3 +38,13 @@ export function rankScores(scores: readonly ScoreRecord[]): RankedScore[] {
 export function highScore(scores: readonly ScoreRecord[]): ScoreRecord | null {
   return rankScores(scores)[0]?.score ?? null;
 }
+
+/** All-time attract board. Longer than the event Top 5, short enough to roll. */
+export const ALL_TIME_SCORE_CAP = 50;
+
+export function allTimeScores(
+  scores: readonly ScoreRecord[],
+  cap = ALL_TIME_SCORE_CAP,
+): RankedScore[] {
+  return rankScores(scores).slice(0, cap);
+}

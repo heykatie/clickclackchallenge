@@ -147,7 +147,7 @@ The strings on this screen live in `docs/design_system.md` (Brand voice). The di
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 
-Do not show the Top 5, operator settings, or a Start button on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9.
+Do not show the event Top 5, operator settings, or a Start button on this screen. After 2 minutes of idle, a rolling all-time list may replace this screen. That state is specified in `docs/prd.md` and `docs/design_system.md`. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, specified in `docs/prd.md` §9.
 
 ## 6. Screen 03 — Typing
 

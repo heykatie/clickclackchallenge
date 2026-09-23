@@ -6,6 +6,7 @@ import { PASSAGE_SET_ID } from "../data/passages";
 import {
   closeDatabase,
   DB_NAME,
+  listAllScores,
   listScores,
   loadBooth,
   openDatabase,
@@ -67,6 +68,7 @@ describe("persistence", () => {
     expect(storedFirst?.passageSetId).toBe(PASSAGE_SET_ID);
     expect(await listScores(first.id)).toEqual([score]);
     expect(await listScores(second.id)).toEqual([]);
+    expect(await listAllScores()).toEqual([score]);
 
     const booth = await loadBooth();
     expect(booth.activeEvent?.id).toBe(second.id);
