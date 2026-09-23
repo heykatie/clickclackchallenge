@@ -38,6 +38,7 @@ function standing(overrides: Partial<ResultStanding> = {}): ResultStanding {
   return {
     isNewHighScore: false,
     isTop5: false,
+    isTop10: false,
     showNameEntry: false,
     ...overrides,
   };
@@ -70,11 +71,19 @@ describe("resultCopy", () => {
   });
 
   it("uses the Top 10 line when the attempt places sixth through tenth", () => {
-    expect(resultCopy(standing({ showNameEntry: true }), 40).placedLine).toBe(
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).placedLine).toBe(
       "You made the Top 10!",
     );
-    expect(resultCopy(standing({ showNameEntry: true }), 40).headline).toBe("Nice typing!");
-    expect(resultCopy(standing({ showNameEntry: true }), 40).plinkoLine).toBeNull();
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).headline).toBe("Nice typing!");
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).plinkoLine).toBeNull();
+  });
+
+  it("offers a name past 10th without the Top 10 cheer", () => {
+    expect(resultCopy(standing({ showNameEntry: true }), 40)).toEqual({
+      headline: "Thanks for playing!",
+      placedLine: null,
+      plinkoLine: null,
+    });
   });
 
   it("gives a Plinko line without a place when the score is above 50 WPM", () => {
@@ -107,6 +116,7 @@ describe("describeAttempt", () => {
     expect(describeAttempt([], attempt())).toEqual({
       isNewHighScore: true,
       isTop5: true,
+      isTop10: true,
       showNameEntry: true,
     });
   });
@@ -115,6 +125,7 @@ describe("describeAttempt", () => {
     expect(describeAttempt([], attempt({ displayedWpm: 0, rawWpm: 0.4, accuracy: 100 }))).toEqual({
       isNewHighScore: false,
       isTop5: false,
+      isTop10: false,
       showNameEntry: false,
     });
   });
@@ -123,6 +134,7 @@ describe("describeAttempt", () => {
     expect(describeAttempt([], attempt({ accuracy: 79.99 }))).toEqual({
       isNewHighScore: false,
       isTop5: false,
+      isTop10: false,
       showNameEntry: false,
     });
   });
@@ -147,21 +159,39 @@ describe("describeAttempt", () => {
     );
     expect(describeAttempt(existing, attempt({ displayedWpm: 70 }))).toMatchObject({
       isTop5: false,
+      isTop10: true,
       showNameEntry: true,
     });
   });
 
-  it("hides the name when ten eligible scores are already ahead", () => {
-    const existing = Array.from({ length: 10 }, (_, index) =>
+  it("offers a name at 20th and withholds the Top 10 cheer", () => {
+    const existing = Array.from({ length: 19 }, (_, index) =>
       saved({
         id: `score-${index}`,
         displayedWpm: 100 - index,
         createdAt: `2026-09-22T00:${String(index).padStart(2, "0")}:00.000Z`,
       }),
     );
+    expect(describeAttempt(existing, attempt({ displayedWpm: 40 }))).toEqual({
+      isNewHighScore: false,
+      isTop5: false,
+      isTop10: false,
+      showNameEntry: true,
+    });
+  });
+
+  it("hides the name when twenty eligible scores are already ahead", () => {
+    const existing = Array.from({ length: 20 }, (_, index) =>
+      saved({
+        id: `score-${index}`,
+        displayedWpm: 120 - index,
+        createdAt: `2026-09-22T00:${String(index).padStart(2, "0")}:00.000Z`,
+      }),
+    );
     expect(describeAttempt(existing, attempt({ displayedWpm: 50 }))).toEqual({
       isNewHighScore: false,
       isTop5: false,
+      isTop10: false,
       showNameEntry: false,
     });
   });

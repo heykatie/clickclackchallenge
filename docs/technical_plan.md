@@ -311,7 +311,7 @@ TIMER STARTS
   ↓
 RESULTS
   ↓
-name if Top 10 eligible
+name if ranked through 20th
   ↓
 LEADERBOARD
   ↓
@@ -493,7 +493,7 @@ Field behavior:
 
 - name for a Top 10 qualifying score
 - null when that contestant leaves through View Leaderboard
-- null for scores outside the Top 10
+- null for scores outside the top 20
 - the score row is still written in both null cases
 
 `rawWpm`
@@ -1054,7 +1054,7 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
-→ if Top 10, show NameForm
+→ if ranked through 20th, show NameForm
 → one exit writes one score row:
     Save Score, with the name
     or View Leaderboard, with name null
@@ -1725,7 +1725,7 @@ V1 stores contestant data locally on the event iPad.
 
 Collected data is limited to:
 
-- name, if Top 10
+- name, if ranked through 20th
 - WPM
 - accuracy
 - timestamp
@@ -1845,7 +1845,8 @@ the first eligible score is the high score and a Top 10
 accuracy below 80, including 79.99, hides name entry
 a tie keeps the earlier score as the high score
 sixth place is Top 10 and not Top 5
-ten scores already ahead hide name entry
+twenty scores already ahead hide name entry
+twentieth place shows the name field and no Top 10 line
 preview placement does not change the WPM stored on earlier scores
 a name is trimmed and kept up to 20 characters
 an empty name and a name past 20 characters are rejected
@@ -1936,7 +1937,7 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
-after 2 idle minutes, Ready shows a rolling all-time list of at most 50 scores that meet the accuracy gate and display at least 1 WPM
+after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 Escape, Space, any other key, or a tap on that list returns to Ready and does not start the test
 Ready-screen key is not passed into Typing as contestant input
 Typing screen renders the full sentence before timer starts

@@ -138,6 +138,19 @@ describe("rankScores", () => {
 });
 
 describe("allTimeScores", () => {
+  it("defaults the roll to 20 scores", () => {
+    const scores = Array.from({ length: 25 }, (_, index) =>
+      score({
+        id: `roll-${index}`,
+        displayedWpm: 30 + index,
+        accuracy: 90,
+        createdAt: `2026-09-22T02:${String(index).padStart(2, "0")}:00.000Z`,
+      }),
+    );
+    expect(allTimeScores(scores)).toHaveLength(20);
+    expect(allTimeScores(scores)[0]?.rank).toBe(1);
+  });
+
   it("keeps eligible scores from every event and caps the roll", () => {
     const scores = [
       score({

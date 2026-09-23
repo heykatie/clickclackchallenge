@@ -41,8 +41,11 @@ export function highScore(scores: readonly ScoreRecord[]): ScoreRecord | null {
   return rankScores(scores)[0]?.score ?? null;
 }
 
-/** All-time attract board. Longer than the event Top 5, short enough to roll. */
-export const ALL_TIME_SCORE_CAP = 50;
+/** All-time attract board. Long enough to feel like a history, short enough to come back around. */
+export const ALL_TIME_SCORE_CAP = 20;
+
+/** Event rank that may enter a name. The Top 10 cheer stops at 10. */
+export const NAME_ENTRY_RANK = 20;
 
 export function allTimeScores(
   scores: readonly ScoreRecord[],

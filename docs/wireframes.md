@@ -68,7 +68,7 @@ There are five screens. Waiting and running are states of Typing; name entry is 
 | Ready → Typing | Show the whole sentence; consume the opening keypress without entering it into the passage or starting the timer. |
 | Waiting → Running | Start timing on the first valid typing keystroke. |
 | Running → Results | End the test at the selected duration and show final WPM, accuracy, and qualification status. |
-| Results → Leaderboard | Top 10 contestants save a name. Other contestants use View Leaderboard. Both open the Top 5. The control is in `docs/prd.md` §15. |
+| Results → Leaderboard | Contestants through 20th place save a name. The Top 10 cheer stops at 10th. Other contestants use View Leaderboard. Both open the Top 5. The control is in `docs/prd.md` §15. |
 | Leaderboard → Ready | Clear contestant state, retain event data, and return without refreshing the browser. |
 
 ## 3. Shared visual system
@@ -200,7 +200,7 @@ Bundle passages and fonts locally. Do not add pause/restart controls, a leaderbo
 
 ## 7. Screen 04 — Results + Name
 
-**Purpose:** make the final result easy to understand and collect a name from eligible Top 10 contestants on the same screen.
+**Purpose:** make the final result easy to understand and collect a name through 20th place on the same screen. The Top 10 cheer stops at 10th.
 
 ![Results wireframe: final WPM, accuracy, and name entry](./wireframes/04-results.png)
 
@@ -305,7 +305,7 @@ This is a review checklist for the intended interface, not a claim that the app 
 - [ ] Current word, caret, completed text, upcoming text, and errors are distinguishable.
 - [ ] Timer is bottom-center; live WPM and accuracy are bottom-left and bottom-right.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Name entry is on Results and offered to Top 10 qualifiers, including ranks 6–10.
+- [ ] Name entry is on Results and offered through 20th place. The Top 10 line stops at 10th.
 - [ ] Name entry is protected from automatic reset; saving does not duplicate a score.
 - [ ] The leaderboard shows at most five real scores in ranked order, with rank 1 emphasized.
 - [ ] The optional YOU highlight refers to the current attempt and never adds a sixth row.

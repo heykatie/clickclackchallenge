@@ -291,7 +291,7 @@ Use the feedback treatments in section 8. Keep the passage dominant. Do not show
 
 ## 12. Results + Name
 
-**Purpose:** present the final result and collect a name from Top 10 qualifiers on the same screen.
+**Purpose:** present the final result and collect a name from contestants through 20th place on the same screen. The Top 10 cheer stops at 10th.
 
 Required hierarchy:
 
@@ -476,7 +476,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
 - [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
-- [ ] Top 10 name entry stays on Results. An empty name shows the leaderboard countdown for the last 5 seconds, then leaves. The leaderboard's return-to-ready countdown does not run during name entry.
+- [ ] Name entry through 20th place stays on Results. An empty name shows the leaderboard countdown for the last 5 seconds, then leaves. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.

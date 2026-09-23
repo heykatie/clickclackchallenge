@@ -65,7 +65,7 @@ Contestants should be able to:
 - type continuously without unnecessary interruptions
 - see live WPM, accuracy, and remaining time
 - see their final result
-- enter a name if they qualify for the Top 10
+- enter a name if they rank through 20th place
 - see the Top 5 leaderboard
 
 ### Secondary User — Booth Operator
@@ -214,7 +214,7 @@ Ready
 → contestant types
 → timer expires
 → Results screen
-→ Save Score, or View Leaderboard with no name, if Top 10 eligible; otherwise View Leaderboard
+→ Save Score, or View Leaderboard with no name, if ranked through 20th; otherwise View Leaderboard
 → Leaderboard
 → Next Player or automatic reset
 → Ready
@@ -317,7 +317,7 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 50. Escape or Space returns to Ready and does not start the test. Any other key or a tap does the same. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Escape or Space returns to Ready and does not start the test. Any other key or a tap does the same. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
@@ -843,16 +843,19 @@ Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the 
 
 Results and name entry should remain on the **same screen**.
 
-### Top 10 Qualification
+### Name Qualification
 
 If the contestant's score:
 
-- meets the minimum accuracy threshold, and
-- ranks within the event's Top 10
+- meets the minimum accuracy threshold,
+- displays at least 1 WPM, and
+- ranks within the event's top 20
 
 then show name entry.
 
-If the contestant does not qualify for the Top 10, name entry should not be shown.
+The place lines stay narrower. “You made the Top 5!” is places 2 through 5. “You made the Top 10!” is places 6 through 10. Places 11 through 20 may enter a name and do not get a place line. Rank 1 still uses “NEW HIGH SCORE!” only.
+
+If the contestant ranks outside the top 20, name entry should not be shown.
 
 When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
@@ -1496,12 +1499,13 @@ Expected order:
 
 ---
 
-### Top 10 Name Eligibility
+### Name Eligibility
 
 **Given**
 
 - the contestant meets the minimum accuracy threshold
-- the completed score ranks within the event's Top 10
+- the displayed WPM is at least 1
+- the completed score ranks within the event's top 20
 
 **When**
 
@@ -1511,8 +1515,9 @@ Expected order:
 
 - name entry is shown
 - the contestant may enter and save a name
+- a place line appears only for the Top 10
 
-If the contestant ranks outside the Top 10, name entry must not be shown.
+If the contestant ranks outside the top 20, name entry must not be shown.
 
 ---
 
@@ -1520,7 +1525,7 @@ If the contestant ranks outside the Top 10, name entry must not be shown.
 
 **Given**
 
-- the contestant does not qualify for the Top 10
+- the contestant does not qualify for a name
 - name entry is not shown
 
 **When**
@@ -1907,7 +1912,8 @@ partial words count correctly
 Backspace behavior passes
 held-key repeat protection passes
 minimum accuracy gate passes
-Top 10 name behavior passes
+name entry through 20th place passes
+places 11 through 20 can enter a name and do not see a place line
 Top 5 sorting passes
 Plinko qualification passes
 rank 1 shows NEW HIGH SCORE! and, above 50 WPM, You win a Plinko drop!
