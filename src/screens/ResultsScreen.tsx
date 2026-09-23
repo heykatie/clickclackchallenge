@@ -1,11 +1,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, nameToSaveOnEnter, normalizeName } from "../features/results/nameRules";
+import {
+  nameTimeoutMessage,
+  nameTimerKey,
+  nameTimerPhase,
+  nameTimerSeconds,
+} from "../features/results/nameTimeout";
 import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
-
-const NAME_IDLE_SECONDS = 15;
-const NAME_COUNTDOWN_AT = 5;
 
 type ResultsScreenProps = {
   result: TestResult;
@@ -27,7 +30,6 @@ export function ResultsScreen({
   claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
-  const [secondsLeft, setSecondsLeft] = useState(NAME_IDLE_SECONDS);
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
@@ -41,13 +43,17 @@ export function ResultsScreen({
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
-  const waitingForName = Boolean(standing?.showNameEntry) && savedName === null && !saving;
-  const [idlePhase, setIdlePhase] = useState(waitingForName);
+  const phase = nameTimerPhase(Boolean(standing?.showNameEntry), name, saving);
+  const timerKey = nameTimerKey(phase, name);
+  const [activeTimer, setActiveTimer] = useState(timerKey);
+  const [secondsLeft, setSecondsLeft] = useState(() => nameTimerSeconds(phase));
 
-  if (idlePhase !== waitingForName) {
-    setIdlePhase(waitingForName);
-    setSecondsLeft(NAME_IDLE_SECONDS);
+  if (activeTimer !== timerKey) {
+    setActiveTimer(timerKey);
+    setSecondsLeft(nameTimerSeconds(phase));
   }
+
+  const timeoutMessage = nameTimeoutMessage(phase, secondsLeft);
 
   useEffect(() => {
     claimShortEscape(() => {
@@ -145,7 +151,7 @@ export function ResultsScreen({
   }, [standing]);
 
   useEffect(() => {
-    if (!waitingForName) {
+    if (phase === "off") {
       return;
     }
     left.current = false;
@@ -153,15 +159,22 @@ export function ResultsScreen({
       setSecondsLeft((current) => (current <= 1 ? 0 : current - 1));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [waitingForName]);
+  }, [phase]);
 
   useEffect(() => {
-    if (!waitingForName || secondsLeft !== 0 || left.current) {
+    if (phase === "off" || secondsLeft !== 0 || left.current) {
       return;
     }
     left.current = true;
+    if (phase === "started") {
+      const nameToSave = normalizeName(nameStateRef.current);
+      if (nameToSave !== null) {
+        onSaveRef.current(nameToSave);
+        return;
+      }
+    }
     onViewRef.current();
-  }, [waitingForName, secondsLeft]);
+  }, [phase, secondsLeft]);
 
   function saveScore() {
     if (savedName === null) {
@@ -240,9 +253,7 @@ export function ResultsScreen({
           </button>
         </div>
       ) : null}
-      {waitingForName && secondsLeft <= NAME_COUNTDOWN_AT && secondsLeft > 0 ? (
-        <p className="result-name-countdown">Opening the leaderboard in {secondsLeft}s</p>
-      ) : null}
+      {timeoutMessage ? <p className="result-name-countdown">{timeoutMessage}</p> : null}
     </main>
   );
 }
