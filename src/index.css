@@ -255,6 +255,10 @@ label {
   overflow: hidden;
 }
 
+.screensaver:focus {
+  outline: none;
+}
+
 .screensaver-kicker {
   margin: 0;
   align-self: center;

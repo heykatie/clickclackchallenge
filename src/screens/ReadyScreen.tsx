@@ -71,8 +71,8 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
       }
       onStartRef.current();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   function noteActivity() {

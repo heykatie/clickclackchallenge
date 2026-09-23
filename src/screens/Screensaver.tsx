@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { RankedScore } from "../features/leaderboard/ranking";
 
 type ScreensaverProps = {
@@ -6,11 +7,29 @@ type ScreensaverProps = {
 };
 
 export function Screensaver({ scores, onWake }: ScreensaverProps) {
+  const screenRef = useRef<HTMLElement>(null);
   const crawl = repeatForCrawl(scores);
   const seconds = Math.max(crawl.length, 8) * 2.4;
 
+  useEffect(() => {
+    screenRef.current?.focus();
+  }, []);
+
   return (
-    <main className="screen screensaver" onPointerDown={onWake}>
+    <main
+      className="screen screensaver"
+      ref={screenRef}
+      tabIndex={-1}
+      onPointerDown={onWake}
+      onKeyDown={(event) => {
+        if (event.repeat || event.key !== "Escape") {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        onWake();
+      }}
+    >
       <p className="screensaver-kicker">HIGH SCORES</p>
       <div className="screensaver-window" aria-label="All-time high scores">
         <div className="screensaver-track" style={{ animationDuration: `${seconds}s` }}>

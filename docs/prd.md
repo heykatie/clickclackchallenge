@@ -317,7 +317,7 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 50. A key or tap returns to Ready and does not start the test. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 50. Escape returns to Ready and does not start the test. Any other key or a tap does the same. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
