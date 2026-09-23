@@ -850,9 +850,9 @@ then show name entry.
 
 If the contestant does not qualify for the Top 10, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. There is no idle timeout on Results. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Save Score and View Leaderboard remain the only ways a result is stored.
 
-When name entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. Automatic next-player reset must not interrupt name entry. The label is in `docs/design_system.md` (Brand voice).
+When name entry is shown, Save Score still rejects an empty name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. Typing a name stops that countdown. Clearing the name starts the 15 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
 ### Name Rules
 

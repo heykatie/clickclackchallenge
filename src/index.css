@@ -288,6 +288,12 @@ label {
   background: var(--tiny-lavender-light);
 }
 
+.result-name-countdown {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
 .name-field {
   display: flex;
   flex-direction: column;

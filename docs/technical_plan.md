@@ -1953,7 +1953,8 @@ name validation rejects empty values
 View Leaderboard with an empty name writes one score row with a null name and opens the Top 5
 Next Player returns to Ready
 auto reset begins only on Leaderboard
-auto reset does not run while name entry is active
+leaderboard auto reset does not run while name entry is active
+an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
 Leaderboard renders no more than five rows
 ```
 

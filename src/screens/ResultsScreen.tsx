@@ -1,7 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MAX_NAME_LENGTH, normalizeName } from "../features/results/nameRules";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
+
+const NAME_IDLE_SECONDS = 15;
+const NAME_COUNTDOWN_AT = 5;
 
 type ResultsScreenProps = {
   result: TestResult;
@@ -21,9 +24,42 @@ export function ResultsScreen({
   onSetup,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
+  const [secondsLeft, setSecondsLeft] = useState(NAME_IDLE_SECONDS);
   const holdTimer = useRef<number | null>(null);
+  const left = useRef(false);
+  const onViewRef = useRef(onViewLeaderboard);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
+  const waitingForName = Boolean(standing?.showNameEntry) && savedName === null && !saving;
+  const [idlePhase, setIdlePhase] = useState(waitingForName);
+
+  if (idlePhase !== waitingForName) {
+    setIdlePhase(waitingForName);
+    setSecondsLeft(NAME_IDLE_SECONDS);
+  }
+
+  useEffect(() => {
+    onViewRef.current = onViewLeaderboard;
+  });
+
+  useEffect(() => {
+    if (!waitingForName) {
+      return;
+    }
+    left.current = false;
+    const id = window.setInterval(() => {
+      setSecondsLeft((current) => (current <= 1 ? 0 : current - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [waitingForName]);
+
+  useEffect(() => {
+    if (!waitingForName || secondsLeft !== 0 || left.current) {
+      return;
+    }
+    left.current = true;
+    onViewRef.current();
+  }, [waitingForName, secondsLeft]);
 
   function saveScore() {
     if (savedName === null) {
@@ -91,6 +127,9 @@ export function ResultsScreen({
             VIEW LEADERBOARD
           </button>
         </div>
+      ) : null}
+      {waitingForName && secondsLeft <= NAME_COUNTDOWN_AT && secondsLeft > 0 ? (
+        <p className="result-name-countdown">Opening the leaderboard in {secondsLeft}s</p>
       ) : null}
     </main>
   );
