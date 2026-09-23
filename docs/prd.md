@@ -522,6 +522,8 @@ A contestant below the threshold:
 - does not qualify for leaderboard ranking
 - is not prompted for a leaderboard name
 
+A score that displays as 0 WPM also stays off every board, including the event Top 5 and the all-time roll. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
+
 ### Ranking and Ties
 
 Leaderboard ranking uses:
@@ -837,7 +839,7 @@ The Results screen should display:
 - Plinko qualification status when the contestant qualifies
 - Top 10 qualification status when applicable
 
-Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The headline is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 50 or below. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
+Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
 
 Results and name entry should remain on the **same screen**.
 
@@ -1439,6 +1441,8 @@ Separate physical presses of the same key must still work normally.
 - name entry is not shown
 - the score cannot appear in the Top 5
 
+A displayed 0 WPM score follows the same exclusion even when accuracy is 80% or higher. Results shows “Casper, is that you?” instead of a place.
+
 Boundary cases:
 
 ```text
@@ -1910,7 +1914,8 @@ rank 1 shows NEW HIGH SCORE! and, above 50 WPM, You win a Plinko drop!
 places 2 through 5 show Nice typing! and You made the Top 5!
 places 6 through 10 show Nice typing! and You made the Top 10!
 a Top 5 or Top 10 score above 50 WPM shows the place line and the Plinko line
-a score outside the Top 10 at 50 WPM or below shows Thanks for playing! only
+a score outside the Top 10 at 1 through 50 WPM shows Thanks for playing! only
+a displayed 0 WPM score shows Casper, is that you? and does not place
 fresh event behavior passes
 continue event behavior passes
 score persistence passes

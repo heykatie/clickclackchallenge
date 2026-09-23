@@ -85,6 +85,14 @@ describe("resultCopy", () => {
     });
   });
 
+  it("asks if a 0 WPM result is a ghost and does not place them", () => {
+    expect(resultCopy(standing({ isTop5: true, showNameEntry: true, isNewHighScore: true }), 0)).toEqual({
+      headline: "Casper, is that you?",
+      placedLine: null,
+      plinkoLine: null,
+    });
+  });
+
   it("thanks a result that misses the board and does not win a Plinko drop", () => {
     expect(resultCopy(standing(), 50)).toEqual({
       headline: "Thanks for playing!",
@@ -100,6 +108,14 @@ describe("describeAttempt", () => {
       isNewHighScore: true,
       isTop5: true,
       showNameEntry: true,
+    });
+  });
+
+  it("does not place a displayed 0 WPM score, even at 100% accuracy", () => {
+    expect(describeAttempt([], attempt({ displayedWpm: 0, rawWpm: 0.4, accuracy: 100 }))).toEqual({
+      isNewHighScore: false,
+      isTop5: false,
+      showNameEntry: false,
     });
   });
 

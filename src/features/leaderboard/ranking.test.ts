@@ -54,6 +54,15 @@ describe("rankScores", () => {
     expect(ranked.map((entry) => entry.score.id)).toEqual(["eligible"]);
   });
 
+  it("excludes a displayed 0 WPM score and keeps 1 WPM", () => {
+    const ranked = rankScores([
+      score({ id: "zero", displayedWpm: 0, accuracy: 100, createdAt: "2026-09-22T00:00:00.000Z" }),
+      score({ id: "one", displayedWpm: 1, accuracy: 80, createdAt: "2026-09-22T00:01:00.000Z" }),
+    ]);
+    expect(ranked.map((entry) => entry.score.id)).toEqual(["one"]);
+    expect(ranked[0]?.rank).toBe(1);
+  });
+
   it("derives Top 5, Top 10, and the high score from stored WPM", () => {
     const scores = Array.from({ length: 12 }, (_, index) =>
       score({

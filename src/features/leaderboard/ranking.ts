@@ -9,7 +9,9 @@ export interface RankedScore {
 }
 
 export function rankScores(scores: readonly ScoreRecord[]): RankedScore[] {
-  const eligible = scores.filter((score) => meetsLeaderboardAccuracy(score.accuracy));
+  const eligible = scores.filter(
+    (score) => meetsLeaderboardAccuracy(score.accuracy) && score.displayedWpm > 0,
+  );
   const ordered = [...eligible].sort((left, right) => {
     if (right.displayedWpm !== left.displayedWpm) {
       return right.displayedWpm - left.displayedWpm;
@@ -46,6 +48,5 @@ export function allTimeScores(
   scores: readonly ScoreRecord[],
   cap = ALL_TIME_SCORE_CAP,
 ): RankedScore[] {
-  const scored = scores.filter((score) => score.displayedWpm > 0);
-  return rankScores(scored).slice(0, cap);
+  return rankScores(scores).slice(0, cap);
 }

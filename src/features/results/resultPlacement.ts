@@ -31,6 +31,13 @@ export interface ResultCopy {
 }
 
 export function resultCopy(standing: ResultStanding, displayedWpm: number): ResultCopy {
+  if (displayedWpm === 0) {
+    return {
+      headline: "Casper, is that you?",
+      placedLine: null,
+      plinkoLine: null,
+    };
+  }
   const placed = standing.isTop5 || standing.showNameEntry;
   const winsPlinko = displayedWpm > 50;
   return {

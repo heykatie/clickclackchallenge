@@ -591,7 +591,7 @@ meetsAccuracyThreshold: boolean;
 
 Rank and Top 5 / Top 10 change whenever a new score is added. `meetsAccuracyThreshold` goes stale if `MIN_LEADERBOARD_ACCURACY` changes after giant-keyboard testing. Do not store that boolean.
 
-At rank time, a score is eligible when `accuracy >= MIN_LEADERBOARD_ACCURACY`. Keep the numeric `accuracy` field. The threshold value is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). Ranking order is in `docs/prd.md`.
+At rank time, a score is eligible when `accuracy >= MIN_LEADERBOARD_ACCURACY` and `displayedWpm > 0`. Keep the numeric `accuracy` field. The threshold value is the provisional gate in `docs/prd.md` (Minimum Leaderboard Accuracy). A displayed 0 WPM stays off the board. Ranking order is in `docs/prd.md`.
 
 ### App Settings
 
@@ -1373,7 +1373,7 @@ Responsibility:
 Handles:
 
 ```text
-keep scores where accuracy >= MIN_LEADERBOARD_ACCURACY
+keep scores where accuracy >= MIN_LEADERBOARD_ACCURACY and displayedWpm > 0
 → sort by displayed WPM
 → break ties by displayed accuracy, rounded to a whole number
 → break remaining ties by earlier createdAt
@@ -1818,7 +1818,7 @@ displayed accuracy, rounded to a whole number, breaks displayed-WPM ties
 two scores that round to the same accuracy are not ordered by hidden tenths
 earlier createdAt breaks remaining ties
 scores below minimum accuracy are excluded
-eligibility uses accuracy >= MIN_LEADERBOARD_ACCURACY and ignores a stored meetsAccuracyThreshold flag
+eligibility uses accuracy >= MIN_LEADERBOARD_ACCURACY, displayedWpm > 0, and ignores a stored meetsAccuracyThreshold flag
 rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
@@ -1839,7 +1839,8 @@ places 2 through 5 use Nice typing! and You made the Top 5!
 sixth through tenth use Nice typing! and You made the Top 10!
 a Top 5 or Top 10 score above 50 shows the place line and the Plinko line
 an unplaced score above 50 uses Nice typing! and the Plinko line only
-an unplaced score at 50 WPM or below is Thanks for playing! only
+an unplaced score at 1 through 50 WPM is Thanks for playing! only
+a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10
 accuracy below 80, including 79.99, hides name entry
 a tie keeps the earlier score as the high score
