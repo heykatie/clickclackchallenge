@@ -1988,6 +1988,7 @@ Next Player returns to Ready
 auto reset begins only on Leaderboard
 leaderboard auto reset does not run while name entry is active
 an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
+an allowed Results name saves 20 seconds after the last change, with Saving your score in {n}s visible for the last 5
 Leaderboard renders no more than five rows
 ```
 
