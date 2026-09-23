@@ -6,7 +6,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // A waiting worker activates after the installed app is closed. Do not skipWaiting or reload.
       registerType: "prompt",
+      includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       manifest: {
         name: "clickclackchallenge",
         short_name: "clickclackchallenge",
@@ -17,6 +19,31 @@ export default defineConfig({
         background_color: "#FBEDEF",
         theme_color: "#FBEDEF",
         lang: "en",
+        icons: [
+          {
+            src: "icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
+      },
+      workbox: {
+        navigateFallback: "index.html",
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2,webmanifest}"],
+        globIgnores: ["**/icons.svg"],
       },
     }),
   ],

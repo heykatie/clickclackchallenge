@@ -1,7 +1,8 @@
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
+import { LandscapeGate } from "./pwa/LandscapeGate";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -174,20 +175,23 @@ function App() {
     }
   }
 
-  if (status === "loading") {
-    return <main className="screen" aria-busy="true" />;
-  }
+  return <LandscapeGate>{boothScreen()}</LandscapeGate>;
 
-  if (status === "failed") {
-    return (
-      <main className="screen">
-        <h1>Scores can't be saved</h1>
-        <p>This iPad can't store the event. Don't start a competition until storage is working.</p>
-      </main>
-    );
-  }
+  function boothScreen(): ReactNode {
+    if (status === "loading") {
+      return <main className="screen" aria-busy="true" />;
+    }
 
-  switch (state.screen) {
+    if (status === "failed") {
+      return (
+        <main className="screen">
+          <h1>Scores can't be saved</h1>
+          <p>This iPad can't store the event. Don't start a competition until storage is working.</p>
+        </main>
+      );
+    }
+
+    switch (state.screen) {
     case "setup":
       return (
         <EventSetupScreen
@@ -267,6 +271,7 @@ function App() {
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
         />
       );
+    }
   }
 }
 
