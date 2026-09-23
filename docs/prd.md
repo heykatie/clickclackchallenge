@@ -326,7 +326,7 @@ After 2 minutes with no key and no tap, and only when at least one qualifying sc
 
 ### Start Behavior
 
-Any key except Escape may transition from Ready to Typing. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
+Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
 
 The key used to leave the Ready screen:
 
