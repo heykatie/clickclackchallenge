@@ -1,4 +1,4 @@
-# Typing Test — V1 Wireframes
+# clickclackchallenge — V1 Wireframes
 
 This file owns screen layout and the five PNG wireframes in `docs/wireframes/`.
 

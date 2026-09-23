@@ -1,4 +1,4 @@
-# Typing Test
+# clickclackchallenge
 
 An offline typing contest for a landscape iPad and a giant physical keyboard, intended for repeated use at an event booth.
 

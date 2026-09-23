@@ -1,4 +1,4 @@
-# Typing Test — V1 Product Requirements Document
+# clickclackchallenge — V1 Product Requirements Document
 
 This file owns product behavior: scoring, the accuracy gate, ranking, name rules, continue-event duration, reset timing, what must persist, the requirement that the booth works offline, and the booth acceptance tests.
 
@@ -19,7 +19,7 @@ If two documents disagree, follow the owner in this table. The user's latest exp
 
 ## 1. Overview
 
-The **Typing Test** is an offline-first typing competition designed for repeated use at event booths with a giant physical keyboard connected to a landscape iPad.
+**clickclackchallenge** is an offline-first typing competition designed for repeated use at event booths with a giant physical keyboard connected to a landscape iPad.
 
 The app replaces the current workflow of using a generic browser typing test, manually refreshing the page between contestants, and manually tracking the high score.
 
@@ -48,7 +48,7 @@ This creates several issues:
 - the current workflow creates unnecessary friction between contestants
 - prize qualification and leaderboard behavior are not integrated into the test
 
-The custom Typing Test should provide a complete booth-specific flow from contestant start through scoring, leaderboard display, and reset.
+clickclackchallenge should provide a complete booth-specific flow from contestant start through scoring, leaderboard display, and reset.
 
 ---
 
@@ -975,7 +975,7 @@ It should not run while name entry is still in progress.
 
 ## 19. Offline Requirements
 
-The Typing Test must support the complete booth workflow without an active internet connection after the application has been successfully loaded, installed, and cached on the event iPad.
+clickclackchallenge must support the complete booth workflow without an active internet connection after the application has been successfully loaded, installed, and cached on the event iPad.
 
 Offline operation is a core V1 requirement, not an optional enhancement.
 
@@ -1210,7 +1210,7 @@ Screen layout lives in `docs/wireframes.md`.
 
 ## V1 Testing Plan
 
-Testing must verify that the Typing Test behaves correctly from the operator and contestant perspective and is reliable enough for repeated booth use.
+Testing must verify that clickclackchallenge behaves correctly from the operator and contestant perspective and is reliable enough for repeated booth use.
 
 These are the product-level acceptance tests for V1. The automated test map and hardware check lists live in `docs/technical_plan.md`.
 
