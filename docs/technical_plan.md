@@ -266,9 +266,9 @@ Offline requirements and what must persist are in `docs/prd.md`. Palette and CSS
 
 Use `vite-plugin-pwa` and Workbox. Register the generated service worker through the Vite PWA configuration. Precache the Vite build with the Workbox manifest so hashed filenames stay in sync. Configure an SPA navigation fallback to the application entry point so an installed launch still loads the shell offline.
 
-The manifest is configured in `vite.config.ts`. Its name and short name are “clickclackchallenge.” It starts at `/`, uses `display: "standalone"` and `orientation: "landscape"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button and the app does not call `skipWaiting`. The manifest icons are the blush keycap at 192 and 512, including a maskable 512. `index.html` also links the 180px Apple touch icon so Safari can install that keycap on the Home Screen.
+The manifest is configured in `vite.config.ts`. Its name and short name are “clickclackchallenge.” It starts at `/`, uses `display: "standalone"` and `orientation: "any"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened. There is no refresh button and the app does not call `skipWaiting`. The manifest icons are the blush keycap at 192 and 512, including a maskable 512. `index.html` also links the 180px Apple touch icon so Safari can install that keycap on the Home Screen.
 
-`orientation: "landscape"` is the installed-app lock. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. If the viewport is portrait, or landscape but narrower than the screen, do not render the five screens. Show the contest headline and “Turn sideways and use the full screen.” from `docs/design_system.md`. The Plinko line stays on Ready. Do not reflow the 4:3 layouts into those viewports. `needsLandscapeGate` makes that decision and compares the viewport width with `screen.availWidth`. A 24px gap still counts as full width, so a scrollbar does not hide the booth. While the instruction is showing, the screen components unmount, so their keyboard listeners stop. The reducer in `App` stays mounted, so rotating back does not discard an in-progress test.
+The installed app can rotate. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. Only Typing stays landscape and full screen. If that viewport is portrait, or landscape but narrower than the screen, do not render the passage. Show the contest headline and “Turn sideways and use the full screen.” from `docs/design_system.md`. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. `showsInPortrait` is that rule. The Plinko line stays on Ready. Do not reflow the typing layout into a portrait or narrow viewport. `needsLandscapeGate` compares the viewport width with `screen.availWidth`. A 24px gap still counts as full width, so a scrollbar does not hide Typing. While the instruction is showing, Typing unmounts, so the passage listener stops. A short Escape still returns to Ready and discards the attempt. The reducer in `App` stays mounted, so rotating back does not discard an in-progress test.
 
 Workbox precaches the Vite build, including hashed JavaScript, CSS, fonts, icons, and the manifest. Passages are imported into the JavaScript bundle, so they ride along in that precache. The navigation fallback is `index.html`, so an installed launch still loads the shell offline.
 
@@ -1968,7 +1968,7 @@ a key still held from Ready is ignored until that key is released
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
-a short Escape press during Typing returns to Ready and saves no score
+a short Escape press during Typing returns to Ready and saves no score, including while the portrait instruction is showing
 holding Escape during Typing opens Event Setup and saves no score
 Space, Enter, or Escape during the Leaderboard returns to Ready and keeps the saved scores
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
@@ -2001,7 +2001,8 @@ Do not over-test static decorative styling through component tests.
 Required cases:
 
 ```text
-portrait shows the instruction
+portrait shows the instruction for Typing
+portrait keeps Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list visible
 a landscape viewport narrower than the screen shows the instruction
 a landscape viewport that fills the screen width shows the booth
 a scrollbar-sized gap still shows the booth
@@ -2015,7 +2016,7 @@ Required on the actual target landscape iPad:
 
 ```text
 Event Setup fits without clipping
-portrait and Split View show the landscape full-screen instruction instead of the five screens
+portrait and Split View show the landscape full-screen instruction on Typing. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait
 Ready screen is readable from approximately two feet away
 typing sentence remains on one line
 typing sentence does not clip at either side

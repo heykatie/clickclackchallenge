@@ -52,9 +52,9 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 | Scrolling | Keep each contestant screen within one viewport |
 | Content placement | Generous safe margins; no clipped text, rows, or actions |
 | Export sizing | PNG pixels are not CSS layout dimensions |
-| Orientation | Landscape full screen only |
+| Orientation | Landscape full screen for typing. Every other screen also shows in portrait. |
 
-The five screens are landscape 4:3 only. Portrait and Split View must not show them. Show “Turn sideways and use the full screen.” The manifest lock and that gate are in `docs/technical_plan.md`.
+Typing is landscape and full screen. Portrait and Split View show “Turn sideways and use the full screen.” Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. That gate is in `docs/technical_plan.md`.
 
 Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including name entry with the physical keyboard connected.
 
@@ -472,7 +472,7 @@ This checklist records what to verify; it does not claim the implementation has 
 
 - [ ] All screens use the current palette and the three defined font roles.
 - [ ] Visible branding is limited to the optional logo-only badge.
-- [ ] Each contestant screen fits a landscape 4:3 viewport and is readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction instead.
+- [ ] The screens fit a landscape 4:3 viewport and are readable at approximately two feet. Portrait and Split View show the landscape full-screen instruction on Typing. Every other screen stays visible in portrait.
 - [ ] Event Setup contains the duration, game mode, and leaderboard choices plus Start Event.
 - [ ] Ready shows the contest message, current high score and name, and keyboard invitation. The headline bounces a little and the invitation pulses. Reduced motion keeps both still.
 - [ ] Ready contains no Start button, Top 5, or operator controls.

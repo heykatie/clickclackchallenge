@@ -125,34 +125,34 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
   }
 
   return (
-    <main className="screen ready-screen" ref={screenRef} tabIndex={-1} onPointerDown={noteActivity}>
-      <button
-        type="button"
-        className="logo-badge"
-        aria-label="Logo"
-        onPointerDown={beginHold}
-        onPointerUp={endHold}
-        onPointerLeave={endHold}
-      />
-      <div className="ready-copy">
-        <h1>GIANT keyboard typing contest!</h1>
-        <p className="ready-plinko">Type above 50 WPM for a Plinko drop.</p>
-        <section className="high-score-card" aria-label="Current high score">
-          <p className="stat-label">CURRENT HIGH SCORE</p>
-          {highScore ? (
-            <>
-              <p className="stat-value">{highScore.displayedWpm} WPM</p>
-              <p className={highScore.name ? "high-score-name has-name" : "high-score-name"}>
-                {highScore.name ?? "—"}
-              </p>
-            </>
-          ) : (
-            <p className="high-score-empty">Be the first high score!</p>
-          )}
-        </section>
-        <p className="display ready-prompt">PRESS ANY KEY TO START</p>
-        <p className="ready-helper">Your timer starts when you begin typing.</p>
-      </div>
-    </main>
+      <main className="screen ready-screen" ref={screenRef} tabIndex={-1} onPointerDown={noteActivity}>
+        <button
+          type="button"
+          className="logo-badge"
+          aria-label="Logo"
+          onPointerDown={beginHold}
+          onPointerUp={endHold}
+          onPointerLeave={endHold}
+        />
+        <div className="ready-copy">
+          <h1>GIANT keyboard typing contest!</h1>
+          <p className="ready-plinko">Type above 50 WPM for a Plinko drop.</p>
+          <section className="high-score-card" aria-label="Current high score">
+            <p className="stat-label">CURRENT HIGH SCORE</p>
+            {highScore ? (
+              <>
+                <p className="stat-value">{highScore.displayedWpm} WPM</p>
+                <p className={highScore.name ? "high-score-name has-name" : "high-score-name"}>
+                  {highScore.name ?? "—"}
+                </p>
+              </>
+            ) : (
+              <p className="high-score-empty">Be the first high score!</p>
+            )}
+          </section>
+          <p className="display ready-prompt">PRESS ANY KEY TO START</p>
+          <p className="ready-helper">Your timer starts when you begin typing.</p>
+        </div>
+      </main>
   );
 }

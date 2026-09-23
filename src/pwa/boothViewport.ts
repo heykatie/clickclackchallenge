@@ -2,8 +2,9 @@
 export const FULL_SCREEN_SLACK_PX = 24;
 
 /**
- * The five screens are landscape and full screen only.
+ * Typing is landscape and full screen.
  * Portrait, or a landscape window narrower than the screen, shows the turn-sideways instruction.
+ * Every other screen stays visible. showsInPortrait is that exception.
  */
 export function needsLandscapeGate(
   viewportWidth: number,
@@ -17,4 +18,11 @@ export function needsLandscapeGate(
     return true;
   }
   return viewportWidth < screenWidth - FULL_SCREEN_SLACK_PX;
+}
+
+export type BoothScreen = "setup" | "rolling" | "ready" | "typing" | "results" | "leaderboard";
+
+/** Only the typing screen requires landscape. */
+export function showsInPortrait(screen: BoothScreen): boolean {
+  return screen !== "typing";
 }
