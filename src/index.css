@@ -350,6 +350,7 @@ button.is-cursor {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-height: 100dvh;
   overflow: hidden;
 }
 

@@ -19,7 +19,7 @@ If two documents disagree, follow the owner in this table. The user's latest exp
 
 This document specifies layout for the five screens on a landscape iPad with a giant keyboard. Product behavior lives in `docs/prd.md`.
 
-**Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling.
+**Target:** landscape iPad, 4:3, readable from approximately two feet away. Each contestant screen fits within the viewport without scrolling. Every screen except Typing also shows in portrait. The typing screen stays landscape.
 
 **Current branding rule:** preserve the brand inspired pastel visual style and optional logo-only keycap badge.
 

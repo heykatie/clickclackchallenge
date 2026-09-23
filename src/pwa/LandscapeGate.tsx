@@ -1,27 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { needsLandscapeGate } from "./boothViewport";
+import type { ReactNode } from "react";
+import { useNeedsLandscapeGate } from "./useLandscapeGate";
 
 type LandscapeGateProps = {
   children: ReactNode;
 };
 
-function readGate(): boolean {
-  return needsLandscapeGate(window.innerWidth, window.innerHeight, window.screen.availWidth);
-}
-
 export function LandscapeGate({ children }: LandscapeGateProps) {
-  const [blocked, setBlocked] = useState(readGate);
-
-  useEffect(() => {
-    const update = () => setBlocked(readGate());
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("orientationchange", update);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", update);
-    };
-  }, []);
+  const blocked = useNeedsLandscapeGate();
 
   if (blocked) {
     return (

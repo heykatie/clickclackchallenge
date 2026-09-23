@@ -15,7 +15,7 @@ export default defineConfig({
         description: "Offline typing contest for an event booth.",
         start_url: "/",
         display: "standalone",
-        orientation: "landscape",
+        orientation: "any",
         background_color: "#FBEDEF",
         theme_color: "#FBEDEF",
         lang: "en",

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } 
 import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
+import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
 import { LandscapeGate } from "./pwa/LandscapeGate";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
@@ -11,6 +12,13 @@ import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState } from "./state/appState";
 import { createEscapeHold } from "./state/escapeHold";
 import { createStartKeyGate } from "./state/startKey";
+
+function landscapeOnly(screen: BoothScreen, screenNode: ReactNode): ReactNode {
+  if (showsInPortrait(screen)) {
+    return screenNode;
+  }
+  return <LandscapeGate>{screenNode}</LandscapeGate>;
+}
 
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
@@ -71,7 +79,11 @@ function App() {
       event.preventDefault();
       event.stopImmediatePropagation();
       if (result === "short") {
-        shortEscapeRef.current?.();
+        if (shortEscapeRef.current) {
+          shortEscapeRef.current();
+        } else if (screenRef.current === "typing") {
+          dispatch({ type: "ENTER_READY" });
+        }
       }
     };
     window.addEventListener("keydown", onKeyDown, true);
@@ -230,7 +242,7 @@ function App() {
     }
   }
 
-  return <LandscapeGate>{boothScreen()}</LandscapeGate>;
+  return boothScreen();
 
   function boothScreen(): ReactNode {
     if (status === "loading") {
@@ -248,7 +260,8 @@ function App() {
 
     switch (state.screen) {
     case "setup":
-      return (
+      return landscapeOnly(
+        "setup",
         <EventSetupScreen
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
@@ -259,7 +272,7 @@ function App() {
           onContinue={(durationSeconds, testMode) => {
             void continueEvent(durationSeconds, testMode);
           }}
-        />
+        />,
       );
     case "ready":
       return (
@@ -277,7 +290,8 @@ function App() {
       if (state.currentTest === null) {
         return null;
       }
-      return (
+      return landscapeOnly(
+        "typing",
         <TypingScreen
           session={state.currentTest}
           ignoreHeldKey={(key) => startKeyGate.current.isBlocked(key)}
@@ -288,13 +302,14 @@ function App() {
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
           onReturnToReady={() => dispatch({ type: "ENTER_READY" })}
           claimShortEscape={claimShortEscape}
-        />
+        />,
       );
     case "results":
       if (state.latestResult === null) {
         return null;
       }
-      return (
+      return landscapeOnly(
+        "results",
         <ResultsScreen
           result={state.latestResult}
           standing={standing}
@@ -307,10 +322,11 @@ function App() {
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
           claimShortEscape={claimShortEscape}
-        />
+        />,
       );
     case "leaderboard":
-      return (
+      return landscapeOnly(
+        "leaderboard",
         <LeaderboardScreen
           scores={leaderboardScores}
           currentScoreId={state.currentScoreId}
