@@ -867,7 +867,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. A short Escape press during Typing returns to Ready and discards the attempt. Holding Escape opens Event Setup and discards the attempt. A short Escape press does not leave Ready.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. A short Escape press during Typing returns to Ready and discards the attempt. Holding Escape opens Event Setup and discards the attempt. A short Escape press does not leave Ready. A tap on Ready opens Typing and does not count as a typed character. A tap on the rolling list only returns to Ready.
 
 Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 

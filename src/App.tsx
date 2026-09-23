@@ -279,7 +279,9 @@ function App() {
         <ReadyScreen
           highScore={state.highScore}
           onStart={(key) => {
-            startKeyGate.current.arm(key);
+            if (key !== "") {
+              startKeyGate.current.arm(key);
+            }
             dispatch({ type: "ENTER_TYPING" });
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}

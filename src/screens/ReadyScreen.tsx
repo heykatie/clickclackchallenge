@@ -18,6 +18,7 @@ type ReadyScreenProps = {
 export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
+  const heldSetup = useRef(false);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
   const [asleep, setAsleep] = useState(false);
@@ -102,7 +103,23 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
 
   function beginHold() {
     noteActivity();
-    holdTimer.current = window.setTimeout(onSetup, HOLD_SETUP_MS);
+    heldSetup.current = false;
+    holdTimer.current = window.setTimeout(() => {
+      holdTimer.current = null;
+      heldSetup.current = true;
+      onSetup();
+    }, HOLD_SETUP_MS);
+  }
+
+  function startFromPointer(event: React.PointerEvent<HTMLElement>) {
+    if (event.button !== 0) {
+      return;
+    }
+    if (heldSetup.current) {
+      heldSetup.current = false;
+      return;
+    }
+    onStartRef.current("");
   }
 
   function endHold() {
@@ -125,7 +142,13 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
   }
 
   return (
-      <main className="screen ready-screen" ref={screenRef} tabIndex={-1} onPointerDown={noteActivity}>
+      <main
+        className="screen ready-screen"
+        ref={screenRef}
+        tabIndex={-1}
+        onPointerDown={noteActivity}
+        onPointerUp={startFromPointer}
+      >
         <button
           type="button"
           className="logo-badge"
