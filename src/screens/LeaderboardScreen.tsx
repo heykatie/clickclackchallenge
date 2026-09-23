@@ -11,6 +11,7 @@ type LeaderboardScreenProps = {
   currentScoreId: string | null;
   onNextPlayer: () => void;
   onSetup: () => void;
+  claimShortEscape: (handler: (() => void) | null) => void;
 };
 
 export function LeaderboardScreen({
@@ -18,6 +19,7 @@ export function LeaderboardScreen({
   currentScoreId,
   onNextPlayer,
   onSetup,
+  claimShortEscape,
 }: LeaderboardScreenProps) {
   const [secondsLeft, setSecondsLeft] = useState(RESET_SECONDS);
   const screenRef = useRef<HTMLElement>(null);
@@ -29,6 +31,17 @@ export function LeaderboardScreen({
   useEffect(() => {
     onNextPlayerRef.current = onNextPlayer;
   });
+
+  useEffect(() => {
+    claimShortEscape(() => {
+      if (left.current) {
+        return;
+      }
+      left.current = true;
+      onNextPlayerRef.current();
+    });
+    return () => claimShortEscape(null);
+  }, [claimShortEscape]);
 
   function leave() {
     if (left.current) {
@@ -60,8 +73,8 @@ export function LeaderboardScreen({
       event.preventDefault();
       leave();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
   function beginHold() {

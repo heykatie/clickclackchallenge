@@ -21,6 +21,7 @@ type TypingScreenProps = {
   onExpire: () => void;
   onSetup: () => void;
   onReturnToReady: () => void;
+  claimShortEscape: (handler: (() => void) | null) => void;
 };
 
 export function TypingScreen({
@@ -30,6 +31,7 @@ export function TypingScreen({
   onExpire,
   onSetup,
   onReturnToReady,
+  claimShortEscape,
 }: TypingScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const onTypeRef = useRef(onType);
@@ -45,6 +47,11 @@ export function TypingScreen({
     onExpireRef.current = onExpire;
     onReturnRef.current = onReturnToReady;
   });
+
+  useEffect(() => {
+    claimShortEscape(() => onReturnRef.current());
+    return () => claimShortEscape(null);
+  }, [claimShortEscape]);
 
   useEffect(() => {
     if (session.startedAt !== null) {

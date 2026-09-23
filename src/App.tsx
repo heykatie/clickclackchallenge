@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
@@ -9,6 +9,7 @@ import { ReadyScreen } from "./screens/ReadyScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState } from "./state/appState";
+import { createEscapeHold } from "./state/escapeHold";
 import { createStartKeyGate } from "./state/startKey";
 
 function App() {
@@ -21,12 +22,66 @@ function App() {
   const startKeyGate = useRef(createStartKeyGate(window));
   const saveRequest = useRef<Promise<ScoreRecord> | null>(null);
   const savedResult = useRef<typeof state.latestResult>(null);
+  const shortEscapeRef = useRef<(() => void) | null>(null);
+  const claimShortEscape = useCallback((handler: (() => void) | null) => {
+    shortEscapeRef.current = handler;
+  }, []);
+  const screenRef = useRef(state.screen);
+  const statusRef = useRef(status);
+  useEffect(() => {
+    screenRef.current = state.screen;
+    statusRef.current = status;
+  });
   if (trackedScreen !== state.screen) {
     setTrackedScreen(state.screen);
     if (state.screen !== "results") {
       setStanding(null);
     }
   }
+
+  useEffect(() => {
+    const hold = createEscapeHold(() => {
+      if (screenRef.current === "setup" || statusRef.current !== "ready") {
+        return;
+      }
+      dispatch({ type: "ENTER_SETUP" });
+    });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        screenRef.current === "setup" ||
+        screenRef.current === "leaderboard" ||
+        statusRef.current !== "ready"
+      ) {
+        return;
+      }
+      if (!hold.keyDown(event)) {
+        return;
+      }
+      event.preventDefault();
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (screenRef.current === "setup" || statusRef.current !== "ready") {
+        hold.cancel();
+        return;
+      }
+      const result = hold.keyUp(event);
+      if (result === "ignore") {
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (result === "short") {
+        shortEscapeRef.current?.();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      hold.cancel();
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +270,7 @@ function App() {
             dispatch({ type: "ENTER_TYPING" });
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          claimShortEscape={claimShortEscape}
         />
       );
     case "typing":
@@ -226,17 +282,12 @@ function App() {
           session={state.currentTest}
           ignoreHeldKey={(key) => startKeyGate.current.isBlocked(key)}
           onType={(key) => {
-            if (key.key === "Escape") {
-              if (!key.repeat) {
-                dispatch({ type: "ENTER_READY" });
-              }
-              return;
-            }
             dispatch({ type: "TYPE_KEY", ...key });
           }}
           onExpire={() => dispatch({ type: "FINISH_TEST" })}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
           onReturnToReady={() => dispatch({ type: "ENTER_READY" })}
+          claimShortEscape={claimShortEscape}
         />
       );
     case "results":
@@ -255,6 +306,7 @@ function App() {
             void leaveResults(null);
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          claimShortEscape={claimShortEscape}
         />
       );
     case "leaderboard":
@@ -269,6 +321,7 @@ function App() {
             }
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          claimShortEscape={claimShortEscape}
         />
       );
     }

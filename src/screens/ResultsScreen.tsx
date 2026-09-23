@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, nameToSaveOnEnter, normalizeName } from "../features/results/nameRules";
-import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
+import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
 
@@ -14,6 +14,7 @@ type ResultsScreenProps = {
   onSave: (name: string) => void;
   onViewLeaderboard: () => void;
   onSetup: () => void;
+  claimShortEscape: (handler: (() => void) | null) => void;
 };
 
 export function ResultsScreen({
@@ -23,6 +24,7 @@ export function ResultsScreen({
   onSave,
   onViewLeaderboard,
   onSetup,
+  claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(NAME_IDLE_SECONDS);
@@ -46,6 +48,17 @@ export function ResultsScreen({
     setIdlePhase(waitingForName);
     setSecondsLeft(NAME_IDLE_SECONDS);
   }
+
+  useEffect(() => {
+    claimShortEscape(() => {
+      if (savingRef.current || left.current || !shortEscapeOpensLeaderboard(standingRef.current)) {
+        return;
+      }
+      left.current = true;
+      onViewRef.current();
+    });
+    return () => claimShortEscape(null);
+  }, [claimShortEscape]);
 
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;

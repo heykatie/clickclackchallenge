@@ -103,6 +103,7 @@ export function EventSetupScreen({
 
   return (
     <main className="screen" ref={screenRef} tabIndex={-1}>
+      <span className="logo-badge" aria-hidden="true" />
       <h1>Event setup</h1>
       <p className="setup-hint">Arrow keys move. Enter selects.</p>
       <fieldset>
