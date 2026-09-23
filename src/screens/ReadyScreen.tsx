@@ -59,7 +59,8 @@ export function ReadyScreen({ highScore, onStart, onSetup }: ReadyScreenProps) {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       event.preventDefault();
-      if (asleepRef.current) {
+      const onRoll = event.target instanceof Element && event.target.closest(".screensaver") !== null;
+      if (asleepRef.current || onRoll) {
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);
