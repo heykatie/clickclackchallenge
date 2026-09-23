@@ -4,6 +4,32 @@ An offline typing contest for a landscape iPad and a giant physical keyboard. It
 
 Scores stay on the device in IndexedDB. After the app is installed from a public HTTPS URL, the booth loop works with no network.
 
+Play it at [clickclackchallenge.vercel.app](https://clickclackchallenge.vercel.app/). Use a landscape window at full screen.
+
+## Demo
+
+The five booth screens, in order, on the 4:3 stage.
+
+<img src="docs/screenshots/01-event-setup.png" alt="Event Setup, with Story selected and Start fresh" width="840">
+
+**Event Setup.** The operator chooses the length, the mode, and whether the leaderboard continues. Story uses 60 seconds.
+
+<img src="docs/screenshots/02-ready.png" alt="Ready screen: GIANT keyboard typing contest, press any key to start" width="840">
+
+**Ready.** Any key except Escape starts the test. That opening key is not scored.
+
+<img src="docs/screenshots/03-typing.png" alt="Typing screen, mid-sentence, with live WPM, time, and accuracy" width="840">
+
+**Typing.** The passage, live WPM, accuracy, and the time remaining.
+
+<img src="docs/screenshots/04-results.png" alt="Results screen with a new high score, a Plinko drop, and a name field" width="840">
+
+**Results.** A Top 20 score at 70% accuracy or better can enter a name. Displayed WPM above 50 wins a Plinko drop.
+
+<img src="docs/screenshots/05-leaderboard.png" alt="Leaderboard showing the current score in the Top 5" width="840">
+
+**Leaderboard.** The event Top 5, then the next player.
+
 ## Booth loop
 
 1. **Event Setup.** The operator chooses 30 or 60 seconds, a game mode, and either Start fresh or Continue previous event. Arrow keys move. Enter selects. Story always uses 60 seconds.
@@ -40,13 +66,16 @@ A long-press on the logo opens Event Setup from Ready, Typing, Results, and the 
 
 ## Stack
 
-- React 19 and TypeScript
-- Vite 8
-- IndexedDB through `idb`
-- `vite-plugin-pwa` for the installable offline app
-- Vitest and oxlint
+| Piece | Role |
+| --- | --- |
+| React 19 and TypeScript | The interface |
+| Vite 8 | Dev server and production build |
+| IndexedDB through `idb` | Scores stored on the device |
+| `vite-plugin-pwa` | The installable offline app |
+| Vitest and oxlint | Tests and lint |
+| Fredoka, Nunito, Atkinson Hyperlegible | Display, interface, and typing type |
 
-There is no backend. Node.js 22 is required (`.nvmrc`).
+There is no backend and no environment variables. Node.js 22 is required (`.nvmrc`).
 
 ## Run locally
 
@@ -56,7 +85,7 @@ npm install
 npm run dev
 ```
 
-Open the printed `http://localhost` URL. `localhost` is a secure page, so scores can be saved. A plain `http://` address on the local network is not, and starting an event there fails.
+Open the printed `http://localhost` URL and walk the loop in the demo above. `localhost` is a secure page, so scores can be saved. A plain `http://` address on the local network is not, and starting an event there fails.
 
 `npm run dev` does not register the service worker. Use a production build to try install and offline behavior.
 
@@ -84,7 +113,7 @@ On Vercel:
 
 Netlify and Cloudflare Pages use the same build command and output directory. Do not deploy to a path such as `/clickclackchallenge/`. The service worker and manifest expect `/`.
 
-After the first deploy, open the `https://` URL, let the app finish loading, and use that URL for the booth. Later pushes to `main` update the same site.
+The live site is [clickclackchallenge.vercel.app](https://clickclackchallenge.vercel.app/). Open it, let the app finish loading, and use that URL for the booth. Later pushes to `main` update the same site.
 
 ## Documentation
 
