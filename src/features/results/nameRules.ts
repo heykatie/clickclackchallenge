@@ -24,6 +24,11 @@ export function isEnterKey(key: { key: string; code?: string }): boolean {
   return key.key === "Enter" || key.key === "NumpadEnter" || key.code === "Enter" || key.code === "NumpadEnter";
 }
 
+/** The name Enter should save: the field, then the latest state, then letters typed before the field existed. */
+export function nameToSaveOnEnter(fieldValue: string, stateValue: string, pending: string): string | null {
+  return normalizeName(fieldValue || stateValue || pending);
+}
+
 /** A letter to put in the name when the field is not focused yet. Null lets the browser handle the key. */
 export function nameCharacterFromKey(
   key: { key: string; repeat: boolean; metaKey: boolean; ctrlKey: boolean; altKey: boolean },

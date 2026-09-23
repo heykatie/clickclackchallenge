@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isEnterKey, nameCharacterFromKey, normalizeName } from "./nameRules";
+import { isEnterKey, nameCharacterFromKey, nameToSaveOnEnter, normalizeName } from "./nameRules";
 
 describe("normalizeName", () => {
   it("trims a name and keeps the saved value within 20 characters", () => {
@@ -23,6 +23,15 @@ describe("normalizeName", () => {
     expect(normalizeName("badass")).toBeNull();
     expect(normalizeName("fuuck")).toBeNull();
     expect(normalizeName("Hell")).toBeNull();
+    expect(normalizeName("boob")).toBeNull();
+    expect(normalizeName("BOOBIE")).toBeNull();
+    expect(normalizeName("boobies")).toBeNull();
+    expect(normalizeName("b00b")).toBeNull();
+    expect(normalizeName("b o o b")).toBeNull();
+    expect(normalizeName("titties")).toBeNull();
+    expect(normalizeName("T1TTIES")).toBeNull();
+    expect(normalizeName("penis")).toBeNull();
+    expect(normalizeName("p3nis")).toBeNull();
   });
 
   it("keeps an ordinary name that only shares those letters", () => {
@@ -30,6 +39,10 @@ describe("normalizeName", () => {
     expect(normalizeName("hello")).toBe("hello");
     expect(normalizeName("bass")).toBe("bass");
     expect(normalizeName("Dickey")).toBe("Dickey");
+    expect(normalizeName("Bobby")).toBe("Bobby");
+    expect(normalizeName("Book")).toBe("Book");
+    expect(normalizeName("Titus")).toBe("Titus");
+    expect(normalizeName("Penny")).toBe("Penny");
   });
 });
 
@@ -39,6 +52,20 @@ describe("isEnterKey", () => {
     expect(isEnterKey({ key: "NumpadEnter" })).toBe(true);
     expect(isEnterKey({ key: "Unidentified", code: "Enter" })).toBe(true);
     expect(isEnterKey({ key: "a", code: "KeyA" })).toBe(false);
+  });
+});
+
+describe("nameToSaveOnEnter", () => {
+  it("saves the name from the field, and falls back to state or early letters", () => {
+    expect(nameToSaveOnEnter("Ann", "", "")).toBe("Ann");
+    expect(nameToSaveOnEnter("", "Ann", "")).toBe("Ann");
+    expect(nameToSaveOnEnter("", "", "Ann")).toBe("Ann");
+    expect(nameToSaveOnEnter("  Ann  ", "nope", "")).toBe("Ann");
+  });
+
+  it("does not save an empty or blocked name", () => {
+    expect(nameToSaveOnEnter("   ", "", "")).toBeNull();
+    expect(nameToSaveOnEnter("shit", "Ann", "")).toBeNull();
   });
 });
 

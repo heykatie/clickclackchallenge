@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, normalizeName } from "../features/results/nameRules";
+import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, nameToSaveOnEnter, normalizeName } from "../features/results/nameRules";
 import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import type { TestResult } from "../state/appState";
@@ -34,6 +34,7 @@ export function ResultsScreen({
   const onSaveRef = useRef(onSave);
   const savingRef = useRef(saving);
   const nameRef = useRef<HTMLInputElement>(null);
+  const nameStateRef = useRef("");
   const pendingName = useRef("");
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
@@ -51,15 +52,30 @@ export function ResultsScreen({
     onSaveRef.current = onSave;
     savingRef.current = saving;
     standingRef.current = standing;
-    if (standing && !standing.showNameEntry) {
+    nameStateRef.current = name;
+    const field = nameRef.current;
+    if (field && document.activeElement !== field && !(document.activeElement instanceof HTMLButtonElement)) {
+      field.focus();
+    } else if (standing && !standing.showNameEntry) {
       screenRef.current?.focus();
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      const current = standingRef.current;
-      if (event.repeat || !current || current.showNameEntry || savingRef.current || left.current) {
+      if (event.repeat || savingRef.current || left.current) {
         return;
       }
-      if (!isViewLeaderboardKey(event)) {
+      const nameField = nameRef.current;
+      if (nameField && isEnterKey(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        const nameToSave = nameToSaveOnEnter(nameField.value, nameStateRef.current, pendingName.current);
+        if (nameToSave !== null) {
+          left.current = true;
+          onSaveRef.current(nameToSave);
+        }
+        return;
+      }
+      const current = standingRef.current;
+      if (!current || current.showNameEntry || !isViewLeaderboardKey(event)) {
         return;
       }
       event.preventDefault();
@@ -88,14 +104,7 @@ export function ResultsScreen({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isEnterKey(event) && standing?.showNameEntry && !event.repeat) {
-        const typed = nameRef.current?.value || pendingName.current;
-        const nameToSave = normalizeName(typed);
-        if (nameToSave !== null && !savingRef.current) {
-          event.preventDefault();
-          event.stopPropagation();
-          onSaveRef.current(nameToSave);
-        }
+      if (isEnterKey(event)) {
         return;
       }
       const field = nameRef.current;
@@ -111,7 +120,11 @@ export function ResultsScreen({
         pendingName.current = (pendingName.current + character).slice(0, MAX_NAME_LENGTH);
         return;
       }
-      setName((current) => (current + character).slice(0, MAX_NAME_LENGTH));
+      setName((current) => {
+        const next = (current + character).slice(0, MAX_NAME_LENGTH);
+        nameStateRef.current = next;
+        return next;
+      });
       field.focus();
     };
     window.addEventListener("keydown", onKeyDown, true);
@@ -183,14 +196,17 @@ export function ResultsScreen({
             value={name}
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              nameStateRef.current = event.target.value;
+              setName(event.target.value);
+            }}
             aria-invalid={problem === "blocked"}
             onKeyDown={(event) => {
               if (!isEnterKey(event)) {
                 return;
               }
               event.preventDefault();
-              const nameToSave = normalizeName(event.currentTarget.value);
+              const nameToSave = nameToSaveOnEnter(event.currentTarget.value, name, pendingName.current);
               if (nameToSave !== null) {
                 onSave(nameToSave);
               }
