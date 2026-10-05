@@ -87,13 +87,13 @@ export function ResultsScreen({
       screenRef.current?.focus();
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || savingRef.current || left.current) {
-        return;
-      }
       const nameField = nameRef.current;
       if (nameField && isEnterKey(event)) {
         event.preventDefault();
         event.stopPropagation();
+        if (event.repeat || savingRef.current || left.current) {
+          return;
+        }
         if (!acceptsLeaveKey(shownAt, performance.now())) {
           return;
         }
@@ -102,6 +102,9 @@ export function ResultsScreen({
           left.current = true;
           onSaveRef.current(nameToSave);
         }
+        return;
+      }
+      if (event.repeat || savingRef.current || left.current) {
         return;
       }
       const current = standingRef.current;
@@ -225,19 +228,6 @@ export function ResultsScreen({
               setName(event.target.value);
             }}
             aria-invalid={problem === "blocked"}
-            onKeyDown={(event) => {
-              if (!isEnterKey(event)) {
-                return;
-              }
-              event.preventDefault();
-              if (!acceptsLeaveKey(shownAt, performance.now())) {
-                return;
-              }
-              const nameToSave = nameToSaveOnEnter(event.currentTarget.value, name, pendingName.current);
-              if (nameToSave !== null) {
-                onSave(nameToSave);
-              }
-            }}
           />
           {problem === "blocked" ? <p className="name-hint">Pick a different name.</p> : null}
         </label>
