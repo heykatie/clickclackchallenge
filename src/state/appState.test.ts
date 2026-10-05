@@ -202,6 +202,16 @@ describe("appReducer", () => {
     expect(ready.latestResult).toBeNull();
   });
 
+  it("does not finish the test again once Results is showing", () => {
+    const started = appReducer(
+      appReducer(initialState, { type: "ENTER_TYPING" }),
+      { type: "TYPE_KEY", key: "T", repeat: false, now: 0 },
+    );
+    const results = appReducer(started, { type: "FINISH_TEST" });
+    expect(results.screen).toBe("results");
+    expect(appReducer(results, { type: "FINISH_TEST" })).toBe(results);
+  });
+
   it("opens Event Setup from Results without keeping the unsaved result", () => {
     const finished = appReducer(
       appReducer(initialState, { type: "ENTER_TYPING" }),
