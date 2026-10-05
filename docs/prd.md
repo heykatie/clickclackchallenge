@@ -915,6 +915,10 @@ The leaderboard should not expose:
 
 Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
 
+### House scores on an empty board
+
+While the active event has no eligible score, the Leaderboard shows two arcade-style house scores in places 1 and 2: Clicky at 60 WPM and Clacky at 45 WPM. The other three places stay empty. House scores are display only. They are never saved, never ranked against real scores, and never count toward the Ready high score, Results placement, Plinko, or the rolling high-score list. The first eligible score replaces both of them, even when it is lower. They never get the YOU marker.
+
 ---
 
 ## 17. High Score
@@ -1948,6 +1952,7 @@ holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 a short Escape press on Ready does not start the test and opens the rolling high-score list
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
 arrow keys choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
+an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
 the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name

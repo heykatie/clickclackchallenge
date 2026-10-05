@@ -63,3 +63,34 @@ export interface LeaderboardSlot {
 export function topFiveSlots(ranked: readonly RankedScore[]): LeaderboardSlot[] {
   return Array.from({ length: 5 }, (_, index) => ({ rank: index + 1, entry: ranked[index] ?? null }));
 }
+
+function houseScore(rank: number, name: string, displayedWpm: number): RankedScore {
+  return {
+    rank,
+    isTop5: true,
+    isTop10: true,
+    score: {
+      id: `house-${rank}`,
+      eventId: "house",
+      name,
+      rawWpm: displayedWpm,
+      displayedWpm,
+      accuracy: 100,
+      correctCharacters: 0,
+      correctAttempts: 0,
+      incorrectAttempts: 0,
+      durationSeconds: 30,
+      testMode: "famous-lines",
+      passageSetId: "house",
+      createdAt: "1970-01-01T00:00:00.000Z",
+    },
+  };
+}
+
+/** Arcade-style targets for an empty board. Display only: never saved, ranked, or counted for a high score or prize. */
+const HOUSE_SCORES: readonly RankedScore[] = [houseScore(1, "Clicky", 60), houseScore(2, "Clacky", 45)];
+
+/** The Leaderboard's entries: the ranked event scores, or the house scores until the first real one exists. */
+export function boardEntries(ranked: readonly RankedScore[]): readonly RankedScore[] {
+  return ranked.length > 0 ? ranked : HOUSE_SCORES;
+}

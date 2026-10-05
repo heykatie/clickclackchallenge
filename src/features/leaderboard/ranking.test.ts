@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreRecord } from "../../db/persistence";
 import { calculateWpm, displayedWpm } from "../typing/scoring";
-import { allTimeScores, highScore, rankScores, topFiveSlots } from "./ranking";
+import { allTimeScores, boardEntries, highScore, rankScores, topFiveSlots } from "./ranking";
 
 function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm" | "accuracy" | "createdAt">): ScoreRecord {
   return {
@@ -233,3 +233,26 @@ describe("topFiveSlots", () => {
     expect(slots.map((slot) => slot.entry?.score.displayedWpm)).toEqual([27, 26, 25, 24, 23]);
   });
 });
+
+describe("boardEntries", () => {
+  it("shows two arcade-style house scores on an empty board", () => {
+    const entries = boardEntries([]);
+    expect(entries.map((entry) => [entry.rank, entry.score.name, entry.score.displayedWpm])).toEqual([
+      [1, "Clicky", 60],
+      [2, "Clacky", 45],
+    ]);
+  });
+
+  it("shows the house scores when every saved score is below the gates", () => {
+    const entries = boardEntries(
+      rankScores([score({ displayedWpm: 80, accuracy: 40, createdAt: "2026-09-22T00:00:00.000Z" })]),
+    );
+    expect(entries.map((entry) => entry.score.name)).toEqual(["Clicky", "Clacky"]);
+  });
+
+  it("drops the house scores once one real score is on the board", () => {
+    const ranked = rankScores([score({ displayedWpm: 20, accuracy: 95, createdAt: "2026-09-22T00:00:00.000Z" })]);
+    expect(boardEntries(ranked)).toBe(ranked);
+  });
+});
+

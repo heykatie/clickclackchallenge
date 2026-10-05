@@ -1836,6 +1836,7 @@ Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
 the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
+an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
 ```
 

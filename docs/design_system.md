@@ -187,7 +187,7 @@ Use a large soft-white field with a persistent “Name” label, Nunito text, an
 
 ### Score panel
 
-Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
+Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples. The only invented rows are the two house scores on an empty Leaderboard, defined in `docs/prd.md` §16.
 
 ### Leaderboard rows
 
@@ -361,9 +361,9 @@ Returning to ready screen in 5s
 
 ### Empty and partial boards
 
-Show actual event data rather than filling missing places with sample contestants.
+Show actual event data. The one exception is the board with no eligible score, which shows the two house scores from `docs/prd.md` §16 (Clicky and Clacky) styled like ordinary rows.
 
-Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Show “No scores yet” above the panel when the board is empty. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
+Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
 
 ### Automatic return
 

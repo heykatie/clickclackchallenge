@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
-import { rankScores, topFiveSlots } from "../features/leaderboard/ranking";
+import { boardEntries, rankScores, topFiveSlots } from "../features/leaderboard/ranking";
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { ScoreRow } from "./ScoreRow";
@@ -31,8 +31,7 @@ export function LeaderboardScreen({
   const left = useRef(false);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const onNextPlayerRef = useRef(onNextPlayer);
-  const slots = topFiveSlots(rankScores(scores));
-  const empty = slots.every((slot) => slot.entry === null);
+  const slots = topFiveSlots(boardEntries(rankScores(scores)));
   const logoHold = useLogoHold(() => {
     left.current = true;
     onSetup();
@@ -107,7 +106,6 @@ export function LeaderboardScreen({
       />
       <p className="score-kicker">TOP 5</p>
       <h1>Leaderboard</h1>
-      {empty ? <p className="leaderboard-empty">No scores yet</p> : null}
       <ol className="score-card score-rows leaderboard-rows">
         {slots.map((slot) => (
           <ScoreRow

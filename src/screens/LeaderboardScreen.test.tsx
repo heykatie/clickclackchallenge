@@ -67,10 +67,22 @@ describe("LeaderboardScreen", () => {
     expect(screen.queryByText("No scores yet")).toBeNull();
   });
 
-  it("says No scores yet on an empty board and does not crown an empty first place", () => {
+  it("fills an empty board with two house scores and three empty places", () => {
     renderBoard([]);
-    expect(screen.getByText("No scores yet")).toBeTruthy();
-    expect(rows()[0]?.className).not.toContain("is-first");
+    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky60WPM", "2Clacky45WPM", "3——", "4——", "5——"]);
+    expect(screen.queryByText("No scores yet")).toBeNull();
+    expect(screen.queryByText("YOU")).toBeNull();
+  });
+
+  it("does not crown an empty first place", () => {
+    renderBoard([]);
+    expect(rows()[2]?.className).toContain("is-empty");
+    expect(rows()[2]?.className).not.toContain("is-first");
+  });
+
+  it("replaces the house scores with the first real score", () => {
+    renderBoard([score("a", "Alex", 20, 0)], "a");
+    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2——", "3——", "4——", "5——"]);
   });
 
   it("marks the just-saved result with YOU, matching the score and not the name", () => {
