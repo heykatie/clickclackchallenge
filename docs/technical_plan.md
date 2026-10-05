@@ -764,11 +764,13 @@ Do not derive IDs from:
 ---
 ## 9. IndexedDB Structure
 
-Recommended database:
+Active database:
 
 ```text
-typing-test-db
+clickclackchallenge-db
 ```
+
+The previous name `typing-test-db` is only a compatibility source. On first open, the app copies events, scores, and settings into `clickclackchallenge-db` when that legacy database is already present. Existing destination records are kept, including newer ones. The copy and a completion record (`settings` key `imported-legacy-booth`) commit in one transaction. A failed copy rolls back the destination write and leaves `typing-test-db` unchanged so a later open can retry. A fresh install does not create `typing-test-db`.
 
 Object stores:
 
@@ -1942,6 +1944,11 @@ leaderboard can be reconstructed from persisted scores
 data survives page reload
 submitting Save Score twice for the same result inserts one score row
 View Leaderboard with no name inserts one score row with name null
+fresh install uses clickclackchallenge-db and does not create typing-test-db
+legacy events, scores, and settings are copied once
+newer destination records win collisions
+a failed copy rolls back and can be retried
+typing-test-db remains after a successful or failed import
 ```
 
 ---

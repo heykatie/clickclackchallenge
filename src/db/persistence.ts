@@ -67,7 +67,7 @@ export interface NewScore {
   passageSetId: string;
 }
 
-interface TypingTestDB {
+interface ClickClackChallengeDB {
   events: {
     key: string;
     value: EventRecord;
@@ -84,11 +84,14 @@ interface TypingTestDB {
   };
 }
 
-export const DB_NAME = "typing-test-db";
+export const DB_NAME = "clickclackchallenge-db";
+/** Previous booth database. Read it during migration; do not delete or update it. */
+export const LEGACY_DB_NAME = "typing-test-db";
+const MIGRATION_KEY = "imported-legacy-booth";
 export const SETTINGS_KEY = "app";
 const SCHEMA_VERSION = 3;
 
-let databasePromise: Promise<IDBPDatabase<TypingTestDB>> | null = null;
+let databasePromise: Promise<IDBPDatabase<ClickClackChallengeDB>> | null = null;
 
 function defaultSettings(): AppSettings {
   return {
@@ -98,9 +101,9 @@ function defaultSettings(): AppSettings {
   };
 }
 
-export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
+export function openDatabase(): Promise<IDBPDatabase<ClickClackChallengeDB>> {
   if (!databasePromise) {
-    databasePromise = openDB<TypingTestDB>(DB_NAME, SCHEMA_VERSION, {
+    databasePromise = openDB<ClickClackChallengeDB>(DB_NAME, SCHEMA_VERSION, {
       async upgrade(database, oldVersion, _newVersion, transaction) {
         if (oldVersion < 1) {
           const events = database.createObjectStore("events", { keyPath: "id" });
@@ -116,19 +119,27 @@ export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
 
         if (oldVersion === 1) {
           await backfillTestMode(
-            transaction as IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+            transaction as IDBPTransaction<ClickClackChallengeDB, ["events", "scores"], "versionchange">,
           );
         }
 
         if (oldVersion < 3) {
           await renameStoredRaceMode(
-            transaction as IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+            transaction as IDBPTransaction<ClickClackChallengeDB, ["events", "scores"], "versionchange">,
           );
         }
       },
       terminated() {
         databasePromise = null;
       },
+    }).then(async (database) => {
+      try {
+        await importLegacyBooth(database);
+        return database;
+      } catch (error) {
+        database.close();
+        throw error;
+      }
     }).catch((error: unknown) => {
       databasePromise = null;
       throw error;
@@ -138,7 +149,7 @@ export function openDatabase(): Promise<IDBPDatabase<TypingTestDB>> {
 }
 
 async function backfillTestMode(
-  transaction: IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+  transaction: IDBPTransaction<ClickClackChallengeDB, ["events", "scores"], "versionchange">,
 ): Promise<void> {
   let eventCursor = await transaction.objectStore("events").openCursor();
   while (eventCursor) {
@@ -163,7 +174,7 @@ async function backfillTestMode(
 }
 
 async function renameStoredRaceMode(
-  transaction: IDBPTransaction<TypingTestDB, ["events", "scores"], "versionchange">,
+  transaction: IDBPTransaction<ClickClackChallengeDB, ["events", "scores"], "versionchange">,
 ): Promise<void> {
   let eventCursor = await transaction.objectStore("events").openCursor();
   while (eventCursor) {
@@ -180,6 +191,77 @@ async function renameStoredRaceMode(
       await scoreCursor.update({ ...scoreCursor.value, testMode: "famous-lines" });
     }
     scoreCursor = await scoreCursor.continue();
+  }
+}
+
+async function importLegacyBooth(database: IDBPDatabase<ClickClackChallengeDB>): Promise<void> {
+  if (await database.get("settings", MIGRATION_KEY)) {
+    return;
+  }
+
+  let absent = false;
+  const legacy = await openDB<ClickClackChallengeDB>(LEGACY_DB_NAME, undefined, {
+    upgrade(_database, oldVersion, _newVersion, transaction) {
+      // Opening a missing database would create it. Abort that creation.
+      if (oldVersion === 0) {
+        absent = true;
+        void transaction.done.catch(() => undefined);
+        transaction.abort();
+      }
+    },
+  }).catch((error: unknown) => {
+    if (absent) {
+      return null;
+    }
+    throw error;
+  });
+  if (!legacy) {
+    return;
+  }
+
+  try {
+    const read = legacy.transaction(["events", "scores", "settings"]);
+    const [events, scores, settings] = await Promise.all([
+      read.objectStore("events").getAll(),
+      read.objectStore("scores").getAll(),
+      read.objectStore("settings").get(SETTINGS_KEY),
+    ]);
+    await read.done;
+
+    const write = database.transaction(["events", "scores", "settings"], "readwrite");
+    const done = write.done;
+    try {
+      if (!(await write.objectStore("settings").get(MIGRATION_KEY))) {
+        for (const event of events) {
+          if (!(await write.objectStore("events").get(event.id))) {
+            await write.objectStore("events").put(normalizeEvent(event));
+          }
+        }
+        for (const score of scores) {
+          if (!(await write.objectStore("scores").get(score.id))) {
+            await write.objectStore("scores").put(normalizeScore(score));
+          }
+        }
+        if (settings && !(await write.objectStore("settings").get(SETTINGS_KEY))) {
+          await write.objectStore("settings").put(
+            { ...settings, schemaVersion: SCHEMA_VERSION },
+            SETTINGS_KEY,
+          );
+        }
+        await write.objectStore("settings").put(defaultSettings(), MIGRATION_KEY);
+      }
+      await done;
+    } catch (error) {
+      try {
+        write.abort();
+      } catch {
+        // The transaction may already be aborting.
+      }
+      await done.catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    legacy.close();
   }
 }
 
