@@ -369,7 +369,7 @@ Preserve five row positions. An unoccupied place keeps its rank in an outlined c
 
 - Start the return countdown when the leaderboard appears.
 - The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
-- NEXT PLAYER returns immediately to Ready. Space, Enter, and a short Escape press do the same. Countdown completion performs the same reset.
+- NEXT PLAYER returns immediately to Ready. Space, Enter, and a short Escape press do the same. An arrow key moves focus to it, shown with the standard focus outline. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 
 ## 14. Motion

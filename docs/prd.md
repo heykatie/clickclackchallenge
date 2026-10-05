@@ -940,6 +940,8 @@ NEXT PLAYER
 
 Selecting Next Player should immediately return to the Ready screen. Space, Enter, Escape, and a tap on the logo badge do the same. The saved scores stay.
 
+Arrow keys choose an action on Results and the Leaderboard, the same way they move the cursor on Event Setup. On Results, Up and Down move between the name field, SAVE SCORE (only while the name can be saved), and VIEW LEADERBOARD; Left and Right move between the buttons, and inside the name field they move the text cursor. On the Leaderboard an arrow chooses NEXT PLAYER. Enter or Space on a chosen button does what that button does, so Enter on VIEW LEADERBOARD leaves without a name even when one is typed.
+
 For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Taps and buttons work at once. Holding Escape still opens Event Setup.
 
 The app should also automatically return to Ready after a short delay.
@@ -1945,6 +1947,7 @@ Space, Enter, or a short Escape press on the Leaderboard returns to Ready
 holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 a short Escape press on Ready does not start the test and opens the rolling high-score list
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
+arrow keys choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name

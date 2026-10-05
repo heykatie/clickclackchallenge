@@ -2012,6 +2012,8 @@ leaderboard auto reset does not run while name entry is active
 an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
 an allowed Results name saves 20 seconds after the last change, with Saving your score in {n}s visible for the last 5
 Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
+arrow keys move focus between the Results name field and its enabled buttons, keep Left and Right for the text cursor inside the field, and choose NEXT PLAYER on the Leaderboard (moveActionFocus)
+Enter or Space on a focused Results button runs that button, so Enter on VIEW LEADERBOARD views without saving the typed name
 Leaderboard renders no more than five rows
 ```
 

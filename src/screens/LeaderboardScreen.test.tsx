@@ -151,4 +151,14 @@ describe("LeaderboardScreen", () => {
     expect(onSetup).toHaveBeenCalledOnce();
     expect(onNextPlayer).not.toHaveBeenCalled();
   });
+
+  it("chooses NEXT PLAYER with an arrow key, and Enter on it returns to Ready", () => {
+    fakeBoothClock();
+    const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: /NEXT PLAYER/ }));
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onNextPlayer).toHaveBeenCalledOnce();
+  });
 });

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
 import { rankScores, topFiveSlots } from "../features/leaderboard/ranking";
+import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { ScoreRow } from "./ScoreRow";
 import { useLogoHold } from "./useLogoHold";
@@ -28,6 +29,7 @@ export function LeaderboardScreen({
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
   const left = useRef(false);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
   const onNextPlayerRef = useRef(onNextPlayer);
   const slots = topFiveSlots(rankScores(scores));
   const empty = slots.every((slot) => slot.entry === null);
@@ -75,6 +77,13 @@ export function LeaderboardScreen({
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
+      const nextButton = nextButtonRef.current;
+      const current = document.activeElement === nextButton ? "next" : null;
+      if (nextButton && moveActionFocus(["next"], current, event.key) !== null) {
+        event.preventDefault();
+        nextButton.focus();
+        return;
+      }
       if (event.repeat || !isLeaderboardLeaveKey(event)) {
         return;
       }
@@ -110,7 +119,7 @@ export function LeaderboardScreen({
           />
         ))}
       </ol>
-      <button type="button" className="next-player-button" onClick={leave}>
+      <button type="button" ref={nextButtonRef} className="next-player-button" onClick={leave}>
         NEXT PLAYER <span aria-hidden="true">→</span>
       </button>
       {secondsLeft <= RESET_COUNTDOWN_AT && secondsLeft > 0 ? (
