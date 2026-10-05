@@ -55,11 +55,7 @@ function App() {
       dispatch({ type: "ENTER_SETUP" });
     });
     const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        screenRef.current === "setup" ||
-        screenRef.current === "leaderboard" ||
-        statusRef.current !== "ready"
-      ) {
+      if (screenRef.current === "setup" || statusRef.current !== "ready") {
         return;
       }
       if (!hold.keyDown(event)) {

@@ -28,17 +28,20 @@ async function renderReady(scores: ScoreRecord[] = [qualifying]) {
   listAllScores.mockResolvedValue(scores);
   const onStart = vi.fn();
   const onSetup = vi.fn();
+  let shortEscape: (() => void) | null = null;
   render(
     <ReadyScreen
       highScore={{ displayedWpm: 60, name: "Alex" }}
       onStart={onStart}
       onSetup={onSetup}
-      claimShortEscape={() => {}}
+      claimShortEscape={(handler) => {
+        shortEscape = handler;
+      }}
     />,
   );
   // Let the all-time scores load.
   await act(async () => {});
-  return { onStart, onSetup };
+  return { onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
 
 /** A tap lands its pointerup on whatever screen is showing once pointerdown has been handled. */
@@ -94,6 +97,21 @@ describe("ReadyScreen", () => {
     tapLogo();
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     expect(onStart).not.toHaveBeenCalled();
+  });
+
+  it("opens the rolling list on a short Escape, like a logo tap, and closes it on the next", async () => {
+    const { onStart, shortEscape } = await renderReady();
+    shortEscape();
+    expect(screen.getByText("HIGH SCORES")).toBeTruthy();
+    shortEscape();
+    expect(screen.queryByText("HIGH SCORES")).toBeNull();
+    expect(onStart).not.toHaveBeenCalled();
+  });
+
+  it("does nothing on a short Escape when there is no score to roll", async () => {
+    const { shortEscape } = await renderReady([]);
+    shortEscape();
+    expect(screen.queryByText("HIGH SCORES")).toBeNull();
   });
 
   it("opens Event Setup on a logo hold without starting the test", async () => {

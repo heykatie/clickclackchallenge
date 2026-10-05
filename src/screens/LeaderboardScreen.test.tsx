@@ -27,16 +27,19 @@ function score(id: string, name: string | null, displayedWpm: number, minute: nu
 function renderBoard(scores: ScoreRecord[], currentScoreId: string | null = null) {
   const onNextPlayer = vi.fn();
   const onSetup = vi.fn();
+  let shortEscape: (() => void) | null = null;
   render(
     <LeaderboardScreen
       scores={scores}
       currentScoreId={currentScoreId}
       onNextPlayer={onNextPlayer}
       onSetup={onSetup}
-      claimShortEscape={() => {}}
+      claimShortEscape={(handler) => {
+        shortEscape = handler;
+      }}
     />,
   );
-  return { onNextPlayer, onSetup };
+  return { onNextPlayer, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
 
 function rows() {
@@ -87,16 +90,33 @@ describe("LeaderboardScreen", () => {
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 
-  it("ignores Space, Enter, and Escape for the first second, then returns to Ready", () => {
+  it("ignores Space and Enter for the first second, then returns to Ready", () => {
     fakeBoothClock();
     const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
     fireEvent.keyDown(window, { key: " " });
     fireEvent.keyDown(window, { key: "Enter" });
-    fireEvent.keyDown(window, { key: "Escape" });
     expect(onNextPlayer).not.toHaveBeenCalled();
 
     act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
     fireEvent.keyDown(window, { key: " " });
+    expect(onNextPlayer).toHaveBeenCalledOnce();
+  });
+
+  it("does not leave on Escape key-down, so Escape can be held for Event Setup", () => {
+    fakeBoothClock();
+    const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onNextPlayer).not.toHaveBeenCalled();
+  });
+
+  it("returns to Ready on a short Escape after the first second, like a logo tap", () => {
+    fakeBoothClock();
+    const { onNextPlayer, shortEscape } = renderBoard([score("a", "Alex", 60, 0)]);
+    shortEscape();
+    expect(onNextPlayer).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    shortEscape();
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 

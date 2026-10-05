@@ -6,7 +6,7 @@ import {
   nameTimerPhase,
   nameTimerSeconds,
 } from "../features/results/nameTimeout";
-import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
+import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { useLogoHold } from "./useLogoHold";
@@ -63,18 +63,14 @@ export function ResultsScreen({
 
   const timeoutMessage = nameTimeoutMessage(phase, secondsLeft);
 
+  // A short Escape does what a logo tap does: save, with the name when it is allowed, and open Ready.
   useEffect(() => {
     claimShortEscape(() => {
-      if (
-        savingRef.current ||
-        left.current ||
-        !shortEscapeOpensLeaderboard(standingRef.current) ||
-        !acceptsLeaveKey(shownAt, performance.now())
-      ) {
+      if (savingRef.current || left.current || !acceptsLeaveKey(shownAt, performance.now())) {
         return;
       }
       left.current = true;
-      onViewRef.current();
+      onSaveAndReadyRef.current(normalizeName(nameStateRef.current));
     });
     return () => claimShortEscape(null);
   }, [claimShortEscape, shownAt]);
