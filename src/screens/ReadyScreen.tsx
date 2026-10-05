@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { listAllScores } from "../db/persistence";
 import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
-import { readyKeyDown } from "./readyKeys";
+import { readyKeyDown, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
 import { useLogoHold } from "./useLogoHold";
 
@@ -101,10 +101,10 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
   }
 
   function startFromPointer(event: React.PointerEvent<HTMLElement>) {
-    if (event.button !== 0) {
-      return;
+    const onLogo = event.target instanceof Element && event.target.closest(".logo-badge") !== null;
+    if (readyPointerUp({ button: event.button, onLogo }) === "start") {
+      onStartRef.current("");
     }
-    onStartRef.current("");
   }
 
   if (asleep) {
