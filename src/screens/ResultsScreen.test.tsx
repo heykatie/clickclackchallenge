@@ -225,6 +225,19 @@ describe("ResultsScreen arrow keys", () => {
     expect(document.activeElement).toBe(nameField());
   });
 
+  it("moves with Tab and Shift+Tab like Down and Up, never stopping on the logo", () => {
+    renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    const order: (Element | null)[] = [];
+    for (let i = 0; i < 4; i += 1) {
+      fireEvent.keyDown(window, { key: "Tab" });
+      order.push(document.activeElement);
+    }
+    expect(order).toEqual([button("SAVE SCORE"), button("VIEW LEADERBOARD"), nameField(), button("SAVE SCORE")]);
+    fireEvent.keyDown(window, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(nameField());
+  });
+
   it("moves between the buttons with Left and Right", () => {
     renderResults(ranked);
     fireEvent.change(nameField(), { target: { value: "Zed" } });
