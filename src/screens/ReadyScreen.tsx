@@ -88,9 +88,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
       const action = readyKeyDown(event.key, rolling);
       if (action === "wake") {
-        if (event.key !== "Escape") {
-          event.preventDefault();
-        }
+        event.preventDefault();
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);

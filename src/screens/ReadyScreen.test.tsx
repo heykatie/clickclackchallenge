@@ -108,6 +108,15 @@ describe("ReadyScreen", () => {
     expect(onStart).not.toHaveBeenCalled();
   });
 
+  it("keeps the rolling list up on Escape key-down, so the short press can close it", async () => {
+    const { shortEscape } = await renderReady();
+    shortEscape();
+    fireEvent.keyDown(screen.getByRole("main"), { key: "Escape" });
+    expect(screen.getByText("HIGH SCORES")).toBeTruthy();
+    shortEscape();
+    expect(screen.queryByText("HIGH SCORES")).toBeNull();
+  });
+
   it("does nothing on a short Escape when there is no score to roll", async () => {
     const { shortEscape } = await renderReady([]);
     shortEscape();

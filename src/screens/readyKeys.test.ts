@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest";
 import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 
 describe("readyKeyDown", () => {
-  it("returns to Ready for any key while the rolling list is up", () => {
+  it("returns to Ready for any key but Escape while the rolling list is up", () => {
     expect(readyKeyDown("a", true)).toBe("wake");
     expect(readyKeyDown(" ", true)).toBe("wake");
     expect(readyKeyDown("Enter", true)).toBe("wake");
-    expect(readyKeyDown("Escape", true)).toBe("wake");
+  });
+
+  it("leaves Escape on the rolling list to the short-press and hold handling", () => {
+    expect(readyKeyDown("Escape", true)).toBe("ignore");
   });
 
   it("does not start a test from Escape on Ready", () => {

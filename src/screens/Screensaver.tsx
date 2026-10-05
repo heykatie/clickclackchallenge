@@ -43,7 +43,8 @@ export function Screensaver({ scores, onWake }: ScreensaverProps) {
       // Waking on pointerdown would let the same tap's pointerup reach Ready and start a test.
       onPointerUp={onWake}
       onKeyDown={(event) => {
-        if (event.repeat) {
+        // Escape is handled on release, as a short press or a hold, like the logo badge.
+        if (event.repeat || event.key === "Escape") {
           return;
         }
         event.preventDefault();
