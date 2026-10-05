@@ -78,7 +78,7 @@ export function LeaderboardScreen({
     const onKeyDown = (event: KeyboardEvent) => {
       const nextButton = nextButtonRef.current;
       const current = document.activeElement === nextButton ? "next" : null;
-      if (nextButton && moveActionFocus(["next"], current, event.key) !== null) {
+      if (nextButton && moveActionFocus(["next"], current, event.key, { shiftKey: event.shiftKey }) !== null) {
         event.preventDefault();
         nextButton.focus();
         return;

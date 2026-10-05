@@ -97,15 +97,15 @@ export function ResultsScreen({
       const viewButton = viewButtonRef.current;
       const active = document.activeElement;
 
-      // Arrow keys choose between the name field and the buttons. Inside the field, Left and Right move the text cursor.
-      if (event.key.startsWith("Arrow")) {
+      // Arrow keys and Tab choose between the name field and the buttons. Inside the field, Left and Right move the text cursor.
+      if (event.key.startsWith("Arrow") || event.key === "Tab") {
         if (active === nameField && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
           return;
         }
         const targets = { name: nameField, save: saveButton && !saveButton.disabled ? saveButton : null, view: viewButton };
         const actions = (["name", "save", "view"] as const).filter((action) => targets[action] !== null);
         const current = actions.find((action) => targets[action] === active) ?? null;
-        const next = moveActionFocus(actions, current, event.key);
+        const next = moveActionFocus(actions, current, event.key, { shiftKey: event.shiftKey });
         if (next !== null) {
           event.preventDefault();
           targets[next]?.focus();

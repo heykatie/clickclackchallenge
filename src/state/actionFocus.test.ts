@@ -22,7 +22,14 @@ describe("moveActionFocus", () => {
     expect(moveActionFocus(["next"], "next", "ArrowLeft")).toBe("next");
   });
 
-  it("ignores keys that are not arrows", () => {
+  it("moves forward on Tab and back on Shift+Tab, like Down and Up", () => {
+    expect(moveActionFocus(results, "name", "Tab")).toBe("save");
+    expect(moveActionFocus(results, "view", "Tab")).toBe("name");
+    expect(moveActionFocus(results, "save", "Tab", { shiftKey: true })).toBe("name");
+    expect(moveActionFocus(results, "name", "Tab", { shiftKey: true })).toBe("view");
+  });
+
+  it("ignores keys that are not arrows or Tab", () => {
     expect(moveActionFocus(results, "name", "Enter")).toBeNull();
     expect(moveActionFocus(results, "name", "a")).toBeNull();
   });

@@ -164,6 +164,17 @@ describe("LeaderboardScreen", () => {
     expect(onNextPlayer).not.toHaveBeenCalled();
   });
 
+  it("chooses NEXT PLAYER with Tab and keeps it there instead of moving to the logo", () => {
+    fakeBoothClock();
+    renderBoard([score("a", "Alex", 60, 0)]);
+    const next = screen.getByRole("button", { name: /NEXT PLAYER/ });
+    fireEvent.keyDown(window, { key: "Tab" });
+    expect(document.activeElement).toBe(next);
+    fireEvent.keyDown(window, { key: "Tab" });
+    fireEvent.keyDown(window, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(next);
+  });
+
   it("chooses NEXT PLAYER with an arrow key, and Enter on it returns to Ready", () => {
     fakeBoothClock();
     const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
