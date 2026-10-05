@@ -11,6 +11,7 @@ import {
   remainingSeconds,
   type TestSession,
 } from "../features/typing/typingEngine";
+import { useLogoHold } from "./useLogoHold";
 
 const WAITING_RETURN_MS = 5000;
 
@@ -39,7 +40,7 @@ export function TypingScreen({
   const onExpireRef = useRef(onExpire);
   const onReturnRef = useRef(onReturnToReady);
   const [now, setNow] = useState(() => performance.now());
-  const holdTimer = useRef<number | null>(null);
+  const logoHold = useLogoHold(onSetup, onReturnToReady);
 
   useEffect(() => {
     onTypeRef.current = onType;
@@ -107,29 +108,13 @@ export function TypingScreen({
     ),
   );
 
-  function beginHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-    }
-    holdTimer.current = window.setTimeout(onSetup, 600);
-  }
-
-  function endHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }
-
   return (
     <main className="screen typing-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"
-        aria-label="Logo"
-        onPointerDown={beginHold}
-        onPointerUp={endHold}
-        onPointerLeave={endHold}
+        aria-label="Back to start"
+        {...logoHold}
       />
       <p className="passage-line">
         {session.expectedSentence.split("").map((character, index) => {

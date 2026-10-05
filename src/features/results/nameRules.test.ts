@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isEnterKey, nameCharacterFromKey, nameToSaveOnEnter, normalizeName } from "./nameRules";
+import { isEnterKey, nameCharacterFromKey, nameProblem, nameToSaveOnEnter, normalizeName } from "./nameRules";
 
 describe("normalizeName", () => {
   it("trims a name and keeps the saved value within 20 characters", () => {
@@ -11,6 +11,12 @@ describe("normalizeName", () => {
     expect(normalizeName("   ")).toBeNull();
     expect(normalizeName("")).toBeNull();
     expect(normalizeName("a".repeat(21))).toBeNull();
+  });
+
+  it("names the problem with a name past 20 characters as too long, not empty", () => {
+    expect(nameProblem("   ")).toBe("empty");
+    expect(nameProblem("a".repeat(21))).toBe("too-long");
+    expect(nameProblem("  " + "a".repeat(20) + "  ")).toBeNull();
   });
 
   it("rejects profanity, including spaces and number swaps", () => {

@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. Holding Escape for that same moment opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. Holding Escape for that same moment opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -322,11 +322,11 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
-Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
+Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the logo badge does not start the test; it opens the rolling list. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
 
 The key used to leave the Ready screen:
 
@@ -347,7 +347,7 @@ If that key has not been pressed within 5 seconds, Ready appears again. No score
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
-A long-press on the logo badge opens Event Setup and does not save a score. That works while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
+A long-press on the logo badge opens Event Setup and does not save a score. A tap on the logo badge returns to Ready and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
 
 A short Escape press returns to Ready and does not save a score, including while the portrait instruction is covering the passage. Holding Escape opens Event Setup and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
 
@@ -856,7 +856,7 @@ The place lines stay narrower. “You made the Top 5!” is places 2 through 5. 
 
 If the contestant ranks outside the top 20, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter, Space, and a short Escape press select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. Save Score and View Leaderboard remain the only ways a result is stored.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter, Space, and a short Escape press select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. A tap on the logo badge, with or without name entry, stores the result the way View Leaderboard does, keeping the typed name when it is allowed and null otherwise, then opens Ready instead of the Top 5. Save Score, View Leaderboard, and that tap are the only ways a result is stored.
 
 When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. A blocked name shows “Pick a different name.” and does not stop that wait. Clearing the name starts the 15 seconds again. After the last change to an allowed name, Results waits 20 seconds, then shows “Saving your score in {n}s” for 5 seconds and saves that name. Another change to the name starts the 20 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
@@ -935,7 +935,7 @@ The Leaderboard screen must include:
 NEXT PLAYER
 ```
 
-Selecting Next Player should immediately return to the Ready screen. Space, Enter, and Escape do the same. The saved scores stay.
+Selecting Next Player should immediately return to the Ready screen. Space, Enter, Escape, and a tap on the logo badge do the same. The saved scores stay.
 
 For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Taps and buttons work at once. Holding Escape still opens Event Setup.
 
@@ -1946,6 +1946,8 @@ Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard
 Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
 a tap on the rolling high-score list returns to Ready and does not start the test
+a tap on the logo badge on Ready does not start the test and opens the rolling high-score list when a qualifying score exists
+a tap on the logo badge returns to Ready from Typing without saving, from Results after saving, and from the Leaderboard
 automatic reset passes
 giant keyboard input passes
 PWA launches offline

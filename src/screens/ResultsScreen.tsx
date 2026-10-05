@@ -9,6 +9,7 @@ import {
 import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
 
 type ResultsScreenProps = {
@@ -17,6 +18,8 @@ type ResultsScreenProps = {
   saving: boolean;
   onSave: (name: string) => void;
   onViewLeaderboard: () => void;
+  /** Saves like View Leaderboard, with the name when it is allowed, then opens Ready. */
+  onSaveAndReady: (name: string | null) => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
@@ -27,17 +30,20 @@ export function ResultsScreen({
   saving,
   onSave,
   onViewLeaderboard,
+  onSaveAndReady,
   onSetup,
   claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
-  const holdTimer = useRef<number | null>(null);
+  const [logoTaps, setLogoTaps] = useState(0);
+  const logoHold = useLogoHold(onSetup, () => setLogoTaps((count) => count + 1));
   const left = useRef(false);
   const standingRef = useRef(standing);
   const onViewRef = useRef(onViewLeaderboard);
   const onSaveRef = useRef(onSave);
+  const onSaveAndReadyRef = useRef(onSaveAndReady);
   const savingRef = useRef(saving);
   const nameRef = useRef<HTMLInputElement>(null);
   const nameStateRef = useRef("");
@@ -76,6 +82,7 @@ export function ResultsScreen({
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;
     onSaveRef.current = onSave;
+    onSaveAndReadyRef.current = onSaveAndReady;
     savingRef.current = saving;
     standingRef.current = standing;
     nameStateRef.current = name;
@@ -86,13 +93,13 @@ export function ResultsScreen({
       screenRef.current?.focus();
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || savingRef.current || left.current) {
-        return;
-      }
       const nameField = nameRef.current;
       if (nameField && isEnterKey(event)) {
         event.preventDefault();
         event.stopPropagation();
+        if (event.repeat || savingRef.current || left.current) {
+          return;
+        }
         if (!acceptsLeaveKey(shownAt, performance.now())) {
           return;
         }
@@ -101,6 +108,9 @@ export function ResultsScreen({
           left.current = true;
           onSaveRef.current(nameToSave);
         }
+        return;
+      }
+      if (event.repeat || savingRef.current || left.current) {
         return;
       }
       const current = standingRef.current;
@@ -189,6 +199,15 @@ export function ResultsScreen({
     onViewRef.current();
   }, [phase, secondsLeft]);
 
+  // A logo tap saves the result, with the name when it is allowed, and opens Ready.
+  useEffect(() => {
+    if (logoTaps === 0 || savingRef.current || left.current) {
+      return;
+    }
+    left.current = true;
+    onSaveAndReadyRef.current(normalizeName(nameStateRef.current));
+  }, [logoTaps]);
+
   function saveScore() {
     if (savedName === null) {
       return;
@@ -196,29 +215,13 @@ export function ResultsScreen({
     onSave(savedName);
   }
 
-  function beginHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-    }
-    holdTimer.current = window.setTimeout(onSetup, 600);
-  }
-
-  function endHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }
-
   return (
     <main className="screen results-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"
-        aria-label="Logo"
-        onPointerDown={beginHold}
-        onPointerUp={endHold}
-        onPointerLeave={endHold}
+        aria-label="Back to start"
+        {...logoHold}
       />
       {copy ? <h1>{copy.headline}</h1> : null}
       <p className="stat-value">{result.displayedWpm} WPM</p>
@@ -240,19 +243,6 @@ export function ResultsScreen({
               setName(event.target.value);
             }}
             aria-invalid={problem === "blocked"}
-            onKeyDown={(event) => {
-              if (!isEnterKey(event)) {
-                return;
-              }
-              event.preventDefault();
-              if (!acceptsLeaveKey(shownAt, performance.now())) {
-                return;
-              }
-              const nameToSave = nameToSaveOnEnter(event.currentTarget.value, name, pendingName.current);
-              if (nameToSave !== null) {
-                onSave(nameToSave);
-              }
-            }}
           />
           {problem === "blocked" ? <p className="name-hint">Pick a different name.</p> : null}
         </label>

@@ -8,3 +8,16 @@ export function readyKeyDown(key: string, rolling: boolean): "wake" | "ignore" |
   }
   return "start";
 }
+
+/** A tap on Ready starts the test. The logo badge is for the operator's long-press only. */
+export function readyPointerUp(pointer: { button: number; onLogo: boolean }): "start" | "ignore" {
+  if (pointer.button !== 0 || pointer.onLogo) {
+    return "ignore";
+  }
+  return "start";
+}
+
+/** A tap on the logo badge opens the rolling high-score list early, when it has a score to show. */
+export function readyLogoTap(rollingScoreCount: number): "roll" | "ignore" {
+  return rollingScoreCount > 0 ? "roll" : "ignore";
+}

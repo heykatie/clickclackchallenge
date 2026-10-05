@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readyKeyDown } from "./readyKeys";
+import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 
 describe("readyKeyDown", () => {
   it("returns to Ready for any key while the rolling list is up", () => {
@@ -16,5 +16,30 @@ describe("readyKeyDown", () => {
   it("starts the test from any other key on Ready", () => {
     expect(readyKeyDown("a", false)).toBe("start");
     expect(readyKeyDown(" ", false)).toBe("start");
+  });
+});
+
+describe("readyPointerUp", () => {
+  it("starts the test from a tap on Ready", () => {
+    expect(readyPointerUp({ button: 0, onLogo: false })).toBe("start");
+  });
+
+  it("does not start the test from a tap on the logo badge", () => {
+    expect(readyPointerUp({ button: 0, onLogo: true })).toBe("ignore");
+  });
+
+  it("does not start the test from a secondary button", () => {
+    expect(readyPointerUp({ button: 2, onLogo: false })).toBe("ignore");
+  });
+});
+
+describe("readyLogoTap", () => {
+  it("opens the rolling high-score list when a qualifying score exists", () => {
+    expect(readyLogoTap(1)).toBe("roll");
+    expect(readyLogoTap(20)).toBe("roll");
+  });
+
+  it("does nothing when there is no score to roll", () => {
+    expect(readyLogoTap(0)).toBe("ignore");
   });
 });

@@ -125,7 +125,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, currentTest };
     }
     case "FINISH_TEST":
-      if (state.currentTest === null || state.currentTest.startedAt === null) {
+      if (state.screen !== "typing" || state.currentTest === null || state.currentTest.startedAt === null) {
         return state;
       }
       return finishTest(state, { ...state.currentTest, isFinished: true }, null);
