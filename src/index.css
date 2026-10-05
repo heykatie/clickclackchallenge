@@ -346,31 +346,21 @@ button.is-cursor {
   font-size: 1.125rem;
 }
 
-.screensaver {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  height: 100dvh;
+/* Sparse edge motifs for score screens: a blush-pink blob low left and a mint arc high right. */
+.edge-motifs {
   overflow: hidden;
   isolation: isolate;
 }
 
-.screensaver:focus {
-  outline: none;
-}
-
-/* Sparse edge motifs: a blush-pink blob low left and a mint arc high right. */
-.screensaver::before,
-.screensaver::after {
+.edge-motifs::before,
+.edge-motifs::after {
   content: "";
   position: absolute;
   z-index: -1;
   pointer-events: none;
 }
 
-.screensaver::before {
+.edge-motifs::before {
   left: -6rem;
   bottom: -7rem;
   width: 18rem;
@@ -380,7 +370,7 @@ button.is-cursor {
   opacity: 0.7;
 }
 
-.screensaver::after {
+.edge-motifs::after {
   top: -7rem;
   right: -7rem;
   width: 14rem;
@@ -389,7 +379,15 @@ button.is-cursor {
   border-radius: 50%;
 }
 
-.screensaver-kicker {
+/* In portrait the Leaderboard stage ends mid-screen, so its edge motifs would be cut flat there. */
+@media (orientation: portrait) {
+  .leaderboard-screen.edge-motifs::before,
+  .leaderboard-screen.edge-motifs::after {
+    display: none;
+  }
+}
+
+.score-kicker {
   margin: 0;
   padding: 0.45rem 1.25rem;
   border-radius: 999px;
@@ -401,17 +399,153 @@ button.is-cursor {
   letter-spacing: 0.04em;
 }
 
-/* Shrinks to the scores it holds. A long list stops at the screen and rolls. */
-.screensaver-window {
+.score-card {
   box-sizing: border-box;
-  flex: 0 1 auto;
   width: min(100%, 46rem);
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
   border: 2px solid var(--tiny-lavender);
   border-radius: 1.75rem;
   background: var(--tiny-white);
+}
+
+.score-rows {
+  margin: 0;
+  padding: 0.6rem;
+  list-style: none;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 3.25rem 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.4rem 1.5rem 0.4rem 1rem;
+  text-align: left;
+}
+
+.score-row + .score-row:not(.is-first, .is-current) {
+  box-shadow: inset 0 1px 0 var(--tiny-lavender-light);
+}
+
+/* Only highlighted rows are rounded, so the dividers between quiet rows stay straight. */
+.score-row.is-first,
+.score-row.is-current {
+  border-radius: 1.25rem;
+}
+
+.score-row.is-first {
+  background: var(--tiny-lavender-light);
+}
+
+/* The just-finished result. Rank 1 keeps its lavender surface and gains the mint outline. */
+.score-row.is-current {
+  background: color-mix(in srgb, var(--tiny-mint) 25%, var(--tiny-white));
+  box-shadow: inset 0 0 0 2px var(--tiny-mint-strong);
+}
+
+.score-row.is-first.is-current {
+  background: var(--tiny-lavender-light);
+}
+
+.score-rank {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--tiny-lavender-light);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.score-row.is-first .score-rank {
+  background: var(--tiny-mint-strong);
+}
+
+.score-crown {
+  display: grid;
+  place-items: center;
+  color: var(--tiny-lavender-deep);
+}
+
+.score-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.score-name {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-wpm {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.score-wpm-value {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-wpm-unit {
+  color: var(--tiny-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* An unoccupied place: quiet, never styled like a winning score. */
+.score-row.is-empty .score-rank {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--tiny-lavender-light);
+  color: var(--tiny-muted);
+}
+
+.score-row.is-empty .score-name,
+.score-row.is-empty .score-wpm-value {
+  color: var(--tiny-muted);
+  font-weight: 600;
+}
+
+.you-pill {
+  flex: none;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: var(--tiny-mint-strong);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.screensaver {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  height: 100dvh;
+}
+
+.screensaver:focus {
+  outline: none;
+}
+
+/* Shrinks to the scores it holds. A long list stops at the screen and rolls. */
+.screensaver-window {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Soft fade where rows enter and leave the card. */
@@ -440,88 +574,31 @@ button.is-cursor {
   animation: score-roll linear infinite;
 }
 
-.screensaver-rows {
-  margin: 0;
-  /* Padding, not a gap between copies, so each copy is exactly half the track. */
-  padding: 0.6rem;
-  list-style: none;
-}
-
-.screensaver-row {
-  display: grid;
-  grid-template-columns: 3.5rem 2.5rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
+.screensaver .score-row {
   min-height: 5rem;
-  padding: 0.5rem 1.5rem 0.5rem 1rem;
-  border-radius: 1.25rem;
 }
 
-.screensaver-row + .screensaver-row:not(.is-first) {
-  box-shadow: inset 0 1px 0 var(--tiny-lavender-light);
-}
-
-.screensaver-row.is-first {
-  background: var(--tiny-lavender-light);
-}
-
-.screensaver-window:not(.is-rolling) .screensaver-row {
-  animation: score-row-in 420ms ease-out both;
-  animation-delay: calc(var(--row-index, 0) * 90ms);
-}
-
-.screensaver-rank {
-  display: grid;
-  place-items: center;
+.screensaver .score-rank {
   width: 3.25rem;
   height: 3.25rem;
-  border-radius: 50%;
-  background: var(--tiny-lavender-light);
-  font-family: var(--font-display);
   font-size: 1.75rem;
-  font-weight: 700;
 }
 
-.screensaver-row.is-first .screensaver-rank {
-  background: var(--tiny-mint-strong);
-}
-
-.screensaver-crown {
-  display: grid;
-  place-items: center;
-  color: var(--tiny-lavender-deep);
-}
-
-.screensaver-name {
-  overflow: hidden;
-  font-family: var(--font-display);
+.screensaver .score-name {
   font-size: 2.25rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.screensaver-name.has-name {
+.screensaver .score-name.has-name {
   color: var(--tiny-lavender-deep);
 }
 
-.screensaver-wpm {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.screensaver-wpm-value {
-  font-family: var(--font-display);
+.screensaver .score-wpm-value {
   font-size: 2.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 
-.screensaver-wpm-unit {
-  color: var(--tiny-muted);
-  font-size: 1.125rem;
-  font-weight: 700;
+.screensaver-window:not(.is-rolling) .score-row {
+  animation: score-row-in 420ms ease-out both;
+  animation-delay: calc(var(--row-index, 0) * 90ms);
 }
 
 @keyframes score-roll {
@@ -550,7 +627,7 @@ button.is-cursor {
   }
 
   .screensaver-window.is-rolling .screensaver-track,
-  .screensaver-window:not(.is-rolling) .screensaver-row,
+  .screensaver-window:not(.is-rolling) .score-row,
   .ready-copy h1,
   .ready-prompt {
     animation: none;
@@ -650,69 +727,31 @@ button:disabled {
   gap: 1rem;
 }
 
+.leaderboard-screen h1 {
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  line-height: 1.05;
+}
+
+.leaderboard-empty {
+  margin: 0;
+  color: var(--tiny-muted);
+  font-weight: 700;
+}
+
+.next-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: min(100%, 24rem);
+  min-height: 4.5rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+}
+
 .leaderboard-countdown {
   margin: 0;
-  font-size: 0.875rem;
-  font-weight: 700;
-}
-
-.leaderboard-kicker,
-.leaderboard-screen h1 {
-  margin: 0;
-}
-
-.leaderboard-kicker {
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  background: var(--tiny-mint);
-  font-family: var(--font-display);
-  font-weight: 700;
-}
-
-.leaderboard-rows {
-  width: min(100%, 40rem);
-  margin: 0;
-  padding: 0.5rem;
-  list-style: none;
-  border-radius: 1.75rem;
-  background: var(--tiny-white);
-}
-
-.leaderboard-row {
-  display: grid;
-  grid-template-columns: 3rem 1fr auto auto;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 3.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
-}
-
-.leaderboard-row.is-first {
-  background: var(--tiny-lavender-light);
-}
-
-.leaderboard-row.is-current {
-  outline: 3px solid var(--tiny-mint-strong);
-}
-
-.leaderboard-rank,
-.leaderboard-wpm {
-  font-family: var(--font-display);
-  font-weight: 700;
-}
-
-.leaderboard-name {
-  overflow: hidden;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.you-pill {
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  background: var(--tiny-mint);
   font-size: 0.875rem;
   font-weight: 700;
 }

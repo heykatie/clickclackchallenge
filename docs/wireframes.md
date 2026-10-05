@@ -275,7 +275,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 
 - Rank by displayed WPM, then displayed accuracy rounded to a whole number, then the earlier submission. That order is in `docs/prd.md`. Do not sort on the stored accuracy tenths.
 - Show only the Top 5. Do not append the current player as a sixth row if they rank lower.
-- The PNG's five contestants are sample data. **Proposed sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, include “No scores yet.”
+- The PNG's five contestants are sample data. **Sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, include “No scores yet.”
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
 - Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.

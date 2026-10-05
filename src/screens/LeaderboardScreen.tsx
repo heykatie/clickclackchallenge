@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
-import { rankScores } from "../features/leaderboard/ranking";
+import { rankScores, topFiveSlots } from "../features/leaderboard/ranking";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { ScoreRow } from "./ScoreRow";
 import { useLogoHold } from "./useLogoHold";
 
 const RESET_SECONDS = 15;
@@ -28,7 +29,8 @@ export function LeaderboardScreen({
   const screenRef = useRef<HTMLElement>(null);
   const left = useRef(false);
   const onNextPlayerRef = useRef(onNextPlayer);
-  const rows = rankScores(scores).filter((entry) => entry.isTop5);
+  const slots = topFiveSlots(rankScores(scores));
+  const empty = slots.every((slot) => slot.entry === null);
   const logoHold = useLogoHold(() => {
     left.current = true;
     onSetup();
@@ -87,40 +89,29 @@ export function LeaderboardScreen({
   }, [shownAt]);
 
   return (
-    <main className="screen leaderboard-screen" ref={screenRef} tabIndex={-1}>
+    <main className="screen leaderboard-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"
         aria-label="Back to start"
         {...logoHold}
       />
-      <p className="leaderboard-kicker">TOP 5</p>
+      <p className="score-kicker">TOP 5</p>
       <h1>Leaderboard</h1>
-      {rows.length === 0 ? <p>No scores yet</p> : null}
-      <ol className="leaderboard-rows">
-        {rows.map((entry) => {
-          const isCurrent = entry.score.id === currentScoreId;
-          return (
-            <li
-              key={entry.score.id}
-              className={[
-                "leaderboard-row",
-                entry.rank === 1 ? "is-first" : "",
-                isCurrent ? "is-current" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <span className="leaderboard-rank">{entry.rank}</span>
-              <span className="leaderboard-name">{entry.score.name ?? "—"}</span>
-              {isCurrent ? <span className="you-pill">YOU</span> : null}
-              <span className="leaderboard-wpm">{entry.score.displayedWpm} WPM</span>
-            </li>
-          );
-        })}
+      {empty ? <p className="leaderboard-empty">No scores yet</p> : null}
+      <ol className="score-card score-rows leaderboard-rows">
+        {slots.map((slot) => (
+          <ScoreRow
+            key={slot.entry?.score.id ?? `empty-${slot.rank}`}
+            rank={slot.rank}
+            name={slot.entry?.score.name ?? null}
+            displayedWpm={slot.entry?.score.displayedWpm ?? null}
+            isCurrent={slot.entry !== null && slot.entry.score.id === currentScoreId}
+          />
+        ))}
       </ol>
-      <button type="button" onClick={leave}>
-        NEXT PLAYER
+      <button type="button" className="next-player-button" onClick={leave}>
+        NEXT PLAYER <span aria-hidden="true">→</span>
       </button>
       {secondsLeft <= RESET_COUNTDOWN_AT && secondsLeft > 0 ? (
         <p className="leaderboard-countdown">Returning to ready screen in {secondsLeft}s</p>

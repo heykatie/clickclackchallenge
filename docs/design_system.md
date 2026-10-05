@@ -355,14 +355,15 @@ Returning to ready screen in 5s
 - Keep the other rows quiet and easy to scan.
 - Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its name.
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
-- Place a large mint NEXT PLAYER button below the panel, with the automatic-return message beneath it.
-- Keep peripheral motifs sparse and separate from the rows and button.
+- Place a large mint NEXT PLAYER button below the panel, with a decorative arrow and the automatic-return message beneath it.
+- Keep peripheral motifs sparse and separate from the rows and button: a pink blob low left and a mint arc high right, the same as the rolling list. In portrait the Leaderboard stage ends mid-screen, so it drops them there.
+- The Leaderboard and the rolling list share one row style: a rank circle, a crown slot, the name, and a large WPM with a small muted unit. Quiet rows are separated by straight hairlines; only highlighted rows are rounded.
 
 ### Empty and partial boards
 
 Show actual event data rather than filling missing places with sample contestants.
 
-**Proposed treatment:** preserve five row positions, use dashes for unoccupied places, and show “No scores yet” when the board is empty. Do not style an empty placeholder as a winning score.
+Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Show “No scores yet” above the panel when the board is empty. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
 
 ### Automatic return
 
