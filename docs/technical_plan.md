@@ -1962,6 +1962,10 @@ typing-test-db remains after a successful or failed import
 
 Use React Testing Library for high-value UI behavior rather than testing every visual detail.
 
+Component tests sit beside each screen as `*.test.tsx`. Each file starts with `// @vitest-environment jsdom` and imports `src/test/domSetup.ts` first. That file adds the `PointerEvent` and `ResizeObserver` jsdom lacks, and `fakeBoothClock` fakes timers, `Date`, and `performance.now` so the leave-key grace and countdowns can be stepped. The rest of the suite stays in the node environment. A tap test sends its pointerup to whichever screen is showing after pointerdown, the way a real tap lands, so a screen that changes on pointerdown is caught.
+
+Covered so far: Ready, Typing, Results, and the Leaderboard. Not covered yet: Event Setup, and App-level flows that touch IndexedDB, such as Continue and the save-then-Ready logo tap on Results past the `onSaveAndReady` call.
+
 Required cases:
 
 ```text
