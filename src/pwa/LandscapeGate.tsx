@@ -5,8 +5,11 @@ type LandscapeGateProps = {
   children: ReactNode;
 };
 
+/** The local dev server skips the gate so Typing can be built and tested in any window. Every build keeps it. */
+const GATE_ENABLED = !import.meta.env.DEV;
+
 export function LandscapeGate({ children }: LandscapeGateProps) {
-  const blocked = useNeedsLandscapeGate();
+  const blocked = useNeedsLandscapeGate() && GATE_ENABLED;
 
   if (blocked) {
     return (
