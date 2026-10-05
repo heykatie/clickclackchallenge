@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { listAllScores } from "../db/persistence";
 import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
-import { HOLD_SETUP_MS } from "../state/escapeHold";
 import { readyKeyDown } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
+import { useLogoHold } from "./useLogoHold";
 
 const READY_IDLE_MS = 120_000;
 
@@ -17,8 +17,7 @@ type ReadyScreenProps = {
 
 export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
-  const holdTimer = useRef<number | null>(null);
-  const heldSetup = useRef(false);
+  const logoHold = useLogoHold(onSetup);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
   const [asleep, setAsleep] = useState(false);
@@ -101,32 +100,11 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
     setActivity((current) => current + 1);
   }
 
-  function beginHold() {
-    noteActivity();
-    heldSetup.current = false;
-    holdTimer.current = window.setTimeout(() => {
-      holdTimer.current = null;
-      heldSetup.current = true;
-      onSetup();
-    }, HOLD_SETUP_MS);
-  }
-
   function startFromPointer(event: React.PointerEvent<HTMLElement>) {
     if (event.button !== 0) {
       return;
     }
-    if (heldSetup.current) {
-      heldSetup.current = false;
-      return;
-    }
     onStartRef.current("");
-  }
-
-  function endHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
   }
 
   if (asleep) {
@@ -153,9 +131,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
           type="button"
           className="logo-badge"
           aria-label="Logo"
-          onPointerDown={beginHold}
-          onPointerUp={endHold}
-          onPointerLeave={endHold}
+          {...logoHold}
         />
         <div className="ready-copy">
           <h1>GIANT keyboard typing contest!</h1>

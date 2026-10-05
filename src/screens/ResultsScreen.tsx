@@ -9,6 +9,7 @@ import {
 import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
 
 type ResultsScreenProps = {
@@ -33,7 +34,7 @@ export function ResultsScreen({
   const [name, setName] = useState("");
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
-  const holdTimer = useRef<number | null>(null);
+  const logoHold = useLogoHold(onSetup);
   const left = useRef(false);
   const standingRef = useRef(standing);
   const onViewRef = useRef(onViewLeaderboard);
@@ -196,29 +197,13 @@ export function ResultsScreen({
     onSave(savedName);
   }
 
-  function beginHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-    }
-    holdTimer.current = window.setTimeout(onSetup, 600);
-  }
-
-  function endHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }
-
   return (
     <main className="screen results-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"
         aria-label="Logo"
-        onPointerDown={beginHold}
-        onPointerUp={endHold}
-        onPointerLeave={endHold}
+        {...logoHold}
       />
       {copy ? <h1>{copy.headline}</h1> : null}
       <p className="stat-value">{result.displayedWpm} WPM</p>

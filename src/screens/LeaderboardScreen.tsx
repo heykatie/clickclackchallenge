@@ -3,6 +3,7 @@ import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
 import { rankScores } from "../features/leaderboard/ranking";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { useLogoHold } from "./useLogoHold";
 
 const RESET_SECONDS = 15;
 const RESET_COUNTDOWN_AT = 5;
@@ -25,10 +26,13 @@ export function LeaderboardScreen({
   const [secondsLeft, setSecondsLeft] = useState(RESET_SECONDS);
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
-  const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
   const onNextPlayerRef = useRef(onNextPlayer);
   const rows = rankScores(scores).filter((entry) => entry.isTop5);
+  const logoHold = useLogoHold(() => {
+    left.current = true;
+    onSetup();
+  });
 
   useEffect(() => {
     onNextPlayerRef.current = onNextPlayer;
@@ -82,29 +86,13 @@ export function LeaderboardScreen({
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [shownAt]);
 
-  function beginHold() {
-    holdTimer.current = window.setTimeout(() => {
-      left.current = true;
-      onSetup();
-    }, 600);
-  }
-
-  function endHold() {
-    if (holdTimer.current !== null) {
-      window.clearTimeout(holdTimer.current);
-      holdTimer.current = null;
-    }
-  }
-
   return (
     <main className="screen leaderboard-screen" ref={screenRef} tabIndex={-1}>
       <button
         type="button"
         className="logo-badge"
         aria-label="Logo"
-        onPointerDown={beginHold}
-        onPointerUp={endHold}
-        onPointerLeave={endHold}
+        {...logoHold}
       />
       <p className="leaderboard-kicker">TOP 5</p>
       <h1>Leaderboard</h1>
