@@ -249,7 +249,7 @@ Visual order:
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
 4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
-After 2 minutes of idle, replace this screen with the all-time roll from `docs/prd.md`. Keep a small “HIGH SCORES” label. Roll rank, name, and WPM upward in a loop. Names use deep lavender. Rank 1 keeps the light lavender row. A missing name stays a charcoal dash. Respect reduced motion by showing the list still.
+After 2 minutes of idle, replace this screen with the all-time roll from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and holds still, and the rows rise in one after another. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, a mint rank circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 

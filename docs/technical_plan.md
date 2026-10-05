@@ -1835,6 +1835,7 @@ rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
+the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
 ```
 
 ---
@@ -1971,6 +1972,7 @@ Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test
 holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
+each score on that list appears once, with no repeated rows
 any key or a tap on that list returns to Ready and does not start the test
 holding Escape on that list opens Event Setup
 Ready-screen key is not passed into Typing as contestant input
