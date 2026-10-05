@@ -46,7 +46,7 @@ function standing(overrides: Partial<ResultStanding> = {}): ResultStanding {
 
 describe("resultCopy", () => {
   it("congratulates a Top 5 result and adds the Plinko line above 50 WPM", () => {
-    expect(resultCopy(standing({ isTop5: true, showNameEntry: true }), 80)).toEqual({
+    expect(resultCopy(standing({ isTop5: true, showNameEntry: true }), 80, 100)).toEqual({
       headline: "Nice typing!",
       placedLine: "You made the Top 5!",
       plinkoLine: "You win a Plinko drop!",
@@ -55,14 +55,14 @@ describe("resultCopy", () => {
 
   it("uses only NEW HIGH SCORE and the Plinko line for rank 1", () => {
     expect(
-      resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 80),
+      resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 80, 100),
     ).toEqual({
       headline: "NEW HIGH SCORE!",
       placedLine: null,
       plinkoLine: "You win a Plinko drop!",
     });
     expect(
-      resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 50),
+      resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 50, 100),
     ).toEqual({
       headline: "NEW HIGH SCORE!",
       placedLine: null,
@@ -71,15 +71,15 @@ describe("resultCopy", () => {
   });
 
   it("uses the Top 10 line when the attempt places sixth through tenth", () => {
-    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).placedLine).toBe(
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40, 100).placedLine).toBe(
       "You made the Top 10!",
     );
-    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).headline).toBe("Nice typing!");
-    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40).plinkoLine).toBeNull();
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40, 100).headline).toBe("Nice typing!");
+    expect(resultCopy(standing({ isTop10: true, showNameEntry: true }), 40, 100).plinkoLine).toBeNull();
   });
 
   it("offers a name past 10th without the Top 10 cheer", () => {
-    expect(resultCopy(standing({ showNameEntry: true }), 40)).toEqual({
+    expect(resultCopy(standing({ showNameEntry: true }), 40, 100)).toEqual({
       headline: "Thanks for playing!",
       placedLine: null,
       plinkoLine: null,
@@ -87,7 +87,7 @@ describe("resultCopy", () => {
   });
 
   it("gives a Plinko line without a place when the score is above 50 WPM", () => {
-    expect(resultCopy(standing(), 51)).toEqual({
+    expect(resultCopy(standing(), 51, 100)).toEqual({
       headline: "Nice typing!",
       placedLine: null,
       plinkoLine: "You win a Plinko drop!",
@@ -95,7 +95,7 @@ describe("resultCopy", () => {
   });
 
   it("asks if a 0 WPM result is a ghost and does not place them", () => {
-    expect(resultCopy(standing({ isTop5: true, showNameEntry: true, isNewHighScore: true }), 0)).toEqual({
+    expect(resultCopy(standing({ isTop5: true, showNameEntry: true, isNewHighScore: true }), 0, 100)).toEqual({
       headline: "Casper, is that you?",
       placedLine: null,
       plinkoLine: null,
@@ -103,7 +103,7 @@ describe("resultCopy", () => {
   });
 
   it("thanks a result that misses the board and does not win a Plinko drop", () => {
-    expect(resultCopy(standing(), 50)).toEqual({
+    expect(resultCopy(standing(), 50, 100)).toEqual({
       headline: "Thanks for playing!",
       placedLine: null,
       plinkoLine: null,
@@ -206,5 +206,24 @@ describe("describeAttempt", () => {
     describeAttempt([earlier], attempt({ displayedWpm: 92, testMode: "words" }));
     expect(earlier.displayedWpm).toBe(46);
     expect(earlier.durationSeconds).toBe(60);
+  });
+});
+
+describe("resultCopy with the Plinko accuracy gate", () => {
+  it("gives a Plinko drop above 50 WPM at 30% accuracy or better", () => {
+    expect(resultCopy(standing(), 60, 30).plinkoLine).toBe("You win a Plinko drop!");
+    expect(resultCopy(standing(), 60, 30).headline).toBe("Nice typing!");
+  });
+
+  it("gives no Plinko drop below 30% accuracy, even far above 50 WPM", () => {
+    expect(resultCopy(standing(), 380, 29.99)).toEqual({
+      headline: "Thanks for playing!",
+      placedLine: null,
+      plinkoLine: null,
+    });
+  });
+
+  it("gives no Plinko drop when there were no attempts", () => {
+    expect(resultCopy(standing(), 60, null).plinkoLine).toBeNull();
   });
 });

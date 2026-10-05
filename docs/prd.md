@@ -684,16 +684,19 @@ The Ready-screen prize string is in `docs/design_system.md` (Brand voice).
 
 Prize qualification and leaderboard qualification are separate rules.
 
-A contestant qualifies when their displayed WPM is greater than 50.
+A contestant qualifies when their displayed WPM is greater than 50 and their accuracy is at least 30%.
 
 ```text
-51 WPM or higher → qualifies
-50 WPM           → does not qualify
+51 WPM or higher, 30% accuracy or higher → qualifies
+50 WPM                                   → does not qualify
+any WPM below 30% accuracy               → does not qualify
 ```
+
+The 30% gate is deliberately the lowest useful minimum. It only stops key-mashing: random keys land around 5–20% accuracy, mostly from lucky spaces, while a real typist above 50 WPM clears it easily. Like the leaderboard gate, it uses the stored accuracy, so 29.99% does not qualify even though it displays as 30%.
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
-Leaderboard accuracy requirements do not automatically determine prize qualification unless the operator chooses to make that a future rule.
+The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
 
 ---
 
@@ -838,7 +841,7 @@ The Results screen should display:
 - Plinko qualification status when the contestant qualifies
 - Top 10 qualification status when applicable
 
-Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
+Show “You win a Plinko drop!” only when displayed WPM is above 50 and accuracy is at least 30%. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
 
 Results and name entry should remain on the **same screen**.
 
@@ -1839,8 +1842,9 @@ The following must remain unchanged:
 **Then**
 
 ```text
-51 WPM or higher → qualifies
-50 WPM           → does not qualify
+51 WPM or higher, 30% accuracy or higher → qualifies
+50 WPM                                   → does not qualify
+51 WPM or higher, 29.99% accuracy        → does not qualify
 ```
 
 If the intended business rule changes to `50 WPM or higher`, both the qualification rule and visible copy must be updated together.
@@ -1920,7 +1924,7 @@ minimum accuracy gate passes
 name entry through 20th place passes
 places 11 through 20 can enter a name and do not see a place line
 Top 5 sorting passes
-Plinko qualification passes
+Plinko qualification passes, including no drop below 30% accuracy
 rank 1 shows NEW HIGH SCORE! and, above 50 WPM, You win a Plinko drop!
 places 2 through 5 show Nice typing! and You made the Top 5!
 places 6 through 10 show Nice typing! and You made the Top 10!

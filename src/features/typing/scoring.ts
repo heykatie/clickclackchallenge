@@ -1,4 +1,6 @@
 export const MIN_LEADERBOARD_ACCURACY = 70;
+/** Low on purpose: it only stops key-mashing. Random keys land around 5–20%, mostly from lucky spaces. */
+export const PLINKO_MIN_ACCURACY = 30;
 
 export function calculateWpm(
   correctCharacters: number,
@@ -34,4 +36,9 @@ export function displayedAccuracy(accuracy: number): number {
 
 export function meetsLeaderboardAccuracy(accuracy: number): boolean {
   return accuracy >= MIN_LEADERBOARD_ACCURACY;
+}
+
+/** A Plinko drop needs displayed WPM above 50 and stored accuracy of at least PLINKO_MIN_ACCURACY. */
+export function winsPlinko(displayedWpm: number, accuracy: number | null): boolean {
+  return displayedWpm > 50 && accuracy !== null && accuracy >= PLINKO_MIN_ACCURACY;
 }

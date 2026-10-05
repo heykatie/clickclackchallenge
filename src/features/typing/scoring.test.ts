@@ -5,6 +5,8 @@ import {
   displayedAccuracy,
   displayedWpm,
   meetsLeaderboardAccuracy,
+  PLINKO_MIN_ACCURACY,
+  winsPlinko,
 } from "./scoring";
 
 describe("calculateWpm", () => {
@@ -50,5 +52,15 @@ describe("meetsLeaderboardAccuracy", () => {
   it("accepts 70% and rejects 69.99%", () => {
     expect(meetsLeaderboardAccuracy(70)).toBe(true);
     expect(meetsLeaderboardAccuracy(69.99)).toBe(false);
+  });
+});
+
+describe("winsPlinko", () => {
+  it("needs displayed WPM above 50 and stored accuracy of at least 30%", () => {
+    expect(PLINKO_MIN_ACCURACY).toBe(30);
+    expect(winsPlinko(51, 30)).toBe(true);
+    expect(winsPlinko(50, 100)).toBe(false);
+    expect(winsPlinko(51, 29.99)).toBe(false);
+    expect(winsPlinko(51, null)).toBe(false);
   });
 });

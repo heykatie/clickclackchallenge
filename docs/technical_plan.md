@@ -1853,6 +1853,7 @@ places 2 through 5 use Nice typing! and You made the Top 5!
 sixth through tenth use Nice typing! and You made the Top 10!
 a Top 5 or Top 10 score above 50 shows the place line and the Plinko line
 an unplaced score above 50 uses Nice typing! and the Plinko line only
+no Plinko line below 30% accuracy, even far above 50 WPM (winsPlinko)
 an unplaced score at 1 through 50 WPM is Thanks for playing! only
 a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10

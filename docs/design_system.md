@@ -300,7 +300,7 @@ Required hierarchy:
 1. Headline.
 2. Large final WPM.
 3. Accuracy.
-4. Plinko line when displayed WPM is above 50.
+4. Plinko line when the contestant qualifies (`docs/prd.md` §13).
 5. Place line for Top 5 or Top 10, except rank 1.
 6. Name field and Save Score action for eligible contestants.
 
@@ -481,7 +481,7 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
-- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
+- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when the contestant qualifies under `docs/prd.md` §13, and the place line for Top 5 or Top 10 except rank 1.
 - [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” An allowed name waits 20 seconds after the last change, counts down for 5 seconds, and saves. When name entry is omitted, Enter, Space, and a short Escape press select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
 - [ ] NEXT PLAYER, Space, Enter, Escape, and the visible countdown return to Ready while preserving event data.

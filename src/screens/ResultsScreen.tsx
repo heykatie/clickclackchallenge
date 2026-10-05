@@ -50,7 +50,7 @@ export function ResultsScreen({
   const pendingName = useRef("");
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
-  const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
+  const copy = standing ? resultCopy(standing, result.displayedWpm, result.accuracy) : null;
   const phase = nameTimerPhase(Boolean(standing?.showNameEntry), name, saving);
   const timerKey = nameTimerKey(phase, name);
   const [activeTimer, setActiveTimer] = useState(timerKey);
