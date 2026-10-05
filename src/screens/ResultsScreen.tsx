@@ -6,8 +6,9 @@ import {
   nameTimerPhase,
   nameTimerSeconds,
 } from "../features/results/nameTimeout";
-import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
+import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
+import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
@@ -46,11 +47,13 @@ export function ResultsScreen({
   const onSaveAndReadyRef = useRef(onSaveAndReady);
   const savingRef = useRef(saving);
   const nameRef = useRef<HTMLInputElement>(null);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
+  const viewButtonRef = useRef<HTMLButtonElement>(null);
   const nameStateRef = useRef("");
   const pendingName = useRef("");
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
-  const copy = standing ? resultCopy(standing, result.displayedWpm) : null;
+  const copy = standing ? resultCopy(standing, result.displayedWpm, result.accuracy) : null;
   const phase = nameTimerPhase(Boolean(standing?.showNameEntry), name, saving);
   const timerKey = nameTimerKey(phase, name);
   const [activeTimer, setActiveTimer] = useState(timerKey);
@@ -63,18 +66,14 @@ export function ResultsScreen({
 
   const timeoutMessage = nameTimeoutMessage(phase, secondsLeft);
 
+  // A short Escape does what a logo tap does: save, with the name when it is allowed, and open Ready.
   useEffect(() => {
     claimShortEscape(() => {
-      if (
-        savingRef.current ||
-        left.current ||
-        !shortEscapeOpensLeaderboard(standingRef.current) ||
-        !acceptsLeaveKey(shownAt, performance.now())
-      ) {
+      if (savingRef.current || left.current || !acceptsLeaveKey(shownAt, performance.now())) {
         return;
       }
       left.current = true;
-      onViewRef.current();
+      onSaveAndReadyRef.current(normalizeName(nameStateRef.current));
     });
     return () => claimShortEscape(null);
   }, [claimShortEscape, shownAt]);
@@ -94,6 +93,47 @@ export function ResultsScreen({
     }
     const onKeyDown = (event: KeyboardEvent) => {
       const nameField = nameRef.current;
+      const saveButton = saveButtonRef.current;
+      const viewButton = viewButtonRef.current;
+      const active = document.activeElement;
+
+      // Arrow keys choose between the name field and the buttons. Inside the field, Left and Right move the text cursor.
+      if (event.key.startsWith("Arrow")) {
+        if (active === nameField && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+          return;
+        }
+        const targets = { name: nameField, save: saveButton && !saveButton.disabled ? saveButton : null, view: viewButton };
+        const actions = (["name", "save", "view"] as const).filter((action) => targets[action] !== null);
+        const current = actions.find((action) => targets[action] === active) ?? null;
+        const next = moveActionFocus(actions, current, event.key);
+        if (next !== null) {
+          event.preventDefault();
+          targets[next]?.focus();
+        }
+        return;
+      }
+
+      // Enter or Space on a chosen button does what that button does.
+      const chosen = active === viewButton ? "view" : active === saveButton ? "save" : null;
+      if (chosen !== null && (isEnterKey(event) || event.key === " ")) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.repeat || savingRef.current || left.current || !acceptsLeaveKey(shownAt, performance.now())) {
+          return;
+        }
+        if (chosen === "view") {
+          left.current = true;
+          onViewRef.current();
+          return;
+        }
+        const nameToSave = nameToSaveOnEnter(nameField?.value ?? "", nameStateRef.current, pendingName.current);
+        if (nameToSave !== null) {
+          left.current = true;
+          onSaveRef.current(nameToSave);
+        }
+        return;
+      }
+
       if (nameField && isEnterKey(event)) {
         event.preventDefault();
         event.stopPropagation();
@@ -152,7 +192,7 @@ export function ResultsScreen({
       const field = nameRef.current;
       const character = nameCharacterFromKey(event, {
         fieldFocused: field !== null && document.activeElement === field,
-        buttonFocused: event.target instanceof HTMLButtonElement,
+        buttonFocused: document.activeElement instanceof HTMLButtonElement,
       });
       if (character === null || (standing !== null && !standing.showNameEntry)) {
         return;
@@ -250,11 +290,11 @@ export function ResultsScreen({
       {standing ? (
         <div className="results-actions">
           {standing.showNameEntry ? (
-            <button type="button" onClick={saveScore} disabled={saving || savedName === null}>
+            <button type="button" ref={saveButtonRef} onClick={saveScore} disabled={saving || savedName === null}>
               SAVE SCORE
             </button>
           ) : null}
-          <button type="button" onClick={onViewLeaderboard} disabled={saving}>
+          <button type="button" ref={viewButtonRef} onClick={onViewLeaderboard} disabled={saving}>
             VIEW LEADERBOARD
           </button>
         </div>

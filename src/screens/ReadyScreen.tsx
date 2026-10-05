@@ -64,16 +64,21 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
     return () => window.clearTimeout(id);
   }, [asleep, activity, allTime.length]);
 
+  // A short Escape does what a logo tap does: open the rolling list, or close it when it is up.
   useEffect(() => {
     claimShortEscape(() => {
-      if (!asleepRef.current) {
+      if (asleepRef.current) {
+        asleepRef.current = false;
+        setAsleep(false);
         return;
       }
-      asleepRef.current = false;
-      setAsleep(false);
+      if (readyLogoTap(allTime.length) === "roll") {
+        asleepRef.current = true;
+        setAsleep(true);
+      }
     });
     return () => claimShortEscape(null);
-  }, [claimShortEscape]);
+  }, [claimShortEscape, allTime.length]);
 
   useEffect(() => {
     screenRef.current?.focus();
@@ -83,9 +88,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
       const action = readyKeyDown(event.key, rolling);
       if (action === "wake") {
-        if (event.key !== "Escape") {
-          event.preventDefault();
-        }
+        event.preventDefault();
         if (!event.repeat) {
           asleepRef.current = false;
           setAsleep(false);

@@ -61,13 +61,14 @@ describe("ResultsScreen without name entry", () => {
     expect(onViewLeaderboard).toHaveBeenCalledOnce();
   });
 
-  it("opens the leaderboard on a short Escape only after the first second", () => {
-    const { onViewLeaderboard, shortEscape } = renderResults(unranked);
+  it("saves with no name and opens Ready on a short Escape after the first second, like a logo tap", () => {
+    const { onSaveAndReady, onViewLeaderboard, shortEscape } = renderResults(unranked);
     shortEscape();
-    expect(onViewLeaderboard).not.toHaveBeenCalled();
+    expect(onSaveAndReady).not.toHaveBeenCalled();
     pastGrace();
     shortEscape();
-    expect(onViewLeaderboard).toHaveBeenCalledOnce();
+    expect(onSaveAndReady).toHaveBeenCalledExactlyOnceWith(null);
+    expect(onViewLeaderboard).not.toHaveBeenCalled();
   });
 
   it("has no idle timeout", () => {
@@ -161,6 +162,15 @@ describe("ResultsScreen with name entry", () => {
     expect(onSaveAndReady).toHaveBeenCalledExactlyOnceWith("Zed");
   });
 
+  it("saves the allowed name and opens Ready on a short Escape, like a logo tap", () => {
+    const { onSaveAndReady, onSave, shortEscape } = renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    pastGrace();
+    shortEscape();
+    expect(onSaveAndReady).toHaveBeenCalledExactlyOnceWith("Zed");
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it("saves with no name on a logo tap when the name is blocked", () => {
     const { onSaveAndReady } = renderResults(ranked);
     fireEvent.change(nameField(), { target: { value: "f u c k" } });
@@ -182,3 +192,92 @@ describe("ResultsScreen with name entry", () => {
     expect(onViewLeaderboard).not.toHaveBeenCalled();
   });
 });
+
+describe("ResultsScreen arrow keys", () => {
+  beforeEach(fakeBoothClock);
+
+  const button = (name: string) => screen.getByRole("button", { name });
+
+  it("moves between the name field and the buttons with Up and Down", () => {
+    renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(button("SAVE SCORE"));
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(button("VIEW LEADERBOARD"));
+    fireEvent.keyDown(window, { key: "ArrowUp" });
+    expect(document.activeElement).toBe(button("SAVE SCORE"));
+    fireEvent.keyDown(window, { key: "ArrowUp" });
+    expect(document.activeElement).toBe(nameField());
+  });
+
+  it("skips SAVE SCORE while the name cannot be saved", () => {
+    renderResults(ranked);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(button("VIEW LEADERBOARD"));
+  });
+
+  it("keeps Left and Right for the text cursor inside the name field", () => {
+    renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(nameField());
+  });
+
+  it("moves between the buttons with Left and Right", () => {
+    renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(button("VIEW LEADERBOARD"));
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(button("SAVE SCORE"));
+  });
+
+  it("views the leaderboard with no name when Enter is pressed on VIEW LEADERBOARD", () => {
+    const { onSave, onViewLeaderboard } = renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onViewLeaderboard).toHaveBeenCalledOnce();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it("views the leaderboard when Space is pressed on VIEW LEADERBOARD, without typing a space", () => {
+    const { onViewLeaderboard } = renderResults(ranked);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    pastGrace();
+    fireEvent.keyDown(window, { key: " " });
+    expect(onViewLeaderboard).toHaveBeenCalledOnce();
+    expect(nameField().value).toBe("");
+  });
+
+  it("saves the name when Enter is pressed on SAVE SCORE", () => {
+    const { onSave } = renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith("Zed");
+  });
+
+  it("does not act on a chosen button in the first second", () => {
+    const { onViewLeaderboard } = renderResults(ranked);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onViewLeaderboard).not.toHaveBeenCalled();
+  });
+
+  it("chooses VIEW LEADERBOARD with an arrow when there is no name entry", () => {
+    const { onViewLeaderboard } = renderResults(unranked);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(button("VIEW LEADERBOARD"));
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onViewLeaderboard).toHaveBeenCalledOnce();
+  });
+});
+

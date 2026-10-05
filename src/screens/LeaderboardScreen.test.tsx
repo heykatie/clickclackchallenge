@@ -27,16 +27,19 @@ function score(id: string, name: string | null, displayedWpm: number, minute: nu
 function renderBoard(scores: ScoreRecord[], currentScoreId: string | null = null) {
   const onNextPlayer = vi.fn();
   const onSetup = vi.fn();
+  let shortEscape: (() => void) | null = null;
   render(
     <LeaderboardScreen
       scores={scores}
       currentScoreId={currentScoreId}
       onNextPlayer={onNextPlayer}
       onSetup={onSetup}
-      claimShortEscape={() => {}}
+      claimShortEscape={(handler) => {
+        shortEscape = handler;
+      }}
     />,
   );
-  return { onNextPlayer, onSetup };
+  return { onNextPlayer, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
 
 function rows() {
@@ -64,10 +67,22 @@ describe("LeaderboardScreen", () => {
     expect(screen.queryByText("No scores yet")).toBeNull();
   });
 
-  it("says No scores yet on an empty board and does not crown an empty first place", () => {
+  it("fills an empty board with two house scores and three empty places", () => {
     renderBoard([]);
-    expect(screen.getByText("No scores yet")).toBeTruthy();
-    expect(rows()[0]?.className).not.toContain("is-first");
+    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky60WPM", "2Clacky45WPM", "3——", "4——", "5——"]);
+    expect(screen.queryByText("No scores yet")).toBeNull();
+    expect(screen.queryByText("YOU")).toBeNull();
+  });
+
+  it("does not crown an empty first place", () => {
+    renderBoard([]);
+    expect(rows()[2]?.className).toContain("is-empty");
+    expect(rows()[2]?.className).not.toContain("is-first");
+  });
+
+  it("replaces the house scores with the first real score", () => {
+    renderBoard([score("a", "Alex", 20, 0)], "a");
+    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2——", "3——", "4——", "5——"]);
   });
 
   it("marks the just-saved result with YOU, matching the score and not the name", () => {
@@ -87,16 +102,33 @@ describe("LeaderboardScreen", () => {
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 
-  it("ignores Space, Enter, and Escape for the first second, then returns to Ready", () => {
+  it("ignores Space and Enter for the first second, then returns to Ready", () => {
     fakeBoothClock();
     const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
     fireEvent.keyDown(window, { key: " " });
     fireEvent.keyDown(window, { key: "Enter" });
-    fireEvent.keyDown(window, { key: "Escape" });
     expect(onNextPlayer).not.toHaveBeenCalled();
 
     act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
     fireEvent.keyDown(window, { key: " " });
+    expect(onNextPlayer).toHaveBeenCalledOnce();
+  });
+
+  it("does not leave on Escape key-down, so Escape can be held for Event Setup", () => {
+    fakeBoothClock();
+    const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onNextPlayer).not.toHaveBeenCalled();
+  });
+
+  it("returns to Ready on a short Escape after the first second, like a logo tap", () => {
+    fakeBoothClock();
+    const { onNextPlayer, shortEscape } = renderBoard([score("a", "Alex", 60, 0)]);
+    shortEscape();
+    expect(onNextPlayer).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    shortEscape();
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 
@@ -130,5 +162,15 @@ describe("LeaderboardScreen", () => {
     fireEvent.pointerUp(logo, { button: 0 });
     expect(onSetup).toHaveBeenCalledOnce();
     expect(onNextPlayer).not.toHaveBeenCalled();
+  });
+
+  it("chooses NEXT PLAYER with an arrow key, and Enter on it returns to Ready", () => {
+    fakeBoothClock();
+    const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: /NEXT PLAYER/ }));
+    act(() => vi.advanceTimersByTime(LEAVE_KEY_GRACE_MS));
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 });

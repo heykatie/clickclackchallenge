@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. Holding Escape for that same moment opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. The Escape key mirrors the badge on every screen after Start Event: a short press does what a tap does, and holding it for that same moment does what a long-press does. Holding Escape also opens Event Setup from the rolling high-score list. Space and Enter on the Leaderboard return to Ready. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -326,7 +326,7 @@ After 2 minutes with no key and no tap, or at once after a tap on the logo badge
 
 ### Start Behavior
 
-Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the logo badge does not start the test; it opens the rolling list. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
+Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the logo badge does not start the test; it opens the rolling list. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test; like a logo tap, it opens the rolling list, or closes it when it is up. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
 
 The key used to leave the Ready screen:
 
@@ -684,16 +684,19 @@ The Ready-screen prize string is in `docs/design_system.md` (Brand voice).
 
 Prize qualification and leaderboard qualification are separate rules.
 
-A contestant qualifies when their displayed WPM is greater than 50.
+A contestant qualifies when their displayed WPM is greater than 50 and their accuracy is at least 30%.
 
 ```text
-51 WPM or higher → qualifies
-50 WPM           → does not qualify
+51 WPM or higher, 30% accuracy or higher → qualifies
+50 WPM                                   → does not qualify
+any WPM below 30% accuracy               → does not qualify
 ```
+
+The 30% gate is deliberately the lowest useful minimum. It only stops key-mashing: random keys land around 5–20% accuracy, mostly from lucky spaces, while a real typist above 50 WPM clears it easily. Like the leaderboard gate, it uses the stored accuracy, so 29.99% does not qualify even though it displays as 30%.
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
-Leaderboard accuracy requirements do not automatically determine prize qualification unless the operator chooses to make that a future rule.
+The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
 
 ---
 
@@ -838,7 +841,7 @@ The Results screen should display:
 - Plinko qualification status when the contestant qualifies
 - Top 10 qualification status when applicable
 
-Show “You win a Plinko drop!” only when displayed WPM is above 50. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
+Show “You win a Plinko drop!” only when displayed WPM is above 50 and accuracy is at least 30%. Omit the line otherwise. Qualification is in §13. The headline is “Casper, is that you?” when displayed WPM is 0, with no place line and no Plinko line. It is “NEW HIGH SCORE!” for rank 1, with no Top 5 line. It is “Nice typing!” for another Top 5 result, a Top 10 result, or any result above 50 WPM. It is “Thanks for playing!” when the attempt is outside the Top 10 and the displayed WPM is 1 through 50. Places 2 through 5 add “You made the Top 5!” Top 10 outside the five adds “You made the Top 10!” A Top 5 or Top 10 score above 50 shows the place line and the Plinko line together. Rank 1 above 50 shows the Plinko line with “NEW HIGH SCORE!” only. The words are in `docs/design_system.md` (Brand voice).
 
 Results and name entry should remain on the **same screen**.
 
@@ -856,7 +859,7 @@ The place lines stay narrower. “You made the Top 5!” is places 2 through 5. 
 
 If the contestant ranks outside the top 20, name entry should not be shown.
 
-When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter, Space, and a short Escape press select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. A tap on the logo badge, with or without name entry, stores the result the way View Leaderboard does, keeping the typed name when it is allowed and null otherwise, then opens Ready instead of the Top 5. Save Score, View Leaderboard, and that tap are the only ways a result is stored.
+When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. A tap on the logo badge or a short Escape press, with or without name entry, stores the result the way View Leaderboard does, keeping the typed name when it is allowed and null otherwise, then opens Ready instead of the Top 5. Save Score, View Leaderboard, and that tap or Escape press are the only ways a result is stored.
 
 When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. A blocked name shows “Pick a different name.” and does not stop that wait. Clearing the name starts the 15 seconds again. After the last change to an allowed name, Results waits 20 seconds, then shows “Saving your score in {n}s” for 5 seconds and saves that name. Another change to the name starts the 20 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
@@ -912,6 +915,10 @@ The leaderboard should not expose:
 
 Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
 
+### House scores on an empty board
+
+While the active event has no eligible score, the Leaderboard shows two arcade-style house scores in places 1 and 2: Clicky at 60 WPM and Clacky at 45 WPM. The other three places stay empty. House scores are display only. They are never saved, never ranked against real scores, and never count toward the Ready high score, Results placement, Plinko, or the rolling high-score list. The first eligible score replaces both of them, even when it is lower. They never get the YOU marker.
+
 ---
 
 ## 17. High Score
@@ -936,6 +943,8 @@ NEXT PLAYER
 ```
 
 Selecting Next Player should immediately return to the Ready screen. Space, Enter, Escape, and a tap on the logo badge do the same. The saved scores stay.
+
+Arrow keys choose an action on Results and the Leaderboard, the same way they move the cursor on Event Setup. On Results, Up and Down move between the name field, SAVE SCORE (only while the name can be saved), and VIEW LEADERBOARD; Left and Right move between the buttons, and inside the name field they move the text cursor. On the Leaderboard an arrow chooses NEXT PLAYER. Enter or Space on a chosen button does what that button does, so Enter on VIEW LEADERBOARD leaves without a name even when one is typed.
 
 For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Taps and buttons work at once. Holding Escape still opens Event Setup.
 
@@ -1614,7 +1623,7 @@ This is the same before and after the timer starts.
 - the attempt is discarded
 - no score is saved
 
-A short Escape press does not leave Ready for Typing. Holding Escape opens Event Setup from Ready, Typing, Results, and the rolling high-score list. A short Escape press during Typing returns to Ready. On the Leaderboard, Space, Enter, and Escape return to Ready the same way Next Player does. The saved scores stay.
+A short Escape press does not leave Ready for Typing; it opens the rolling high-score list, as a logo tap does. Holding Escape opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list. A short Escape press during Typing returns to Ready. On Results it saves and returns to Ready, as a logo tap does. On the Leaderboard, Space, Enter, and a short Escape press return to Ready the same way Next Player does. The saved scores stay.
 
 ### Waiting Typing Returns to Ready
 
@@ -1761,7 +1770,7 @@ Any sentence that does not fit must be rewritten or removed.
 
 **When**
 
-- the operator long-presses the logo-only badge, or holds Escape on Ready, Typing, Results, or the rolling high-score list
+- the operator long-presses the logo-only badge, or holds Escape on Ready, Typing, Results, the Leaderboard, or the rolling high-score list
 
 **Then**
 
@@ -1839,8 +1848,9 @@ The following must remain unchanged:
 **Then**
 
 ```text
-51 WPM or higher → qualifies
-50 WPM           → does not qualify
+51 WPM or higher, 30% accuracy or higher → qualifies
+50 WPM                                   → does not qualify
+51 WPM or higher, 29.99% accuracy        → does not qualify
 ```
 
 If the intended business rule changes to `50 WPM or higher`, both the qualification rule and visible copy must be updated together.
@@ -1920,7 +1930,7 @@ minimum accuracy gate passes
 name entry through 20th place passes
 places 11 through 20 can enter a name and do not see a place line
 Top 5 sorting passes
-Plinko qualification passes
+Plinko qualification passes, including no drop below 30% accuracy
 rank 1 shows NEW HIGH SCORE! and, above 50 WPM, You win a Plinko drop!
 places 2 through 5 show Nice typing! and You made the Top 5!
 places 6 through 10 show Nice typing! and You made the Top 10!
@@ -1937,9 +1947,12 @@ a finished Story scores the time taken
 an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
-Space, Enter, or Escape on the Leaderboard returns to Ready
-holding Escape on Ready, Typing, or Results opens Event Setup
-a short Escape press on Ready does not start the test
+Space, Enter, or a short Escape press on the Leaderboard returns to Ready
+holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
+a short Escape press on Ready does not start the test and opens the rolling high-score list
+a short Escape press on Results saves the score and returns to Ready, like a logo tap
+arrow keys choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
+an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
 the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name

@@ -1,5 +1,5 @@
 import type { ScoreRecord, TestDuration, TestMode } from "../../db/persistence";
-import { meetsLeaderboardAccuracy } from "../typing/scoring";
+import { meetsLeaderboardAccuracy, winsPlinko } from "../typing/scoring";
 import { NAME_ENTRY_RANK, rankScores } from "../leaderboard/ranking";
 
 /** Later than any saved score, so a tie keeps the earlier attempt ahead. */
@@ -31,7 +31,7 @@ export interface ResultCopy {
   plinkoLine: string | null;
 }
 
-export function resultCopy(standing: ResultStanding, displayedWpm: number): ResultCopy {
+export function resultCopy(standing: ResultStanding, displayedWpm: number, accuracy: number | null): ResultCopy {
   if (displayedWpm === 0) {
     return {
       headline: "Casper, is that you?",
@@ -40,11 +40,11 @@ export function resultCopy(standing: ResultStanding, displayedWpm: number): Resu
     };
   }
   const cheered = standing.isTop5 || standing.isTop10;
-  const winsPlinko = displayedWpm > 50;
+  const plinko = winsPlinko(displayedWpm, accuracy);
   return {
     headline: standing.isNewHighScore
       ? "NEW HIGH SCORE!"
-      : cheered || winsPlinko
+      : cheered || plinko
         ? "Nice typing!"
         : "Thanks for playing!",
     placedLine: standing.isNewHighScore
@@ -54,7 +54,7 @@ export function resultCopy(standing: ResultStanding, displayedWpm: number): Resu
         : standing.isTop10
           ? "You made the Top 10!"
           : null,
-    plinkoLine: winsPlinko ? "You win a Plinko drop!" : null,
+    plinkoLine: plinko ? "You win a Plinko drop!" : null,
   };
 }
 

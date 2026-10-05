@@ -187,7 +187,7 @@ Use a large soft-white field with a persistent “Name” label, Nunito text, an
 
 ### Score panel
 
-Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples; never populate a new event with sample contestants.
+Make WPM the strongest element, with the unit explicit. Keep name and supporting labels subordinate. Use illustration values only in design examples. The only invented rows are the two house scores on an empty Leaderboard, defined in `docs/prd.md` §16.
 
 ### Leaderboard rows
 
@@ -253,7 +253,7 @@ After 2 minutes of idle, replace this screen with the all-time roll from `docs/p
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, and a tap on it returns to Ready from the other three and opens the rolling high-score list on Ready, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, and a tap on it returns to Ready from the other three and opens the rolling high-score list on Ready, as specified in `docs/prd.md` §9. The Escape key mirrors the badge: a short press does what a tap does, and holding it does what a long-press does. Space and Enter on the Leaderboard return to Ready.
 
 ## 11. Typing
 
@@ -300,7 +300,7 @@ Required hierarchy:
 1. Headline.
 2. Large final WPM.
 3. Accuracy.
-4. Plinko line when displayed WPM is above 50.
+4. Plinko line when the contestant qualifies (`docs/prd.md` §13).
 5. Place line for Top 5 or Top 10, except rank 1.
 6. Name field and Save Score action for eligible contestants.
 
@@ -361,15 +361,15 @@ Returning to ready screen in 5s
 
 ### Empty and partial boards
 
-Show actual event data rather than filling missing places with sample contestants.
+Show actual event data. The one exception is the board with no eligible score, which shows the two house scores from `docs/prd.md` §16 (Clicky and Clacky) styled like ordinary rows.
 
-Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Show “No scores yet” above the panel when the board is empty. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
+Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
 
 ### Automatic return
 
 - Start the return countdown when the leaderboard appears.
 - The countdown duration and what reset preserves are defined in `docs/prd.md`. Show “Returning to ready screen in {n}s” only for the last 5 seconds, in small type. Do not leave the number static.
-- NEXT PLAYER returns immediately to Ready. Space, Enter, and Escape do the same. Countdown completion performs the same reset.
+- NEXT PLAYER returns immediately to Ready. Space, Enter, and a short Escape press do the same. An arrow key moves focus to it, shown with the standard focus outline. Countdown completion performs the same reset.
 - Cancel the outgoing countdown when leaving the screen.
 
 ## 14. Motion
@@ -481,10 +481,10 @@ This checklist records what to verify; it does not claim the implementation has 
 - [ ] Typing shows one complete centered line with balanced margins and a consistent font size.
 - [ ] Current word, caret, completed text, upcoming text, and errors remain distinguishable.
 - [ ] WPM, timer, and accuracy occupy the bottom-left, bottom-center, and bottom-right positions.
-- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when displayed WPM is above 50, and the place line for Top 5 or Top 10 except rank 1.
+- [ ] Results show the headline, WPM, accuracy, “You win a Plinko drop!” when the contestant qualifies under `docs/prd.md` §13, and the place line for Top 5 or Top 10 except rank 1.
 - [ ] Name entry through 20th place stays on Results. Enter saves the score with the typed name. An empty or blocked name shows the leaderboard countdown for the last 5 seconds, then leaves. A blocked name shows “Pick a different name.” An allowed name waits 20 seconds after the last change, counts down for 5 seconds, and saves. When name entry is omitted, Enter, Space, and a short Escape press select View Leaderboard. The leaderboard's return-to-ready countdown does not run during name entry.
 - [ ] Leaderboard shows only the Top 5, emphasizes rank 1, and optionally identifies the current result.
-- [ ] NEXT PLAYER, Space, Enter, Escape, and the visible countdown return to Ready while preserving event data.
+- [ ] NEXT PLAYER, Space, Enter, a short Escape press, and the visible countdown return to Ready while preserving event data.
 - [ ] Empty states contain no fabricated scores or contestants.
 - [ ] Essential text has sufficient contrast, focus is visible, and state is not conveyed by color alone.
 - [ ] Required fonts, images, icons, and passages are available offline.

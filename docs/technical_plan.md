@@ -965,7 +965,7 @@ contestant keypress
 → transition to TypingScreen
 ```
 
-A short Escape press does not start the test. Holding Escape opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
+A short Escape press does not start the test. Escape mirrors the logo badge everywhere: App's `createEscapeHold` sends a short press to the screen's `claimShortEscape` handler, which runs the screen's logo-tap action, and a hold opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list. Space and Enter on the Leaderboard return to Ready.
 
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
@@ -1160,11 +1160,11 @@ Displays:
 Handles:
 
 ```text
-NEXT PLAYER, Escape, Enter, or Space
+NEXT PLAYER, Enter, Space, or a short Escape press
 → ReadyScreen
 ```
 
-Escape, Enter, and Space wait for `acceptsLeaveKey` in `src/state/leaveKeyGrace.ts`. Results uses the same check for its keyboard exits. The rule is in `docs/prd.md` §18.
+Enter, Space, and a short Escape press wait for `acceptsLeaveKey` in `src/state/leaveKeyGrace.ts`. Results uses the same check for its keyboard exits. The rule is in `docs/prd.md` §18.
 
 and:
 
@@ -1836,6 +1836,7 @@ Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
 the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
+an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
 ```
 
@@ -1853,6 +1854,7 @@ places 2 through 5 use Nice typing! and You made the Top 5!
 sixth through tenth use Nice typing! and You made the Top 10!
 a Top 5 or Top 10 score above 50 shows the place line and the Plinko line
 an unplaced score above 50 uses Nice typing! and the Plinko line only
+no Plinko line below 30% accuracy, even far above 50 WPM (winsPlinko)
 an unplaced score at 1 through 50 WPM is Thanks for playing! only
 a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10
@@ -1974,7 +1976,7 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
-a short Escape press on Ready does not start the test
+a short Escape press on Ready does not start the test and opens the rolling list when it has a score
 holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 each score on that list appears once, with no repeated rows
@@ -1988,7 +1990,7 @@ Typing screen waits for first valid typing character before timer starts
 if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
 a short Escape press during Typing returns to Ready and saves no score, including while the portrait instruction is showing
 holding Escape during Typing opens Event Setup and saves no score
-Space, Enter, or Escape during the Leaderboard returns to Ready and keeps the saved scores
+Space, Enter, or a short Escape press during the Leaderboard returns to Ready and keeps the saved scores; Escape key-down alone does not leave, so it can be held
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result
@@ -2000,7 +2002,8 @@ Typing screen displays remaining time
 a result ranked through 20th shows the name field, focused
 Enter on Results saves the score with the typed name
 a result outside 20th does not show the name field
-Enter, Space, or a short Escape press on Results without name entry opens the leaderboard
+Enter or Space on Results without name entry opens the leaderboard
+a short Escape press on Results saves with the allowed name or null and opens Ready, like a logo tap
 non-Top-10 View Leaderboard opens the Top 5
 name validation rejects empty values
 View Leaderboard with an empty name writes one score row with a null name and opens the Top 5
@@ -2010,6 +2013,8 @@ leaderboard auto reset does not run while name entry is active
 an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
 an allowed Results name saves 20 seconds after the last change, with Saving your score in {n}s visible for the last 5
 Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
+arrow keys move focus between the Results name field and its enabled buttons, keep Left and Right for the text cursor inside the field, and choose NEXT PLAYER on the Leaderboard (moveActionFocus)
+Enter or Space on a focused Results button runs that button, so Enter on VIEW LEADERBOARD views without saving the typed name
 Leaderboard renders no more than five rows
 ```
 
