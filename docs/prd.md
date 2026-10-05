@@ -937,6 +937,8 @@ NEXT PLAYER
 
 Selecting Next Player should immediately return to the Ready screen. Space, Enter, and Escape do the same. The saved scores stay.
 
+For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Taps and buttons work at once. Holding Escape still opens Event Setup.
+
 The app should also automatically return to Ready after a short delay.
 
 Initial target:
@@ -1942,6 +1944,8 @@ the operator can change Event Setup with the arrow keys and Enter
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard
+Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
+a tap on the rolling high-score list returns to Ready and does not start the test
 automatic reset passes
 giant keyboard input passes
 PWA launches offline
