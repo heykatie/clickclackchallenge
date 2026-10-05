@@ -16,3 +16,8 @@ export function readyPointerUp(pointer: { button: number; onLogo: boolean }): "s
   }
   return "start";
 }
+
+/** A tap on the logo badge opens the rolling high-score list early, when it has a score to show. */
+export function readyLogoTap(rollingScoreCount: number): "roll" | "ignore" {
+  return rollingScoreCount > 0 ? "roll" : "ignore";
+}

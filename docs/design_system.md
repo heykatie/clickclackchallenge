@@ -253,7 +253,7 @@ After 2 minutes of idle, replace this screen with the all-time roll from `docs/p
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, and a tap on it returns to Ready from the other three, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, and a tap on it returns to Ready from the other three and opens the rolling high-score list on Ready, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
 
 ## 11. Typing
 

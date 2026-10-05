@@ -869,7 +869,7 @@ represent cumulative attempt history and are not undone by Backspace.
 
 ---
 
-Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. A short Escape press during Typing returns to Ready and discards the attempt. Holding Escape opens Event Setup and discards the attempt. A short Escape press does not leave Ready. A tap on Ready opens Typing and does not count as a typed character. A tap on the logo badge does not; `readyPointerUp` is that rule. A tap on the rolling list only returns to Ready.
+Ready behavior is in `docs/prd.md`. Ready strings are in `docs/design_system.md`. The first scored attempt is the first printable character, including space and punctuation. The key still held from Ready is not that attempt. It is ignored until it is released. The non-typing keys excluded from that attempt are Shift, Control, Option/Alt, Command/Meta, Caps Lock, Tab, Escape, arrow keys, and function keys. Backspace does not start the timer. It is handled separately once typing has started. A short Escape press during Typing returns to Ready and discards the attempt. Holding Escape opens Event Setup and discards the attempt. A short Escape press does not leave Ready. A tap on Ready opens Typing and does not count as a typed character. A tap on the logo badge does not; `readyPointerUp` is that rule. It opens the rolling list instead when that list has a score; `readyLogoTap` is that rule. A tap on the rolling list only returns to Ready.
 
 Scoring, name, Plinko, high-score, and reset rules are in `docs/prd.md`. Visual states and CSS tokens are in `docs/design_system.md`. Screen layout is in `docs/wireframes.md`.
 
@@ -1974,6 +1974,7 @@ holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 each score on that list appears once, with no repeated rows
 any key or a tap on that list returns to Ready and does not start the test
+a tap on the logo badge on Ready opens that list at once when it has a score, and does nothing otherwise
 holding Escape on that list opens Event Setup
 Ready-screen key is not passed into Typing as contestant input
 a key still held from Ready is ignored until that key is released

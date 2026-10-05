@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge does nothing. Holding Escape for that same moment opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. Holding Escape for that same moment opens Event Setup from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready. A short Escape press does not. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -322,11 +322,11 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
-Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the logo badge does not start the test. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
+Any key except Escape, or a tap on Ready, may transition from Ready to Typing. A tap does not count as a typed character. A tap on the logo badge does not start the test; it opens the rolling list. A tap on the rolling list still only returns to Ready. A long-press on the logo still opens Event Setup and does not start the test. A short Escape press does not start a test. Holding Escape opens Event Setup. A short Escape press leaves a typing session for Ready. Holding Escape during that session opens Event Setup instead.
 
 The key used to leave the Ready screen:
 
@@ -1946,7 +1946,7 @@ Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard
 Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
 a tap on the rolling high-score list returns to Ready and does not start the test
-a tap on the logo badge on Ready does not start the test
+a tap on the logo badge on Ready does not start the test and opens the rolling high-score list when a qualifying score exists
 a tap on the logo badge returns to Ready from Typing without saving, from Results after saving, and from the Leaderboard
 automatic reset passes
 giant keyboard input passes

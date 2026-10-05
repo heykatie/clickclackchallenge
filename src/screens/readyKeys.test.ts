@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readyKeyDown, readyPointerUp } from "./readyKeys";
+import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 
 describe("readyKeyDown", () => {
   it("returns to Ready for any key while the rolling list is up", () => {
@@ -30,5 +30,16 @@ describe("readyPointerUp", () => {
 
   it("does not start the test from a secondary button", () => {
     expect(readyPointerUp({ button: 2, onLogo: false })).toBe("ignore");
+  });
+});
+
+describe("readyLogoTap", () => {
+  it("opens the rolling high-score list when a qualifying score exists", () => {
+    expect(readyLogoTap(1)).toBe("roll");
+    expect(readyLogoTap(20)).toBe("roll");
+  });
+
+  it("does nothing when there is no score to roll", () => {
+    expect(readyLogoTap(0)).toBe("ignore");
   });
 });

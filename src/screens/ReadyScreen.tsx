@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { listAllScores } from "../db/persistence";
 import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
-import { readyKeyDown, readyPointerUp } from "./readyKeys";
+import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
 import { useLogoHold } from "./useLogoHold";
 
@@ -17,12 +17,18 @@ type ReadyScreenProps = {
 
 export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
-  const logoHold = useLogoHold(onSetup);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
   const [allTime, setAllTime] = useState<RankedScore[]>([]);
+
+  const logoHold = useLogoHold(onSetup, () => {
+    if (readyLogoTap(allTime.length) === "roll") {
+      asleepRef.current = true;
+      setAsleep(true);
+    }
+  });
 
   useEffect(() => {
     onStartRef.current = onStart;
