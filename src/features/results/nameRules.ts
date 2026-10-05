@@ -2,10 +2,13 @@ import { isBlockedName } from "./blockedNames";
 
 export const MAX_NAME_LENGTH = 20;
 
-export function nameProblem(input: string): "empty" | "blocked" | null {
+export function nameProblem(input: string): "empty" | "too-long" | "blocked" | null {
   const trimmed = input.trim();
-  if (trimmed.length === 0 || trimmed.length > MAX_NAME_LENGTH) {
+  if (trimmed.length === 0) {
     return "empty";
+  }
+  if (trimmed.length > MAX_NAME_LENGTH) {
+    return "too-long";
   }
   if (isBlockedName(trimmed)) {
     return "blocked";
