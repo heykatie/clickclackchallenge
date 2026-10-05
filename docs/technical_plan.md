@@ -1164,6 +1164,8 @@ NEXT PLAYER, Escape, Enter, or Space
 → ReadyScreen
 ```
 
+Escape, Enter, and Space wait for `acceptsLeaveKey` in `src/state/leaveKeyGrace.ts`. Results uses the same check for its keyboard exits. The rule is in `docs/prd.md` §18.
+
 and:
 
 ```text
@@ -1866,6 +1868,7 @@ a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept
 a finished story scores the time from the first character to the last
 an unfinished story scores the full selected duration
+a leave key is ignored for the first second after Results or the Leaderboard appears
 ```
 
 ---
@@ -1996,6 +1999,7 @@ auto reset begins only on Leaderboard
 leaderboard auto reset does not run while name entry is active
 an empty Results name opens the leaderboard after 15 seconds, with the countdown visible for the last 5
 an allowed Results name saves 20 seconds after the last change, with Saving your score in {n}s visible for the last 5
+Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
 Leaderboard renders no more than five rows
 ```
 

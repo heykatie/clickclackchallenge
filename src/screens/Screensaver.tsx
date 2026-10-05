@@ -20,7 +20,8 @@ export function Screensaver({ scores, onWake }: ScreensaverProps) {
       className="screen screensaver"
       ref={screenRef}
       tabIndex={-1}
-      onPointerDown={onWake}
+      // Waking on pointerdown would let the same tap's pointerup reach Ready and start a test.
+      onPointerUp={onWake}
       onKeyDown={(event) => {
         if (event.repeat) {
           return;

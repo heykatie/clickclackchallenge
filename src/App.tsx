@@ -335,7 +335,7 @@ function App() {
           onNextPlayer={() => {
             const event = state.activeEvent;
             if (event) {
-              void openReady(event);
+              openReady(event).catch(() => setStatus("failed"));
             }
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
 import { rankScores } from "../features/leaderboard/ranking";
+import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 
 const RESET_SECONDS = 15;
 const RESET_COUNTDOWN_AT = 5;
@@ -22,6 +23,7 @@ export function LeaderboardScreen({
   claimShortEscape,
 }: LeaderboardScreenProps) {
   const [secondsLeft, setSecondsLeft] = useState(RESET_SECONDS);
+  const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
@@ -34,14 +36,14 @@ export function LeaderboardScreen({
 
   useEffect(() => {
     claimShortEscape(() => {
-      if (left.current) {
+      if (left.current || !acceptsLeaveKey(shownAt, performance.now())) {
         return;
       }
       left.current = true;
       onNextPlayerRef.current();
     });
     return () => claimShortEscape(null);
-  }, [claimShortEscape]);
+  }, [claimShortEscape, shownAt]);
 
   function leave() {
     if (left.current) {
@@ -71,11 +73,14 @@ export function LeaderboardScreen({
         return;
       }
       event.preventDefault();
+      if (!acceptsLeaveKey(shownAt, performance.now())) {
+        return;
+      }
       leave();
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, []);
+  }, [shownAt]);
 
   function beginHold() {
     holdTimer.current = window.setTimeout(() => {

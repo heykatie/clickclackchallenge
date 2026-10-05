@@ -8,6 +8,7 @@ import {
 } from "../features/results/nameTimeout";
 import { isViewLeaderboardKey, shortEscapeOpensLeaderboard } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
+import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import type { TestResult } from "../state/appState";
 
 type ResultsScreenProps = {
@@ -30,6 +31,7 @@ export function ResultsScreen({
   claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
+  const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
   const holdTimer = useRef<number | null>(null);
   const left = useRef(false);
@@ -57,14 +59,19 @@ export function ResultsScreen({
 
   useEffect(() => {
     claimShortEscape(() => {
-      if (savingRef.current || left.current || !shortEscapeOpensLeaderboard(standingRef.current)) {
+      if (
+        savingRef.current ||
+        left.current ||
+        !shortEscapeOpensLeaderboard(standingRef.current) ||
+        !acceptsLeaveKey(shownAt, performance.now())
+      ) {
         return;
       }
       left.current = true;
       onViewRef.current();
     });
     return () => claimShortEscape(null);
-  }, [claimShortEscape]);
+  }, [claimShortEscape, shownAt]);
 
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;
@@ -86,6 +93,9 @@ export function ResultsScreen({
       if (nameField && isEnterKey(event)) {
         event.preventDefault();
         event.stopPropagation();
+        if (!acceptsLeaveKey(shownAt, performance.now())) {
+          return;
+        }
         const nameToSave = nameToSaveOnEnter(nameField.value, nameStateRef.current, pendingName.current);
         if (nameToSave !== null) {
           left.current = true;
@@ -99,6 +109,9 @@ export function ResultsScreen({
       }
       event.preventDefault();
       event.stopPropagation();
+      if (!acceptsLeaveKey(shownAt, performance.now())) {
+        return;
+      }
       left.current = true;
       onViewRef.current();
     };
@@ -232,6 +245,9 @@ export function ResultsScreen({
                 return;
               }
               event.preventDefault();
+              if (!acceptsLeaveKey(shownAt, performance.now())) {
+                return;
+              }
               const nameToSave = nameToSaveOnEnter(event.currentTarget.value, name, pendingName.current);
               if (nameToSave !== null) {
                 onSave(nameToSave);
