@@ -53,3 +53,13 @@ export function allTimeScores(
 ): RankedScore[] {
   return rankScores(scores).slice(0, cap);
 }
+
+export interface LeaderboardSlot {
+  rank: number;
+  entry: RankedScore | null;
+}
+
+/** The visible board keeps five row positions. Unoccupied places stay empty, never invented. */
+export function topFiveSlots(ranked: readonly RankedScore[]): LeaderboardSlot[] {
+  return Array.from({ length: 5 }, (_, index) => ({ rank: index + 1, entry: ranked[index] ?? null }));
+}

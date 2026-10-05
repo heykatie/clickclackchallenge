@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreRecord } from "../../db/persistence";
 import { calculateWpm, displayedWpm } from "../typing/scoring";
-import { allTimeScores, highScore, rankScores } from "./ranking";
+import { allTimeScores, highScore, rankScores, topFiveSlots } from "./ranking";
 
 function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm" | "accuracy" | "createdAt">): ScoreRecord {
   return {
@@ -202,5 +202,34 @@ describe("allTimeScores", () => {
     ]);
     expect(rolled.map((entry) => entry.score.id)).toEqual(["one"]);
     expect(rolled[0]?.rank).toBe(1);
+  });
+});
+
+describe("topFiveSlots", () => {
+  const at = (minute: number) => `2026-09-22T00:${String(minute).padStart(2, "0")}:00.000Z`;
+
+  it("keeps five row positions and leaves unoccupied places empty", () => {
+    const slots = topFiveSlots(
+      rankScores([
+        score({ displayedWpm: 50, accuracy: 95, createdAt: at(0) }),
+        score({ displayedWpm: 60, accuracy: 95, createdAt: at(1) }),
+      ]),
+    );
+    expect(slots.map((slot) => slot.rank)).toEqual([1, 2, 3, 4, 5]);
+    expect(slots.map((slot) => slot.entry?.score.displayedWpm ?? null)).toEqual([60, 50, null, null, null]);
+  });
+
+  it("shows five empty places for an empty board", () => {
+    const slots = topFiveSlots([]);
+    expect(slots).toHaveLength(5);
+    expect(slots.every((slot) => slot.entry === null)).toBe(true);
+  });
+
+  it("never adds a sixth row", () => {
+    const slots = topFiveSlots(
+      rankScores(Array.from({ length: 8 }, (_, i) => score({ displayedWpm: 20 + i, accuracy: 95, createdAt: at(i) }))),
+    );
+    expect(slots).toHaveLength(5);
+    expect(slots.map((slot) => slot.entry?.score.displayedWpm)).toEqual([27, 26, 25, 24, 23]);
   });
 });

@@ -1835,6 +1835,7 @@ rank is derived rather than stored
 Top 10 selection is correct
 Top 5 selection is correct
 high score is the first eligible ranked score
+the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
 ```
 
