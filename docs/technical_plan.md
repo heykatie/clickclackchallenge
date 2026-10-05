@@ -1986,6 +1986,8 @@ Space, Enter, or Escape during the Leaderboard returns to Ready and keeps the sa
 long-press on the logo while Typing is waiting opens Event Setup and saves no score
 after the timer starts, that long-press opens Event Setup and saves no score
 long-press on the logo from Results opens Event Setup and does not write the unsaved result
+a tap on the logo returns to Ready: from Typing without a score, from Results after saving it with the allowed name or null, and from the Leaderboard
+a logo release before the long-press is a tap; a release after it, or after the finger slides off, is not (logoHold)
 Typing screen displays live WPM
 Typing screen displays live accuracy
 Typing screen displays remaining time

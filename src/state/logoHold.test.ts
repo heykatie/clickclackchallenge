@@ -55,4 +55,36 @@ describe("logo hold", () => {
     vi.advanceTimersByTime(HOLD_SETUP_MS * 2);
     expect(onHold).not.toHaveBeenCalled();
   });
+
+  it("reports a release before the hold as a tap", () => {
+    vi.useFakeTimers();
+    const onHold = vi.fn();
+    const hold = createLogoHold(onHold);
+
+    hold.begin();
+    vi.advanceTimersByTime(HOLD_SETUP_MS - 1);
+    expect(hold.release()).toBe("tap");
+    vi.advanceTimersByTime(HOLD_SETUP_MS);
+    expect(onHold).not.toHaveBeenCalled();
+  });
+
+  it("does not report a tap after the hold has opened Event Setup", () => {
+    vi.useFakeTimers();
+    const onHold = vi.fn();
+    const hold = createLogoHold(onHold);
+
+    hold.begin();
+    vi.advanceTimersByTime(HOLD_SETUP_MS);
+    expect(onHold).toHaveBeenCalledOnce();
+    expect(hold.release()).toBe("none");
+  });
+
+  it("does not report a tap when the finger slid off before release", () => {
+    vi.useFakeTimers();
+    const hold = createLogoHold(vi.fn());
+
+    hold.begin();
+    hold.end();
+    expect(hold.release()).toBe("none");
+  });
 });

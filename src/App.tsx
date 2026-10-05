@@ -242,6 +242,22 @@ function App() {
     }
   }
 
+  async function leaveResultsForReady(name: string | null) {
+    const event = state.activeEvent;
+    if (!event) {
+      return;
+    }
+    setSaving(true);
+    try {
+      await recordScore(name);
+      await openReady(event);
+    } catch {
+      setStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return boothScreen();
 
   function boothScreen(): ReactNode {
@@ -321,6 +337,9 @@ function App() {
           }}
           onViewLeaderboard={() => {
             void leaveResults(null);
+          }}
+          onSaveAndReady={(name) => {
+            void leaveResultsForReady(name);
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
           claimShortEscape={claimShortEscape}

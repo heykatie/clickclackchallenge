@@ -18,6 +18,8 @@ type ResultsScreenProps = {
   saving: boolean;
   onSave: (name: string) => void;
   onViewLeaderboard: () => void;
+  /** Saves like View Leaderboard, with the name when it is allowed, then opens Ready. */
+  onSaveAndReady: (name: string | null) => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
@@ -28,17 +30,20 @@ export function ResultsScreen({
   saving,
   onSave,
   onViewLeaderboard,
+  onSaveAndReady,
   onSetup,
   claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
-  const logoHold = useLogoHold(onSetup);
+  const [logoTaps, setLogoTaps] = useState(0);
+  const logoHold = useLogoHold(onSetup, () => setLogoTaps((count) => count + 1));
   const left = useRef(false);
   const standingRef = useRef(standing);
   const onViewRef = useRef(onViewLeaderboard);
   const onSaveRef = useRef(onSave);
+  const onSaveAndReadyRef = useRef(onSaveAndReady);
   const savingRef = useRef(saving);
   const nameRef = useRef<HTMLInputElement>(null);
   const nameStateRef = useRef("");
@@ -77,6 +82,7 @@ export function ResultsScreen({
   useEffect(() => {
     onViewRef.current = onViewLeaderboard;
     onSaveRef.current = onSave;
+    onSaveAndReadyRef.current = onSaveAndReady;
     savingRef.current = saving;
     standingRef.current = standing;
     nameStateRef.current = name;
@@ -193,6 +199,15 @@ export function ResultsScreen({
     onViewRef.current();
   }, [phase, secondsLeft]);
 
+  // A logo tap saves the result, with the name when it is allowed, and opens Ready.
+  useEffect(() => {
+    if (logoTaps === 0 || savingRef.current || left.current) {
+      return;
+    }
+    left.current = true;
+    onSaveAndReadyRef.current(normalizeName(nameStateRef.current));
+  }, [logoTaps]);
+
   function saveScore() {
     if (savedName === null) {
       return;
@@ -205,7 +220,7 @@ export function ResultsScreen({
       <button
         type="button"
         className="logo-badge"
-        aria-label="Logo"
+        aria-label="Back to start"
         {...logoHold}
       />
       {copy ? <h1>{copy.headline}</h1> : null}

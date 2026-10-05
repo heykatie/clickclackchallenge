@@ -253,7 +253,7 @@ After 2 minutes of idle, replace this screen with the all-time roll from `docs/p
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice.
 
-Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
+Start behavior, including the opening keypress and the “above 50 WPM” comparison, is in `docs/prd.md`. Do not show the Top 5, a Start button, or operator controls on this screen. A long-press on the logo badge opens Event Setup from Ready, Typing, Results, and the Leaderboard, and a tap on it returns to Ready from the other three, as specified in `docs/prd.md` §9. Holding Escape does the same from Ready, Typing, Results, and the rolling high-score list. Space, Enter, and Escape on the Leaderboard return to Ready.
 
 ## 11. Typing
 
@@ -348,7 +348,7 @@ Returning to ready screen in 5s
 
 ### Layout and emphasis
 
-- Place a small logo-only badge near the upper-left safe margin. Long-press behavior is in `docs/prd.md` §9.
+- Place a small logo-only badge near the upper-left safe margin. Its tap and long-press behavior is in `docs/prd.md` §9.
 - Center the “TOP 5” pill and “Leaderboard” heading.
 - Use one wide soft-white rounded panel with five consistent row positions.
 - Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.

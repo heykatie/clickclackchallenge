@@ -32,7 +32,7 @@ export function LeaderboardScreen({
   const logoHold = useLogoHold(() => {
     left.current = true;
     onSetup();
-  });
+  }, leave);
 
   useEffect(() => {
     onNextPlayerRef.current = onNextPlayer;
@@ -91,7 +91,7 @@ export function LeaderboardScreen({
       <button
         type="button"
         className="logo-badge"
-        aria-label="Logo"
+        aria-label="Back to start"
         {...logoHold}
       />
       <p className="leaderboard-kicker">TOP 5</p>

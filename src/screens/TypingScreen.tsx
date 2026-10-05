@@ -40,7 +40,7 @@ export function TypingScreen({
   const onExpireRef = useRef(onExpire);
   const onReturnRef = useRef(onReturnToReady);
   const [now, setNow] = useState(() => performance.now());
-  const logoHold = useLogoHold(onSetup);
+  const logoHold = useLogoHold(onSetup, onReturnToReady);
 
   useEffect(() => {
     onTypeRef.current = onType;
@@ -113,7 +113,7 @@ export function TypingScreen({
       <button
         type="button"
         className="logo-badge"
-        aria-label="Logo"
+        aria-label="Back to start"
         {...logoHold}
       />
       <p className="passage-line">
