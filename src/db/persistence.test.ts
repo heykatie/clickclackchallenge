@@ -6,6 +6,7 @@ import { PASSAGE_SET_ID } from "../data/passages";
 import {
   closeDatabase,
   DB_NAME,
+  LEGACY_DB_NAME,
   listAllScores,
   listScores,
   loadBooth,
@@ -39,6 +40,7 @@ describe("persistence", () => {
   beforeEach(async () => {
     await closeDatabase();
     await deleteDB(DB_NAME);
+    await deleteDB(LEGACY_DB_NAME);
   });
 
   it("creates a fresh event with the selected duration, passage set, and no scores", async () => {
