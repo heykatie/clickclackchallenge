@@ -241,6 +241,17 @@ Display three option groups and one main action:
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
+Layout, after `01-setup.png`:
+
+- Header: a mint “OPERATOR SETUP” pill, the headline “Set up today's typing test”, and the muted line “Choose the length, the game, and which leaderboard to use.”
+- Three white group cards with a lavender ring, each titled with a numbered lavender circle: “1 Test length”, “2 Game mode”, “3 Leaderboard”. On a wide screen Test length and Game mode sit side by side above Leaderboard; below 900px they stack.
+- Each choice is a tile: a dot, a Fredoka title, and a muted one-line description. Test length tiles show “30s” and “60s” as big Baloo 2 numbers with “Faster booth flow” and “Longer challenge”. Game mode: Standard “Common words, a new mix each time”; Famous Lines “The same famous lines for everyone”; Story “One short story, up to 60 seconds”. Leaderboard: Start fresh “A new event with an empty leaderboard”; Continue previous “Keep this event's leaderboard”; All-time leaderboard “Rank every score from every event”.
+- A selected tile fills its dot and takes a tint and ring: mint for Test length and Game mode, lavender for Leaderboard. The keyboard cursor is the charcoal outline. Unavailable tiles fade to half strength. While Story is selected, “Story always runs 60 seconds.” sits under Test length; with no event, “No previous event yet.” sits under Leaderboard.
+- A white footer bar holds “Arrow keys move. Enter selects.” on the left and a large mint “START EVENT →” on the right.
+- Only the pink corner blob; the mint arc is left out because the operator tools sit in the top-right corner.
+
+Each tile stays a real radio button named by its title and described by its line, so keyboard order, touch, and screen readers are unchanged.
+
 Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
 
 The Start fresh confirmation replaces the choices with one white card with a lavender border, the question, the explanation, and two buttons. CANCEL is the quieter white button with a lavender ring and starts chosen. START FRESH is the mint button.

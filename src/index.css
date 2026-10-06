@@ -1028,3 +1028,262 @@ button:disabled {
   box-shadow: inset 0 0 0 2px var(--tiny-lavender);
   font-size: 0.8rem;
 }
+
+/* Event Setup, after the 01-setup wireframe: a header, numbered group cards of option tiles, and a footer bar. */
+.setup-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* The operator tools sit in the top-right corner, so Event Setup keeps only the pink blob. */
+.setup-screen.edge-motifs::after {
+  display: none;
+}
+
+.setup-header {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+}
+
+.setup-kicker {
+  margin: 0;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  background: var(--tiny-mint);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.setup-header h1 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  line-height: 1.1;
+}
+
+.setup-subtitle {
+  margin: 0;
+  color: var(--tiny-muted);
+  font-size: 1.05rem;
+}
+
+.setup-groups {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-areas:
+    "length mode"
+    "board board";
+}
+
+.setup-group-length {
+  grid-area: length;
+}
+
+.setup-group-mode {
+  grid-area: mode;
+}
+
+.setup-group-board {
+  grid-area: board;
+}
+
+/* Below this the side-by-side cards squeeze the Game mode tiles, so the groups stack. */
+@media (max-width: 900px) {
+  .setup-groups {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "length"
+      "mode"
+      "board";
+  }
+}
+
+fieldset.setup-group {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 2px solid var(--tiny-lavender-light);
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+/* Floating the legend puts it inside the card instead of on its border. */
+.setup-group legend {
+  float: left;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.setup-group legend + * {
+  clear: both;
+}
+
+.setup-step {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--tiny-lavender-light);
+  color: var(--tiny-lavender-deep);
+  font-family: var(--font-number);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.setup-options {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.setup-options-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.setup-options-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  .setup-options-three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+label.setup-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  gap: 0.2rem 0.6rem;
+  margin: 0;
+  padding: 0.85rem 0.95rem;
+  border: 2px solid var(--tiny-lavender-light);
+  border-radius: 1.25rem;
+  background: var(--tiny-white);
+  cursor: pointer;
+}
+
+/* The radio stays real for keyboard and screen readers; the tile and dot show its state. */
+.setup-option-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.setup-option-dot {
+  align-self: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--tiny-lavender);
+}
+
+.setup-option-title {
+  align-self: center;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.setup-option-description {
+  grid-column: 2;
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+/* 30s and 60s read as big numbers, like the wireframe. Needs label. to beat the two-column tile rule. */
+label.setup-option-big {
+  justify-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 0.75rem 0.75rem 0.95rem;
+  text-align: center;
+}
+
+.setup-option-big .setup-option-dot {
+  justify-self: start;
+}
+
+.setup-option-big .setup-option-title {
+  font-family: var(--font-number);
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.setup-option-big .setup-option-description {
+  grid-column: 1;
+}
+
+.setup-option.is-selected.setup-option-mint {
+  border-color: var(--tiny-mint-strong);
+  background: color-mix(in srgb, var(--tiny-mint) 25%, var(--tiny-white));
+}
+
+.setup-option.is-selected.setup-option-mint .setup-option-dot {
+  background: var(--tiny-mint-strong);
+  box-shadow: inset 0 0 0 3px var(--tiny-white), 0 0 0 2px var(--tiny-mint-strong);
+}
+
+.setup-option.is-selected.setup-option-lavender {
+  border-color: var(--tiny-lavender);
+  background: color-mix(in srgb, var(--tiny-lavender-light) 45%, var(--tiny-white));
+}
+
+.setup-option.is-selected.setup-option-lavender .setup-option-dot {
+  background: var(--tiny-lavender);
+  box-shadow: inset 0 0 0 3px var(--tiny-white), 0 0 0 2px var(--tiny-lavender);
+}
+
+.setup-option.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.setup-note {
+  margin: 0.6rem 0 0;
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+}
+
+.setup-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem 0.85rem 1.25rem;
+  border: 2px solid var(--tiny-lavender-light);
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+.setup-footer .setup-hint {
+  margin: 0;
+  color: var(--tiny-muted);
+  font-size: 1rem;
+}
+
+.setup-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3.75rem;
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}

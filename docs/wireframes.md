@@ -115,7 +115,7 @@ Use three clear option groups with visible selected states and one large mint ac
 
 `01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the three option groups and Start Event. The setup PNG and the diagram above were drawn before the Game mode group. “Applies to everyone” in that diagram is old sample text. Duration and game mode apply to the next contestant and can change during Continue. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
-Event setup rules, including saved duration and game mode, are in `docs/prd.md`.
+Event setup rules, including saved duration and game mode, are in `docs/prd.md`. The built layout, which adds the Game mode card and a third Leaderboard choice to this wireframe, is described in `docs/design_system.md` §9.
 
 ## 5. Screen 02 — Ready / Attract
 
