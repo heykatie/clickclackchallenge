@@ -919,7 +919,7 @@ The leaderboard may:
 - emphasize rank #1
 - highlight the newest contestant if they are in the Top 5
 
-An empty place reads “Your name here?” instead of a name. When the newest contestant takes rank #1, the Leaderboard plays the new-high-score burst; otherwise it does not.
+When the newest contestant takes rank #1, the Leaderboard plays the new-high-score burst; otherwise it does not.
 
 The leaderboard should not expose:
 

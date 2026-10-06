@@ -69,14 +69,14 @@ describe("LeaderboardScreen", () => {
   it("keeps five places with dashes when the board is partly empty", () => {
     renderBoard([score("a", "Alex", 60, 0)]);
     expect(rows()).toHaveLength(5);
-    expect(rows()[1]?.textContent).toBe("2Your name here?—");
+    expect(rows()[1]?.textContent).toBe("2——");
     expect(rows()[1]?.className).toContain("is-empty");
     expect(screen.queryByText("No scores yet")).toBeNull();
   });
 
   it("fills an empty board with two house scores and three empty places", () => {
     renderBoard([]);
-    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky54WPM", "2Clacky47WPM", "3Your name here?—", "4Your name here?—", "5Your name here?—"]);
+    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky54WPM", "2Clacky47WPM", "3——", "4——", "5——"]);
     expect(screen.queryByText("No scores yet")).toBeNull();
     expect(screen.queryByText("YOU")).toBeNull();
   });
@@ -89,7 +89,7 @@ describe("LeaderboardScreen", () => {
 
   it("replaces the house scores with the first real score", () => {
     renderBoard([score("a", "Alex", 20, 0)], "a");
-    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2Your name here?—", "3Your name here?—", "4Your name here?—", "5Your name here?—"]);
+    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2——", "3——", "4——", "5——"]);
   });
 
   it("marks the just-saved result with YOU, matching the score and not the name", () => {
@@ -231,11 +231,6 @@ describe("LeaderboardScreen", () => {
   it("does not burst for a lower place", () => {
     renderBoard([score("a", "Alex", 90, 0), score("b", "Bo", 70, 1)], "b");
     expect(document.querySelector(".result-celebration")).toBeNull();
-  });
-
-  it("invites the next player into empty places", () => {
-    renderBoard([score("a", "Alex", 60, 0)]);
-    expect(rows()[1]?.textContent).toContain("Your name here?");
   });
 
   it("drains a countdown bar on NEXT PLAYER over the 15 seconds", () => {

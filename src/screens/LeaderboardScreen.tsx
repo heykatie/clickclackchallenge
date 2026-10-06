@@ -127,7 +127,6 @@ export function LeaderboardScreen({
             displayedWpm={slot.entry?.score.displayedWpm ?? null}
             isCurrent={slot.entry !== null && slot.entry.score.id === currentScoreId}
             motion={slot.entry ? rowMotion(slot.rank, currentRank) : null}
-            emptyLabel="Your name here?"
           />
         ))}
       </ol>

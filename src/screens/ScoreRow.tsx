@@ -11,8 +11,6 @@ type ScoreRowProps = {
   style?: CSSProperties;
   /** How the row moves as the Leaderboard opens. */
   motion?: RowMotion;
-  /** Text for an unoccupied place's name. */
-  emptyLabel?: string;
 };
 
 /** One ranked row, shared by the Leaderboard and the rolling high-score list. */
@@ -23,7 +21,6 @@ export function ScoreRow({
   isCurrent = false,
   style,
   motion = null,
-  emptyLabel = "—",
 }: ScoreRowProps) {
   const empty = displayedWpm === null;
   const first = rank === 1 && !empty;
@@ -49,7 +46,7 @@ export function ScoreRow({
         {first ? <Crown /> : null}
       </span>
       <span className="score-name-cell">
-        <span className={!empty && name ? "score-name has-name" : "score-name"}>{empty ? emptyLabel : (name ?? "—")}</span>
+        <span className={!empty && name ? "score-name has-name" : "score-name"}>{empty ? "—" : (name ?? "—")}</span>
         {isCurrent ? <span className="you-pill">YOU</span> : null}
       </span>
       {empty ? (

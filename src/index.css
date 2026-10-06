@@ -1308,23 +1308,6 @@ label.setup-option-big {
   }
 }
 
-/* Empty places gently invite the next player. */
-.leaderboard-rows .score-row.is-empty .score-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  animation: board-invite 2.4s ease-in-out infinite;
-}
-
-@keyframes board-invite {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
 /* NEXT PLAYER drains like a progress bar over the auto-return time. */
 .next-player-button {
   position: relative;
@@ -1355,8 +1338,7 @@ label.setup-option-big {
 @media (prefers-reduced-motion: reduce) {
   .leaderboard-rows .score-row.is-climbing,
   .leaderboard-rows .score-row.is-nudged,
-  .leaderboard-rows .score-row.is-first .score-crown svg,
-  .leaderboard-rows .score-row.is-empty .score-name {
+  .leaderboard-rows .score-row.is-first .score-crown svg {
     animation: none;
   }
 
