@@ -1053,18 +1053,18 @@ button:disabled {
  * so staff spot a prize winner.
  */
 .result-pill {
-  animation: result-pill-pop 600ms ease-out 2.5s both;
+  animation: result-pill-pop 600ms ease-out var(--count-up-end, 2.5s) both;
 }
 
 /* The prize keeps wiggling every 3 seconds so staff and passers-by spot a winner. */
 .result-plinko {
   animation:
-    result-pill-pop 600ms ease-out 2.5s both,
-    result-pill-wiggle 3s ease-in-out 3.2s infinite;
+    result-pill-pop 600ms ease-out var(--count-up-end, 2.5s) both,
+    result-pill-wiggle 3s ease-in-out calc(var(--count-up-end, 2.5s) + 700ms) infinite;
 }
 
 .result-place {
-  animation-delay: 2.65s;
+  animation-delay: calc(var(--count-up-end, 2.5s) + 150ms);
 }
 
 @keyframes result-pill-pop {

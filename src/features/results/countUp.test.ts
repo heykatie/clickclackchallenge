@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COUNT_UP_DELAY_MS, COUNT_UP_MS, countUpValue } from "./countUp";
+import { COUNT_UP_DELAY_MS, COUNT_UP_MS, countUpMs, countUpValue } from "./countUp";
 
 const settled = COUNT_UP_DELAY_MS + COUNT_UP_MS;
 
@@ -31,8 +31,15 @@ describe("countUpValue", () => {
     expect(countUpValue(0, settled / 2)).toBe(0);
   });
 
-  it("starts once Nice typing! has typed out, and rolls slowly enough to watch", () => {
+  it("starts once Nice typing! has typed out", () => {
     expect(COUNT_UP_DELAY_MS).toBe(900);
-    expect(COUNT_UP_MS).toBe(1600);
+  });
+
+  it("gives a bigger score a longer roll, from 1.2 seconds up to 2 seconds", () => {
+    expect(countUpMs(0)).toBe(1200);
+    expect(countUpMs(75)).toBe(1600);
+    expect(countUpMs(150)).toBe(2000);
+    expect(countUpMs(9000)).toBe(2000);
+    expect(countUpMs(40)).toBeLessThan(countUpMs(120));
   });
 });
