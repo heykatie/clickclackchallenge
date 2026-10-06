@@ -26,6 +26,10 @@
   --font-display: "Fredoka", sans-serif;
   --font-ui: "Nunito", sans-serif;
   --font-typing: "Atkinson Hyperlegible", sans-serif;
+  /* Scores and leaderboard names. */
+  --font-score: "Baloo 2", "Fredoka", sans-serif;
+  /* The NEW HIGH SCORE headline only. */
+  --font-celebrate: "Chewy", "Fredoka", sans-serif;
 
   color: var(--tiny-charcoal);
   background: var(--tiny-blush);
@@ -305,8 +309,9 @@ button.is-cursor {
   padding: 0.75rem 1.25rem;
   border-radius: 999px;
   background: var(--tiny-mint);
+  font-family: var(--font-display);
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .high-score-card {
@@ -317,6 +322,7 @@ button.is-cursor {
 }
 
 .high-score-card .stat-value {
+  font-family: var(--font-score);
   font-size: 3rem;
 }
 
@@ -494,7 +500,7 @@ button.is-cursor {
 
 .score-name {
   overflow: hidden;
-  font-family: var(--font-display);
+  font-family: var(--font-score);
   font-size: 1.75rem;
   font-weight: 700;
   text-overflow: ellipsis;
@@ -508,7 +514,7 @@ button.is-cursor {
 }
 
 .score-wpm-value {
-  font-family: var(--font-display);
+  font-family: var(--font-score);
   font-size: 2.25rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -709,7 +715,16 @@ button.is-cursor {
 
 .results-screen .stat-value {
   margin: 0;
+  font-family: var(--font-score);
   font-size: 4.5rem;
+}
+
+/* Chewy is narrow, so it runs larger than the other headlines to read as the big moment. */
+.results-screen h1.is-new-high-score {
+  font-family: var(--font-celebrate);
+  font-size: 3rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .results-screen h1,
@@ -722,8 +737,9 @@ button.is-cursor {
   padding: 0.75rem 1.25rem;
   border-radius: 999px;
   color: var(--tiny-charcoal);
+  font-family: var(--font-display);
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .result-plinko {

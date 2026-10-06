@@ -267,7 +267,15 @@ export function ResultsScreen({
         {...logoHold}
       />
       {standing && celebratesNewHighScore(standing, result.displayedWpm) ? <Celebration /> : null}
-      {copy ? <h1>{copy.headline}</h1> : null}
+      {copy ? (
+        <h1
+          className={
+            standing && celebratesNewHighScore(standing, result.displayedWpm) ? "is-new-high-score" : undefined
+          }
+        >
+          {copy.headline}
+        </h1>
+      ) : null}
       <p className="stat-value">
         <span className="visually-hidden">{result.displayedWpm} WPM</span>
         {/* The rolling number is decoration; screen readers get the final score above. */}
