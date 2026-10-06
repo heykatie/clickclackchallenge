@@ -272,9 +272,9 @@ describe("EventSetupScreen", () => {
     expect(screen.getByText("Plinko drops won this event: 12")).toBeTruthy();
   });
 
-  it("uses the singular for one drop", () => {
+  it("keeps the plural for one drop, so the line reads the same at any count", () => {
     renderSetup(existing, false, false, false, 1);
-    expect(screen.getByText("Plinko drop won this event: 1")).toBeTruthy();
+    expect(screen.getByText("Plinko drops won this event: 1")).toBeTruthy();
   });
 
   it("shows no Plinko count before any event exists", () => {

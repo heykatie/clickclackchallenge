@@ -249,7 +249,7 @@ export function EventSetupScreen({
       <h1 className="setup-title">Set up today's typing test</h1>
       {storedDuration !== null && plinkoWins !== null ? (
         <p className="setup-plinko-count">
-          {plinkoWins === 1 ? "Plinko drop" : "Plinko drops"} won this event: {plinkoWins}
+          Plinko drops won this event: {plinkoWins}
         </p>
       ) : null}
       {updateReady && confirmCursor === null ? (
