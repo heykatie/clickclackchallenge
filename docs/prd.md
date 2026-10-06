@@ -125,7 +125,7 @@ V1 should:
 10. remove the need for browser refreshes between contestants
 11. reset cleanly for the next contestant
 12. maintain a simple, readable landscape-iPad interface
-13. keep each game mode fair: Famous Lines uses one sentence sequence, Standard draws from one fixed word list, and Story uses one fixed short story
+13. keep each game mode fair while every try differs: Famous Lines shuffles one fixed set of lines, Standard draws from one fixed word list, and Story picks from a set of matched short stories
 14. follow the documented visual design system
 
 ---
@@ -152,7 +152,7 @@ V1 includes:
 - Backspace support
 - Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
-- Story, one fixed short story with a 60-second cap
+- Story, one of several matched short stories, with a 60-second cap
 - results screen
 - high-score detection
 - minimum leaderboard accuracy requirement
@@ -731,7 +731,7 @@ V1 must not depend on:
 
 Famous Lines passages are short famous lines from games, anime, and technology. Prefer lines people already know: funny, popular, or thoughtful. Familiar names are part of those lines. Famous Lines does not use numbers.
 
-Story is one original short story, the same lines in the same order for every attempt. It follows the shape of a fall into another world, a kindness, and a way home. It does not copy text or names from those stories. The lines together are about 120–140 characters, so a 100 WPM attempt can finish in about 15 seconds and a 25 WPM attempt uses most of the timer. Story always ends at 60 seconds if the story is unfinished. One sentence shows at a time. The attempt ends when the last sentence is committed.
+Story is a set of six original short stories. Each attempt gets one at random, never the same story as the attempt before. Each is a small journey: arriving somewhere strange, a kindness, and a way home, without copying text or names from other stories. They are matched for fairness: four sentences of 30–34 characters, 123–126 characters in all, exactly one comma, and simple everyday words. Together a story is about 120–140 characters, so a 100 WPM attempt can finish in about 15 seconds and a 25 WPM attempt uses most of the timer. Story always ends at 60 seconds if the story is unfinished. One sentence shows at a time. The attempt ends when the last sentence is committed.
 
 Famous Lines sentences should:
 
@@ -764,19 +764,17 @@ The final character limit should be validated using the final typing font and th
 
 ### Event Fairness
 
-Famous Lines uses one ordered sentence sequence for every attempt in the event.
+Every attempt gets different text, so a contestant cannot memorize it, while every mode stays as fair as possible.
 
-Example:
+Famous Lines uses one fixed set of lines for every attempt, shuffled into a new order each time. Every line is 30 to 50 characters with similar punctuation, so no order is much easier than another.
 
 ```text
 Contestant A:
-Sentence 1 → Sentence 2 → Sentence 3 → ...
+Line 17 → Line 3 → Line 29 → ...
 
 Contestant B:
-Sentence 1 → Sentence 2 → Sentence 3 → ...
+Line 8 → Line 22 → Line 1 → ...
 ```
-
-Famous Lines sentences are not shuffled per contestant. Every attempt, including a retake, starts again at the first sentence. That keeps Famous Lines difficulty consistent across competitors.
 
 Standard uses the same list of the 200 most common English words for every attempt. Each attempt gets a new random draw from that list. Words are lowercase and have no punctuation. A line ends with the space that joins it to the next word, and that space is scored like any other character. The draw changes per attempt. The word list does not.
 
@@ -836,10 +834,10 @@ Example:
 ```text
 common-sentences-v2
 common-words-v1
-story-v1
+stories-v2
 ```
 
-`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. `story-v1` is the Story passage. Saved scores keep the identifier from the attempt that earned them.
+`common-sentences-v2` is the current Famous Lines set, the famous-quote lines. `common-sentences-v1` was the earlier everyday-sentence set. `story-v1` was the single Story passage; `stories-v2` is the current set of six matched stories. Saved scores keep the identifier from the attempt that earned them.
 
 If the passage set changes later, create a new version rather than silently replacing the existing set.
 
@@ -1766,11 +1764,9 @@ A server connection must not be required.
 
 **Then**
 
-- Famous Lines starts every contestant at the same first sentence
-- Famous Lines gives every contestant the same ordered sentence sequence
-- Famous Lines passages are not shuffled per contestant
+- Famous Lines gives every attempt every line from the same set, in a new order
 - Standard gives every attempt a new draw from the same 200-word list
-- Story gives every attempt the same short story
+- Story gives every attempt one of the matched stories, never the same one twice in a row
 - a score keeps the mode and WPM from the attempt that earned it
 
 ---
@@ -1975,9 +1971,9 @@ a displayed 0 WPM score shows Casper, is that you? and does not place
 fresh event behavior passes
 continue event behavior passes
 score persistence passes
-Famous Lines uses the same sentence sequence for every attempt
+Famous Lines shuffles the same set of lines for every attempt
 Standard draws each attempt from the same 200-word list
-Story uses the same short story and a 60-second cap
+Story picks a different matched story each attempt, with a 60-second cap
 a finished Story scores the time taken
 an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line

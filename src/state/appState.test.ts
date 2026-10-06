@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { EventRecord } from "../db/persistence";
+import { passages } from "../data/passages";
+import { stories } from "../data/story";
 import { appReducer, initialState } from "./appState";
 
 const event60: EventRecord = {
@@ -21,9 +23,7 @@ describe("appReducer", () => {
     expect(typing.screen).toBe("typing");
     expect(typing.currentTest?.startedAt).toBeNull();
     expect(typing.currentTest?.correctAttempts).toBe(0);
-    expect(typing.currentTest?.expectedSentence.startsWith("It's dangerous to go alone")).toBe(
-      true,
-    );
+    expect(passages).toContain(typing.currentTest?.expectedSentence);
   });
 
   it("scores the first printable character and starts the timer", () => {
@@ -33,7 +33,7 @@ describe("appReducer", () => {
     );
     const typed = appReducer(typing, {
       type: "TYPE_KEY",
-      key: "I",
+      key: typing.currentTest?.expectedSentence[0] ?? "",
       repeat: false,
       now: 1000,
     });
@@ -109,7 +109,7 @@ describe("appReducer", () => {
     expect(typing.durationSeconds).toBe(60);
     expect(typing.currentTest?.durationSeconds).toBe(60);
     expect(typing.currentTest?.testMode).toBe("famous-lines");
-    expect(typing.currentTest?.expectedSentence.startsWith("It's dangerous to go alone")).toBe(true);
+    expect(passages).toContain(typing.currentTest?.expectedSentence);
   });
 
   it("ends a story when the last line is finished and scores the time taken", () => {
@@ -121,7 +121,7 @@ describe("appReducer", () => {
       type: "ENTER_TYPING",
     });
     const sentences = state.currentTest?.sentences ?? [];
-    expect(sentences[0]).toBe("A child fell down into the dark.");
+    expect(stories.some((story) => story[0] === sentences[0])).toBe(true);
     let now = 1_000;
     for (const sentence of sentences) {
       for (const key of sentence) {
@@ -225,5 +225,55 @@ describe("appReducer", () => {
     expect(setup.screen).toBe("setup");
     expect(setup.latestResult).toBeNull();
     expect(setup.currentTest).toBeNull();
+  });
+});
+
+describe("passages for each try", () => {
+  const typingWith = (testMode: "famous-lines" | "story") =>
+    appReducer(
+      appReducer(appReducer(initialState, { type: "SET_ACTIVE_EVENT", event: { ...event60, testMode } }), {
+        type: "ENTER_READY",
+      }),
+      { type: "ENTER_TYPING" },
+    ).currentTest?.sentences ?? [];
+
+  it("gives each Famous Lines try every line in a new order", () => {
+    const tries = Array.from({ length: 5 }, () => typingWith("famous-lines"));
+    for (const lines of tries) {
+      expect([...lines].sort()).toEqual([...passages].sort());
+    }
+    expect(new Set(tries.map((lines) => lines.join("|"))).size).toBeGreaterThan(1);
+  });
+
+  it("never gives two Story tries in a row the same story", () => {
+    let state = appReducer(initialState, { type: "SET_ACTIVE_EVENT", event: { ...event60, testMode: "story" } });
+    let previous = "";
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      state = appReducer(appReducer(state, { type: "ENTER_READY" }), { type: "ENTER_TYPING" });
+      const next = state.currentTest?.sentences.join("|") ?? "";
+      expect(next).not.toBe(previous);
+      previous = next;
+    }
+  });
+});
+
+describe("story choice stays in state", () => {
+  it("remembers the story a try got, so running the update twice cannot repeat it next time", () => {
+    const ready = appReducer(
+      appReducer(initialState, { type: "SET_ACTIVE_EVENT", event: { ...event60, testMode: "story" } }),
+      { type: "ENTER_READY" },
+    );
+    // React may run an update twice in development; only one result is kept.
+    appReducer(ready, { type: "ENTER_TYPING" });
+    const kept = appReducer(ready, { type: "ENTER_TYPING" });
+    const shown = kept.currentTest?.sentences.join("|");
+    expect(stories.map((story) => story.join("|")).indexOf(shown ?? "")).toBe(kept.lastStory);
+
+    const back = appReducer(kept, { type: "ENTER_READY" });
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      appReducer(back, { type: "ENTER_TYPING" });
+      const next = appReducer(back, { type: "ENTER_TYPING" });
+      expect(next.currentTest?.sentences.join("|")).not.toBe(shown);
+    }
   });
 });
