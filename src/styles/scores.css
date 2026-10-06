@@ -1,0 +1,179 @@
+.score-kicker {
+  margin: 0;
+  padding: 0.45rem 1.25rem;
+  border-radius: 999px;
+  background: var(--tiny-lavender-light);
+  color: var(--tiny-lavender-deep);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.score-card {
+  box-sizing: border-box;
+  width: min(100%, 46rem);
+  border: 2px solid var(--tiny-lavender);
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+.score-rows {
+  margin: 0;
+  padding: 0.6rem;
+  list-style: none;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 3.25rem 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.4rem 1.5rem 0.4rem 1rem;
+  text-align: left;
+}
+
+.score-row + .score-row:not(.is-first, .is-current) {
+  box-shadow: inset 0 1px 0 var(--tiny-lavender-light);
+}
+
+/* Only highlighted rows are rounded, so the dividers between quiet rows stay straight. */
+.score-row.is-first,
+.score-row.is-current {
+  border-radius: 1.25rem;
+}
+
+.score-row.is-first {
+  background: var(--tiny-lavender-light);
+}
+
+/* The just-finished result. Rank 1 keeps its lavender surface and gains the mint outline. */
+.score-row.is-current {
+  background: color-mix(in srgb, var(--tiny-mint) 25%, var(--tiny-white));
+  box-shadow: inset 0 0 0 2px var(--tiny-mint-strong);
+}
+
+.score-row.is-first.is-current {
+  background: var(--tiny-lavender-light);
+}
+
+.score-rank {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--tiny-lavender-light);
+  font-family: var(--font-number);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.score-row.is-first .score-rank {
+  background: var(--tiny-mint-strong);
+}
+
+.score-crown {
+  display: grid;
+  place-items: center;
+  color: var(--tiny-gold-deep);
+}
+
+.score-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.score-name {
+  overflow: hidden;
+  font-family: var(--font-name);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-wpm {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.score-wpm-value {
+  font-family: var(--font-number);
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-wpm-unit {
+  color: var(--tiny-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* An unoccupied place: quiet, never styled like a winning score. */
+.score-row.is-empty .score-rank {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--tiny-lavender-light);
+  color: var(--tiny-muted);
+}
+
+.score-row.is-empty .score-name {
+  color: var(--tiny-muted);
+  font-weight: 600;
+}
+
+.you-pill {
+  flex: none;
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: var(--tiny-mint-strong);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.all-time-best {
+  margin: 0.5rem 0 0;
+  color: var(--tiny-lavender-deep);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Podium: pastel peach, sky, and pink rank circles for the top three, on the Leaderboard and rolling list. */
+.score-row.is-podium-1 .score-rank {
+  background: var(--tiny-peach);
+}
+
+.score-row.is-podium-2 .score-rank {
+  background: var(--tiny-sky);
+}
+
+.score-row.is-podium-3 .score-rank {
+  background: var(--tiny-pink);
+}
+
+/*
+ * The top score shimmers as the one to beat: on the Leaderboard when the player missed it, and on the idle
+ * rolling list. It sweeps on an overlay so it never fights the row's own entrance or wave animation.
+ */
+.score-row.is-shining {
+  position: relative;
+}
+
+.score-row.is-shining::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  background-position: 150% 0;
+  animation: board-row-glow 6s ease-in-out 600ms infinite;
+}

@@ -11,11 +11,13 @@ import {
   DB_NAME,
   LEGACY_DB_NAME,
   listAllScores,
+  listEverything,
   listBoardScores,
   listScores,
   loadBooth,
   openDatabase,
   saveScore,
+  setSoundOn,
   SETTINGS_KEY,
   startFreshEvent,
   updateActiveEvent,
@@ -264,6 +266,34 @@ describe("persistence", () => {
     const database = await openDatabase();
     expect(await database.count("scores")).toBe(2);
     expect(await database.count("events")).toBe(3);
+  });
+
+  it("keeps sound off until the operator turns it on, and remembers it after the app reopens", async () => {
+    expect((await loadBooth()).settings.soundOn).toBe(false);
+    await setSoundOn(true);
+    await closeDatabase();
+    expect((await loadBooth()).settings.soundOn).toBe(true);
+  });
+
+  it("keeps the sound setting through Start fresh and Clear all scores", async () => {
+    await setSoundOn(true);
+    await startFreshEvent(30);
+    expect((await loadBooth()).settings.soundOn).toBe(true);
+    await clearAllScores(30, "words");
+    expect((await loadBooth()).settings.soundOn).toBe(true);
+  });
+
+  it("lists every score and event for a backup, cleared ones included", async () => {
+    const first = await startFreshEvent(30);
+    await saveScore(scoreInput(first.id, 70));
+    await clearAllScores(30, "famous-lines");
+    const after = (await loadBooth()).activeEvent!;
+    await saveScore(scoreInput(after.id, 80));
+
+    const everything = await listEverything();
+    expect(everything.scores.map((score) => score.displayedWpm).sort()).toEqual([70, 80]);
+    expect(everything.events.find((event) => event.id === first.id)?.hiddenAt).not.toBeNull();
+    expect(everything.events.find((event) => event.id === after.id)?.hiddenAt).toBeNull();
   });
 
   it("shows scores saved after the clear", async () => {

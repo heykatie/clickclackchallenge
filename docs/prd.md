@@ -311,6 +311,12 @@ All-time leaderboard is the third Leaderboard choice, after Start fresh and Cont
 
 When an event exists, Event Setup shows a small CLEAR ALL SCORES link at its bottom left, away from START EVENT, for removing test scores before a real event. It asks first: “Clear all scores?”, with CANCEL chosen; Escape cancels. CLEAR SCORES hides every event and score saved so far and starts an empty event with the selected length and mode. Hidden scores leave every board, Results placement, the Ready high score, the rolling list, and the all-time best, including on an all-time board. Nothing is deleted: the scores stay on the device. Scores saved after the clear show normally. In the arrow-key order it comes right after START EVENT.
 
+Next to it, a small DOWNLOAD SCORES link saves every score on the device as a CSV file, at once and with no confirmation. On an iPad it opens the share sheet, so staff can keep a backup in Files or send it on. The file is named `clickclackchallenge-scores-YYYY-MM-DD.csv` and lists the newest score first, with the time saved, event, name, WPM, accuracy, test length, mode, rank within its event (blank when unranked), whether it won a Plinko drop, and whether it was cleared. Cleared scores are included, because they are still on the device. A name a spreadsheet would run as a formula is written so it stays plain text. In the arrow-key order it comes last, after CLEAR ALL SCORES and RESTORE CLEARED SCORES.
+
+The last link, SOUND: OFF or SOUND: ON, turns booth sound on or off. It is off by default, because a booth is noisy and staff should choose it. It is a device setting: it shows before any event exists, and Start fresh and Clear all scores keep it. When on, a correct key makes a soft click, a wrong key a low blip, a new high score a short rising chime, and any other Plinko win a single ding. Backspace and ignored keys are silent. Turning it on plays the ding once as a sample. The sounds are generated, not audio files, so they work offline. If the device has no audio, the booth stays quiet and keeps working.
+
+Once an event exists, a small line under the Event Setup title tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
+
 After a clear, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR ALL SCORES. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
 
 ### Returning to Event Setup
@@ -712,7 +718,7 @@ The 30% gate is deliberately the lowest useful minimum. It only stops key-mashin
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
-The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
+A Plinko drop also needs a plausible score: 200 WPM or less. The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
 
 ---
 
@@ -875,6 +881,8 @@ If the contestant ranks outside the top 20, name entry should not be shown.
 
 When name entry is not shown, Results shows one required action, View Leaderboard, which opens the Top 5. Enter and Space select it. That screen has no idle timeout. A long-press on the logo badge opens Event Setup and does not write the score. Holding Escape does the same. A tap on the logo badge or a short Escape press, with or without name entry, stores the result the way View Leaderboard does, keeping the typed name when it is allowed and null otherwise, then opens Ready instead of the Top 5. Save Score, View Leaderboard, and that tap or Escape press are the only ways a result is stored.
 
+Results saves the attempt as one score row as soon as it opens, with no name, so a reload or crash while the contestant types their name cannot lose it. Saving with a name adds the name to that same row. Leaving without a name keeps it as it is. A score is still written once per test.
+
 When name entry is shown, the name field is focused and ready. The first letter typed on that screen goes into the name. Pressing Enter saves that score with the typed name. Save Score still rejects an empty name and a blocked name. View Leaderboard is also shown. It writes one score row with a null name and opens the Top 5. That score stays eligible for ranking. If the name is still empty or blocked after 15 seconds, Results shows “Opening the leaderboard in {n}s” for the last 5 seconds, then takes the same blank-name exit. A blocked name shows “Pick a different name.” and does not stop that wait. Clearing the name starts the 15 seconds again. After the last change to an allowed name, Results waits 20 seconds, then shows “Saving your score in {n}s” for 5 seconds and saves that name. Another change to the name starts the 20 seconds again. The leaderboard's return-to-ready countdown must not run during name entry. The labels are in `docs/design_system.md` (Brand voice).
 
 ### Name Rules
@@ -929,7 +937,7 @@ The leaderboard should not expose:
 - internal IDs
 - database metadata
 
-Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
+Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board. A score above 200 WPM is set aside as impossible: only the very fastest typists pass 200 WPM on a normal keyboard, and a giant keyboard is far slower, so it can only come from a stuck key, a macro, or a glitch. It is still saved and appears in the scores download, but it never ranks, never becomes the high score or all-time best, and never wins a Plinko drop. Results shows it with the ordinary “Thanks for playing!” and no name entry.
 
 ### All-time board
 

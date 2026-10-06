@@ -885,6 +885,8 @@ V1 should use a small, explicit structure with clear responsibilities.
 
 The goal is to keep the code easy to understand and test without creating unnecessary abstractions.
 
+Styles live in `src/styles/`, one file per screen plus shared ones, and `src/index.css` only imports them in a fixed order: `base` (color tokens, page, buttons, forms, logo badge, shared stats and countdown bar), `scores` (the shared score rows and podium), `ready`, `screensaver`, `typing`, `results`, `setup`, `leaderboard`, then `motion` (every Reduce Motion override, last so it always wins). Keep that order: a later file may override an earlier one. `src/designTokens.test.ts` reads the color tokens from `base.css` and checks text contrast.
+
 Use the following rule:
 
 ```text
@@ -1069,14 +1071,15 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
+→ save the score row at once, with name null
 → if ranked through 20th, focus the name field
-→ one exit writes one score row:
-    Save Score, with the name
-    or View Leaderboard, with name null
+→ the exit finishes that same row:
+    Save Score adds the name
+    or View Leaderboard keeps name null
 → LeaderboardScreen
 ```
 
-Both Results exits write one score row. View Leaderboard does that with a null name, as in `docs/prd.md` §15.
+Each finished test writes one score row, as soon as Results has worked out its standing, so a reload or crash during name entry cannot lose the attempt. The standing is worked out first, so the attempt is not ranked against itself. Save Score then adds the name to that row; View Leaderboard leaves it null, as in `docs/prd.md` §15. `createResultSaver` in `src/state/resultSave.ts` owns this: one row per result, a second request for the same result waits for the first, a failed early save is retried on exit, and a failed rename is reported instead of writing a second row.
 
 Name entry remains part of the Results screen.
 
@@ -1843,6 +1846,10 @@ Top 5 selection is correct
 high score is the first eligible ranked score
 the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
+a score above 200 WPM is saved but never ranks, never becomes the high score, and never wins a Plinko drop (isPlausibleWpm, MAX_PLAUSIBLE_WPM)
+sound plays a click for a right key, a blip for a wrong one, a chime for a new high score, and a ding for another Plinko win, and stays silent for Backspace (keyCue, resultCue); it never opens audio while off and survives a device with no audio (createBoothSound); the setting defaults off and survives a reopen, Start fresh, and Clear all scores (setSoundOn)
+Event Setup counts the active event's Plinko wins under the same rule as Results, and an impossible score never counts (countPlinkoWins)
+the scores download lists every score newest first with its event rank, Plinko win, and cleared state, quotes commas, and defuses spreadsheet formulas in names (scoresCsv); it reads cleared events too (listEverything)
 the all-time line names the best eligible score from every event, drops a missing name, and hides when it is the event's own first place or nothing was saved (allTimeBestLine)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
 the just-saved Top 5 row climbs from below the board, the scored rows under it slide down one row, and rows above it stay still (rowMotion)
@@ -1966,6 +1973,7 @@ leaderboard can be reconstructed from persisted scores
 data survives page reload
 submitting Save Score twice for the same result inserts one score row
 View Leaderboard with no name inserts one score row with name null
+Results saves the row as it opens with name null, Save Score renames that same row, a double request saves once, a failed early save is retried on exit, and a failed rename never writes a second row (createResultSaver)
 fresh install uses clickclackchallenge-db and does not create typing-test-db
 legacy events, scores, and settings are copied once
 newer destination records win collisions

@@ -1,0 +1,131 @@
+.screensaver {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  height: 100dvh;
+}
+
+.screensaver:focus {
+  outline: none;
+}
+
+/* Shrinks to the scores it holds. A long list stops at the screen and rolls. */
+.screensaver-window {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Soft fade where rows enter and leave the card. */
+.screensaver-window.is-rolling::before,
+.screensaver-window.is-rolling::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  height: 2.5rem;
+  pointer-events: none;
+}
+
+.screensaver-window.is-rolling::before {
+  top: 0;
+  background: linear-gradient(var(--tiny-white), transparent);
+}
+
+.screensaver-window.is-rolling::after {
+  bottom: 0;
+  background: linear-gradient(transparent, var(--tiny-white));
+}
+
+.screensaver-window.is-rolling .screensaver-track {
+  animation: score-roll linear infinite;
+}
+
+.screensaver .score-row {
+  min-height: 5rem;
+}
+
+.screensaver .score-rank {
+  width: 3.25rem;
+  height: 3.25rem;
+  font-size: 1.75rem;
+}
+
+.screensaver .score-name {
+  font-size: 2.25rem;
+}
+
+.screensaver .score-name.has-name {
+  color: var(--tiny-lavender-deep);
+}
+
+.screensaver .score-wpm-value {
+  font-size: 2.75rem;
+}
+
+/*
+ * A list short enough to hold still would look frozen, so after the rows rise in, a slow wave
+ * lifts each row in turn every 4 seconds, and the rank 1 crown wiggles as it passes.
+ */
+.screensaver-window:not(.is-rolling) .score-row {
+  animation:
+    score-row-in 420ms ease-out both,
+    score-row-wave 4s ease-in-out infinite;
+  animation-delay:
+    calc(var(--row-index, 0) * 90ms),
+    calc(1.2s + var(--row-index, 0) * 0.35s);
+}
+
+.screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg {
+  transform-origin: 50% 90%;
+  animation: score-crown-wiggle 4s ease-in-out 1.2s infinite;
+}
+
+@keyframes score-row-wave {
+  0%,
+  16%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  8% {
+    transform: translateY(-0.4rem) scale(1.015);
+  }
+}
+
+@keyframes score-crown-wiggle {
+  0%,
+  14%,
+  100% {
+    transform: rotate(0deg);
+  }
+  4% {
+    transform: rotate(-14deg);
+  }
+  9% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes score-roll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes score-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

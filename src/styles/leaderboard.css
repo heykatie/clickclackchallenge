@@ -1,0 +1,123 @@
+.leaderboard-screen {
+  gap: 1rem;
+}
+
+.leaderboard-screen h1 {
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  line-height: 1.05;
+}
+
+.next-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: min(100%, 24rem);
+  min-height: 4.5rem;
+  margin-top: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+}
+
+.leaderboard-countdown {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* Leaderboard motion. The just-saved row climbs from below the board; the rows below it slide down. */
+/* The climbing row rises from inside the board's bottom edge, not over NEXT PLAYER. */
+.leaderboard-rows {
+  overflow: clip;
+}
+
+.leaderboard-rows .score-row {
+  position: relative;
+}
+
+.leaderboard-rows .score-row.is-climbing {
+  z-index: 1;
+  animation:
+    board-row-climb 2.2s cubic-bezier(0.45, 0, 0.2, 1.1) 350ms both,
+    board-row-glow 6s ease-in-out 2.6s infinite;
+}
+
+.leaderboard-rows .score-row.is-climbing {
+  background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
+  background-size: 250% 100%;
+  background-repeat: no-repeat;
+  background-position: 150% 0;
+}
+
+.leaderboard-rows .score-row.is-nudged {
+  animation: board-row-nudge 2.2s cubic-bezier(0.45, 0, 0.2, 1) 350ms both;
+}
+
+@keyframes board-row-climb {
+  from {
+    transform: translateY(calc(var(--climb-rows, 1) * 100%));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes board-row-nudge {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* After it lands, a white shimmer crosses the row twice (1.1s each), then rests; the pair repeats every 6 seconds. */
+@keyframes board-row-glow {
+  0% {
+    background-position: 150% 0;
+  }
+  18.3% {
+    background-position: -50% 0;
+  }
+  18.31% {
+    background-position: 150% 0;
+  }
+  36.7%,
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+/* The rank 1 crown drops in and wobbles. */
+.leaderboard-rows .score-row.is-first .score-crown svg {
+  transform-origin: 50% 90%;
+  animation:
+    board-crown-drop 900ms ease-out 500ms both,
+    crown-bounce 3s ease-in-out 3.5s infinite;
+}
+
+@keyframes board-crown-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-1.2rem) rotate(0deg);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0) rotate(-14deg);
+  }
+  70% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes board-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

@@ -1,0 +1,177 @@
+.ready-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.ready-copy {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  text-align: center;
+  max-width: 40rem;
+}
+
+.ready-copy h1 {
+  margin: 0;
+  color: var(--tiny-lavender-deep);
+  font-size: 2.75rem;
+  line-height: 1.1;
+  animation: ready-headline-bounce 2.2s ease-in-out infinite;
+}
+
+@keyframes ready-headline-bounce {
+  0%,
+  62%,
+  100% {
+    transform: translateY(0);
+  }
+
+  76% {
+    transform: translateY(-0.45rem);
+  }
+
+  88% {
+    transform: translateY(0.06rem);
+  }
+}
+
+.ready-plinko {
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--tiny-mint);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  /* A soft mint glow breathes around the prize so passers-by notice it. */
+  animation: ready-plinko-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes ready-plinko-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(108 207 199 / 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2.5px var(--tiny-mint-strong),
+      0 0 11px 4px rgb(36 117 110 / 0.45);
+  }
+}
+
+.high-score-card {
+  width: min(100%, 22rem);
+  padding: 1.6rem 1.75rem;
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+.high-score-card .stat-label {
+  margin: 0;
+}
+
+.high-score-card .all-time-best {
+  margin-top: 0.75rem;
+}
+
+.high-score-card .stat-value {
+  /* Baloo 2's tall default line height and the paragraph margin left a wide gap around the number. */
+  margin: 0.75rem 0 0.6rem;
+  line-height: 1;
+  font-family: var(--font-number);
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+.high-score-name,
+.high-score-empty {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+}
+
+.high-score-card .high-score-empty {
+  margin-top: 0.9rem;
+}
+
+.high-score-name {
+  overflow: hidden;
+  font-family: var(--font-name);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The Ready high-score name matches its gold crown. */
+.high-score-name.has-name {
+  color: var(--tiny-gold-deep);
+}
+
+/* The high score wears the Leaderboard crown, bouncing every 3 seconds. */
+.high-score-crown {
+  display: inline-block;
+  margin-right: 0.4rem;
+  vertical-align: -0.1em;
+  color: var(--tiny-gold-deep);
+}
+
+/* Every crown is the same gold, on Ready, the Leaderboard, and the rolling list. */
+.high-score-crown svg path,
+.score-crown svg path {
+  fill: var(--tiny-gold);
+}
+
+.high-score-crown svg {
+  display: block;
+  width: 1.6rem;
+  height: auto;
+  transform-origin: 50% 90%;
+  animation: crown-bounce 3s ease-in-out 0.6s infinite;
+}
+
+/* A hop with a wobble, then rest until the next 3-second beat. */
+@keyframes crown-bounce {
+  0%,
+  30%,
+  100% {
+    transform: none;
+  }
+  8% {
+    transform: translateY(-0.5rem) rotate(-12deg);
+  }
+  16% {
+    transform: translateY(0) rotate(10deg);
+  }
+  23% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* Kept just smaller than the Plinko line above it; the pulse and deep mint still make it the invitation. */
+.ready-prompt {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--tiny-mint-deep);
+  animation: ready-prompt-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ready-prompt-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.04);
+  }
+}
+
+/* Just smaller than PRESS ANY KEY TO START above it. */
+.ready-helper {
+  /* Tucks the hint up under PRESS ANY KEY TO START instead of a full section gap away. */
+  margin: -1rem 0 0;
+  font-size: 0.85rem;
+}

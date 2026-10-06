@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import css from "./index.css?raw";
+import css from "./styles/base.css?raw";
 
 function token(name: string): string {
   const match = css.match(new RegExp(`--${name}:\\s*#([0-9a-fA-F]{6})`));
