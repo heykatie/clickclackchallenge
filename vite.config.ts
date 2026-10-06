@@ -50,7 +50,7 @@ export default defineConfig({
   ],
   test: {
     environment: "node",
-    // Vitest blanks CSS by default; the token contrast test reads the real stylesheet.
-    css: { include: [/src\/index\.css/] },
+    // Vitest blanks CSS by default; the token contrast test reads the real color tokens.
+    css: { include: [/src\/styles\/base\.css/] },
   },
 });

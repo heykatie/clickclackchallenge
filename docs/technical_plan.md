@@ -885,6 +885,8 @@ V1 should use a small, explicit structure with clear responsibilities.
 
 The goal is to keep the code easy to understand and test without creating unnecessary abstractions.
 
+Styles live in `src/styles/`, one file per screen plus shared ones, and `src/index.css` only imports them in a fixed order: `base` (color tokens, page, buttons, forms, logo badge, shared stats and countdown bar), `scores` (the shared score rows and podium), `ready`, `screensaver`, `typing`, `results`, `setup`, `leaderboard`, then `motion` (every Reduce Motion override, last so it always wins). Keep that order: a later file may override an earlier one. `src/designTokens.test.ts` reads the color tokens from `base.css` and checks text contrast.
+
 Use the following rule:
 
 ```text

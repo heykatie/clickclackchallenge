@@ -1,0 +1,336 @@
+.setup-hint {
+  margin-top: 0;
+  font-size: 1.125rem;
+}
+
+/* In portrait the Leaderboard stage ends mid-screen, so its edge motifs would be cut flat there. */
+@media (orientation: portrait) {
+  .leaderboard-screen.edge-motifs::before,
+  .leaderboard-screen.edge-motifs::after {
+    display: none;
+  }
+}
+
+.setup-confirm {
+  box-sizing: border-box;
+  width: min(100%, 36rem);
+  margin: 1rem auto 0;
+  padding: 1.5rem 1.75rem;
+  border: 2px solid var(--tiny-lavender);
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+  text-align: center;
+}
+
+.setup-confirm h2 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+}
+
+.setup-confirm p {
+  margin: 0 0 1.25rem;
+}
+
+.setup-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* CANCEL is the safe default, so it reads as the quieter button. */
+.setup-confirm-cancel {
+  background: var(--tiny-white);
+  box-shadow: inset 0 0 0 2px var(--tiny-lavender);
+}
+
+.setup-update {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--tiny-mint) 30%, var(--tiny-white));
+  box-shadow: inset 0 0 0 2px var(--tiny-mint-strong);
+}
+
+.setup-update p {
+  margin: 0;
+}
+
+/*
+ * Event Setup, after the 01-setup wireframe but pared back: the headline, three borderless white cards of
+ * option tiles, and START EVENT on its own with the hint under it. Clear and restore are small links on the left.
+ */
+.setup-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /* Even room above and below, so the title clears the logo badge and the block sits mid-page. */
+  padding-top: 5.5rem;
+  padding-bottom: 5.5rem;
+}
+
+/* Auto margins center the block vertically but, unlike justify-content, never push the title off a short screen. */
+.setup-screen > .setup-title {
+  margin-top: auto;
+}
+
+.setup-screen > :last-child {
+  margin-bottom: auto;
+}
+
+/* Only the pink corner blob, to keep the page quiet. */
+.setup-screen.edge-motifs::after {
+  display: none;
+}
+
+.setup-title {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  line-height: 1.1;
+}
+
+.setup-groups {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-areas:
+    "length mode"
+    "board board";
+}
+
+.setup-group-length {
+  grid-area: length;
+}
+
+.setup-group-mode {
+  grid-area: mode;
+}
+
+.setup-group-board {
+  grid-area: board;
+}
+
+/* Below this the side-by-side cards squeeze the Game mode tiles, so the groups stack. */
+@media (max-width: 900px) {
+  .setup-groups {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "length"
+      "mode"
+      "board";
+  }
+}
+
+fieldset.setup-group {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 0;
+  border-radius: 1.75rem;
+  background: var(--tiny-white);
+}
+
+/* Floating the legend puts it inside the card instead of on its border. */
+.setup-group legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.setup-group legend + * {
+  clear: both;
+}
+
+.setup-options {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.setup-options-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.setup-options-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  .setup-options-three {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A soft fill shows each tile; only the selected one gets a ring. The border stays transparent so nothing shifts. */
+label.setup-option {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 0.15rem;
+  min-height: 3.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--tiny-blush) 70%, var(--tiny-white));
+  cursor: pointer;
+}
+
+/* The radio stays real for keyboard and screen readers; the tile shows its state. */
+.setup-option-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.setup-option-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.setup-option-description {
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+/* 30s and 60s read as big numbers, like the wireframe. Needs label. to beat the tile rule. */
+label.setup-option-big {
+  justify-items: center;
+  padding: 0.85rem 0.75rem;
+  text-align: center;
+}
+
+.setup-option-big .setup-option-title {
+  font-family: var(--font-number);
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.setup-option.is-selected.setup-option-mint {
+  border-color: var(--tiny-mint-strong);
+  background: color-mix(in srgb, var(--tiny-mint) 30%, var(--tiny-white));
+}
+
+.setup-option.is-selected.setup-option-lavender {
+  border-color: var(--tiny-lavender);
+  background: color-mix(in srgb, var(--tiny-lavender-light) 55%, var(--tiny-white));
+}
+
+.setup-option.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.setup-note {
+  margin: 0.6rem 0 0;
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+}
+
+.setup-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.setup-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+/* Small text links: still buttons for the keyboard cursor, but quiet next to START EVENT. */
+.setup-tool {
+  min-height: 40px;
+  padding: 0.35rem 0.25rem;
+  background: none;
+  color: var(--tiny-muted);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  box-shadow: none;
+}
+
+.setup-start-group {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.setup-start-group .setup-hint {
+  margin: 0;
+  color: var(--tiny-muted);
+  font-size: 0.85rem;
+}
+
+.setup-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3.75rem;
+  padding: 0.75rem 1.75rem;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+/*
+ * Short screens (a laptop window, an iPad in Safari with its toolbar) get a compact Event Setup.
+ * 760px covers narrower windows, where tile text wraps and the block grows. The booth iPad, 820px tall, is unchanged.
+ */
+/* In portrait the block fills the stage with nothing to center into, so the title needs its own room below the logo. */
+@media (orientation: portrait) {
+  .setup-screen {
+    padding-top: 7rem;
+  }
+}
+
+@media (max-height: 760px) {
+  .setup-screen {
+    padding-top: 4.75rem;
+    padding-bottom: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .setup-title {
+    font-size: 2rem;
+  }
+
+  .setup-groups {
+    gap: 0.6rem;
+  }
+
+  fieldset.setup-group {
+    padding: 0.65rem 0.9rem 0.75rem;
+  }
+
+  .setup-group legend {
+    margin-bottom: 0.4rem;
+    font-size: 1.15rem;
+  }
+
+  label.setup-option {
+    min-height: 3rem;
+    padding: 0.45rem 0.9rem;
+  }
+
+  .setup-option-big .setup-option-title {
+    font-size: 2.1rem;
+  }
+}

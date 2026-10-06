@@ -1,0 +1,49 @@
+@media (prefers-reduced-motion: reduce) {
+  .screensaver-window {
+    overflow: auto;
+  }
+
+  .caret,
+  .screensaver-window.is-rolling .screensaver-track,
+  .screensaver-window:not(.is-rolling) .score-row,
+  .screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg,
+  .ready-copy h1,
+  .ready-plinko,
+  .ready-prompt,
+  .typed-letter,
+  .wave-letter,
+  .ghost-letter,
+  .stamp-letter,
+  .results-screen h1.is-new-high-score {
+    animation: none;
+  }
+
+  .screensaver-track ol[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-celebration {
+    display: none;
+  }
+
+  .result-pill,
+  .result-plinko {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-row.is-shining::after,
+  .leaderboard-rows .score-row.is-climbing,
+  .leaderboard-rows .score-row.is-nudged,
+  .leaderboard-rows .score-row.is-first .score-crown svg,
+  .high-score-crown svg {
+    animation: none;
+  }
+
+  .button-countdown {
+    display: none;
+  }
+}
