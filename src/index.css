@@ -752,6 +752,21 @@ button.is-cursor {
   }
 }
 
+/* "Nice typing!" types itself out, one letter every 70ms. */
+.typed-letter {
+  white-space: pre;
+  animation: typed-letter-in 1ms linear calc(var(--letter-index, 0) * 70ms) both;
+}
+
+@keyframes typed-letter-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .screensaver-window {
     overflow: auto;
@@ -763,7 +778,8 @@ button.is-cursor {
   .screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg,
   .ready-copy h1,
   .ready-plinko,
-  .ready-prompt {
+  .ready-prompt,
+  .typed-letter {
     animation: none;
   }
 

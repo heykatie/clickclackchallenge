@@ -358,6 +358,22 @@ describe("ResultsScreen celebration", () => {
     expect(screen.getByRole("heading", { name: "Nice typing!" }).className).not.toContain("is-new-high-score");
   });
 
+  it("types out Nice typing! one letter after another, keeping the heading's name", () => {
+    renderResults(ranked);
+    const heading = screen.getByRole("heading", { name: "Nice typing!" });
+    const letters = [...heading.querySelectorAll(".typed-letter")];
+    expect(letters.map((letter) => letter.textContent).join("")).toBe("Nice typing!");
+    expect(letters.map((letter) => (letter as HTMLElement).style.getPropertyValue("--letter-index"))).toEqual(
+      [..."Nice typing!"].map((_, index) => String(index)),
+    );
+    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("does not type out NEW HIGH SCORE!", () => {
+    renderResults(newHigh);
+    expect(document.querySelector(".typed-letter")).toBeNull();
+  });
+
   it("does not burst for a Top 5 place or a calm result", () => {
     renderResults(ranked);
     expect(document.querySelector(".result-celebration")).toBeNull();

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { isEnterKey, MAX_NAME_LENGTH, nameCharacterFromKey, nameProblem, nameToSaveOnEnter, normalizeName } from "../features/results/nameRules";
 import {
   nameTimeoutMessage,
@@ -273,7 +273,7 @@ export function ResultsScreen({
             standing && celebratesNewHighScore(standing, result.displayedWpm) ? "is-new-high-score" : undefined
           }
         >
-          {copy.headline}
+          {copy.headline === "Nice typing!" ? <TypedHeadline text={copy.headline} /> : copy.headline}
         </h1>
       ) : null}
       <p className="stat-value">
@@ -319,5 +319,21 @@ export function ResultsScreen({
       ) : null}
       {timeoutMessage ? <p className="result-name-countdown">{timeoutMessage}</p> : null}
     </main>
+  );
+}
+
+/** Shows the text appearing one letter after another, as if it were being typed. */
+function TypedHeadline({ text }: { text: string }) {
+  return (
+    <>
+      <span className="visually-hidden">{text}</span>
+      <span aria-hidden="true">
+        {[...text].map((letter, index) => (
+          <span key={index} className="typed-letter" style={{ "--letter-index": index } as CSSProperties}>
+            {letter}
+          </span>
+        ))}
+      </span>
+    </>
   );
 }
