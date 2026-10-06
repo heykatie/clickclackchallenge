@@ -71,15 +71,15 @@ describe("winsPlinko", () => {
 });
 
 describe("isPlausibleWpm", () => {
-  it("accepts up to 250 displayed WPM, above the fastest typists on a normal keyboard", () => {
-    expect(MAX_PLAUSIBLE_WPM).toBe(250);
-    expect(isPlausibleWpm(250)).toBe(true);
-    expect(isPlausibleWpm(251)).toBe(false);
+  it("accepts up to 200 displayed WPM, far above anyone on a giant keyboard", () => {
+    expect(MAX_PLAUSIBLE_WPM).toBe(200);
+    expect(isPlausibleWpm(200)).toBe(true);
+    expect(isPlausibleWpm(201)).toBe(false);
   });
 
   it("gives no Plinko drop for a score no person could type", () => {
-    expect(winsPlinko(250, 100)).toBe(true);
-    expect(winsPlinko(251, 100)).toBe(false);
+    expect(winsPlinko(200, 100)).toBe(true);
+    expect(winsPlinko(201, 100)).toBe(false);
   });
 });
 

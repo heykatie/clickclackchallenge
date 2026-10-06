@@ -2,10 +2,10 @@ export const MIN_LEADERBOARD_ACCURACY = 70;
 /** Low on purpose: it only stops key-mashing. Random keys land around 5–20%, mostly from lucky spaces. */
 export const PLINKO_MIN_ACCURACY = 30;
 /**
- * The fastest typists sustain about 200–215 WPM on a normal keyboard, and a giant keyboard is far slower.
+ * Only the very fastest typists pass 200 WPM, on a normal keyboard; a giant keyboard is far slower.
  * A higher score can only come from a stuck key, a macro, or a glitch, so it is saved but set aside.
  */
-export const MAX_PLAUSIBLE_WPM = 250;
+export const MAX_PLAUSIBLE_WPM = 200;
 
 export function isPlausibleWpm(displayedWpm: number): boolean {
   return displayedWpm <= MAX_PLAUSIBLE_WPM;

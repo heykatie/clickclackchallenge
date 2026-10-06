@@ -718,7 +718,7 @@ The 30% gate is deliberately the lowest useful minimum. It only stops key-mashin
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
-A Plinko drop also needs a plausible score: 250 WPM or less. The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
+A Plinko drop also needs a plausible score: 200 WPM or less. The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
 
 ---
 
@@ -937,7 +937,7 @@ The leaderboard should not expose:
 - internal IDs
 - database metadata
 
-Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board. A score above 250 WPM is set aside as impossible: the fastest typists sustain about 200–215 WPM on a normal keyboard, and a giant keyboard is far slower, so it can only come from a stuck key, a macro, or a glitch. It is still saved and appears in the scores download, but it never ranks, never becomes the high score or all-time best, and never wins a Plinko drop. Results shows it with the ordinary “Thanks for playing!” and no name entry.
+Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board. A score above 200 WPM is set aside as impossible: only the very fastest typists pass 200 WPM on a normal keyboard, and a giant keyboard is far slower, so it can only come from a stuck key, a macro, or a glitch. It is still saved and appears in the scores download, but it never ranks, never becomes the high score or all-time best, and never wins a Plinko drop. Results shows it with the ordinary “Thanks for playing!” and no name entry.
 
 ### All-time board
 

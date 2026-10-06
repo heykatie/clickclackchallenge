@@ -21,9 +21,9 @@ function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm
 
 describe("rankScores", () => {
   it("sets aside a score no person could type, so it never ranks or becomes the high score", () => {
-    const real = score({ displayedWpm: 250, accuracy: 99, createdAt: "2026-09-22T00:00:00.000Z" });
-    const impossible = score({ displayedWpm: 251, accuracy: 100, createdAt: "2026-09-22T00:01:00.000Z" });
-    expect(rankScores([real, impossible]).map((entry) => entry.score.displayedWpm)).toEqual([250]);
+    const real = score({ displayedWpm: 200, accuracy: 99, createdAt: "2026-09-22T00:00:00.000Z" });
+    const impossible = score({ displayedWpm: 201, accuracy: 100, createdAt: "2026-09-22T00:01:00.000Z" });
+    expect(rankScores([real, impossible]).map((entry) => entry.score.displayedWpm)).toEqual([200]);
     expect(highScore([impossible])).toBeNull();
   });
 
