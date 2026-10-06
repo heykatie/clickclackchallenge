@@ -965,7 +965,7 @@ contestant keypress
 → transition to TypingScreen
 ```
 
-A short Escape press does not start the test. Escape mirrors the logo badge everywhere: App's `createEscapeHold` sends a short press to the screen's `claimShortEscape` handler, which runs the screen's logo-tap action, and a hold opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list. Space and Enter on the Leaderboard return to Ready.
+A short Escape press does not start the test. Escape mirrors the logo badge everywhere: App's `createEscapeHold` sends a short press to the screen's `claimShortEscape` handler, and reads the hold length from `escapeHoldMs` when Escape goes down (1.5 seconds on Ready, 3 seconds elsewhere; the logo long-press stays 0.6 seconds), which runs the screen's logo-tap action, and a hold opens Event Setup from Ready, Typing, Results, the Leaderboard, and the rolling high-score list. Space and Enter on the Leaderboard return to Ready.
 
 The key used to leave the Ready screen follows the start rule in `docs/prd.md`.
 
@@ -1977,7 +1977,7 @@ EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test and opens the rolling list when it has a score
-holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
+holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard; an earlier release is a short press (escapeHoldMs)
 after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
 each score on that list appears once, with no repeated rows
 any key or a tap on that list returns to Ready and does not start the test

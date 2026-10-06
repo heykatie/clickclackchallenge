@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createEscapeHold, HOLD_SETUP_MS } from "./escapeHold";
+import { createEscapeHold, ESCAPE_HOLD_MS, ESCAPE_HOLD_READY_MS, escapeHoldMs, HOLD_SETUP_MS } from "./escapeHold";
 
 describe("escape hold", () => {
   afterEach(() => {
@@ -44,3 +44,46 @@ describe("escape hold", () => {
     expect(hold.keyUp({ key: "Escape" })).toBe("ignore");
   });
 });
+
+describe("escapeHoldMs", () => {
+  it("holds 1.5 seconds on Ready, which includes the rolling list", () => {
+    expect(ESCAPE_HOLD_READY_MS).toBe(1_500);
+    expect(escapeHoldMs("ready")).toBe(1_500);
+  });
+
+  it("holds 3 seconds on Typing, Results, and the Leaderboard", () => {
+    expect(ESCAPE_HOLD_MS).toBe(3_000);
+    expect(escapeHoldMs("typing")).toBe(3_000);
+    expect(escapeHoldMs("results")).toBe(3_000);
+    expect(escapeHoldMs("leaderboard")).toBe(3_000);
+  });
+
+  it("keeps the logo long-press at 0.6 seconds", () => {
+    expect(HOLD_SETUP_MS).toBe(600);
+  });
+});
+
+describe("escape hold length", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("reads the hold length when Escape goes down", () => {
+    vi.useFakeTimers();
+    const onHold = vi.fn();
+    let holdMs = ESCAPE_HOLD_READY_MS;
+    const hold = createEscapeHold(onHold, () => holdMs);
+
+    hold.keyDown({ key: "Escape" });
+    vi.advanceTimersByTime(ESCAPE_HOLD_READY_MS);
+    expect(onHold).toHaveBeenCalledOnce();
+    hold.keyUp({ key: "Escape" });
+
+    holdMs = ESCAPE_HOLD_MS;
+    hold.keyDown({ key: "Escape" });
+    vi.advanceTimersByTime(ESCAPE_HOLD_MS - 1);
+    expect(hold.keyUp({ key: "Escape" })).toBe("short");
+    expect(onHold).toHaveBeenCalledOnce();
+  });
+});
+

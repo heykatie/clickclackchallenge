@@ -10,7 +10,7 @@ import { ReadyScreen } from "./screens/ReadyScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState } from "./state/appState";
-import { createEscapeHold } from "./state/escapeHold";
+import { createEscapeHold, escapeHoldMs } from "./state/escapeHold";
 import { createStartKeyGate } from "./state/startKey";
 
 function landscapeOnly(screen: BoothScreen, screenNode: ReactNode): ReactNode {
@@ -53,7 +53,7 @@ function App() {
         return;
       }
       dispatch({ type: "ENTER_SETUP" });
-    });
+    }, () => (screenRef.current === "setup" ? escapeHoldMs("ready") : escapeHoldMs(screenRef.current)));
     const onKeyDown = (event: KeyboardEvent) => {
       if (screenRef.current === "setup" || statusRef.current !== "ready") {
         return;
