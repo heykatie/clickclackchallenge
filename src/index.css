@@ -299,7 +299,7 @@ button.is-cursor {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.75rem;
   text-align: center;
   max-width: 40rem;
 }
@@ -354,7 +354,7 @@ button.is-cursor {
 
 .high-score-card {
   width: min(100%, 22rem);
-  padding: 1.25rem 1.5rem;
+  padding: 1.6rem 1.75rem;
   border-radius: 1.75rem;
   background: var(--tiny-white);
 }
@@ -363,9 +363,13 @@ button.is-cursor {
   margin: 0;
 }
 
+.high-score-card .all-time-best {
+  margin-top: 0.75rem;
+}
+
 .high-score-card .stat-value {
   /* Baloo 2's tall default line height and the paragraph margin left a wide gap around the number. */
-  margin: 0.6rem 0 0.4rem;
+  margin: 0.75rem 0 0.6rem;
   line-height: 1;
   font-family: var(--font-number);
   font-size: 3rem;
