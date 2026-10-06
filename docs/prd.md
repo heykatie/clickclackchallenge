@@ -305,7 +305,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### All-time Leaderboard
 
-All-time leaderboard is the third Leaderboard choice, after Start fresh and Continue previous event. Like Continue, it needs an existing event and keeps it: new scores still save to that event, so its own history stays intact. It changes which scores the board ranks: every eligible score ever saved, from every event including archived ones. The choice is stored on the event, so Event Setup shows it again later, and Continue switches the same event back to ranking only its own scores. Neither switch deletes, moves, or rewrites a score. Start fresh always opens a new event that ranks its own scores. What the all-time board changes on each screen is in §16.
+All-time leaderboard is the third Leaderboard choice, after Start fresh and Continue previous. Like Continue, it needs an existing event and keeps it: new scores still save to that event, so its own history stays intact. It changes which scores the board ranks: every eligible score ever saved, from every event including archived ones. The choice is stored on the event, so Event Setup shows it again later, and Continue switches the same event back to ranking only its own scores. Neither switch deletes, moves, or rewrites a score. Start fresh always opens a new event that ranks its own scores. What the all-time board changes on each screen is in §16.
 
 ### Returning to Event Setup
 

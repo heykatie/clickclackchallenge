@@ -93,7 +93,7 @@ Palette, type scale, CSS tokens, corner radii, and touch-target sizes live in `d
 │ │ [● 30 seconds]         │  │ [● Start fresh]                 │  │
 │ │ [○ 60 seconds]         │  │ Create a new event.             │  │
 │ │                        │  │                                 │  │
-│ │ Applies to everyone    │  │ [○ Continue previous event]     │  │
+│ │ Applies to everyone    │  │ [○ Continue previous]           │  │
 │ │ in this event.         │  │ Resume the latest event.        │  │
 │ └────────────────────────┘  └─────────────────────────────────┘  │
 │                                                                  │
@@ -108,10 +108,10 @@ Use three clear option groups with visible selected states and one large mint ac
 | Test length | One choice: 30 or 60 seconds, for Standard and Famous Lines. On Continue, the control opens on the event's current length and still accepts the other length for the next contestant. While Story is selected, it shows 60 seconds and cannot be changed. Behavior is in `docs/prd.md`. |
 | Game mode | One choice: Standard, Famous Lines, or Story. On Continue, the control opens on the event's current mode and still accepts the other modes for the next contestant. Story shows Test length fixed at 60 seconds. Behavior is in `docs/prd.md`. |
 | Start fresh | One option in the leaderboard group. Behavior is in `docs/prd.md`. |
-| Continue previous event | The other option in that group. Behavior is in `docs/prd.md`. |
+| Continue previous | The other option in that group. Behavior is in `docs/prd.md`. |
 | START EVENT | Opens Ready for the selected event. The keyboard cursor starts here. Arrow keys move through the choices. Enter selects. |
 
-**No previous event:** disable “Continue previous event” and show “No previous event yet.”
+**No previous event:** disable “Continue previous” and show “No previous event yet.”
 
 `01-setup.png` also shows decoration that is not UI: the “Offline-ready on this iPad” chip, the palette-legend footer, and “Previous event · 5 scores · High score 92 WPM” while Start fresh is selected. Do not copy them. The chip is not an offline-readiness indicator. Required Setup is the three option groups and Start Event. The setup PNG and the diagram above were drawn before the Game mode group. “Applies to everyone” in that diagram is old sample text. Duration and game mode apply to the next contestant and can change during Continue. The summary is sample text. It is not the event Start fresh creates. If an indicator is included, it must reflect real cache and service-worker readiness, as in `docs/prd.md` (Offline Readiness).
 
