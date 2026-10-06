@@ -66,17 +66,17 @@ describe("LeaderboardScreen", () => {
     ]);
   });
 
-  it("keeps five places with dashes when the board is partly empty", () => {
+  it("keeps five places, the empty ones showing one dash, when the board is partly empty", () => {
     renderBoard([score("a", "Alex", 60, 0)]);
     expect(rows()).toHaveLength(5);
-    expect(rows()[1]?.textContent).toBe("2——");
+    expect(rows()[1]?.textContent).toBe("2—");
     expect(rows()[1]?.className).toContain("is-empty");
     expect(screen.queryByText("No scores yet")).toBeNull();
   });
 
   it("fills an empty board with two house scores and three empty places", () => {
     renderBoard([]);
-    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky54WPM", "2Clacky47WPM", "3——", "4——", "5——"]);
+    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky54WPM", "2Clacky47WPM", "3—", "4—", "5—"]);
     expect(screen.queryByText("No scores yet")).toBeNull();
     expect(screen.queryByText("YOU")).toBeNull();
   });
@@ -89,7 +89,7 @@ describe("LeaderboardScreen", () => {
 
   it("replaces the house scores with the first real score", () => {
     renderBoard([score("a", "Alex", 20, 0)], "a");
-    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2——", "3——", "4——", "5——"]);
+    expect(rows().map((row) => row.textContent)).toEqual(["1AlexYOU20WPM", "2—", "3—", "4—", "5—"]);
   });
 
   it("marks the just-saved result with YOU, matching the score and not the name", () => {

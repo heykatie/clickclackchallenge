@@ -16,6 +16,9 @@
   /* Decorative accents */
   --tiny-pink: #f4c1d4;
   --tiny-peach: #f5cfc0;
+  --tiny-sky: #b8dcf3;
+  --tiny-gold: #f2c14e;
+  --tiny-gold-deep: #8a5d00;
 
   /* Text and feedback */
   --tiny-charcoal: #403738;
@@ -308,12 +311,15 @@ button.is-cursor {
 
 .ready-plinko {
   margin: 0;
-  padding: 0.75rem 1.25rem;
+  padding: 0.8rem 1.6rem;
+  border: 2px solid var(--tiny-mint-deep);
   border-radius: 999px;
-  background: var(--tiny-mint);
+  background: var(--tiny-mint-strong);
+  /* A chunky sticker edge makes the prize the second thing people read. */
+  box-shadow: 0 0.3rem 0 var(--tiny-mint-deep);
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
 .high-score-card {
@@ -343,8 +349,9 @@ button.is-cursor {
   white-space: nowrap;
 }
 
+/* The Ready high-score name matches its gold crown. */
 .high-score-name.has-name {
-  color: var(--tiny-lavender-deep);
+  color: var(--tiny-gold-deep);
 }
 
 /* The high score wears the Leaderboard crown, bouncing every 3 seconds. */
@@ -352,7 +359,13 @@ button.is-cursor {
   display: inline-block;
   margin-right: 0.4rem;
   vertical-align: -0.1em;
-  color: var(--tiny-lavender-deep);
+  color: var(--tiny-gold-deep);
+}
+
+/* Every crown is the same gold, on Ready, the Leaderboard, and the rolling list. */
+.high-score-crown svg path,
+.score-crown svg path {
+  fill: var(--tiny-gold);
 }
 
 .high-score-crown svg {
@@ -528,7 +541,7 @@ button.is-cursor {
 .score-crown {
   display: grid;
   place-items: center;
-  color: var(--tiny-lavender-deep);
+  color: var(--tiny-gold-deep);
 }
 
 .score-name-cell {
@@ -573,8 +586,7 @@ button.is-cursor {
   color: var(--tiny-muted);
 }
 
-.score-row.is-empty .score-name,
-.score-row.is-empty .score-wpm-value {
+.score-row.is-empty .score-name {
   color: var(--tiny-muted);
   font-weight: 600;
 }
@@ -1257,14 +1269,13 @@ label.setup-option-big {
   font-size: 1.4rem;
 }
 
-/* Podium: pastel gold, silver, and bronze rank circles for the top three, on the Leaderboard and rolling list. */
+/* Podium: pastel peach, sky, and pink rank circles for the top three, on the Leaderboard and rolling list. */
 .score-row.is-podium-1 .score-rank {
   background: var(--tiny-peach);
 }
 
 .score-row.is-podium-2 .score-rank {
-  background: var(--tiny-lavender);
-  color: var(--tiny-white);
+  background: var(--tiny-sky);
 }
 
 .score-row.is-podium-3 .score-rank {

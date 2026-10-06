@@ -45,19 +45,22 @@ export function ScoreRow({
       <span className="score-crown" aria-hidden="true">
         {first ? <Crown /> : null}
       </span>
-      <span className="score-name-cell">
-        <span className={!empty && name ? "score-name has-name" : "score-name"}>{empty ? "—" : (name ?? "—")}</span>
-        {isCurrent ? <span className="you-pill">YOU</span> : null}
-      </span>
+      {/* An empty place shows its outlined rank circle and one quiet dash. */}
       {empty ? (
-        <span className="score-wpm">
-          <span className="score-wpm-value">—</span>
+        <span className="score-name-cell">
+          <span className="score-name">—</span>
         </span>
       ) : (
-        <span className="score-wpm">
-          <span className="score-wpm-value">{displayedWpm}</span>
-          <span className="score-wpm-unit">WPM</span>
-        </span>
+        <>
+          <span className="score-name-cell">
+            <span className={name ? "score-name has-name" : "score-name"}>{name ?? "—"}</span>
+            {isCurrent ? <span className="you-pill">YOU</span> : null}
+          </span>
+          <span className="score-wpm">
+            <span className="score-wpm-value">{displayedWpm}</span>
+            <span className="score-wpm-unit">WPM</span>
+          </span>
+        </>
       )}
     </li>
   );
