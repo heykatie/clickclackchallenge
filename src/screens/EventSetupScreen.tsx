@@ -313,7 +313,7 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "words"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "words", testMode: "words" })}
                 title="Standard"
-                description="Common words, new mix"
+                description="Random easy words"
               />
               <SetupOption
                 className={choiceClass("famous-lines")}
@@ -333,7 +333,7 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "story"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
                 title="Story"
-                description="One short story"
+                description="Race with a short story"
               />
             </div>
           </fieldset>
