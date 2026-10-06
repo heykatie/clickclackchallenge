@@ -347,6 +347,40 @@ button.is-cursor {
   color: var(--tiny-lavender-deep);
 }
 
+/* The high score wears the Leaderboard crown, bouncing every 3 seconds. */
+.high-score-crown {
+  display: inline-block;
+  margin-right: 0.4rem;
+  vertical-align: -0.1em;
+  color: var(--tiny-lavender-deep);
+}
+
+.high-score-crown svg {
+  display: block;
+  width: 1.6rem;
+  height: auto;
+  transform-origin: 50% 90%;
+  animation: crown-bounce 3s ease-in-out 0.6s infinite;
+}
+
+/* A hop with a wobble, then rest until the next 3-second beat. */
+@keyframes crown-bounce {
+  0%,
+  30%,
+  100% {
+    transform: none;
+  }
+  8% {
+    transform: translateY(-0.5rem) rotate(-12deg);
+  }
+  16% {
+    transform: translateY(0) rotate(10deg);
+  }
+  23% {
+    transform: rotate(-5deg);
+  }
+}
+
 /* Kept just smaller than the Plinko line above it; the pulse and deep mint still make it the invitation. */
 .ready-prompt {
   margin: 0;
@@ -1300,7 +1334,9 @@ label.setup-option-big {
 /* The rank 1 crown drops in and wobbles. */
 .leaderboard-rows .score-row.is-first .score-crown svg {
   transform-origin: 50% 90%;
-  animation: board-crown-drop 900ms ease-out 2.4s both;
+  animation:
+    board-crown-drop 900ms ease-out 2.4s both,
+    crown-bounce 3s ease-in-out 5.4s infinite;
 }
 
 @keyframes board-crown-drop {
@@ -1350,7 +1386,8 @@ label.setup-option-big {
 @media (prefers-reduced-motion: reduce) {
   .leaderboard-rows .score-row.is-climbing,
   .leaderboard-rows .score-row.is-nudged,
-  .leaderboard-rows .score-row.is-first .score-crown svg {
+  .leaderboard-rows .score-row.is-first .score-crown svg,
+  .high-score-crown svg {
     animation: none;
   }
 
