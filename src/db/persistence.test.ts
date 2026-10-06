@@ -55,7 +55,7 @@ describe("persistence", () => {
     expect(event.testMode).toBe("famous-lines");
     expect(event.passageSetId).toBe(PASSAGE_SET_ID);
     expect(event.status).toBe("active");
-    expect(event).not.toHaveProperty("name");
+    expect(event.name).toBeNull();
     expect(await listScores(event.id)).toEqual([]);
 
     const booth = await loadBooth();
@@ -266,6 +266,36 @@ describe("persistence", () => {
     const database = await openDatabase();
     expect(await database.count("scores")).toBe(2);
     expect(await database.count("events")).toBe(3);
+  });
+
+  it("stores an optional event name, trimmed and capped, with a blank name stored as none", async () => {
+    const named = await startFreshEvent(30, "words", { name: "  Saturday   market  " });
+    expect(named.name).toBe("Saturday market");
+    expect((await loadBooth()).activeEvent?.name).toBe("Saturday market");
+    expect((await startFreshEvent(30, "words", { name: "   " })).name).toBeNull();
+    expect((await startFreshEvent(30, "words", { name: "x".repeat(60) })).name).toHaveLength(40);
+  });
+
+  it("renames the active event when it is continued, even with the same length and mode", async () => {
+    const event = await startFreshEvent(30, "words", { name: "Pop-up" });
+    const renamed = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "words", name: "Fall pop-up" });
+    expect(renamed.name).toBe("Fall pop-up");
+    expect((await loadBooth()).activeEvent?.name).toBe("Fall pop-up");
+    const kept = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: "words" });
+    expect(kept.name).toBe("Fall pop-up");
+  });
+
+  it("names the empty event that Clear all scores starts", async () => {
+    await startFreshEvent(30, "words", { name: "Test day" });
+    expect((await clearAllScores(30, "words", "Real day")).name).toBe("Real day");
+  });
+
+  it("reads an event saved before names existed as unnamed", async () => {
+    const event = await startFreshEvent(30, "words");
+    const database = await openDatabase();
+    const { name: _unused, ...legacy } = event;
+    await database.put("events", legacy as typeof event);
+    expect((await loadBooth()).activeEvent?.name).toBeNull();
   });
 
   it("keeps sound off until the operator turns it on, and remembers it after the app reopens", async () => {

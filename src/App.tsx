@@ -218,7 +218,12 @@ function App() {
     });
   }
 
-  async function continueEvent(durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) {
+  async function continueEvent(
+    durationSeconds: TestDuration,
+    testMode: TestMode,
+    boardScope: BoardScope,
+    name: string | null,
+  ) {
     const event = state.activeEvent;
     if (!event) {
       return;
@@ -226,9 +231,12 @@ function App() {
     setSaving(true);
     try {
       const active =
-        durationSeconds === event.durationSeconds && testMode === event.testMode && boardScope === event.boardScope
+        durationSeconds === event.durationSeconds &&
+        testMode === event.testMode &&
+        boardScope === event.boardScope &&
+        name === event.name
           ? event
-          : await updateActiveEvent(event.id, { durationSeconds, testMode, boardScope });
+          : await updateActiveEvent(event.id, { durationSeconds, testMode, boardScope, name });
       await openReady(active);
     } catch {
       setStatus("failed");
@@ -237,10 +245,10 @@ function App() {
     }
   }
 
-  async function clearScores(durationSeconds: TestDuration, testMode: TestMode) {
+  async function clearScores(durationSeconds: TestDuration, testMode: TestMode, name: string | null) {
     setSaving(true);
     try {
-      const event = await clearAllScores(durationSeconds, testMode);
+      const event = await clearAllScores(durationSeconds, testMode, name);
       setCanRestore(true);
       await openReady(event);
     } catch {
@@ -289,10 +297,10 @@ function App() {
     }
   }
 
-  async function startFresh(durationSeconds: TestDuration, testMode: TestMode) {
+  async function startFresh(durationSeconds: TestDuration, testMode: TestMode, name: string | null) {
     setSaving(true);
     try {
-      const event = await startFreshEvent(durationSeconds, testMode);
+      const event = await startFreshEvent(durationSeconds, testMode, { name });
       await openReady(event);
     } catch {
       setStatus("failed");
@@ -365,20 +373,21 @@ function App() {
         <EventSetupScreen
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
+          storedEventName={state.activeEvent?.name ?? null}
           storedBoardScope={state.activeEvent?.boardScope ?? null}
           saving={saving}
           updateReady={updateReady}
           onApplyUpdate={() => {
             void updateServiceWorker(true);
           }}
-          onStartFresh={(durationSeconds, testMode) => {
-            void startFresh(durationSeconds, testMode);
+          onStartFresh={(durationSeconds, testMode, name) => {
+            void startFresh(durationSeconds, testMode, name);
           }}
-          onContinue={(durationSeconds, testMode, boardScope) => {
-            void continueEvent(durationSeconds, testMode, boardScope);
+          onContinue={(durationSeconds, testMode, boardScope, name) => {
+            void continueEvent(durationSeconds, testMode, boardScope, name);
           }}
-          onClearScores={(durationSeconds, testMode) => {
-            void clearScores(durationSeconds, testMode);
+          onClearScores={(durationSeconds, testMode, name) => {
+            void clearScores(durationSeconds, testMode, name);
           }}
           canRestore={canRestore}
           onRestoreScores={() => {

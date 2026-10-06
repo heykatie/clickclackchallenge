@@ -11,6 +11,7 @@ export type SetupChoice =
   | "fresh"
   | "continue"
   | "all-time"
+  | "name"
   | "start"
   | "clear"
   | "restore"
@@ -38,7 +39,7 @@ export function setupChoices(
   if (canContinue) {
     choices.push("continue", "all-time");
   }
-  choices.push("start");
+  choices.push("name", "start");
   if (canContinue) {
     choices.push("clear");
   }
@@ -76,13 +77,13 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", on CLEAR ALL SCORES "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", and on SOUND "sound".
+ * "update", on CLEAR ALL SCORES "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on SOUND "sound", and on the event name field "name".
  */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
   options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean },
-): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "sound" | null {
+): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "sound" | "name" | null {
   const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
@@ -110,6 +111,9 @@ export function applySetupKey(
     }
     if (current.cursor === "sound") {
       return "sound";
+    }
+    if (current.cursor === "name") {
+      return "name";
     }
     return selectChoice(current, current.cursor);
   }

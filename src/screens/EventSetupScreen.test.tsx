@@ -6,7 +6,7 @@ import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import { EventSetupScreen } from "./EventSetupScreen";
 
 function renderSetup(
-  stored: { duration: TestDuration; mode: TestMode; board?: BoardScope } | null,
+  stored: { duration: TestDuration; mode: TestMode; board?: BoardScope; name?: string | null } | null,
   updateReady = false,
   canRestore = false,
   soundOn = false,
@@ -24,6 +24,7 @@ function renderSetup(
       storedDuration={stored?.duration ?? null}
       storedTestMode={stored?.mode ?? null}
       storedBoardScope={stored?.board ?? null}
+      storedEventName={stored?.name ?? null}
       saving={false}
       updateReady={updateReady}
       onApplyUpdate={onApplyUpdate}
@@ -45,11 +46,14 @@ const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
 /** From START EVENT, the steps up are All-time leaderboard, Continue, then Start fresh. */
+// START EVENT → event name → All-time → Continue → Start fresh, then back down to START EVENT.
 function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
   press("ArrowUp");
+  press("ArrowUp");
   press("Enter");
+  press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
@@ -59,14 +63,14 @@ describe("EventSetupScreen", () => {
   it("continues the existing event without asking", () => {
     const { onContinue } = renderSetup(existing);
     press("Enter");
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
   });
 
   it("starts fresh without asking when no event exists yet", () => {
     const { onStartFresh } = renderSetup(null);
     press("Enter");
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
 
   it("asks before Start fresh replaces an existing event's leaderboard, with CANCEL chosen", () => {
@@ -105,7 +109,7 @@ describe("EventSetupScreen", () => {
     press("ArrowRight");
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "START FRESH" }));
     press("Enter");
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
 
   it("asks on touch too, and starts fresh from the START FRESH button", () => {
@@ -114,7 +118,7 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(onStartFresh).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
 
   it("shows no update message when there is no update", () => {
@@ -151,11 +155,13 @@ describe("EventSetupScreen", () => {
   it("keeps the event and switches its board to all-time", () => {
     const { onContinue, onStartFresh } = renderSetup(existing);
     press("ArrowUp");
+    press("ArrowUp");
     press("Enter");
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
     press("ArrowDown");
+    press("ArrowDown");
     press("Enter");
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time", null);
     expect(onStartFresh).not.toHaveBeenCalled();
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
   });
@@ -165,7 +171,7 @@ describe("EventSetupScreen", () => {
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
     fireEvent.click(screen.getByLabelText("Continue previous"));
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
   });
 
   it("offers CLEAR ALL SCORES only when an event exists", () => {
@@ -197,7 +203,7 @@ describe("EventSetupScreen", () => {
     press("ArrowRight");
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR SCORES" }));
     press("Enter");
-    expect(onClearScores).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+    expect(onClearScores).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
 
   it("offers RESTORE CLEARED SCORES only after a clear", () => {
@@ -280,5 +286,55 @@ describe("EventSetupScreen", () => {
   it("shows no Plinko count before any event exists", () => {
     renderSetup(null);
     expect(screen.queryByText(/won this event/)).toBeNull();
+  });
+
+  it("shows the event name field, filled with the current event's name", () => {
+    renderSetup({ ...existing, name: "Saturday market" });
+    expect((screen.getByLabelText("Event name (optional)") as HTMLInputElement).value).toBe("Saturday market");
+  });
+
+  it("lets the operator type a name, Space included, without moving the Setup cursor", () => {
+    renderSetup(existing);
+    const field = screen.getByLabelText("Event name (optional)") as HTMLInputElement;
+    field.focus();
+    const space = fireEvent.keyDown(field, { key: " " });
+    const left = fireEvent.keyDown(field, { key: "ArrowLeft" });
+    expect(space).toBe(true);
+    expect(left).toBe(true);
+    expect((screen.getByLabelText("Story") as HTMLInputElement).checked).toBe(false);
+    expect(document.activeElement).toBe(field);
+  });
+
+  it("leaves the field on Enter instead of starting the event", () => {
+    const { onContinue, onStartFresh } = renderSetup(existing);
+    const field = screen.getByLabelText("Event name (optional)") as HTMLInputElement;
+    field.focus();
+    fireEvent.keyDown(field, { key: "Enter" });
+    expect(document.activeElement).not.toBe(field);
+    expect(onContinue).not.toHaveBeenCalled();
+    expect(onStartFresh).not.toHaveBeenCalled();
+  });
+
+  it("reaches the field with Up from START EVENT, and Enter puts the cursor in it", () => {
+    renderSetup(existing);
+    press("ArrowUp");
+    press("Enter");
+    expect(document.activeElement).toBe(screen.getByLabelText("Event name (optional)"));
+  });
+
+  it("passes the typed name when the event continues", () => {
+    const { onContinue } = renderSetup(existing);
+    fireEvent.change(screen.getByLabelText("Event name (optional)"), { target: { value: "Fall pop-up" } });
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", "Fall pop-up");
+  });
+
+  it("passes the typed name to a fresh event, after the confirmation", () => {
+    const { onStartFresh } = renderSetup(existing);
+    fireEvent.change(screen.getByLabelText("Event name (optional)"), { target: { value: "Night market" } });
+    fireEvent.click(screen.getByLabelText("Start fresh"));
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "Night market");
   });
 });
