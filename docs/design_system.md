@@ -73,12 +73,12 @@ These are the latest documented design values. They are approximate visual match
 | Deep mint | `--tiny-mint-deep` | `#24756E` | Ready “PRESS ANY KEY TO START” |
 | Lavender | `--tiny-lavender` | `#AA9AD4` | Borders, current-word emphasis, selected-state accents |
 | Light lavender | `--tiny-lavender-light` | `#D9D0ED` | First-place row, soft highlights, prompt panels |
-| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Leaderboard and rolling-list names, crowns |
+| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Leaderboard and rolling-list names |
 | Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
 | Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
 | Sky | `--tiny-sky` | `#B8DCF3` | Rank 2 podium circle |
-| Gold | `--tiny-gold` | `#F2C14E` | Ready high-score crown fill |
-| Deep gold | `--tiny-gold-deep` | `#8A5D00` | Ready high-score crown outline and name |
+| Gold | `--tiny-gold` | `#F2C14E` | Crown fill everywhere |
+| Deep gold | `--tiny-gold-deep` | `#8A5D00` | Crown outline everywhere, Ready high-score name |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
 | Muted gray | `--tiny-muted` | `#8C8788` | Secondary text outside the passage, and only where contrast is sufficient |
 | Error red | `--tiny-error` | `#D95D5D` | Incorrect characters and validation feedback |
@@ -115,7 +115,7 @@ Use three primary font families. Required font files must be packaged or cached 
 | Numbers | Baloo 2 | 800 | WPM on Results and the Ready high-score card; WPM and rank numbers on the Leaderboard and rolling list. Typing's live stats stay Fredoka |
 | Celebration | Chewy | 400 | The Results headline only when it is NEW HIGH SCORE!, at 3rem because Chewy runs narrow |
 
-Fredoka also sets the Plinko and place pills, at 600. Five fonts is more than usual; each is limited to the roles above, so the mix stays deliberate.
+Fredoka also sets the Plinko and place pills, at 600; the Ready Plinko pill uses 700. Five fonts is more than usual; each is limited to the roles above, so the mix stays deliberate.
 
 The passage prioritizes clear character recognition, including `I`, `l`, `1`, `O`, and `0`. Do not substitute a decorative display face for passage text. Do not add a fourth primary handwritten font in V1.
 
@@ -183,7 +183,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
+“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.4rem) and stands out by its deep mint and pulse rather than its size. The Ready Plinko pill is strong mint with a deep-mint border and a chunky deep-mint sticker edge below it, so the prize reads right after the headline. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
@@ -277,7 +277,7 @@ Visual order:
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep gold, `--tiny-gold-deep` (`#8A5D00`), about 5.7:1 on white, beside a small gold crown. A missing name stays a charcoal dash.
 4. Keyboard invitation, just smaller than the Plinko line, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
-After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, its peach podium circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
+After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, its peach podium circle, and a small gold crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice. The badge is a button, so its screen-reader name says what a tap does: “Show high scores” on Ready, and “Back to start” on Typing, Results, and the Leaderboard.
 
