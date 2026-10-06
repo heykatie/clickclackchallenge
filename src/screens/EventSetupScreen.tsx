@@ -223,36 +223,7 @@ export function EventSetupScreen({
   return (
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
-      {/* Operator tools sit small in the corner, away from START EVENT, so they are not pressed by mistake. */}
-      {confirmCursor === null && (storedDuration !== null || canRestore) ? (
-        <div className="setup-tools">
-          {storedDuration !== null ? (
-            <button
-              type="button"
-              className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-              onClick={askToClear}
-              disabled={saving}
-            >
-              CLEAR ALL SCORES
-            </button>
-          ) : null}
-          {canRestore ? (
-            <button
-              type="button"
-              className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-              onClick={askToRestore}
-              disabled={saving}
-            >
-              RESTORE CLEARED SCORES
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-      <header className="setup-header">
-        <p className="setup-kicker">OPERATOR SETUP</p>
-        <h1>Set up today's typing test</h1>
-        <p className="setup-subtitle">Pick a length, game, and leaderboard.</p>
-      </header>
+      <h1 className="setup-title">Set up today's typing test</h1>
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
           <p id="setup-update-title">
@@ -305,9 +276,7 @@ export function EventSetupScreen({
         <>
         <div className="setup-groups">
           <fieldset className="setup-group setup-group-length">
-            <legend>
-              <span className="setup-step">1</span> Test length
-            </legend>
+            <legend>Test length</legend>
             <div className="setup-options setup-options-two">
               <SetupOption
                 className={choiceClass("30", storySelected)}
@@ -335,9 +304,7 @@ export function EventSetupScreen({
             {storySelected ? <p className="setup-note">Story is always 60s.</p> : null}
           </fieldset>
           <fieldset className="setup-group setup-group-mode">
-            <legend>
-              <span className="setup-step">2</span> Game mode
-            </legend>
+            <legend>Game mode</legend>
             <div className="setup-options setup-options-three">
               <SetupOption
                 className={choiceClass("words")}
@@ -346,7 +313,6 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "words"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "words", testMode: "words" })}
                 title="Standard"
-                description="Common words, new mix"
               />
               <SetupOption
                 className={choiceClass("famous-lines")}
@@ -357,7 +323,6 @@ export function EventSetupScreen({
                   remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
                 }
                 title="Famous Lines"
-                description="Same lines for all"
               />
               <SetupOption
                 className={choiceClass("story")}
@@ -366,14 +331,11 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "story"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
                 title="Story"
-                description="One short story"
               />
             </div>
           </fieldset>
           <fieldset className="setup-group setup-group-board">
-            <legend>
-              <span className="setup-step">3</span> Leaderboard
-            </legend>
+            <legend>Leaderboard</legend>
             <div className="setup-options setup-options-three">
               <SetupOption
                 className={choiceClass("fresh")}
@@ -412,15 +374,42 @@ export function EventSetupScreen({
           </fieldset>
         </div>
         <footer className="setup-footer">
-          <p className="setup-hint">Arrow keys move. Enter selects.</p>
-          <button
-            type="button"
-            className={cursor === "start" ? "setup-start is-cursor" : "setup-start"}
-            onClick={() => startEvent()}
-            disabled={saving}
-          >
-            START EVENT <span aria-hidden="true">→</span>
-          </button>
+          {/* Operator tools are rare, so they sit as small links away from START EVENT. */}
+          {storedDuration !== null || canRestore ? (
+            <div className="setup-tools">
+              {storedDuration !== null ? (
+                <button
+                  type="button"
+                  className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={askToClear}
+                  disabled={saving}
+                >
+                  CLEAR ALL SCORES
+                </button>
+              ) : null}
+              {canRestore ? (
+                <button
+                  type="button"
+                  className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={askToRestore}
+                  disabled={saving}
+                >
+                  RESTORE CLEARED SCORES
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          <div className="setup-start-group">
+            <button
+              type="button"
+              className={cursor === "start" ? "setup-start is-cursor" : "setup-start"}
+              onClick={() => startEvent()}
+              disabled={saving}
+            >
+              START EVENT <span aria-hidden="true">→</span>
+            </button>
+            <p className="setup-hint">Arrow keys move. Enter selects.</p>
+          </div>
         </footer>
         </>
       )}
@@ -441,10 +430,11 @@ type SetupOptionProps = {
   title: string;
   /** A short visual stand-in for the title, such as "30s". */
   bigTitle?: string;
-  description: string;
+  /** A short line under the title. Left out where the title says enough. */
+  description?: string;
 };
 
-/** One choice as a tile. It stays a real radio button named by its title, described by its line. */
+/** One choice as a tile. It stays a real radio button named by its title; the tint and ring show the selection. */
 function SetupOption({
   className,
   tone = "mint",
@@ -479,9 +469,8 @@ function SetupOption({
         disabled={disabled}
         onChange={onSelect}
         aria-labelledby={`${id}-title`}
-        aria-describedby={`${id}-description`}
+        aria-describedby={description ? `${id}-description` : undefined}
       />
-      <span className="setup-option-dot" aria-hidden="true" />
       <span id={`${id}-title`} className="setup-option-title">
         {bigTitle ? (
           <>
@@ -492,9 +481,11 @@ function SetupOption({
           title
         )}
       </span>
-      <span id={`${id}-description`} className="setup-option-description">
-        {description}
-      </span>
+      {description ? (
+        <span id={`${id}-description`} className="setup-option-description">
+          {description}
+        </span>
+      ) : null}
     </label>
   );
 }
