@@ -267,6 +267,7 @@ The Event Setup screen must allow the operator to:
 - select a game mode: `Standard`, `Famous Lines`, or `Story`
 - start a fresh event
 - continue the current/most recently active event when one exists
+- switch that event to an all-time leaderboard when one exists
 
 When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Famous Lines are selected. Continue is unavailable.
 
@@ -301,6 +302,10 @@ If no previous event exists, the Continue option should be unavailable.
 `30 seconds` and `60 seconds` stay selectable while Continue is selected, for Standard and Famous Lines. `Standard`, `Famous Lines`, and `Story` stay selectable too. Story always uses 60 seconds. While Story is selected, Test length shows 60 seconds and cannot be changed. Switching back to Standard or Famous Lines restores the length that was selected for those modes. That length applies to the next contestant in those modes. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
 The operator can do this from the giant keyboard. The cursor starts on START EVENT. Arrow keys move it. Enter selects the choice under the cursor. Enter on START EVENT starts the event. The length choices are skipped while Story is selected. Continue is skipped when no event exists. Touch still works. The hint is in `docs/design_system.md`.
+
+### All-time Leaderboard
+
+All-time leaderboard is the third Leaderboard choice, after Start fresh and Continue previous event. Like Continue, it needs an existing event and keeps it: new scores still save to that event, so its own history stays intact. It changes which scores the board ranks: every eligible score ever saved, from every event including archived ones. The choice is stored on the event, so Event Setup shows it again later, and Continue switches the same event back to ranking only its own scores. Neither switch deletes, moves, or rewrites a score. Start fresh always opens a new event that ranks its own scores. What the all-time board changes on each screen is in §16.
 
 ### Returning to Event Setup
 

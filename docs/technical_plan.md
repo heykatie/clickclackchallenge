@@ -1978,6 +1978,7 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
+EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"
 EventSetup shows "An update is ready." and UPDATE NOW only while an update waits; UPDATE NOW is first in the arrow-key order and installs it from Enter or a tap
 Start fresh over an existing event asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
 EventSetup can select 30-second mode

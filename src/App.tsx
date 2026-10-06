@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, listAllScores } from "./db/persistence";
+import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -171,7 +171,7 @@ function App() {
     });
   }
 
-  async function continueEvent(durationSeconds: TestDuration, testMode: TestMode) {
+  async function continueEvent(durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) {
     const event = state.activeEvent;
     if (!event) {
       return;
@@ -179,9 +179,9 @@ function App() {
     setSaving(true);
     try {
       const active =
-        durationSeconds === event.durationSeconds && testMode === event.testMode
+        durationSeconds === event.durationSeconds && testMode === event.testMode && boardScope === event.boardScope
           ? event
-          : await updateActiveEvent(event.id, { durationSeconds, testMode });
+          : await updateActiveEvent(event.id, { durationSeconds, testMode, boardScope });
       await openReady(active);
     } catch {
       setStatus("failed");
@@ -288,6 +288,7 @@ function App() {
         <EventSetupScreen
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
+          storedBoardScope={state.activeEvent?.boardScope ?? null}
           saving={saving}
           updateReady={updateReady}
           onApplyUpdate={() => {
@@ -296,8 +297,8 @@ function App() {
           onStartFresh={(durationSeconds, testMode) => {
             void startFresh(durationSeconds, testMode);
           }}
-          onContinue={(durationSeconds, testMode) => {
-            void continueEvent(durationSeconds, testMode);
+          onContinue={(durationSeconds, testMode, boardScope) => {
+            void continueEvent(durationSeconds, testMode, boardScope);
           }}
         />,
       );

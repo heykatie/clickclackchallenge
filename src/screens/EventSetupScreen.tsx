@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { TestDuration, TestMode } from "../db/persistence";
+import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
   applyFreshConfirmKey,
@@ -12,25 +12,29 @@ import {
 type EventSetupScreenProps = {
   storedDuration: TestDuration | null;
   storedTestMode: TestMode | null;
+  storedBoardScope: BoardScope | null;
   saving: boolean;
   /** A new version is installed and waiting. */
   updateReady: boolean;
   /** Activates the waiting version and reloads the app. */
   onApplyUpdate: () => void;
   onStartFresh: (durationSeconds: TestDuration, testMode: TestMode) => void;
-  onContinue: (durationSeconds: TestDuration, testMode: TestMode) => void;
+  onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) => void;
 };
 
 export function EventSetupScreen({
   storedDuration,
   storedTestMode,
+  storedBoardScope,
   saving,
   updateReady,
   onApplyUpdate,
   onStartFresh,
   onContinue,
 }: EventSetupScreenProps) {
-  const [mode, setMode] = useState<SetupMode>(storedDuration === null ? "fresh" : "continue");
+  const [mode, setMode] = useState<SetupMode>(
+    storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
+  );
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
   const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "famous-lines");
   const [cursor, setCursor] = useState<SetupChoice>("start");
@@ -73,7 +77,7 @@ export function EventSetupScreen({
       selectedTestMode,
     );
     if (plan.mode === "continue") {
-      onContinue(plan.durationSeconds, plan.testMode);
+      onContinue(plan.durationSeconds, plan.testMode, plan.boardScope);
       return;
     }
     if (!confirmed && needsFreshConfirm(plan, storedDuration !== null)) {
@@ -278,6 +282,17 @@ export function EventSetupScreen({
               onChange={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
             />
             Continue previous event
+          </label>
+          <label className={choiceClass("all-time")}>
+            <input
+              type="radio"
+              name="event-mode"
+              value="all-time"
+              checked={mode === "all-time"}
+              disabled={storedDuration === null}
+              onChange={() => remember({ ...selectionRef.current, cursor: "all-time", leaderboard: "all-time" })}
+            />
+            All-time leaderboard
           </label>
           {storedDuration === null ? <p>No previous event yet.</p> : null}
         </fieldset>

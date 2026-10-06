@@ -10,6 +10,7 @@ export type SetupChoice =
   | "story"
   | "fresh"
   | "continue"
+  | "all-time"
   | "start";
 
 export interface SetupSelection {
@@ -26,7 +27,7 @@ export function setupChoices(testMode: TestMode, canContinue: boolean, updateRea
   }
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
-    choices.push("continue");
+    choices.push("continue", "all-time");
   }
   choices.push("start");
   return choices;
@@ -48,7 +49,7 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
   if (choice === "words" || choice === "famous-lines" || choice === "story") {
     return { ...selection, cursor: choice, testMode: choice };
   }
-  if (choice === "fresh" || choice === "continue") {
+  if (choice === "fresh" || choice === "continue" || choice === "all-time") {
     return { ...selection, cursor: choice, leaderboard: choice };
   }
   return { ...selection, cursor: "start" };
