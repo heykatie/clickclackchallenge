@@ -278,7 +278,7 @@ Focusing the name field can open the iPad software keyboard over SAVE SCORE, eve
 - The PNG's five contestants are sample data. **Sparse state:** keep the five-row layout, fill occupied ranks with real results, and show unoccupied rows with a dash. For an entirely empty board, show the two house scores from `docs/prd.md` §16 in places 1 and 2.
 - “YOU” is temporary feedback for the just-completed attempt, not a permanent property of the stored name.
 - The countdown duration lives in `docs/prd.md`. Booth testing may adjust it later. Render the remaining time in the reset message; do not leave the number fixed.
-- Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 15.
+- Begin the countdown when the leaderboard is displayed. Show “Returning to ready screen in {seconds}s” only for the last 5 seconds, in small type. The live interface must not leave the number fixed at 25.
 - NEXT PLAYER returns immediately to Ready. Space, Enter, and a short Escape press do the same. Countdown completion produces the same reset. Cancel the old countdown when leaving the leaderboard so it cannot affect the next contestant.
 
 ## 9. Shared scoring, storage, and reset behavior

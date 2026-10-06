@@ -982,7 +982,7 @@ The app should also automatically return to Ready after a short delay.
 Initial target:
 
 ```text
-approximately 15 seconds
+approximately 25 seconds
 ```
 
 Show “Returning to ready screen in {n}s” only for the last 5 seconds. The message is small. The exact duration may be adjusted after booth testing.

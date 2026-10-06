@@ -9,7 +9,7 @@ import { Celebration } from "./Celebration";
 import { ScoreRow } from "./ScoreRow";
 import { useLogoHold } from "./useLogoHold";
 
-const RESET_SECONDS = 15;
+const RESET_SECONDS = 25;
 const RESET_COUNTDOWN_AT = 5;
 
 type LeaderboardScreenProps = {
