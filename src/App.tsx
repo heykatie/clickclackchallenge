@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -34,6 +34,7 @@ function App() {
   const [standing, setStanding] = useState<ResultStanding | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
+  const [canRestore, setCanRestore] = useState(false);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
   const saveRequest = useRef<Promise<ScoreRecord> | null>(null);
@@ -109,6 +110,7 @@ function App() {
         if (booth.activeEvent) {
           dispatch({ type: "SET_ACTIVE_EVENT", event: booth.activeEvent });
         }
+        setCanRestore(booth.hasClearedScores);
         setStatus("ready");
         // Storage works without this; it only asks the browser not to evict the scores.
         void requestPersistentStorage();
@@ -194,7 +196,24 @@ function App() {
     setSaving(true);
     try {
       const event = await clearAllScores(durationSeconds, testMode);
+      setCanRestore(true);
       await openReady(event);
+    } catch {
+      setStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function restoreScores() {
+    const event = state.activeEvent;
+    setSaving(true);
+    try {
+      await restoreClearedScores();
+      setCanRestore(await hasClearedScores());
+      if (event) {
+        await openReady(event);
+      }
     } catch {
       setStatus("failed");
     } finally {
@@ -315,6 +334,10 @@ function App() {
           }}
           onClearScores={(durationSeconds, testMode) => {
             void clearScores(durationSeconds, testMode);
+          }}
+          canRestore={canRestore}
+          onRestoreScores={() => {
+            void restoreScores();
           }}
         />,
       );

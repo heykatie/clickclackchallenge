@@ -1984,6 +1984,7 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
+EventSetup shows RESTORE CLEARED SCORES only after a clear, after CLEAR ALL SCORES in the arrow-key order; it asks with CANCEL chosen and RESTORE calls onRestoreScores
 EventSetup shows CLEAR ALL SCORES only with an event, right after START EVENT in the arrow-key order; it asks with CANCEL chosen, CANCEL or Escape changes nothing, and CLEAR SCORES clears with the selected length and mode
 App loads every board through listBoardScores(activeEvent): Results placement, the Ready high score, and the Leaderboard. Ready loads its rolling list the same way.
 an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line

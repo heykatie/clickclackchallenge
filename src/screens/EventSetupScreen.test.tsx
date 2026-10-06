@@ -8,11 +8,13 @@ import { EventSetupScreen } from "./EventSetupScreen";
 function renderSetup(
   stored: { duration: TestDuration; mode: TestMode; board?: BoardScope } | null,
   updateReady = false,
+  canRestore = false,
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
   const onApplyUpdate = vi.fn();
   const onClearScores = vi.fn();
+  const onRestoreScores = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -22,11 +24,13 @@ function renderSetup(
       updateReady={updateReady}
       onApplyUpdate={onApplyUpdate}
       onClearScores={onClearScores}
+      canRestore={canRestore}
+      onRestoreScores={onRestoreScores}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -183,6 +187,34 @@ describe("EventSetupScreen", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR SCORES" }));
     press("Enter");
     expect(onClearScores).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+  });
+
+  it("offers RESTORE CLEARED SCORES only after a clear", () => {
+    renderSetup(existing);
+    expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull();
+  });
+
+  it("asks before restoring, with CANCEL chosen, and CANCEL changes nothing", () => {
+    const { onRestoreScores } = renderSetup(existing, false, true);
+    fireEvent.click(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }));
+    expect(screen.getByText("Restore cleared scores?")).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "CANCEL" }));
+    press("Enter");
+    expect(screen.queryByText("Restore cleared scores?")).toBeNull();
+    expect(onRestoreScores).not.toHaveBeenCalled();
+  });
+
+  it("restores from the keyboard once RESTORE is picked", () => {
+    const { onRestoreScores, onClearScores } = renderSetup(existing, false, true);
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }).className).toContain("is-cursor");
+    press("Enter");
+    press("ArrowRight");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "RESTORE" }));
+    press("Enter");
+    expect(onRestoreScores).toHaveBeenCalledOnce();
+    expect(onClearScores).not.toHaveBeenCalled();
   });
 });
 

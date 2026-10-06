@@ -22,6 +22,10 @@ type EventSetupScreenProps = {
   onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) => void;
   /** Hides every score so far and starts an empty event with these choices. */
   onClearScores: (durationSeconds: TestDuration, testMode: TestMode) => void;
+  /** An earlier clear can be undone. */
+  canRestore: boolean;
+  /** Shows the scores hidden by the most recent clear again. */
+  onRestoreScores: () => void;
 };
 
 export function EventSetupScreen({
@@ -34,6 +38,8 @@ export function EventSetupScreen({
   onStartFresh,
   onContinue,
   onClearScores,
+  canRestore,
+  onRestoreScores,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -56,8 +62,9 @@ export function EventSetupScreen({
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
-  /** Which confirmation is up: Start fresh, or Clear all scores. */
-  const [confirmKind, setConfirmKind] = useState<"fresh" | "clear">("fresh");
+  /** Which confirmation is up: Start fresh, Clear all scores, or Restore cleared scores. */
+  const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
+  const canRestoreRef = useRef(canRestore);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -98,9 +105,18 @@ export function EventSetupScreen({
     setConfirmCursor("cancel");
   }
 
+  function askToRestore() {
+    setConfirmKind("restore");
+    setConfirmCursor("cancel");
+  }
+
   function confirm() {
     if (confirmKind === "clear") {
       onClearScores(visibleDuration, selectedTestMode);
+      return;
+    }
+    if (confirmKind === "restore") {
+      onRestoreScores();
       return;
     }
     startEvent(true);
@@ -109,12 +125,15 @@ export function EventSetupScreen({
   const startRef = useRef(startEvent);
   const confirmRef = useRef(confirm);
   const askToClearRef = useRef(askToClear);
+  const askToRestoreRef = useRef(askToRestore);
   const rememberRef = useRef(remember);
 
   useEffect(() => {
     startRef.current = startEvent;
     confirmRef.current = confirm;
     askToClearRef.current = askToClear;
+    askToRestoreRef.current = askToRestore;
+    canRestoreRef.current = canRestore;
     rememberRef.current = remember;
     savingRef.current = saving;
     updateReadyRef.current = updateReady;
@@ -156,6 +175,7 @@ export function EventSetupScreen({
         shiftKey: event.shiftKey,
         canContinue: storedDuration !== null,
         updateReady: updateReadyRef.current,
+        canRestore: canRestoreRef.current,
       });
       if (result === null) {
         return;
@@ -168,6 +188,12 @@ export function EventSetupScreen({
       if (result === "clear") {
         if (!savingRef.current) {
           askToClearRef.current();
+        }
+        return;
+      }
+      if (result === "restore") {
+        if (!savingRef.current) {
+          askToRestoreRef.current();
         }
         return;
       }
@@ -211,7 +237,15 @@ export function EventSetupScreen({
       ) : null}
       {confirmCursor !== null ? (
         <section className="setup-confirm" role="alertdialog" aria-labelledby="setup-confirm-title">
-          {confirmKind === "clear" ? (
+          {confirmKind === "restore" ? (
+            <>
+              <h2 id="setup-confirm-title">Restore cleared scores?</h2>
+              <p>
+                The scores hidden by the last clear show again on every board and list. The current event and its
+                scores stay.
+              </p>
+            </>
+          ) : confirmKind === "clear" ? (
             <>
               <h2 id="setup-confirm-title">Clear all scores?</h2>
               <p>
@@ -235,7 +269,7 @@ export function EventSetupScreen({
               CANCEL
             </button>
             <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
-              {confirmKind === "clear" ? "CLEAR SCORES" : "START FRESH"}
+              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR SCORES" : "START FRESH"}
             </button>
           </div>
         </section>
@@ -348,6 +382,16 @@ export function EventSetupScreen({
             disabled={saving}
           >
             CLEAR ALL SCORES
+          </button>
+        ) : null}
+        {canRestore ? (
+          <button
+            type="button"
+            className={cursor === "restore" ? "setup-clear is-cursor" : "setup-clear"}
+            onClick={askToRestore}
+            disabled={saving}
+          >
+            RESTORE CLEARED SCORES
           </button>
         ) : null}
         </>
