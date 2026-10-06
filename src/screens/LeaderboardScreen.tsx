@@ -127,6 +127,7 @@ export function LeaderboardScreen({
             displayedWpm={slot.entry?.score.displayedWpm ?? null}
             isCurrent={slot.entry !== null && slot.entry.score.id === currentScoreId}
             motion={slot.entry ? rowMotion(slot.rank, currentRank) : null}
+            shining={slot.rank === 1 && slot.entry !== null && currentScoreId !== null && currentRank === null}
           />
         ))}
       </ol>

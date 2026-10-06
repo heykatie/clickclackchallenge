@@ -1356,10 +1356,19 @@ label.setup-option-big {
   animation:
     board-row-climb 2.2s cubic-bezier(0.45, 0, 0.2, 1.1) 350ms both,
     board-row-glow 5s ease-in-out 2.6s infinite;
+}
+
+.leaderboard-rows .score-row.is-climbing,
+.leaderboard-rows .score-row.is-shining {
   background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
   background-size: 250% 100%;
   background-repeat: no-repeat;
   background-position: 150% 0;
+}
+
+/* When the player missed the board, the top score shimmers instead: the one to beat. */
+.leaderboard-rows .score-row.is-shining {
+  animation: board-row-glow 5s ease-in-out 600ms infinite;
 }
 
 .leaderboard-rows .score-row.is-nudged {
@@ -1456,6 +1465,7 @@ label.setup-option-big {
 @media (prefers-reduced-motion: reduce) {
   .leaderboard-rows .score-row.is-climbing,
   .leaderboard-rows .score-row.is-nudged,
+  .leaderboard-rows .score-row.is-shining,
   .leaderboard-rows .score-row.is-first .score-crown svg,
   .high-score-crown svg {
     animation: none;
