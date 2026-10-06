@@ -54,6 +54,8 @@ export interface AppSettings {
   activeEventId: string | null;
   lastSelectedDuration: TestDuration;
   schemaVersion: number;
+  /** Key clicks and result chimes. Off until the operator turns it on in Event Setup. Missing on older records. */
+  soundOn?: boolean;
 }
 
 export interface BoothState {
@@ -108,6 +110,7 @@ function defaultSettings(): AppSettings {
     activeEventId: null,
     lastSelectedDuration: 30,
     schemaVersion: SCHEMA_VERSION,
+    soundOn: false,
   };
 }
 
@@ -314,7 +317,8 @@ export async function closeDatabase(): Promise<void> {
 
 export async function loadBooth(): Promise<BoothState> {
   const database = await openDatabase();
-  const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
+  const stored = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
+  const settings = { ...stored, soundOn: stored.soundOn ?? false };
   if (!settings.activeEventId) {
     return { settings, activeEvent: null, hasClearedScores: await hasClearedScores() };
   }
@@ -367,6 +371,8 @@ export async function startFreshEvent(
   await events.put(event);
   await settingsStore.put(
     {
+      // Keep the operator's other settings, such as sound.
+      ...previous,
       activeEventId: event.id,
       lastSelectedDuration: durationSeconds,
       schemaVersion: previous?.schemaVersion ?? SCHEMA_VERSION,
@@ -473,6 +479,12 @@ export async function listScores(eventId: string): Promise<ScoreRecord[]> {
 export async function listAllScores(): Promise<ScoreRecord[]> {
   const database = await openDatabase();
   return visibleScores(database, await database.getAll("scores"));
+}
+
+export async function setSoundOn(soundOn: boolean): Promise<void> {
+  const database = await openDatabase();
+  const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
+  await database.put("settings", { ...settings, soundOn }, SETTINGS_KEY);
 }
 
 /** Every score and event on the device, cleared ones included, for the scores download. */

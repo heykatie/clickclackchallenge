@@ -28,6 +28,9 @@ type EventSetupScreenProps = {
   onRestoreScores: () => void;
   /** Saves every score on the device as a CSV file, for a backup or to look up winners later. */
   onDownloadScores: () => void;
+  /** Key clicks and result chimes, off by default for a noisy booth. */
+  soundOn: boolean;
+  onToggleSound: () => void;
 };
 
 export function EventSetupScreen({
@@ -43,6 +46,8 @@ export function EventSetupScreen({
   canRestore,
   onRestoreScores,
   onDownloadScores,
+  soundOn,
+  onToggleSound,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -63,6 +68,7 @@ export function EventSetupScreen({
   const updateReadyRef = useRef(updateReady);
   const onApplyUpdateRef = useRef(onApplyUpdate);
   const onDownloadRef = useRef(onDownloadScores);
+  const onToggleSoundRef = useRef(onToggleSound);
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
@@ -143,6 +149,7 @@ export function EventSetupScreen({
     updateReadyRef.current = updateReady;
     onApplyUpdateRef.current = onApplyUpdate;
     onDownloadRef.current = onDownloadScores;
+    onToggleSoundRef.current = onToggleSound;
     confirmCursorRef.current = confirmCursor;
     selectionRef.current = {
       cursor,
@@ -192,6 +199,10 @@ export function EventSetupScreen({
       }
       if (result === "download") {
         onDownloadRef.current();
+        return;
+      }
+      if (result === "sound") {
+        onToggleSoundRef.current();
         return;
       }
       if (result === "clear") {
@@ -386,40 +397,46 @@ export function EventSetupScreen({
           </fieldset>
         </div>
         <footer className="setup-footer">
-          {/* Operator tools are rare, so they sit as small links away from START EVENT. */}
-          {storedDuration !== null || canRestore ? (
-            <div className="setup-tools">
-              {storedDuration !== null ? (
-                <button
-                  type="button"
-                  className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToClear}
-                  disabled={saving}
-                >
-                  CLEAR ALL SCORES
-                </button>
-              ) : null}
-              {canRestore ? (
-                <button
-                  type="button"
-                  className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToRestore}
-                  disabled={saving}
-                >
-                  RESTORE CLEARED SCORES
-                </button>
-              ) : null}
-              {storedDuration !== null ? (
-                <button
-                  type="button"
-                  className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={onDownloadScores}
-                >
-                  DOWNLOAD SCORES
-                </button>
-              ) : null}
-            </div>
-          ) : null}
+          {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND always shows. */}
+          <div className="setup-tools">
+            {storedDuration !== null ? (
+              <button
+                type="button"
+                className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
+                onClick={askToClear}
+                disabled={saving}
+              >
+                CLEAR ALL SCORES
+              </button>
+            ) : null}
+            {canRestore ? (
+              <button
+                type="button"
+                className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                onClick={askToRestore}
+                disabled={saving}
+              >
+                RESTORE CLEARED SCORES
+              </button>
+            ) : null}
+            {storedDuration !== null ? (
+              <button
+                type="button"
+                className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
+                onClick={onDownloadScores}
+              >
+                DOWNLOAD SCORES
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={cursor === "sound" ? "setup-tool is-cursor" : "setup-tool"}
+              aria-pressed={soundOn}
+              onClick={onToggleSound}
+            >
+              SOUND: {soundOn ? "ON" : "OFF"}
+            </button>
+          </div>
           <div className="setup-start-group">
             <button
               type="button"

@@ -9,6 +9,7 @@ function renderSetup(
   stored: { duration: TestDuration; mode: TestMode; board?: BoardScope } | null,
   updateReady = false,
   canRestore = false,
+  soundOn = false,
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
@@ -16,6 +17,7 @@ function renderSetup(
   const onClearScores = vi.fn();
   const onRestoreScores = vi.fn();
   const onDownloadScores = vi.fn();
+  const onToggleSound = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -28,11 +30,13 @@ function renderSetup(
       canRestore={canRestore}
       onRestoreScores={onRestoreScores}
       onDownloadScores={onDownloadScores}
+      soundOn={soundOn}
+      onToggleSound={onToggleSound}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -126,7 +130,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
-    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → wraps to UPDATE NOW.
+    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → wraps to UPDATE NOW.
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -240,5 +245,23 @@ describe("EventSetupScreen", () => {
   it("has no DOWNLOAD SCORES link before any event exists", () => {
     renderSetup(null);
     expect(screen.queryByRole("button", { name: "DOWNLOAD SCORES" })).toBeNull();
+  });
+
+  it("shows the sound setting and toggles it from the link, before any event too", () => {
+    const { onToggleSound } = renderSetup(null);
+    fireEvent.click(screen.getByRole("button", { name: "SOUND: OFF" }));
+    expect(onToggleSound).toHaveBeenCalledOnce();
+  });
+
+  it("says SOUND: ON when sound is on, and toggles with Enter from the keyboard", () => {
+    const { onToggleSound } = renderSetup(existing, false, false, true);
+    expect(screen.getByRole("button", { name: "SOUND: ON" }).getAttribute("aria-pressed")).toBe("true");
+    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND.
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "SOUND: ON" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(onToggleSound).toHaveBeenCalledOnce();
   });
 });

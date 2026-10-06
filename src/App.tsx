@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
-import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
+import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
 import { LandscapeGate } from "./pwa/LandscapeGate";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
@@ -15,6 +15,8 @@ import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState, type AppState } from "./state/appState";
 import { createEscapeHold, escapeHoldMs } from "./state/escapeHold";
+import { boothSound } from "./sound/boothSound";
+import { keyCue, resultCue } from "./sound/soundCues";
 import { createResultSaver } from "./state/resultSave";
 import { createStartKeyGate } from "./state/startKey";
 
@@ -38,6 +40,8 @@ function App() {
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const [canRestore, setCanRestore] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+  const previousTest = useRef(state.currentTest);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
   const resultSaver = useRef(createResultSaver(saveScore, updateScoreName));
@@ -113,6 +117,8 @@ function App() {
           dispatch({ type: "SET_ACTIVE_EVENT", event: booth.activeEvent });
         }
         setCanRestore(booth.hasClearedScores);
+        setSoundOn(booth.settings.soundOn ?? false);
+        boothSound.setEnabled(booth.settings.soundOn ?? false);
         setStatus("ready");
         // Storage works without this; it only asks the browser not to evict the scores.
         void requestPersistentStorage();
@@ -127,6 +133,25 @@ function App() {
       cancelled = true;
     };
   }, []);
+
+  // A click for each right key and a blip for each wrong one, compared with the session before the key.
+  useEffect(() => {
+    const cue = keyCue(previousTest.current, state.currentTest);
+    previousTest.current = state.currentTest;
+    if (cue) {
+      boothSound.play(cue);
+    }
+  }, [state.currentTest]);
+
+  // One chime or ding when Results knows where the attempt stands.
+  useEffect(() => {
+    if (standing && state.latestResult) {
+      const cue = resultCue(resultCopy(standing, state.latestResult.displayedWpm, state.latestResult.accuracy));
+      if (cue) {
+        boothSound.play(cue);
+      }
+    }
+  }, [standing, state.latestResult]);
 
   useEffect(() => {
     if (state.screen !== "results" || state.latestResult === null || state.currentTest === null || state.activeEvent === null) {
@@ -199,6 +224,19 @@ function App() {
       setStatus("failed");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleSound() {
+    const next = !soundOn;
+    setSoundOn(next);
+    boothSound.setEnabled(next);
+    // A sample, so the operator hears that sound works and how loud it is.
+    boothSound.play("ding");
+    try {
+      await saveSoundSetting(next);
+    } catch (error) {
+      console.error("Could not save the sound setting", error);
     }
   }
 
@@ -325,6 +363,10 @@ function App() {
           }}
           onDownloadScores={() => {
             void downloadScores();
+          }}
+          soundOn={soundOn}
+          onToggleSound={() => {
+            void toggleSound();
           }}
         />,
       );

@@ -16,7 +16,7 @@ describe("applySetupKey", () => {
 
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
     // CLEAR ALL SCORES is last, so Down from it wraps to the first choice.
-    const onLength = applySetupKey({ ...ready, cursor: "download" }, "ArrowDown", { shiftKey: false, canContinue: true });
+    const onLength = applySetupKey({ ...ready, cursor: "sound" }, "ArrowDown", { shiftKey: false, canContinue: true });
     expect(onLength).toEqual({ ...ready, cursor: "30" });
     if (onLength === null || typeof onLength === "string") {
       throw new Error("ArrowDown should land on 30 seconds");
@@ -83,9 +83,9 @@ describe("clear choice", () => {
 });
 
 describe("download choice", () => {
-  it("comes last, after the clear and restore links, and only while an event exists", () => {
-    expect(setupChoices("famous-lines", true).at(-1)).toBe("download");
-    expect(setupChoices("famous-lines", true, false, true).slice(-3)).toEqual(["clear", "restore", "download"]);
+  it("comes after the clear and restore links, and only while an event exists", () => {
+    expect(setupChoices("famous-lines", true).slice(-2)).toEqual(["download", "sound"]);
+    expect(setupChoices("famous-lines", true, false, true).slice(-4)).toEqual(["clear", "restore", "download", "sound"]);
     expect(setupChoices("famous-lines", false)).not.toContain("download");
   });
 
@@ -96,9 +96,20 @@ describe("download choice", () => {
   });
 });
 
+describe("sound choice", () => {
+  it("comes last, even before any event exists, because it is a device setting", () => {
+    expect(setupChoices("famous-lines", true).at(-1)).toBe("sound");
+    expect(setupChoices("famous-lines", false).at(-1)).toBe("sound");
+  });
+
+  it("toggles on Enter", () => {
+    expect(applySetupKey({ ...ready, cursor: "sound" }, "Enter", { shiftKey: false, canContinue: true })).toBe("sound");
+  });
+});
+
 describe("restore choice", () => {
   it("comes after CLEAR ALL SCORES, and only while a clear can be undone", () => {
-    expect(setupChoices("famous-lines", true, false, true).slice(-4)).toEqual(["start", "clear", "restore", "download"]);
+    expect(setupChoices("famous-lines", true, false, true).slice(-5)).toEqual(["start", "clear", "restore", "download", "sound"]);
     expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");
   });
 
@@ -116,9 +127,9 @@ describe("update choice", () => {
     expect(setupChoices("famous-lines", true)).not.toContain("update");
   });
 
-  it("reaches UPDATE NOW by wrapping down from DOWNLOAD SCORES, and Enter on it asks for the update", () => {
+  it("reaches UPDATE NOW by wrapping down from SOUND, and Enter on it asks for the update", () => {
     const options = { shiftKey: false, canContinue: true, updateReady: true };
-    const onUpdate = applySetupKey({ ...ready, cursor: "download" }, "ArrowDown", options);
+    const onUpdate = applySetupKey({ ...ready, cursor: "sound" }, "ArrowDown", options);
     expect(onUpdate).toEqual({ ...ready, cursor: "update" });
     if (onUpdate === null || typeof onUpdate === "string") {
       throw new Error("ArrowDown should land on UPDATE NOW");

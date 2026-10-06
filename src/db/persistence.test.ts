@@ -17,6 +17,7 @@ import {
   loadBooth,
   openDatabase,
   saveScore,
+  setSoundOn,
   SETTINGS_KEY,
   startFreshEvent,
   updateActiveEvent,
@@ -265,6 +266,21 @@ describe("persistence", () => {
     const database = await openDatabase();
     expect(await database.count("scores")).toBe(2);
     expect(await database.count("events")).toBe(3);
+  });
+
+  it("keeps sound off until the operator turns it on, and remembers it after the app reopens", async () => {
+    expect((await loadBooth()).settings.soundOn).toBe(false);
+    await setSoundOn(true);
+    await closeDatabase();
+    expect((await loadBooth()).settings.soundOn).toBe(true);
+  });
+
+  it("keeps the sound setting through Start fresh and Clear all scores", async () => {
+    await setSoundOn(true);
+    await startFreshEvent(30);
+    expect((await loadBooth()).settings.soundOn).toBe(true);
+    await clearAllScores(30, "words");
+    expect((await loadBooth()).settings.soundOn).toBe(true);
   });
 
   it("lists every score and event for a backup, cleared ones included", async () => {
