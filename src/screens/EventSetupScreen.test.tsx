@@ -15,6 +15,7 @@ function renderSetup(
   const onApplyUpdate = vi.fn();
   const onClearScores = vi.fn();
   const onRestoreScores = vi.fn();
+  const onDownloadScores = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -26,11 +27,12 @@ function renderSetup(
       onClearScores={onClearScores}
       canRestore={canRestore}
       onRestoreScores={onRestoreScores}
+      onDownloadScores={onDownloadScores}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -124,6 +126,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
+    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → wraps to UPDATE NOW.
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     expect(screen.getByRole("button", { name: "UPDATE NOW" }).className).toContain("is-cursor");
@@ -216,5 +220,25 @@ describe("EventSetupScreen", () => {
     expect(onRestoreScores).toHaveBeenCalledOnce();
     expect(onClearScores).not.toHaveBeenCalled();
   });
-});
 
+  it("downloads the scores from the DOWNLOAD SCORES link, at once and without a confirmation", () => {
+    const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
+    fireEvent.click(screen.getByRole("button", { name: "DOWNLOAD SCORES" }));
+    expect(onDownloadScores).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+
+  it("reaches DOWNLOAD SCORES after CLEAR ALL SCORES in the arrow-key order, and Enter downloads", () => {
+    const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "DOWNLOAD SCORES" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(onDownloadScores).toHaveBeenCalledOnce();
+  });
+
+  it("has no DOWNLOAD SCORES link before any event exists", () => {
+    renderSetup(null);
+    expect(screen.queryByRole("button", { name: "DOWNLOAD SCORES" })).toBeNull();
+  });
+});

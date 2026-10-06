@@ -475,6 +475,13 @@ export async function listAllScores(): Promise<ScoreRecord[]> {
   return visibleScores(database, await database.getAll("scores"));
 }
 
+/** Every score and event on the device, cleared ones included, for the scores download. */
+export async function listEverything(): Promise<{ scores: ScoreRecord[]; events: EventRecord[] }> {
+  const database = await openDatabase();
+  const [scores, events] = await Promise.all([database.getAll("scores"), database.getAll("events")]);
+  return { scores: scores.map(normalizeScore), events: events.map(normalizeEvent) };
+}
+
 /** The scores the event's board ranks: its own, or every event's when the board is all-time. */
 export function listBoardScores(event: EventRecord): Promise<ScoreRecord[]> {
   return event.boardScope === "all-time" ? listAllScores() : listScores(event.id);

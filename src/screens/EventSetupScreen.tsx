@@ -26,6 +26,8 @@ type EventSetupScreenProps = {
   canRestore: boolean;
   /** Shows the scores hidden by the most recent clear again. */
   onRestoreScores: () => void;
+  /** Saves every score on the device as a CSV file, for a backup or to look up winners later. */
+  onDownloadScores: () => void;
 };
 
 export function EventSetupScreen({
@@ -40,6 +42,7 @@ export function EventSetupScreen({
   onClearScores,
   canRestore,
   onRestoreScores,
+  onDownloadScores,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -59,6 +62,7 @@ export function EventSetupScreen({
   const savingRef = useRef(saving);
   const updateReadyRef = useRef(updateReady);
   const onApplyUpdateRef = useRef(onApplyUpdate);
+  const onDownloadRef = useRef(onDownloadScores);
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
@@ -138,6 +142,7 @@ export function EventSetupScreen({
     savingRef.current = saving;
     updateReadyRef.current = updateReady;
     onApplyUpdateRef.current = onApplyUpdate;
+    onDownloadRef.current = onDownloadScores;
     confirmCursorRef.current = confirmCursor;
     selectionRef.current = {
       cursor,
@@ -183,6 +188,10 @@ export function EventSetupScreen({
       event.preventDefault();
       if (result === "update") {
         onApplyUpdateRef.current();
+        return;
+      }
+      if (result === "download") {
+        onDownloadRef.current();
         return;
       }
       if (result === "clear") {
@@ -398,6 +407,15 @@ export function EventSetupScreen({
                   disabled={saving}
                 >
                   RESTORE CLEARED SCORES
+                </button>
+              ) : null}
+              {storedDuration !== null ? (
+                <button
+                  type="button"
+                  className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={onDownloadScores}
+                >
+                  DOWNLOAD SCORES
                 </button>
               ) : null}
             </div>

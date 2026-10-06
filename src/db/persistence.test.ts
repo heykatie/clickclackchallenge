@@ -11,6 +11,7 @@ import {
   DB_NAME,
   LEGACY_DB_NAME,
   listAllScores,
+  listEverything,
   listBoardScores,
   listScores,
   loadBooth,
@@ -264,6 +265,19 @@ describe("persistence", () => {
     const database = await openDatabase();
     expect(await database.count("scores")).toBe(2);
     expect(await database.count("events")).toBe(3);
+  });
+
+  it("lists every score and event for a backup, cleared ones included", async () => {
+    const first = await startFreshEvent(30);
+    await saveScore(scoreInput(first.id, 70));
+    await clearAllScores(30, "famous-lines");
+    const after = (await loadBooth()).activeEvent!;
+    await saveScore(scoreInput(after.id, 80));
+
+    const everything = await listEverything();
+    expect(everything.scores.map((score) => score.displayedWpm).sort()).toEqual([70, 80]);
+    expect(everything.events.find((event) => event.id === first.id)?.hiddenAt).not.toBeNull();
+    expect(everything.events.find((event) => event.id === after.id)?.hiddenAt).toBeNull();
   });
 
   it("shows scores saved after the clear", async () => {

@@ -13,7 +13,8 @@ export type SetupChoice =
   | "all-time"
   | "start"
   | "clear"
-  | "restore";
+  | "restore"
+  | "download";
 
 export interface SetupSelection {
   cursor: SetupChoice;
@@ -43,6 +44,9 @@ export function setupChoices(
   if (canRestore) {
     choices.push("restore");
   }
+  if (canContinue) {
+    choices.push("download");
+  }
   return choices;
 }
 
@@ -70,13 +74,13 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", on CLEAR ALL SCORES "clear", and on RESTORE CLEARED SCORES "restore".
+ * "update", on CLEAR ALL SCORES "clear", on RESTORE CLEARED SCORES "restore", and on DOWNLOAD SCORES "download".
  */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
   options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean },
-): SetupSelection | "start" | "update" | "clear" | "restore" | null {
+): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | null {
   const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
@@ -98,6 +102,9 @@ export function applySetupKey(
     }
     if (current.cursor === "restore") {
       return "restore";
+    }
+    if (current.cursor === "download") {
+      return "download";
     }
     return selectChoice(current, current.cursor);
   }

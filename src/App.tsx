@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { downloadTextFile } from "./features/export/downloadTextFile";
+import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -205,6 +207,16 @@ function App() {
     }
   }
 
+  async function downloadScores() {
+    try {
+      const { scores, events } = await listEverything();
+      downloadTextFile(scoresFileName(new Date()), scoresCsv(scores, events));
+    } catch (error) {
+      // A failed backup must not stop the event: the scores are still on the device.
+      console.error("Could not download scores", error);
+    }
+  }
+
   async function restoreScores() {
     const event = state.activeEvent;
     setSaving(true);
@@ -338,6 +350,9 @@ function App() {
           canRestore={canRestore}
           onRestoreScores={() => {
             void restoreScores();
+          }}
+          onDownloadScores={() => {
+            void downloadScores();
           }}
         />,
       );
