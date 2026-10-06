@@ -1,5 +1,5 @@
-import { passages } from "../data/passages";
-import { story } from "../data/story";
+import { shuffledPassages } from "../data/passages";
+import { pickStory, stories } from "../data/story";
 import { createWordLines } from "../data/wordLines";
 import type { EventRecord, TestMode } from "../db/persistence";
 import {
@@ -41,6 +41,8 @@ export interface AppState {
   latestResult: TestResult | null;
   highScore: HighScoreSummary | null;
   currentScoreId: string | null;
+  /** The story the last Story try got, so the next try gets a different one. */
+  lastStory: number | null;
 }
 
 export type AppAction =
@@ -61,6 +63,7 @@ export const initialState: AppState = {
   latestResult: null,
   highScore: null,
   currentScoreId: null,
+  lastStory: null,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -98,13 +101,15 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     case "ENTER_TYPING": {
       const testMode = state.activeEvent?.testMode ?? "famous-lines";
+      const lastStory = testMode === "story" ? pickStory(Math.random, state.lastStory) : state.lastStory;
       return {
         ...state,
         screen: "typing",
         latestResult: null,
         currentScoreId: null,
+        lastStory,
         currentTest: createTestSession(
-          sentencesFor(testMode),
+          testMode === "story" ? stories[lastStory!]! : sentencesFor(testMode),
           state.activeEvent?.durationSeconds ?? state.durationSeconds,
           testMode,
         ),
@@ -146,10 +151,7 @@ function sentencesFor(testMode: TestMode): readonly string[] {
   if (testMode === "words") {
     return createWordLines();
   }
-  if (testMode === "story") {
-    return story;
-  }
-  return passages;
+  return shuffledPassages();
 }
 
 function scoreWindowSeconds(session: TestSession, now: number | null): number {

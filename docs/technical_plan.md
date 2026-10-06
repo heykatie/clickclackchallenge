@@ -76,7 +76,7 @@ V1 supports:
 - Backspace
 - Famous Lines sentence sequence, the same for every attempt
 - Standard word list, with a new draw for each attempt
-- Story, one fixed short story with a 60-second cap
+- Story, one of six matched short stories per attempt, with a 60-second cap
 - minimum leaderboard accuracy
 - name entry through 20th place
 - Top 5 leaderboard display
@@ -433,7 +433,7 @@ Field behavior:
 - identifies the text version the next contestant will use
 - `common-sentences-v2` for Famous Lines
 - `common-words-v1` for Standard
-- `story-v1` for Story
+- `stories-v2` for Story (earlier scores keep `story-v1`)
 - updated with `testMode` so the event record matches the next attempt
 
 `status`
@@ -557,7 +557,7 @@ Field behavior:
 `passageSetId`
 
 - snapshot of the text version that produced this score
-- `common-words-v1`, `common-sentences-v1`, `common-sentences-v2`, or `story-v1`
+- `common-words-v1`, `common-sentences-v1`, `common-sentences-v2`, `story-v1`, or `stories-v2`
 - `common-sentences-v1` is the earlier everyday set; current Famous Lines scores use `common-sentences-v2`
 - ranking does not reload that text to recompute WPM
 

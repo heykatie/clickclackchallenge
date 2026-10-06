@@ -38,3 +38,13 @@ export const passages = [
   "But it's there for us, doing the best it can.",
   "People die if they are killed.",
 ] as const;
+
+/** Every line once, in a new random order for each try. The lines are all a similar length, so no order is much easier. */
+export function shuffledPassages(random: () => number = Math.random): string[] {
+  const lines: string[] = [...passages];
+  for (let i = lines.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [lines[i], lines[j]] = [lines[j]!, lines[i]!];
+  }
+  return lines;
+}
