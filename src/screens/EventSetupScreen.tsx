@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
@@ -221,7 +221,7 @@ export function EventSetupScreen({
   }, [confirmCursor]);
 
   return (
-    <main className="screen" ref={screenRef} tabIndex={-1}>
+    <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
       {/* Operator tools sit small in the corner, away from START EVENT, so they are not pressed by mistake. */}
       {confirmCursor === null && (storedDuration !== null || canRestore) ? (
@@ -248,8 +248,11 @@ export function EventSetupScreen({
           ) : null}
         </div>
       ) : null}
-      <h1>Event setup</h1>
-      <p className="setup-hint">Arrow keys move. Enter selects.</p>
+      <header className="setup-header">
+        <p className="setup-kicker">OPERATOR SETUP</p>
+        <h1>Set up today's typing test</h1>
+        <p className="setup-subtitle">Pick a length, game, and leaderboard.</p>
+      </header>
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
           <p id="setup-update-title">
@@ -300,107 +303,198 @@ export function EventSetupScreen({
         </section>
       ) : (
         <>
-        <fieldset>
-          <legend>Test length</legend>
-          <label className={choiceClass("30", storySelected)}>
-            <input
-              type="radio"
-              name="duration"
-              value="30"
-              checked={visibleDuration === 30}
-              disabled={storySelected}
-              onChange={() => remember({ ...selectionRef.current, cursor: "30", duration: 30 })}
-            />
-            30 seconds
-          </label>
-          <label className={choiceClass("60", storySelected)}>
-            <input
-              type="radio"
-              name="duration"
-              value="60"
-              checked={visibleDuration === 60}
-              disabled={storySelected}
-              onChange={() => remember({ ...selectionRef.current, cursor: "60", duration: 60 })}
-            />
-            60 seconds
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Game mode</legend>
-          <label className={choiceClass("words")}>
-            <input
-              type="radio"
-              name="text"
-              value="words"
-              checked={selectedTestMode === "words"}
-              onChange={() => remember({ ...selectionRef.current, cursor: "words", testMode: "words" })}
-            />
-            Standard
-          </label>
-          <label className={choiceClass("famous-lines")}>
-            <input
-              type="radio"
-              name="text"
-              value="famous-lines"
-              checked={selectedTestMode === "famous-lines"}
-              onChange={() =>
-                remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
-              }
-            />
-            Famous Lines
-          </label>
-          <label className={choiceClass("story")}>
-            <input
-              type="radio"
-              name="text"
-              value="story"
-              checked={selectedTestMode === "story"}
-              onChange={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
-            />
-            Story
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend>Leaderboard</legend>
-          <label className={choiceClass("fresh")}>
-            <input
-              type="radio"
-              name="event-mode"
-              value="fresh"
-              checked={mode === "fresh"}
-              onChange={() => remember({ ...selectionRef.current, cursor: "fresh", leaderboard: "fresh" })}
-            />
-            Start fresh
-          </label>
-          <label className={choiceClass("continue")}>
-            <input
-              type="radio"
-              name="event-mode"
-              value="continue"
-              checked={mode === "continue"}
-              disabled={storedDuration === null}
-              onChange={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
-            />
-            Continue previous
-          </label>
-          <label className={choiceClass("all-time")}>
-            <input
-              type="radio"
-              name="event-mode"
-              value="all-time"
-              checked={mode === "all-time"}
-              disabled={storedDuration === null}
-              onChange={() => remember({ ...selectionRef.current, cursor: "all-time", leaderboard: "all-time" })}
-            />
-            All-time leaderboard
-          </label>
-          {storedDuration === null ? <p>No previous event yet.</p> : null}
-        </fieldset>
-        <button type="button" className={cursor === "start" ? "is-cursor" : undefined} onClick={() => startEvent()} disabled={saving}>
-          START EVENT
-        </button>
+        <div className="setup-groups">
+          <fieldset className="setup-group setup-group-length">
+            <legend>
+              <span className="setup-step">1</span> Test length
+            </legend>
+            <div className="setup-options setup-options-two">
+              <SetupOption
+                className={choiceClass("30", storySelected)}
+                name="duration"
+                value="30"
+                checked={visibleDuration === 30}
+                disabled={storySelected}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "30", duration: 30 })}
+                title="30 seconds"
+                bigTitle="30s"
+                description="Faster flow"
+              />
+              <SetupOption
+                className={choiceClass("60", storySelected)}
+                name="duration"
+                value="60"
+                checked={visibleDuration === 60}
+                disabled={storySelected}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "60", duration: 60 })}
+                title="60 seconds"
+                bigTitle="60s"
+                description="Bigger challenge"
+              />
+            </div>
+            {storySelected ? <p className="setup-note">Story is always 60s.</p> : null}
+          </fieldset>
+          <fieldset className="setup-group setup-group-mode">
+            <legend>
+              <span className="setup-step">2</span> Game mode
+            </legend>
+            <div className="setup-options setup-options-three">
+              <SetupOption
+                className={choiceClass("words")}
+                name="text"
+                value="words"
+                checked={selectedTestMode === "words"}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "words", testMode: "words" })}
+                title="Standard"
+                description="Common words, new mix"
+              />
+              <SetupOption
+                className={choiceClass("famous-lines")}
+                name="text"
+                value="famous-lines"
+                checked={selectedTestMode === "famous-lines"}
+                onSelect={() =>
+                  remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
+                }
+                title="Famous Lines"
+                description="Same lines for all"
+              />
+              <SetupOption
+                className={choiceClass("story")}
+                name="text"
+                value="story"
+                checked={selectedTestMode === "story"}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
+                title="Story"
+                description="One short story"
+              />
+            </div>
+          </fieldset>
+          <fieldset className="setup-group setup-group-board">
+            <legend>
+              <span className="setup-step">3</span> Leaderboard
+            </legend>
+            <div className="setup-options setup-options-three">
+              <SetupOption
+                className={choiceClass("fresh")}
+                tone="lavender"
+                name="event-mode"
+                value="fresh"
+                checked={mode === "fresh"}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "fresh", leaderboard: "fresh" })}
+                title="Start fresh"
+                description="New, empty board"
+              />
+              <SetupOption
+                className={choiceClass("continue")}
+                tone="lavender"
+                name="event-mode"
+                value="continue"
+                checked={mode === "continue"}
+                disabled={storedDuration === null}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
+                title="Continue previous"
+                description="Keep last board"
+              />
+              <SetupOption
+                className={choiceClass("all-time")}
+                tone="lavender"
+                name="event-mode"
+                value="all-time"
+                checked={mode === "all-time"}
+                disabled={storedDuration === null}
+                onSelect={() => remember({ ...selectionRef.current, cursor: "all-time", leaderboard: "all-time" })}
+                title="All-time leaderboard"
+                description="Every score ever"
+              />
+            </div>
+            {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
+          </fieldset>
+        </div>
+        <footer className="setup-footer">
+          <p className="setup-hint">Arrow keys move. Enter selects.</p>
+          <button
+            type="button"
+            className={cursor === "start" ? "setup-start is-cursor" : "setup-start"}
+            onClick={() => startEvent()}
+            disabled={saving}
+          >
+            START EVENT <span aria-hidden="true">→</span>
+          </button>
+        </footer>
         </>
       )}
     </main>
+  );
+}
+
+type SetupOptionProps = {
+  /** Cursor and fixed-state classes from the keyboard handling. */
+  className: string | undefined;
+  tone?: "mint" | "lavender";
+  name: string;
+  value: string;
+  checked: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+  /** The option's accessible name. */
+  title: string;
+  /** A short visual stand-in for the title, such as "30s". */
+  bigTitle?: string;
+  description: string;
+};
+
+/** One choice as a tile. It stays a real radio button named by its title, described by its line. */
+function SetupOption({
+  className,
+  tone = "mint",
+  name,
+  value,
+  checked,
+  disabled = false,
+  onSelect,
+  title,
+  bigTitle,
+  description,
+}: SetupOptionProps) {
+  const id = useId();
+  const classes = [
+    "setup-option",
+    `setup-option-${tone}`,
+    bigTitle ? "setup-option-big" : "",
+    checked ? "is-selected" : "",
+    disabled ? "is-disabled" : "",
+    className ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    <label className={classes}>
+      <input
+        type="radio"
+        className="setup-option-input"
+        name={name}
+        value={value}
+        checked={checked}
+        disabled={disabled}
+        onChange={onSelect}
+        aria-labelledby={`${id}-title`}
+        aria-describedby={`${id}-description`}
+      />
+      <span className="setup-option-dot" aria-hidden="true" />
+      <span id={`${id}-title`} className="setup-option-title">
+        {bigTitle ? (
+          <>
+            <span aria-hidden="true">{bigTitle}</span>
+            <span className="visually-hidden">{title}</span>
+          </>
+        ) : (
+          title
+        )}
+      </span>
+      <span id={`${id}-description`} className="setup-option-description">
+        {description}
+      </span>
+    </label>
   );
 }
