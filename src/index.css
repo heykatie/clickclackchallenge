@@ -329,8 +329,8 @@ button.is-cursor {
   }
   50% {
     box-shadow:
-      0 0 0 2px var(--tiny-mint-strong),
-      0 0 10px 3px rgb(108 207 199 / 0.7);
+      0 0 0 2.5px var(--tiny-mint-deep),
+      0 0 11px 4px rgb(108 207 199 / 0.75);
   }
 }
 
