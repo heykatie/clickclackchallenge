@@ -115,7 +115,7 @@ Use three primary font families. Required font files must be packaged or cached 
 | Numbers | Baloo 2 | 800 | WPM on Results and the Ready high-score card; WPM and rank numbers on the Leaderboard and rolling list. Typing's live stats stay Fredoka |
 | Celebration | Chewy | 400 | The Results headline only when it is NEW HIGH SCORE!, at 3rem because Chewy runs narrow |
 
-Fredoka also sets the Plinko and place pills, at 600; the Ready Plinko pill uses 700. Five fonts is more than usual; each is limited to the roles above, so the mix stays deliberate.
+Fredoka also sets the Plinko and place pills, at 600. Five fonts is more than usual; each is limited to the roles above, so the mix stays deliberate.
 
 The passage prioritizes clear character recognition, including `I`, `l`, `1`, `O`, and `0`. Do not substitute a decorative display face for passage text. Do not add a fourth primary handwritten font in V1.
 
@@ -183,7 +183,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.4rem) and stands out by its deep mint and pulse rather than its size. The Ready Plinko pill is strong mint with a deep-mint border and a chunky deep-mint sticker edge below it, so the prize reads right after the headline. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
+“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. The Ready contest headline is deep lavender. The Ready Plinko pill is light mint with charcoal text, and a small mint ring and glow fade in and out around it every 2.4 seconds; reduced motion keeps it plain. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 

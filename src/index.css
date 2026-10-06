@@ -288,6 +288,7 @@ button.is-cursor {
 
 .ready-copy h1 {
   margin: 0;
+  color: var(--tiny-lavender-deep);
   font-size: 2.75rem;
   line-height: 1.1;
   animation: ready-headline-bounce 2.2s ease-in-out infinite;
@@ -311,15 +312,26 @@ button.is-cursor {
 
 .ready-plinko {
   margin: 0;
-  padding: 0.8rem 1.6rem;
-  border: 2px solid var(--tiny-mint-deep);
+  padding: 0.75rem 1.25rem;
   border-radius: 999px;
-  background: var(--tiny-mint-strong);
-  /* A chunky sticker edge makes the prize the second thing people read. */
-  box-shadow: 0 0.3rem 0 var(--tiny-mint-deep);
+  background: var(--tiny-mint);
   font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 600;
+  /* A soft mint glow breathes around the prize so passers-by notice it. */
+  animation: ready-plinko-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes ready-plinko-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(108 207 199 / 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px var(--tiny-mint-strong),
+      0 0 10px 3px rgb(108 207 199 / 0.7);
+  }
 }
 
 .high-score-card {
@@ -743,6 +755,7 @@ button.is-cursor {
   .screensaver-window:not(.is-rolling) .score-row,
   .screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg,
   .ready-copy h1,
+  .ready-plinko,
   .ready-prompt {
     animation: none;
   }
