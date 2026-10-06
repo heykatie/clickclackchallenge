@@ -324,7 +324,7 @@ export function EventSetupScreen({
                   remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
                 }
                 title="Famous Lines"
-                description="Iconic quotes"
+                description="Iconic fun quotes"
               />
               <SetupOption
                 className={choiceClass("story")}
@@ -333,7 +333,7 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "story"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
                 title="Story"
-                description="Race with a story"
+                description="Race to the end"
               />
             </div>
           </fieldset>

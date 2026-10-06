@@ -1216,6 +1216,18 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  /* Even room above and below, so the title clears the logo badge and the block sits mid-page. */
+  padding-top: 5.5rem;
+  padding-bottom: 5.5rem;
+}
+
+/* Auto margins center the block vertically but, unlike justify-content, never push the title off a short screen. */
+.setup-screen > .setup-title {
+  margin-top: auto;
+}
+
+.setup-screen > :last-child {
+  margin-bottom: auto;
 }
 
 /* Only the pink corner blob, to keep the page quiet. */
