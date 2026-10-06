@@ -173,6 +173,8 @@ During Typing, remove or greatly reduce decoration. On Results, use small celebr
 
 Use Fredoka 600–700, a strong mint fill, charcoal text, and rounded corners.
 
+Every pressable button has a chunky deep-mint edge under it, `0 0.3rem 0 var(--tiny-mint-deep)`, and sinks onto that edge while pressed. Pills such as the Plinko and place lines are flat, with no edge, because they are labels, not controls. The logo badge and the small text links keep no edge.
+
 Confirmed action labels:
 
 - “START EVENT”
