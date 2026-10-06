@@ -182,6 +182,14 @@ describe("ReadyScreen", () => {
     expect(screen.getByText("HIGH SCORES")).toBeTruthy();
   });
 
+  it("shimmers only the top score on the rolling list", async () => {
+    await renderReady();
+    act(() => vi.advanceTimersByTime(120_000));
+    const rows = [...document.querySelectorAll(".screensaver-rows:not([aria-hidden='true']) .score-row")];
+    expect(rows[0]?.className).toContain("is-shining");
+    expect(rows.slice(1).some((row) => row.className.includes("is-shining"))).toBe(false);
+  });
+
   it("rolls the current event's scores, not other events'", async () => {
     const older = { ...qualifying, id: "old", eventId: "event-0", name: "Old Champ", displayedWpm: 99 };
     await renderReady([qualifying], { displayedWpm: 60, name: "Alex" }, [qualifying, older]);

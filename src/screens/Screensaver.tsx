@@ -88,6 +88,7 @@ function ScoreColumn({
           rank={entry.rank}
           name={entry.score.name}
           displayedWpm={entry.score.displayedWpm}
+          shining={entry.rank === 1}
           style={{ "--row-index": index } as CSSProperties}
         />
       ))}

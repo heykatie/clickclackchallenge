@@ -408,6 +408,28 @@ describe("ResultsScreen celebration", () => {
     expect(document.querySelector(".typed-letter")).toBeNull();
   });
 
+  it("drains a countdown bar on VIEW LEADERBOARD while the blank name waits 15 seconds", () => {
+    renderResults(ranked);
+    const view = screen.getByRole("button", { name: /VIEW LEADERBOARD/ });
+    const bar = view.querySelector(".button-countdown") as HTMLElement;
+    expect(bar.getAttribute("aria-hidden")).toBe("true");
+    expect(bar.style.animationDuration).toBe("15s");
+    expect(screen.getByRole("button", { name: /SAVE SCORE/ }).querySelector(".button-countdown")).toBeNull();
+  });
+
+  it("moves the countdown bar to SAVE SCORE for 25 seconds once a name is typed", () => {
+    renderResults(ranked);
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    const bar = screen.getByRole("button", { name: /SAVE SCORE/ }).querySelector(".button-countdown") as HTMLElement;
+    expect(bar.style.animationDuration).toBe("25s");
+    expect(screen.getByRole("button", { name: /VIEW LEADERBOARD/ }).querySelector(".button-countdown")).toBeNull();
+  });
+
+  it("shows no countdown bar when Results has no timer", () => {
+    renderResults(unranked);
+    expect(document.querySelector(".button-countdown")).toBeNull();
+  });
+
   it("does not burst for a Top 5 place or a calm result", () => {
     renderResults(ranked);
     expect(document.querySelector(".result-celebration")).toBeNull();

@@ -11,6 +11,7 @@ import { celebratesNewHighScore, resultCopy, type ResultStanding } from "../feat
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { Celebration } from "./Celebration";
+import { ButtonCountdown } from "./ButtonCountdown";
 import { useCountUp } from "./useCountUp";
 import { COUNT_UP_DELAY_MS, countUpMs } from "../features/results/countUp";
 import { useLogoHold } from "./useLogoHold";
@@ -321,10 +322,12 @@ export function ResultsScreen({
           {standing.showNameEntry ? (
             <button type="button" ref={saveButtonRef} onClick={saveScore} disabled={saving || savedName === null}>
               SAVE SCORE
+              {phase === "started" ? <ButtonCountdown key={timerKey} seconds={nameTimerSeconds(phase)} /> : null}
             </button>
           ) : null}
           <button type="button" ref={viewButtonRef} onClick={onViewLeaderboard} disabled={saving}>
             VIEW LEADERBOARD
+            {phase === "blank" ? <ButtonCountdown key={timerKey} seconds={nameTimerSeconds(phase)} /> : null}
           </button>
         </div>
       ) : null}
