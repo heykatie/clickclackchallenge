@@ -12,6 +12,7 @@ function renderSetup(
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
   const onApplyUpdate = vi.fn();
+  const onClearScores = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -20,11 +21,12 @@ function renderSetup(
       saving={false}
       updateReady={updateReady}
       onApplyUpdate={onApplyUpdate}
+      onClearScores={onClearScores}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -119,6 +121,7 @@ describe("EventSetupScreen", () => {
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
     press("ArrowDown");
+    press("ArrowDown");
     expect(screen.getByRole("button", { name: "UPDATE NOW" }).className).toContain("is-cursor");
     press("Enter");
     expect(onApplyUpdate).toHaveBeenCalledOnce();
@@ -148,6 +151,38 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByLabelText("Continue previous"));
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
+  });
+
+  it("offers CLEAR ALL SCORES only when an event exists", () => {
+    renderSetup(null);
+    expect(screen.queryByRole("button", { name: "CLEAR ALL SCORES" })).toBeNull();
+  });
+
+  it("asks before clearing, with CANCEL chosen, and CANCEL or Escape changes nothing", () => {
+    const { onClearScores, onContinue } = renderSetup(existing);
+    fireEvent.click(screen.getByRole("button", { name: "CLEAR ALL SCORES" }));
+    expect(screen.getByText("Clear all scores?")).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "CANCEL" }));
+    press("Enter");
+    expect(screen.queryByText("Clear all scores?")).toBeNull();
+    press("ArrowDown");
+    press("Enter");
+    press("ArrowRight");
+    press("Escape");
+    expect(screen.queryByText("Clear all scores?")).toBeNull();
+    expect(onClearScores).not.toHaveBeenCalled();
+    expect(onContinue).not.toHaveBeenCalled();
+  });
+
+  it("clears with the selected length and mode once CLEAR SCORES is picked", () => {
+    const { onClearScores } = renderSetup(existing);
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "CLEAR ALL SCORES" }).className).toContain("is-cursor");
+    press("Enter");
+    press("ArrowRight");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR SCORES" }));
+    press("Enter");
+    expect(onClearScores).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
   });
 });
 

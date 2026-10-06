@@ -15,7 +15,8 @@ describe("applySetupKey", () => {
   });
 
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
-    const onLength = applySetupKey(ready, "ArrowDown", { shiftKey: false, canContinue: true });
+    // CLEAR ALL SCORES is last, so Down from it wraps to the first choice.
+    const onLength = applySetupKey({ ...ready, cursor: "clear" }, "ArrowDown", { shiftKey: false, canContinue: true });
     expect(onLength).toEqual({ ...ready, cursor: "30" });
     if (onLength === null || typeof onLength === "string") {
       throw new Error("ArrowDown should land on 30 seconds");
@@ -56,7 +57,8 @@ describe("applySetupKey", () => {
 
 describe("all-time choice", () => {
   it("follows Continue, and only while an event exists", () => {
-    expect(setupChoices("famous-lines", true).slice(-3)).toEqual(["continue", "all-time", "start"]);
+    const choices = setupChoices("famous-lines", true);
+    expect(choices.slice(choices.indexOf("continue"), choices.indexOf("start") + 1)).toEqual(["continue", "all-time", "start"]);
     expect(setupChoices("famous-lines", false)).not.toContain("all-time");
   });
 
@@ -67,6 +69,18 @@ describe("all-time choice", () => {
   });
 });
 
+describe("clear choice", () => {
+  it("comes right after START EVENT, and only while an event exists", () => {
+    expect(setupChoices("famous-lines", true).slice(-2)).toEqual(["start", "clear"]);
+    expect(setupChoices("famous-lines", false)).not.toContain("clear");
+    expect(applySetupKey(ready, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "clear" });
+  });
+
+  it("asks to clear on Enter", () => {
+    expect(applySetupKey({ ...ready, cursor: "clear" }, "Enter", { shiftKey: false, canContinue: true })).toBe("clear");
+  });
+});
+
 describe("update choice", () => {
   it("puts UPDATE NOW first only while an update is ready", () => {
     expect(setupChoices("famous-lines", true, true)[0]).toBe("update");
@@ -74,9 +88,9 @@ describe("update choice", () => {
     expect(setupChoices("famous-lines", true)).not.toContain("update");
   });
 
-  it("reaches UPDATE NOW by wrapping down from START EVENT, and Enter on it asks for the update", () => {
+  it("reaches UPDATE NOW by wrapping down from CLEAR ALL SCORES, and Enter on it asks for the update", () => {
     const options = { shiftKey: false, canContinue: true, updateReady: true };
-    const onUpdate = applySetupKey(ready, "ArrowDown", options);
+    const onUpdate = applySetupKey({ ...ready, cursor: "clear" }, "ArrowDown", options);
     expect(onUpdate).toEqual({ ...ready, cursor: "update" });
     if (onUpdate === null || typeof onUpdate === "string") {
       throw new Error("ArrowDown should land on UPDATE NOW");
