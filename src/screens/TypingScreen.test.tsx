@@ -99,4 +99,10 @@ describe("TypingScreen", () => {
     expect(onSetup).toHaveBeenCalledOnce();
     expect(onReturnToReady).not.toHaveBeenCalled();
   });
+
+  it("labels the accuracy stat like the timer", () => {
+    renderTyping();
+    const labels = [...document.querySelectorAll(".stat-label")].map((label) => label.textContent);
+    expect(labels).toEqual(["TIME", "ACCURACY"]);
+  });
 });
