@@ -251,7 +251,7 @@ export function EventSetupScreen({
       <header className="setup-header">
         <p className="setup-kicker">OPERATOR SETUP</p>
         <h1>Set up today's typing test</h1>
-        <p className="setup-subtitle">Choose the length, the game, and which leaderboard to use.</p>
+        <p className="setup-subtitle">Pick a length, game, and leaderboard.</p>
       </header>
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
@@ -318,7 +318,7 @@ export function EventSetupScreen({
                 onSelect={() => remember({ ...selectionRef.current, cursor: "30", duration: 30 })}
                 title="30 seconds"
                 bigTitle="30s"
-                description="Faster booth flow"
+                description="Faster flow"
               />
               <SetupOption
                 className={choiceClass("60", storySelected)}
@@ -329,10 +329,10 @@ export function EventSetupScreen({
                 onSelect={() => remember({ ...selectionRef.current, cursor: "60", duration: 60 })}
                 title="60 seconds"
                 bigTitle="60s"
-                description="Longer challenge"
+                description="Bigger challenge"
               />
             </div>
-            {storySelected ? <p className="setup-note">Story always runs 60 seconds.</p> : null}
+            {storySelected ? <p className="setup-note">Story is always 60s.</p> : null}
           </fieldset>
           <fieldset className="setup-group setup-group-mode">
             <legend>
@@ -346,7 +346,7 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "words"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "words", testMode: "words" })}
                 title="Standard"
-                description="Common words, a new mix each time"
+                description="Common words, new mix"
               />
               <SetupOption
                 className={choiceClass("famous-lines")}
@@ -357,7 +357,7 @@ export function EventSetupScreen({
                   remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
                 }
                 title="Famous Lines"
-                description="The same famous lines for everyone"
+                description="Same lines for all"
               />
               <SetupOption
                 className={choiceClass("story")}
@@ -366,7 +366,7 @@ export function EventSetupScreen({
                 checked={selectedTestMode === "story"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "story", testMode: "story" })}
                 title="Story"
-                description="One short story, up to 60 seconds"
+                description="One short story"
               />
             </div>
           </fieldset>
@@ -383,7 +383,7 @@ export function EventSetupScreen({
                 checked={mode === "fresh"}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "fresh", leaderboard: "fresh" })}
                 title="Start fresh"
-                description="A new event with an empty leaderboard"
+                description="New, empty board"
               />
               <SetupOption
                 className={choiceClass("continue")}
@@ -394,7 +394,7 @@ export function EventSetupScreen({
                 disabled={storedDuration === null}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
                 title="Continue previous"
-                description="Keep this event's leaderboard"
+                description="Keep this board"
               />
               <SetupOption
                 className={choiceClass("all-time")}
@@ -405,7 +405,7 @@ export function EventSetupScreen({
                 disabled={storedDuration === null}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "all-time", leaderboard: "all-time" })}
                 title="All-time leaderboard"
-                description="Rank every score from every event"
+                description="Every score ever"
               />
             </div>
             {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
