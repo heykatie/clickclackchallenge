@@ -305,14 +305,16 @@ describe("ResultsScreen WPM count-up", () => {
     expect(document.querySelector(".result-wpm-count")?.closest("[aria-hidden='true']")).toBeTruthy();
   });
 
-  it("rolls the WPM up from 0 and settles on the final score", () => {
+  it("holds the WPM at 0 while the headline types, then rolls up and settles on the final score", () => {
     renderResults(unranked);
     expect(shownWpm()).toBe("0");
-    act(() => vi.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(850));
+    expect(shownWpm()).toBe("0");
+    act(() => vi.advanceTimersByTime(450));
     const midway = Number(shownWpm());
     expect(midway).toBeGreaterThan(0);
     expect(midway).toBeLessThan(42);
-    act(() => vi.advanceTimersByTime(500));
+    act(() => vi.advanceTimersByTime(1300));
     expect(shownWpm()).toBe("42");
   });
 

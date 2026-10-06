@@ -1880,7 +1880,7 @@ a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept
 a finished story scores the time from the first character to the last
 only the NEW HIGH SCORE headline carries is-new-high-score, which sets it in Chewy
-the Results WPM count-up starts at 0, only rises, eases out, and settles exactly on the score within 0.8 seconds; 0 WPM stays 0 (countUpValue)
+the Results WPM count-up starts at 0, only rises, eases out, and holds at 0 for 0.9 seconds, then settles exactly on the score 1.6 seconds later; 0 WPM stays 0 (countUpValue)
 an unfinished story scores the full selected duration
 a leave key is ignored for the first second after Results or the Leaderboard appears
 ```
