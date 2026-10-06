@@ -775,6 +775,62 @@ button.is-cursor {
   }
 }
 
+/* "Casper, is that you?" haunts the screen: each letter drifts and fades in a slow, staggered float. */
+.ghost-letter {
+  display: inline-block;
+  white-space: pre;
+  animation: ghost-letter-float 3s ease-in-out calc(var(--letter-index, 0) * -150ms) infinite;
+}
+
+@keyframes ghost-letter-float {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.45;
+    transform: translateY(-0.25em);
+  }
+}
+
+/* "NEW HIGH SCORE!" stamps in letter by letter, then beats like a heart every 3 seconds. */
+.stamp-letter {
+  display: inline-block;
+  white-space: pre;
+  animation: stamp-letter-in 380ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--letter-index, 0) * 60ms) both;
+}
+
+.results-screen h1.is-new-high-score {
+  animation: headline-heartbeat 3s ease-in-out 1.6s infinite;
+}
+
+@keyframes stamp-letter-in {
+  from {
+    opacity: 0;
+    transform: scale(2.2) rotate(-8deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes headline-heartbeat {
+  0%,
+  30%,
+  100% {
+    transform: scale(1);
+  }
+  8%,
+  22% {
+    transform: scale(1.08);
+  }
+  15% {
+    transform: scale(1.01);
+  }
+}
+
 @keyframes typed-letter-in {
   from {
     opacity: 0;
@@ -797,7 +853,10 @@ button.is-cursor {
   .ready-plinko,
   .ready-prompt,
   .typed-letter,
-  .wave-letter {
+  .wave-letter,
+  .ghost-letter,
+  .stamp-letter,
+  .results-screen h1.is-new-high-score {
     animation: none;
   }
 
@@ -837,6 +896,11 @@ button.is-cursor {
 .results-screen h1,
 .leaderboard-screen h1 {
   margin: 0;
+}
+
+/* Every Results headline matches the deep-lavender Ready headline. */
+.results-screen h1 {
+  color: var(--tiny-lavender-deep);
 }
 
 .result-pill {
