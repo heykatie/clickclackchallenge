@@ -1436,6 +1436,51 @@ label.setup-option-big {
   font-size: 1.4rem;
 }
 
+/*
+ * Short screens (a laptop window, an iPad in Safari with its toolbar) get a compact Event Setup.
+ * 760px covers narrower windows, where tile text wraps and the block grows. The booth iPad, 820px tall, is unchanged.
+ */
+/* In portrait the block fills the stage with nothing to center into, so the title needs its own room below the logo. */
+@media (orientation: portrait) {
+  .setup-screen {
+    padding-top: 7rem;
+  }
+}
+
+@media (max-height: 760px) {
+  .setup-screen {
+    padding-top: 4.75rem;
+    padding-bottom: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .setup-title {
+    font-size: 2rem;
+  }
+
+  .setup-groups {
+    gap: 0.6rem;
+  }
+
+  fieldset.setup-group {
+    padding: 0.65rem 0.9rem 0.75rem;
+  }
+
+  .setup-group legend {
+    margin-bottom: 0.4rem;
+    font-size: 1.15rem;
+  }
+
+  label.setup-option {
+    min-height: 3rem;
+    padding: 0.45rem 0.9rem;
+  }
+
+  .setup-option-big .setup-option-title {
+    font-size: 2.1rem;
+  }
+}
+
 /* Podium: pastel peach, sky, and pink rank circles for the top three, on the Leaderboard and rolling list. */
 .score-row.is-podium-1 .score-rank {
   background: var(--tiny-peach);
