@@ -64,3 +64,8 @@ export function winsPlinko(displayedWpm: number, accuracy: number | null): boole
     displayedWpm > 50 && isPlausibleWpm(displayedWpm) && accuracy !== null && accuracy >= PLINKO_MIN_ACCURACY
   );
 }
+
+/** How many saved scores won a Plinko drop, so staff can keep track of prize stock. */
+export function countPlinkoWins(scores: readonly { displayedWpm: number; accuracy: number | null }[]): number {
+  return scores.filter((score) => winsPlinko(score.displayedWpm, score.accuracy)).length;
+}

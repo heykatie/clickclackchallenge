@@ -10,6 +10,7 @@ function renderSetup(
   updateReady = false,
   canRestore = false,
   soundOn = false,
+  plinkoWins: number | null = null,
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
@@ -31,6 +32,7 @@ function renderSetup(
       onRestoreScores={onRestoreScores}
       onDownloadScores={onDownloadScores}
       soundOn={soundOn}
+      plinkoWins={plinkoWins}
       onToggleSound={onToggleSound}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
@@ -263,5 +265,20 @@ describe("EventSetupScreen", () => {
     expect(screen.getByRole("button", { name: "SOUND: ON" }).className).toContain("is-cursor");
     press("Enter");
     expect(onToggleSound).toHaveBeenCalledOnce();
+  });
+
+  it("tells staff how many Plinko drops this event has given out", () => {
+    renderSetup(existing, false, false, false, 12);
+    expect(screen.getByText("Plinko drops won this event: 12")).toBeTruthy();
+  });
+
+  it("uses the singular for one drop", () => {
+    renderSetup(existing, false, false, false, 1);
+    expect(screen.getByText("Plinko drop won this event: 1")).toBeTruthy();
+  });
+
+  it("shows no Plinko count before any event exists", () => {
+    renderSetup(null);
+    expect(screen.queryByText(/won this event/)).toBeNull();
   });
 });

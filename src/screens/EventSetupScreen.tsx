@@ -31,6 +31,8 @@ type EventSetupScreenProps = {
   /** Key clicks and result chimes, off by default for a noisy booth. */
   soundOn: boolean;
   onToggleSound: () => void;
+  /** Plinko drops won in the active event, for prize stock. Null until counted. */
+  plinkoWins: number | null;
 };
 
 export function EventSetupScreen({
@@ -48,6 +50,7 @@ export function EventSetupScreen({
   onDownloadScores,
   soundOn,
   onToggleSound,
+  plinkoWins,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -244,6 +247,11 @@ export function EventSetupScreen({
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
       <h1 className="setup-title">Set up today's typing test</h1>
+      {storedDuration !== null && plinkoWins !== null ? (
+        <p className="setup-plinko-count">
+          {plinkoWins === 1 ? "Plinko drop" : "Plinko drops"} won this event: {plinkoWins}
+        </p>
+      ) : null}
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
           <p id="setup-update-title">

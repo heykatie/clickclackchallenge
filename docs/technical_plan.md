@@ -1848,6 +1848,7 @@ the visible board keeps five row positions, leaves unoccupied places empty, and 
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 a score above 250 WPM is saved but never ranks, never becomes the high score, and never wins a Plinko drop (isPlausibleWpm, MAX_PLAUSIBLE_WPM)
 sound plays a click for a right key, a blip for a wrong one, a chime for a new high score, and a ding for another Plinko win, and stays silent for Backspace (keyCue, resultCue); it never opens audio while off and survives a device with no audio (createBoothSound); the setting defaults off and survives a reopen, Start fresh, and Clear all scores (setSoundOn)
+Event Setup counts the active event's Plinko wins under the same rule as Results, and an impossible score never counts (countPlinkoWins)
 the scores download lists every score newest first with its event rank, Plinko win, and cleared state, quotes commas, and defuses spreadsheet formulas in names (scoresCsv); it reads cleared events too (listEverything)
 the all-time line names the best eligible score from every event, drops a missing name, and hides when it is the event's own first place or nothing was saved (allTimeBestLine)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)

@@ -5,6 +5,7 @@ import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
+import { countPlinkoWins } from "./features/typing/scoring";
 import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
 import { LandscapeGate } from "./pwa/LandscapeGate";
@@ -41,6 +42,7 @@ function App() {
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const [canRestore, setCanRestore] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
   const previousTest = useRef(state.currentTest);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
@@ -133,6 +135,27 @@ function App() {
       cancelled = true;
     };
   }, []);
+
+  // Event Setup shows how many Plinko drops the active event has given out, counted fresh each visit.
+  const activeEventId = state.activeEvent?.id ?? null;
+  useEffect(() => {
+    if (state.screen !== "setup" || activeEventId === null) {
+      return;
+    }
+    let cancelled = false;
+    listScores(activeEventId).then(
+      (scores) => {
+        if (!cancelled) {
+          setPlinkoWins(countPlinkoWins(scores));
+        }
+      },
+      // The count is a convenience: if it cannot be read, Event Setup simply leaves it out.
+      () => {},
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [state.screen, activeEventId]);
 
   // A click for each right key and a blip for each wrong one, compared with the session before the key.
   useEffect(() => {
@@ -365,6 +388,7 @@ function App() {
             void downloadScores();
           }}
           soundOn={soundOn}
+          plinkoWins={plinkoWins}
           onToggleSound={() => {
             void toggleSound();
           }}

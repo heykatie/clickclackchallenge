@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  countPlinkoWins,
   isPlausibleWpm,
   MAX_PLAUSIBLE_WPM,
   liveWpm,
@@ -79,6 +80,20 @@ describe("isPlausibleWpm", () => {
   it("gives no Plinko drop for a score no person could type", () => {
     expect(winsPlinko(250, 100)).toBe(true);
     expect(winsPlinko(251, 100)).toBe(false);
+  });
+});
+
+describe("countPlinkoWins", () => {
+  it("counts the saved scores that won a Plinko drop", () => {
+    const scores = [
+      { displayedWpm: 60, accuracy: 95 },
+      { displayedWpm: 51, accuracy: 30 },
+      { displayedWpm: 50, accuracy: 100 },
+      { displayedWpm: 80, accuracy: 29 },
+      { displayedWpm: 900, accuracy: 100 },
+    ];
+    expect(countPlinkoWins(scores)).toBe(2);
+    expect(countPlinkoWins([])).toBe(0);
   });
 });
 

@@ -80,6 +80,14 @@
   margin-top: auto;
 }
 
+/* A quiet count for staff, tucked under the title. */
+.setup-plinko-count {
+  margin: -0.5rem 0 0;
+  color: var(--tiny-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .setup-screen > :last-child {
   margin-bottom: auto;
 }
