@@ -274,7 +274,7 @@ Visual order:
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
 4. Keyboard invitation, just smaller than the Plinko line, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
-After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, a mint rank circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
+After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, its peach podium circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
 
 A small logo-only badge and organic edge motifs are appropriate. Optional helper copy is in Brand voice. The badge is a button, so its screen-reader name says what a tap does: “Show high scores” on Ready, and “Back to start” on Typing, Results, and the Leaderboard.
 
@@ -376,7 +376,7 @@ Returning to ready screen in 5s
 - Place a small logo-only badge near the upper-left safe margin. Its tap and long-press behavior is in `docs/prd.md` §9.
 - Center the “TOP 5” pill and “Leaderboard” heading.
 - Use one wide soft-white rounded panel with five consistent row positions.
-- Make rank 1 the strongest ranking emphasis: light-lavender row surface, mint rank badge/accent, and clear charcoal text. A small crown or star is optional.
+- Make rank 1 the strongest ranking emphasis: light-lavender row surface and clear charcoal text, with a small crown. The top three rank circles form a pastel podium: peach for 1, lavender with white digits for 2, pink for 3, on the Leaderboard and the rolling list.
 - Keep the other rows quiet and easy to scan.
 - Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its name.
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
@@ -388,7 +388,9 @@ Returning to ready screen in 5s
 
 Show actual event data. The one exception is the board with no eligible score, which shows the two house scores from `docs/prd.md` §16 (Clicky and Clacky) styled like ordinary rows.
 
-Preserve five row positions. An unoccupied place keeps its rank in an outlined circle with a muted dash for the name and the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, mint circle, and crown only when a score holds it.
+Preserve five row positions. An unoccupied place keeps its rank in an outlined circle, reads “Your name here?” in small muted text that slowly pulses, and shows a muted dash for the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, podium circle, and crown only when a score holds it.
+
+Leaderboard motion: the just-saved row climbs into place from below the board over 0.75 seconds while the scored rows under it slide down one row, then a white shimmer sweeps across it twice. The rank 1 crown drops in and wobbles. A thin mint bar along the bottom of NEXT PLAYER drains over the auto-return time; the text countdown stays. When the contestant is the new rank 1, the Results sparkle burst plays here too. Reduced motion keeps the rows, crown, and invite still and hides the bar.
 
 ### Automatic return
 

@@ -4,6 +4,8 @@ import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
 import { allTimeBestLine, boardEntries, rankScores, topFiveSlots } from "../features/leaderboard/ranking";
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { rowMotion } from "../features/leaderboard/boardMotion";
+import { Celebration } from "./Celebration";
 import { ScoreRow } from "./ScoreRow";
 import { useLogoHold } from "./useLogoHold";
 
@@ -39,6 +41,7 @@ export function LeaderboardScreen({
   const onNextPlayerRef = useRef(onNextPlayer);
   const ranked = rankScores(scores);
   const slots = topFiveSlots(boardEntries(ranked));
+  const currentRank = slots.find((slot) => slot.entry?.score.id === currentScoreId)?.rank ?? null;
   const bestLine = allTimeBestLine(allTimeBest, ranked[0]?.score ?? null);
   const logoHold = useLogoHold(() => {
     left.current = true;
@@ -106,6 +109,7 @@ export function LeaderboardScreen({
 
   return (
     <main className="screen leaderboard-screen edge-motifs" ref={screenRef} tabIndex={-1}>
+      {currentRank === 1 ? <Celebration /> : null}
       <button
         type="button"
         className="logo-badge"
@@ -122,12 +126,20 @@ export function LeaderboardScreen({
             name={slot.entry?.score.name ?? null}
             displayedWpm={slot.entry?.score.displayedWpm ?? null}
             isCurrent={slot.entry !== null && slot.entry.score.id === currentScoreId}
+            motion={slot.entry ? rowMotion(slot.rank, currentRank) : null}
+            emptyLabel="Your name here?"
           />
         ))}
       </ol>
       {bestLine ? <p className="all-time-best">{bestLine}</p> : null}
       <button type="button" ref={nextButtonRef} className="next-player-button" onClick={leave}>
         NEXT PLAYER <span aria-hidden="true">→</span>
+        {/* Drains over the auto-return time, so leaving on its own never feels abrupt. */}
+        <span
+          className="next-player-countdown"
+          aria-hidden="true"
+          style={{ animationDuration: `${RESET_SECONDS}s` }}
+        />
       </button>
       {secondsLeft <= RESET_COUNTDOWN_AT && secondsLeft > 0 ? (
         <p className="leaderboard-countdown">Returning to ready screen in {secondsLeft}s</p>

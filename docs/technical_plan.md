@@ -1845,6 +1845,7 @@ the visible board keeps five row positions, leaves unoccupied places empty, and 
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 the all-time line names the best eligible score from every event, drops a missing name, and hides when it is the event's own first place or nothing was saved (allTimeBestLine)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
+the just-saved Top 5 row climbs from below the board, the scored rows under it slide down one row, and rows above it stay still (rowMotion)
 ```
 
 ---
