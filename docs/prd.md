@@ -389,7 +389,7 @@ Design behavior:
 
 - completed text: charcoal
 - current word: charcoal text on a light-lavender surface
-- caret: strong mint
+- caret: strong mint, blinking slowly while the contestant pauses (`docs/design_system.md` §14)
 - upcoming text: charcoal
 - incorrect character: accessible red plus a non-color indicator such as underline or background tint
 
