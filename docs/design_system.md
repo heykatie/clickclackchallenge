@@ -243,7 +243,7 @@ The operator can move through these choices with the arrow keys. Show “Arrow k
 
 **Purpose:** explain the challenge, show the current high score, and invite the next player to use the keyboard.
 
-Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score!” When the high score has no name, show a dash instead of a name.
+Ready strings are listed in Brand voice below. The score and name in layout examples are sample content. When there is no eligible score, show “Be the first high score today!” When the high score has no name, show a dash instead of a name.
 
 Visual order:
 
@@ -411,7 +411,7 @@ Confirmed examples:
 GIANT keyboard typing contest!
 Type above 50 WPM for a Plinko drop.
 CURRENT HIGH SCORE
-Be the first high score!
+Be the first high score today!
 Arrow keys move. Enter selects.
 PRESS ANY KEY TO START
 Your timer starts when you begin typing.

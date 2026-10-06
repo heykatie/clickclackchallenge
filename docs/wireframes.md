@@ -143,7 +143,7 @@ Event setup rules, including saved duration and game mode, are in `docs/prd.md`.
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. The headline bounces a little and the start line pulses. Reduced motion keeps both still. When there is no eligible score, the high-score block shows “Be the first high score!” Start behavior and the Plinko rule are in `docs/prd.md`.
+The strings on this screen live in `docs/design_system.md` (Brand voice). The diagram shows where they sit. The headline bounces a little and the start line pulses. Reduced motion keeps both still. When there is no eligible score, the high-score block shows “Be the first high score today!” Start behavior and the Plinko rule are in `docs/prd.md`.
 
 Show the current high-score block. The `[30 SECOND TEST]` chip in the diagram and in `02-ready.png` is sample chrome, not a required control. Ready does not need to show the test duration; that rule is in `docs/prd.md` §10. The invitation is a keyboard prompt, not a Start button. Use pastel edge motifs without crowding the contest message or score.
 

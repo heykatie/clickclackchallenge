@@ -955,7 +955,7 @@ Responsibility:
 
 - attract / ready state between contestants
 
-Displays the Ready strings from `docs/design_system.md`. When there is no eligible score, show “Be the first high score!”
+Displays the Ready strings from `docs/design_system.md`. When there is no eligible score, show “Be the first high score today!”
 
 Handles:
 

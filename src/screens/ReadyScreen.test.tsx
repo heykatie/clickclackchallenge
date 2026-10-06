@@ -24,14 +24,17 @@ const qualifying: ScoreRecord = {
   createdAt: "2026-10-05T10:00:00.000Z",
 };
 
-async function renderReady(scores: ScoreRecord[] = [qualifying]) {
+async function renderReady(
+  scores: ScoreRecord[] = [qualifying],
+  highScore: { displayedWpm: number; name: string | null } | null = { displayedWpm: 60, name: "Alex" },
+) {
   listAllScores.mockResolvedValue(scores);
   const onStart = vi.fn();
   const onSetup = vi.fn();
   let shortEscape: (() => void) | null = null;
   render(
     <ReadyScreen
-      highScore={{ displayedWpm: 60, name: "Alex" }}
+      highScore={highScore}
       onStart={onStart}
       onSetup={onSetup}
       claimShortEscape={(handler) => {
@@ -63,6 +66,11 @@ describe("ReadyScreen", () => {
     await renderReady();
     expect(screen.getByText("60 WPM")).toBeTruthy();
     expect(screen.getByText("Alex")).toBeTruthy();
+  });
+
+  it("invites the first high score of the day when the event has none", async () => {
+    await renderReady([], null);
+    expect(screen.getByText("Be the first high score today!")).toBeTruthy();
   });
 
   it("starts the test from any key through the window listener", async () => {
