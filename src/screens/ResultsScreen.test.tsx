@@ -374,7 +374,7 @@ describe("ResultsScreen celebration", () => {
     expect(letters.map((letter) => (letter as HTMLElement).style.getPropertyValue("--letter-index"))).toEqual(
       [..."Nice typing!"].map((_, index) => String(index)),
     );
-    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(letters[0]?.closest("[aria-hidden]")?.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("waves the letters of Thanks for playing! one after another, keeping the heading's name", () => {
@@ -383,7 +383,7 @@ describe("ResultsScreen celebration", () => {
     const letters = [...heading.querySelectorAll(".wave-letter")];
     expect(letters.map((letter) => letter.textContent).join("")).toBe("Thanks for playing!");
     expect((letters[3] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("3");
-    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(letters[0]?.closest("[aria-hidden]")?.getAttribute("aria-hidden")).toBe("true");
     expect(heading.querySelector(".typed-letter")).toBeNull();
   });
 
@@ -392,7 +392,7 @@ describe("ResultsScreen celebration", () => {
     const heading = screen.getByRole("heading", { name: "Casper, is that you?" });
     const letters = [...heading.querySelectorAll(".ghost-letter")];
     expect(letters.map((letter) => letter.textContent).join("")).toBe("Casper, is that you?");
-    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(letters[0]?.closest("[aria-hidden]")?.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("stamps in the letters of NEW HIGH SCORE!, keeping the heading's name", () => {
@@ -401,6 +401,13 @@ describe("ResultsScreen celebration", () => {
     const letters = [...heading.querySelectorAll(".stamp-letter")];
     expect(letters.map((letter) => letter.textContent).join("")).toBe("NEW HIGH SCORE!");
     expect((letters[4] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("4");
+  });
+
+  it("keeps each word's animated letters together so a headline never wraps mid-word", () => {
+    renderResults(unranked);
+    const heading = screen.getByRole("heading", { name: "Thanks for playing!" });
+    const words = [...heading.querySelectorAll(".headline-word")].map((word) => word.textContent);
+    expect(words).toEqual(["Thanks", "for", "playing!"]);
   });
 
   it("does not type out NEW HIGH SCORE!", () => {

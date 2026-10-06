@@ -780,6 +780,10 @@ button.is-cursor {
   animation: typed-letter-in 1ms linear calc(var(--letter-index, 0) * 70ms) both;
 }
 
+.headline-word {
+  white-space: nowrap;
+}
+
 /* "Thanks for playing!" waves hello: each letter bobs up in turn, twice. */
 .wave-letter {
   display: inline-block;
