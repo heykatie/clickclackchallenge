@@ -16,6 +16,9 @@
   /* Decorative accents */
   --tiny-pink: #f4c1d4;
   --tiny-peach: #f5cfc0;
+  --tiny-sky: #b8dcf3;
+  --tiny-gold: #f2c14e;
+  --tiny-gold-deep: #8a5d00;
 
   /* Text and feedback */
   --tiny-charcoal: #403738;
@@ -343,8 +346,9 @@ button.is-cursor {
   white-space: nowrap;
 }
 
+/* The Ready high-score name matches its gold crown. */
 .high-score-name.has-name {
-  color: var(--tiny-lavender-deep);
+  color: var(--tiny-gold-deep);
 }
 
 /* The high score wears the Leaderboard crown, bouncing every 3 seconds. */
@@ -352,7 +356,11 @@ button.is-cursor {
   display: inline-block;
   margin-right: 0.4rem;
   vertical-align: -0.1em;
-  color: var(--tiny-lavender-deep);
+  color: var(--tiny-gold-deep);
+}
+
+.high-score-crown svg path {
+  fill: var(--tiny-gold);
 }
 
 .high-score-crown svg {
@@ -1256,14 +1264,13 @@ label.setup-option-big {
   font-size: 1.4rem;
 }
 
-/* Podium: pastel gold, silver, and bronze rank circles for the top three, on the Leaderboard and rolling list. */
+/* Podium: pastel peach, sky, and pink rank circles for the top three, on the Leaderboard and rolling list. */
 .score-row.is-podium-1 .score-rank {
   background: var(--tiny-peach);
 }
 
 .score-row.is-podium-2 .score-rank {
-  background: var(--tiny-lavender);
-  color: var(--tiny-white);
+  background: var(--tiny-sky);
 }
 
 .score-row.is-podium-3 .score-rank {

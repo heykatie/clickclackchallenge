@@ -73,9 +73,12 @@ These are the latest documented design values. They are approximate visual match
 | Deep mint | `--tiny-mint-deep` | `#24756E` | Ready “PRESS ANY KEY TO START” |
 | Lavender | `--tiny-lavender` | `#AA9AD4` | Borders, current-word emphasis, selected-state accents |
 | Light lavender | `--tiny-lavender-light` | `#D9D0ED` | First-place row, soft highlights, prompt panels |
-| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Ready high-score name |
+| Deep lavender | `--tiny-lavender-deep` | `#6B5A9A` | Leaderboard and rolling-list names, crowns |
 | Soft pink | `--tiny-pink` | `#F4C1D4` | Decoration and celebration |
 | Peach | `--tiny-peach` | `#F5CFC0` | Warm decorative accents |
+| Sky | `--tiny-sky` | `#B8DCF3` | Rank 2 podium circle |
+| Gold | `--tiny-gold` | `#F2C14E` | Ready high-score crown fill |
+| Deep gold | `--tiny-gold-deep` | `#8A5D00` | Ready high-score crown outline and name |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
 | Muted gray | `--tiny-muted` | `#8C8788` | Secondary text outside the passage, and only where contrast is sufficient |
 | Error red | `--tiny-error` | `#D95D5D` | Incorrect characters and validation feedback |
@@ -271,7 +274,7 @@ Visual order:
 
 1. Contest headline. It bounces a little. Reduced motion keeps it still.
 2. Plinko message on a clear mint-accented surface.
-3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
+3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep gold, `--tiny-gold-deep` (`#8A5D00`), about 5.7:1 on white, beside a small gold crown. A missing name stays a charcoal dash.
 4. Keyboard invitation, just smaller than the Plinko line, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
 After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, its peach podium circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
@@ -376,7 +379,7 @@ Returning to ready screen in 5s
 - Place a small logo-only badge near the upper-left safe margin. Its tap and long-press behavior is in `docs/prd.md` §9.
 - Center the “TOP 5” pill and “Leaderboard” heading.
 - Use one wide soft-white rounded panel with five consistent row positions.
-- Make rank 1 the strongest ranking emphasis: light-lavender row surface and clear charcoal text, with a small crown. The top three rank circles form a pastel podium: peach for 1, lavender with white digits for 2, pink for 3, on the Leaderboard and the rolling list.
+- Make rank 1 the strongest ranking emphasis: light-lavender row surface and clear charcoal text, with a small crown. The top three rank circles form a pastel podium: peach for 1, sky blue for 2, pink for 3, on the Leaderboard and the rolling list.
 - Keep the other rows quiet and easy to scan.
 - Optionally highlight the current player's visible row with a subtle mint tint or outline and a “YOU” pill. Match the current result, not just its name.
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
@@ -401,7 +404,7 @@ Leaderboard motion: the just-saved row waits a moment, then climbs into place fr
 
 ## 14. Motion
 
-Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. On Typing, the caret blinks slowly: visible for the first 0.6 seconds of a 1.2-second cycle, then a short fade out and back. Each key restarts the cycle, so the caret stays solid while someone is typing. The high-score name on Ready wears the same small lavender crown, which hops and wobbles every 3 seconds. Reduced motion keeps all of these still. On Results, the WPM rolls up from 0 to the final score over 0.8 seconds, easing out so most of the climb is early. Screen readers get the final score at once, the rolling digits are hidden from them, and reduced motion shows the final score immediately. A NEW HIGH SCORE gets a 1.5-second burst of ten mint, lavender, and pink sparkle stars and dots that start at the side edges, drift outward, spin a little, and fade. The burst sits behind the content and ignores taps, so it never covers the score or the name field. The Plinko and place pills wait for the count-up to settle, then pop in from 60% size with a small overshoot over 0.6 seconds; the Plinko pill then wiggles twice so staff spot a prize winner. They only appear for wins, so “Thanks for playing!” and “Casper, is that you?” stay calm. Reduced motion removes the burst and the pop.
+Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. On Typing, the caret blinks slowly: visible for the first 0.6 seconds of a 1.2-second cycle, then a short fade out and back. Each key restarts the cycle, so the caret stays solid while someone is typing. The high-score name on Ready, in deep gold, wears a small gold crown, which hops and wobbles every 3 seconds. Reduced motion keeps all of these still. On Results, the WPM rolls up from 0 to the final score over 0.8 seconds, easing out so most of the climb is early. Screen readers get the final score at once, the rolling digits are hidden from them, and reduced motion shows the final score immediately. A NEW HIGH SCORE gets a 1.5-second burst of ten mint, lavender, and pink sparkle stars and dots that start at the side edges, drift outward, spin a little, and fade. The burst sits behind the content and ignores taps, so it never covers the score or the name field. The Plinko and place pills wait for the count-up to settle, then pop in from 60% size with a small overshoot over 0.6 seconds; the Plinko pill then wiggles twice so staff spot a prize winner. They only appear for wins, so “Thanks for playing!” and “Casper, is that you?” stay calm. Reduced motion removes the burst and the pop.
 
 - Do not animate the passage position or use moving backgrounds during Typing. The slow caret blink is the only motion there.
 - Do not let celebrations obscure scores, delay controls, or interfere with name entry.
@@ -479,6 +482,9 @@ Keep wording consistent across screens. Avoid corporate language, technical jarg
   /* Decorative accents */
   --tiny-pink: #F4C1D4;
   --tiny-peach: #F5CFC0;
+  --tiny-sky: #B8DCF3;
+  --tiny-gold: #F2C14E;
+  --tiny-gold-deep: #8A5D00;
 
   /* Text and feedback */
   --tiny-charcoal: #403738;
