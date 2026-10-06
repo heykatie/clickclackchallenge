@@ -335,6 +335,7 @@ button.is-cursor {
 
 .high-score-name {
   overflow: hidden;
+  font-family: var(--font-score);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
