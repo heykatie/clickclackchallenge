@@ -341,7 +341,7 @@ The Typing screen appears first.
 
 The timer starts only when the contestant presses the first valid typing character on the Typing screen.
 
-If that key has not been pressed within 5 seconds, Ready appears again. No score is saved. Keys that do not start the timer do not reset those 5 seconds.
+If that key has not been pressed within 8 seconds, Ready appears again. No score is saved. Keys that do not start the timer do not reset those 8 seconds.
 
 ---
 
@@ -1642,14 +1642,14 @@ A short Escape press does not leave Ready for Typing; it opens the rolling high-
 
 **When**
 
-- 5 seconds pass without a key that starts the timer
+- 8 seconds pass without a key that starts the timer
 
 **Then**
 
 - Ready appears
 - no score is saved
 
-Once the timer has started, those 5 seconds no longer apply.
+Once the timer has started, those 8 seconds no longer apply.
 
 ---
 

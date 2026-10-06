@@ -1990,7 +1990,7 @@ Ready-screen key is not passed into Typing as contestant input
 a key still held from Ready is ignored until that key is released
 Typing screen renders the full sentence before timer starts
 Typing screen waits for first valid typing character before timer starts
-if that key is not pressed within 5 seconds, Typing returns to Ready and saves no score
+if that key is not pressed within 8 seconds, Typing returns to Ready and saves no score
 a short Escape press during Typing returns to Ready and saves no score, including while the portrait instruction is showing
 holding Escape during Typing opens Event Setup and saves no score
 Space, Enter, or a short Escape press during the Leaderboard returns to Ready and keeps the saved scores; Escape key-down alone does not leave, so it can be held
