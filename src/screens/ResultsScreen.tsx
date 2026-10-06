@@ -10,6 +10,7 @@ import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
 import { resultCopy, type ResultStanding } from "../features/results/resultPlacement";
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
+import { useCountUp } from "./useCountUp";
 import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
 
@@ -36,6 +37,7 @@ export function ResultsScreen({
   claimShortEscape,
 }: ResultsScreenProps) {
   const [name, setName] = useState("");
+  const shownWpm = useCountUp(result.displayedWpm);
   const [shownAt] = useState(() => performance.now());
   const screenRef = useRef<HTMLElement>(null);
   const [logoTaps, setLogoTaps] = useState(0);
@@ -264,7 +266,13 @@ export function ResultsScreen({
         {...logoHold}
       />
       {copy ? <h1>{copy.headline}</h1> : null}
-      <p className="stat-value">{result.displayedWpm} WPM</p>
+      <p className="stat-value">
+        <span className="visually-hidden">{result.displayedWpm} WPM</span>
+        {/* The rolling number is decoration; screen readers get the final score above. */}
+        <span aria-hidden="true">
+          <span className="result-wpm-count">{shownWpm}</span> WPM
+        </span>
+      </p>
       <p>
         {result.displayedAccuracy === null ? "—%" : `${result.displayedAccuracy}%`} ACCURACY
       </p>
