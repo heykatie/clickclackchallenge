@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
   calculateAccuracy,
-  calculateWpm,
   displayedAccuracy,
-  displayedWpm,
+  liveWpm,
 } from "../features/typing/scoring";
 import {
   currentWordBounds,
@@ -102,12 +101,7 @@ export function TypingScreen({
     session.correctAttempts,
     session.incorrectAttempts,
   );
-  const liveWpm = displayedWpm(
-    calculateWpm(
-      session.correctCharacters,
-      elapsedSeconds(session, displayNow),
-    ),
-  );
+  const shownWpm = liveWpm(session.correctCharacters, elapsedSeconds(session, displayNow));
 
   return (
     <main className="screen typing-screen" ref={screenRef} tabIndex={-1}>
@@ -149,7 +143,7 @@ export function TypingScreen({
       </p>
       <div className="stats">
         <p>
-          <span className="stat-value">{liveWpm}</span> WPM
+          <span className="stat-value">{shownWpm}</span> WPM
         </p>
         <p>
           <span className="stat-label">TIME</span>

@@ -18,6 +18,17 @@ export function displayedWpm(rawWpm: number): number {
   return Math.round(rawWpm);
 }
 
+/** The Typing screen holds live WPM at 0 this long: over the first few keys it would read as wild speeds. */
+export const LIVE_WPM_WARMUP_SECONDS = 2;
+
+/** The running WPM shown while typing. Display only: the final score always uses calculateWpm. */
+export function liveWpm(correctCharacters: number, elapsedSeconds: number): number {
+  if (elapsedSeconds < LIVE_WPM_WARMUP_SECONDS) {
+    return 0;
+  }
+  return displayedWpm(calculateWpm(correctCharacters, elapsedSeconds));
+}
+
 export function calculateAccuracy(
   correctAttempts: number,
   incorrectAttempts: number,

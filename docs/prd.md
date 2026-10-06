@@ -411,6 +411,8 @@ bottom center → remaining time
 bottom right  → live accuracy
 ```
 
+Live WPM shows 0 for the first 2 seconds after the timer starts. Over the first few keys it would otherwise read as wild speeds. This is display only: the final score is unchanged.
+
 A subtle current high score may appear in the top-right.
 
 The typing screen may retain the logo, but should not display the shop name if the final unbranded design is used.
