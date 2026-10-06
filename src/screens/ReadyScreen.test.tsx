@@ -5,8 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ScoreRecord } from "../db/persistence";
 import { ReadyScreen } from "./ReadyScreen";
 
-const { listAllScores } = vi.hoisted(() => ({ listAllScores: vi.fn<() => Promise<ScoreRecord[]>>() }));
-vi.mock("../db/persistence", () => ({ listAllScores }));
+const { listAllScores, listScores } = vi.hoisted(() => ({
+  listAllScores: vi.fn<() => Promise<ScoreRecord[]>>(),
+  listScores: vi.fn<(eventId: string) => Promise<ScoreRecord[]>>(),
+}));
+vi.mock("../db/persistence", () => ({ listAllScores, listScores }));
 
 const qualifying: ScoreRecord = {
   id: "s1",
@@ -24,16 +27,20 @@ const qualifying: ScoreRecord = {
   createdAt: "2026-10-05T10:00:00.000Z",
 };
 
+/** `scores` are the active event's; `allScores` adds other events' scores and defaults to the same list. */
 async function renderReady(
   scores: ScoreRecord[] = [qualifying],
   highScore: { displayedWpm: number; name: string | null } | null = { displayedWpm: 60, name: "Alex" },
+  allScores: ScoreRecord[] = scores,
 ) {
-  listAllScores.mockResolvedValue(scores);
+  listScores.mockImplementation(async (eventId) => scores.filter((score) => score.eventId === eventId));
+  listAllScores.mockResolvedValue(allScores);
   const onStart = vi.fn();
   const onSetup = vi.fn();
   let shortEscape: (() => void) | null = null;
   render(
     <ReadyScreen
+      eventId="event-1"
       highScore={highScore}
       onStart={onStart}
       onSetup={onSetup}
@@ -42,7 +49,7 @@ async function renderReady(
       }}
     />,
   );
-  // Let the all-time scores load.
+  // Let the scores load.
   await act(async () => {});
   return { onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
@@ -71,6 +78,24 @@ describe("ReadyScreen", () => {
   it("invites the first high score of the day when the event has none", async () => {
     await renderReady([], null);
     expect(screen.getByText("Be the first high score today!")).toBeTruthy();
+  });
+
+  it("shows the all-time best under the event's high score when another event holds it", async () => {
+    const best = { ...qualifying, id: "best", eventId: "event-0", name: "Zed", displayedWpm: 196 };
+    await renderReady([qualifying], { displayedWpm: 60, name: "Alex" }, [qualifying, best]);
+    expect(screen.getByText("All-time best: 196 WPM · Zed")).toBeTruthy();
+  });
+
+  it("shows the all-time best on an event with no score yet", async () => {
+    const best = { ...qualifying, id: "best", eventId: "event-0", name: "Zed", displayedWpm: 196 };
+    await renderReady([], null, [best]);
+    expect(screen.getByText("Be the first high score today!")).toBeTruthy();
+    expect(screen.getByText("All-time best: 196 WPM · Zed")).toBeTruthy();
+  });
+
+  it("hides the all-time line when this event's high score is the all-time best", async () => {
+    await renderReady();
+    expect(screen.queryByText(/All-time best/)).toBeNull();
   });
 
   it("starts the test from any key through the window listener", async () => {
@@ -146,6 +171,22 @@ describe("ReadyScreen", () => {
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByText("HIGH SCORES")).toBeTruthy();
+  });
+
+  it("rolls the current event's scores, not other events'", async () => {
+    const older = { ...qualifying, id: "old", eventId: "event-0", name: "Old Champ", displayedWpm: 99 };
+    await renderReady([qualifying], { displayedWpm: 60, name: "Alex" }, [qualifying, older]);
+    tapLogo();
+    const rolling = document.querySelector(".screensaver-rows:not([aria-hidden='true'])");
+    expect(rolling?.textContent).toContain("Alex");
+    expect(rolling?.textContent).not.toContain("Old Champ");
+  });
+
+  it("does not roll when only other events have scores", async () => {
+    const older = { ...qualifying, id: "old", eventId: "event-0", name: "Old Champ" };
+    await renderReady([], null, [older]);
+    act(() => vi.advanceTimersByTime(180_000));
+    expect(screen.queryByText("HIGH SCORES")).toBeNull();
   });
 
   it("stays on Ready when no qualifying score exists", async () => {

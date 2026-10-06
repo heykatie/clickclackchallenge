@@ -324,7 +324,7 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling high-score list of the active event. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list shows the active event's board: its own scores, whether the operator started fresh or continued, and not those of archived events. It keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
@@ -530,7 +530,7 @@ A contestant below the threshold:
 - does not qualify for leaderboard ranking
 - is not prompted for a leaderboard name
 
-A score that displays as 0 WPM also stays off every board, including the event Top 5 and the all-time roll. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
+A score that displays as 0 WPM also stays off every board, including the event Top 5 and the rolling list. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
 
 ### Ranking and Ties
 
@@ -933,6 +933,10 @@ The Ready screen should show:
 - name, or a dash when that score has no name
 
 If the active event has no eligible scores yet, show “Be the first high score today!”
+
+### All-time best
+
+Ready, under the event's high score, and the Leaderboard, under the board, show one line with the best eligible score ever saved, from any event including archived ones: “All-time best: {WPM} WPM · {name}”, or without the name when the score has none. The line is hidden when nothing was ever saved, and when the all-time best is this event's own first place, which is already shown. It is display only and never changes ranking, placement, or prizes. House scores are never the all-time best.
 
 ---
 
@@ -1961,6 +1965,7 @@ a short Escape press on Ready does not start the test and opens the rolling high
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
+after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 the first letter on Results goes into the name

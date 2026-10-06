@@ -24,7 +24,11 @@ function score(id: string, name: string | null, displayedWpm: number, minute: nu
   };
 }
 
-function renderBoard(scores: ScoreRecord[], currentScoreId: string | null = null) {
+function renderBoard(
+  scores: ScoreRecord[],
+  currentScoreId: string | null = null,
+  allTimeBest: ScoreRecord | null = null,
+) {
   const onNextPlayer = vi.fn();
   const onSetup = vi.fn();
   let shortEscape: (() => void) | null = null;
@@ -32,6 +36,7 @@ function renderBoard(scores: ScoreRecord[], currentScoreId: string | null = null
     <LeaderboardScreen
       scores={scores}
       currentScoreId={currentScoreId}
+      allTimeBest={allTimeBest}
       onNextPlayer={onNextPlayer}
       onSetup={onSetup}
       claimShortEscape={(handler) => {
@@ -184,4 +189,17 @@ describe("LeaderboardScreen", () => {
     fireEvent.keyDown(window, { key: "Enter" });
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
+
+  it("shows the all-time best under the board when another event holds it", () => {
+    const best = { ...score("best", "Zed", 196, 0), eventId: "event-0" };
+    renderBoard([score("a", "Alex", 60, 1)], null, best);
+    expect(screen.getByText("All-time best: 196 WPM · Zed")).toBeTruthy();
+  });
+
+  it("hides the all-time line when this board's first place is the all-time best", () => {
+    const alex = score("a", "Alex", 60, 1);
+    renderBoard([alex], null, alex);
+    expect(screen.queryByText(/All-time best/)).toBeNull();
+  });
 });
+

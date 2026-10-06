@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
+import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, listAllScores } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -33,6 +33,7 @@ function App() {
   const [saving, setSaving] = useState(false);
   const [standing, setStanding] = useState<ResultStanding | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
+  const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
   const saveRequest = useRef<Promise<ScoreRecord> | null>(null);
@@ -239,6 +240,7 @@ function App() {
     try {
       const score = await recordScore(name);
       setLeaderboardScores(await listScores(score.eventId));
+      setAllTimeBest(highScore(await listAllScores()));
       dispatch({ type: "SHOW_LEADERBOARD", currentScoreId: score.id });
     } catch {
       setStatus("failed");
@@ -302,6 +304,7 @@ function App() {
     case "ready":
       return (
         <ReadyScreen
+          eventId={state.activeEvent?.id ?? null}
           highScore={state.highScore}
           onStart={(key) => {
             if (key !== "") {
@@ -359,6 +362,7 @@ function App() {
         "leaderboard",
         <LeaderboardScreen
           scores={leaderboardScores}
+          allTimeBest={allTimeBest}
           currentScoreId={state.currentScoreId}
           onNextPlayer={() => {
             const event = state.activeEvent;

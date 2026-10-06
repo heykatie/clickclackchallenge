@@ -41,15 +41,16 @@ export function highScore(scores: readonly ScoreRecord[]): ScoreRecord | null {
   return rankScores(scores)[0]?.score ?? null;
 }
 
-/** All-time attract board. Long enough to feel like a history, short enough to come back around. */
-export const ALL_TIME_SCORE_CAP = 20;
+/** Rolling high-score list on Ready. Long enough to feel like a history, short enough to come back around. */
+export const ROLLING_LIST_CAP = 20;
 
 /** Event rank that may enter a name. The Top 10 cheer stops at 10. */
 export const NAME_ENTRY_RANK = 20;
 
-export function allTimeScores(
+/** The rolling list: the top ranked scores of the board it is given, which is the active event's. */
+export function rollingListScores(
   scores: readonly ScoreRecord[],
-  cap = ALL_TIME_SCORE_CAP,
+  cap = ROLLING_LIST_CAP,
 ): RankedScore[] {
   return rankScores(scores).slice(0, cap);
 }
@@ -93,4 +94,16 @@ const HOUSE_SCORES: readonly RankedScore[] = [houseScore(1, "Clicky", 60), house
 /** The Leaderboard's entries: the ranked event scores, or the house scores until the first real one exists. */
 export function boardEntries(ranked: readonly RankedScore[]): readonly RankedScore[] {
   return ranked.length > 0 ? ranked : HOUSE_SCORES;
+}
+
+/**
+ * "All-time best: 196 WPM · Zed" for the best eligible score ever saved, from any event.
+ * Null when nothing was saved, or when it is this event's own first place, which the screen already shows.
+ */
+export function allTimeBestLine(best: ScoreRecord | null, eventBest: ScoreRecord | null): string | null {
+  if (best === null || (eventBest !== null && best.id === eventBest.id)) {
+    return null;
+  }
+  const line = `All-time best: ${best.displayedWpm} WPM`;
+  return best.name ? `${line} · ${best.name}` : line;
 }
