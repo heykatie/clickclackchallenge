@@ -758,6 +758,23 @@ button.is-cursor {
   animation: typed-letter-in 1ms linear calc(var(--letter-index, 0) * 70ms) both;
 }
 
+/* "Thanks for playing!" waves hello: each letter bobs up in turn, twice. */
+.wave-letter {
+  display: inline-block;
+  white-space: pre;
+  animation: wave-letter-bob 600ms ease-in-out calc(300ms + var(--letter-index, 0) * 50ms) 2;
+}
+
+@keyframes wave-letter-bob {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-0.3em) rotate(-4deg);
+  }
+}
+
 @keyframes typed-letter-in {
   from {
     opacity: 0;
@@ -779,7 +796,8 @@ button.is-cursor {
   .ready-copy h1,
   .ready-plinko,
   .ready-prompt,
-  .typed-letter {
+  .typed-letter,
+  .wave-letter {
     animation: none;
   }
 

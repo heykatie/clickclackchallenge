@@ -369,6 +369,16 @@ describe("ResultsScreen celebration", () => {
     expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
   });
 
+  it("waves the letters of Thanks for playing! one after another, keeping the heading's name", () => {
+    renderResults(unranked);
+    const heading = screen.getByRole("heading", { name: "Thanks for playing!" });
+    const letters = [...heading.querySelectorAll(".wave-letter")];
+    expect(letters.map((letter) => letter.textContent).join("")).toBe("Thanks for playing!");
+    expect((letters[3] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("3");
+    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(heading.querySelector(".typed-letter")).toBeNull();
+  });
+
   it("does not type out NEW HIGH SCORE!", () => {
     renderResults(newHigh);
     expect(document.querySelector(".typed-letter")).toBeNull();
