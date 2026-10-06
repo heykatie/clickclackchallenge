@@ -251,10 +251,57 @@ label.setup-option-big {
 
 .setup-footer {
   display: flex;
-  flex-wrap: wrap;
+  /* One row: the left side shrinks and its links wrap, so START EVENT never drops below and adds height. */
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem 1rem;
+}
+
+/* The left of the footer stacks the optional event name above the small operator links. */
+.setup-footer-side {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+/* The label sits beside the field, so the name adds one short row, not two. */
+.setup-name {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  margin: 0;
+  color: var(--tiny-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.setup-name input {
+  box-sizing: border-box;
+  width: 14rem;
+  min-width: 0;
+  flex: 0 1 14rem;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--tiny-lavender-light);
+  border-radius: 0.8rem;
+  background: var(--tiny-white);
+  color: var(--tiny-charcoal);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.setup-name input::placeholder {
+  color: var(--tiny-muted);
+  font-weight: 400;
+}
+
+.setup-name input:focus-visible {
+  border-color: var(--tiny-lavender);
 }
 
 .setup-tools {
@@ -310,6 +357,14 @@ label.setup-option-big {
 }
 
 @media (max-height: 760px) {
+  /*
+   * A short, wide window gives the 4:3 stage a narrow width, and then tile text and links wrap and the
+   * block grows taller. Event Setup does not need 4:3, so it may widen to 60rem where the window allows.
+   */
+  .setup-screen {
+    width: min(100vw, max(calc(100dvh * 4 / 3), 60rem));
+  }
+
   .setup-screen {
     padding-top: 4.75rem;
     padding-bottom: 1.5rem;

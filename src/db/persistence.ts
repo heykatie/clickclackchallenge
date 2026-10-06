@@ -29,6 +29,8 @@ export interface EventRecord {
    * board, the rolling list, and the all-time best. Setting it back to null shows them again.
    */
   hiddenAt: string | null;
+  /** An optional name the operator gives the event, for the scores download. Never shown to contestants. */
+  name: string | null;
   status: "active" | "archived";
   createdAt: string;
   updatedAt: string;
@@ -292,6 +294,8 @@ function normalizeEvent(event: EventRecord): EventRecord {
     // Events saved before the board choice existed rank their own scores.
     boardScope: event.boardScope === "all-time" ? "all-time" : "event",
     hiddenAt: event.hiddenAt ?? null,
+    // Events saved before names existed have none.
+    name: event.name ?? null,
     testMode,
     passageSetId: event.passageSetId || passageSetIdFor(testMode),
   };
@@ -336,7 +340,7 @@ export async function loadBooth(): Promise<BoothState> {
 export async function startFreshEvent(
   durationSeconds: TestDuration,
   testMode: TestMode = "famous-lines",
-  options: { clearScores?: boolean } = {},
+  options: { clearScores?: boolean; name?: string | null } = {},
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -363,6 +367,7 @@ export async function startFreshEvent(
     passageSetId: passageSetIdFor(testMode),
     boardScope: "event",
     hiddenAt: null,
+    name: cleanEventName(options.name),
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -385,7 +390,7 @@ export async function startFreshEvent(
 
 export async function updateActiveEvent(
   eventId: string,
-  next: { durationSeconds: TestDuration; testMode: TestMode; boardScope?: BoardScope },
+  next: { durationSeconds: TestDuration; testMode: TestMode; boardScope?: BoardScope; name?: string | null },
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const event = await database.get("events", eventId);
@@ -394,11 +399,13 @@ export async function updateActiveEvent(
   }
   const current = normalizeEvent(event);
   const boardScope = next.boardScope ?? current.boardScope;
+  const name = next.name === undefined ? current.name : cleanEventName(next.name);
   if (
     current.durationSeconds === next.durationSeconds &&
     current.testMode === next.testMode &&
     current.passageSetId === passageSetIdFor(next.testMode) &&
-    current.boardScope === boardScope
+    current.boardScope === boardScope &&
+    current.name === name
   ) {
     return current;
   }
@@ -409,6 +416,7 @@ export async function updateActiveEvent(
     testMode: next.testMode,
     passageSetId: passageSetIdFor(next.testMode),
     boardScope,
+    name,
     updatedAt: new Date().toISOString(),
   };
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -428,8 +436,16 @@ export async function updateActiveEvent(
  * Hides every event, and so every score, from view and starts an empty event with the given choices.
  * Nothing is deleted: setting an event's hiddenAt back to null brings its scores back.
  */
-export function clearAllScores(durationSeconds: TestDuration, testMode: TestMode): Promise<EventRecord> {
-  return startFreshEvent(durationSeconds, testMode, { clearScores: true });
+export function clearAllScores(durationSeconds: TestDuration, testMode: TestMode, name?: string | null): Promise<EventRecord> {
+  return startFreshEvent(durationSeconds, testMode, { clearScores: true, name });
+}
+
+export const MAX_EVENT_NAME_LENGTH = 40;
+
+/** Trims and collapses spaces, and caps the length. A blank name is no name. */
+export function cleanEventName(name: string | null | undefined): string | null {
+  const cleaned = (name ?? "").replace(/\s+/g, " ").trim().slice(0, MAX_EVENT_NAME_LENGTH).trim();
+  return cleaned === "" ? null : cleaned;
 }
 
 export async function hasClearedScores(): Promise<boolean> {

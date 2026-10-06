@@ -11,11 +11,11 @@ const ready: SetupSelection = {
 describe("applySetupKey", () => {
   it("moves the cursor without changing the selected choice", () => {
     const moved = applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true });
-    expect(moved).toEqual({ ...ready, cursor: "all-time" });
+    expect(moved).toEqual({ ...ready, cursor: "name" });
   });
 
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
-    // CLEAR ALL SCORES is last, so Down from it wraps to the first choice.
+    // SOUND is last, so Down from it wraps to the first choice.
     const onLength = applySetupKey({ ...ready, cursor: "sound" }, "ArrowDown", { shiftKey: false, canContinue: true });
     expect(onLength).toEqual({ ...ready, cursor: "30" });
     if (onLength === null || typeof onLength === "string") {
@@ -50,7 +50,7 @@ describe("applySetupKey", () => {
   it("skips Continue when no event exists", () => {
     const fresh: SetupSelection = { ...ready, cursor: "fresh", leaderboard: "fresh" };
     expect(applySetupKey(fresh, "ArrowDown", { shiftKey: false, canContinue: false })).toMatchObject({
-      cursor: "start",
+      cursor: "name",
     });
   });
 });
@@ -58,7 +58,12 @@ describe("applySetupKey", () => {
 describe("all-time choice", () => {
   it("follows Continue, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices.slice(choices.indexOf("continue"), choices.indexOf("start") + 1)).toEqual(["continue", "all-time", "start"]);
+    expect(choices.slice(choices.indexOf("continue"), choices.indexOf("start") + 1)).toEqual([
+      "continue",
+      "all-time",
+      "name",
+      "start",
+    ]);
     expect(setupChoices("famous-lines", false)).not.toContain("all-time");
   });
 
@@ -93,6 +98,19 @@ describe("download choice", () => {
     expect(applySetupKey({ ...ready, cursor: "download" }, "Enter", { shiftKey: false, canContinue: true })).toBe(
       "download",
     );
+  });
+});
+
+describe("event name choice", () => {
+  it("comes right before START EVENT, so Up from START EVENT reaches it", () => {
+    const choices = setupChoices("famous-lines", true);
+    expect(choices[choices.indexOf("start") - 1]).toBe("name");
+    expect(setupChoices("famous-lines", false)).toContain("name");
+    expect(applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
+  });
+
+  it("asks to edit the name on Enter", () => {
+    expect(applySetupKey({ ...ready, cursor: "name" }, "Enter", { shiftKey: false, canContinue: true })).toBe("name");
   });
 });
 

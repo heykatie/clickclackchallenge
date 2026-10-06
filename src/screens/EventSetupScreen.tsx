@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
+import { cleanEventName, MAX_EVENT_NAME_LENGTH, type BoardScope, type TestDuration, type TestMode } from "../db/persistence";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
   applyFreshConfirmKey,
@@ -12,16 +12,18 @@ import {
 type EventSetupScreenProps = {
   storedDuration: TestDuration | null;
   storedTestMode: TestMode | null;
+  /** The active event's optional name, for the scores download. Never shown to contestants. */
+  storedEventName: string | null;
   storedBoardScope: BoardScope | null;
   saving: boolean;
   /** A new version is installed and waiting. */
   updateReady: boolean;
   /** Activates the waiting version and reloads the app. */
   onApplyUpdate: () => void;
-  onStartFresh: (durationSeconds: TestDuration, testMode: TestMode) => void;
-  onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) => void;
+  onStartFresh: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
+  onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope, name: string | null) => void;
   /** Hides every score so far and starts an empty event with these choices. */
-  onClearScores: (durationSeconds: TestDuration, testMode: TestMode) => void;
+  onClearScores: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   /** An earlier clear can be undone. */
   canRestore: boolean;
   /** Shows the scores hidden by the most recent clear again. */
@@ -38,6 +40,7 @@ type EventSetupScreenProps = {
 export function EventSetupScreen({
   storedDuration,
   storedTestMode,
+  storedEventName,
   storedBoardScope,
   saving,
   updateReady,
@@ -58,6 +61,8 @@ export function EventSetupScreen({
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
   const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "famous-lines");
   const [cursor, setCursor] = useState<SetupChoice>("start");
+  const [eventName, setEventName] = useState(storedEventName ?? "");
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const storySelected = selectedTestMode === "story";
   const visibleDuration: TestDuration = storySelected ? 60 : selectedDuration;
   const screenRef = useRef<HTMLElement>(null);
@@ -102,7 +107,7 @@ export function EventSetupScreen({
       selectedTestMode,
     );
     if (plan.mode === "continue") {
-      onContinue(plan.durationSeconds, plan.testMode, plan.boardScope);
+      onContinue(plan.durationSeconds, plan.testMode, plan.boardScope, cleanEventName(eventName));
       return;
     }
     if (!confirmed && needsFreshConfirm(plan, storedDuration !== null)) {
@@ -110,7 +115,7 @@ export function EventSetupScreen({
       setConfirmCursor("cancel");
       return;
     }
-    onStartFresh(plan.durationSeconds, plan.testMode);
+    onStartFresh(plan.durationSeconds, plan.testMode, cleanEventName(eventName));
   }
 
   function askToClear() {
@@ -125,7 +130,7 @@ export function EventSetupScreen({
 
   function confirm() {
     if (confirmKind === "clear") {
-      onClearScores(visibleDuration, selectedTestMode);
+      onClearScores(visibleDuration, selectedTestMode, cleanEventName(eventName));
       return;
     }
     if (confirmKind === "restore") {
@@ -168,6 +173,19 @@ export function EventSetupScreen({
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) {
         return;
       }
+      // While the event name field has focus, keys type into it. Enter or Escape leaves it; Up, Down,
+      // and Tab leave it and move the cursor as usual.
+      if (event.target === nameInputRef.current) {
+        if (event.key === "Enter" || event.key === "NumpadEnter" || event.key === "Escape") {
+          event.preventDefault();
+          screenRef.current?.focus();
+          return;
+        }
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown" && event.key !== "Tab") {
+          return;
+        }
+        screenRef.current?.focus();
+      }
       const confirming = confirmCursorRef.current;
       if (confirming !== null) {
         const answer = applyFreshConfirmKey(confirming, event.key);
@@ -206,6 +224,10 @@ export function EventSetupScreen({
       }
       if (result === "sound") {
         onToggleSoundRef.current();
+        return;
+      }
+      if (result === "name") {
+        nameInputRef.current?.focus();
         return;
       }
       if (result === "clear") {
@@ -405,45 +427,61 @@ export function EventSetupScreen({
           </fieldset>
         </div>
         <footer className="setup-footer">
-          {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND always shows. */}
-          <div className="setup-tools">
-            {storedDuration !== null ? (
+          <div className="setup-footer-side">
+            <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
+              <span>Event name (optional)</span>
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={eventName}
+                maxLength={MAX_EVENT_NAME_LENGTH}
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="e.g. Saturday market"
+                onFocus={() => setCursor("name")}
+                onChange={(event) => setEventName(event.target.value)}
+              />
+            </label>
+            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND always shows. */}
+            <div className="setup-tools">
+              {storedDuration !== null ? (
+                <button
+                  type="button"
+                  className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={askToClear}
+                  disabled={saving}
+                >
+                  CLEAR ALL SCORES
+                </button>
+              ) : null}
+              {canRestore ? (
+                <button
+                  type="button"
+                  className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={askToRestore}
+                  disabled={saving}
+                >
+                  RESTORE CLEARED SCORES
+                </button>
+              ) : null}
+              {storedDuration !== null ? (
+                <button
+                  type="button"
+                  className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={onDownloadScores}
+                >
+                  DOWNLOAD SCORES
+                </button>
+              ) : null}
               <button
                 type="button"
-                className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-                onClick={askToClear}
-                disabled={saving}
+                className={cursor === "sound" ? "setup-tool is-cursor" : "setup-tool"}
+                aria-pressed={soundOn}
+                onClick={onToggleSound}
               >
-                CLEAR ALL SCORES
+                SOUND: {soundOn ? "ON" : "OFF"}
               </button>
-            ) : null}
-            {canRestore ? (
-              <button
-                type="button"
-                className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-                onClick={askToRestore}
-                disabled={saving}
-              >
-                RESTORE CLEARED SCORES
-              </button>
-            ) : null}
-            {storedDuration !== null ? (
-              <button
-                type="button"
-                className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
-                onClick={onDownloadScores}
-              >
-                DOWNLOAD SCORES
-              </button>
-            ) : null}
-            <button
-              type="button"
-              className={cursor === "sound" ? "setup-tool is-cursor" : "setup-tool"}
-              aria-pressed={soundOn}
-              onClick={onToggleSound}
-            >
-              SOUND: {soundOn ? "ON" : "OFF"}
-            </button>
+            </div>
           </div>
           <div className="setup-start-group">
             <button

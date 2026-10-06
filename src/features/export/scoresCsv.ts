@@ -12,6 +12,8 @@ const HEADER = [
   "Date",
   "Time",
   "Event",
+  "Event started",
+  "Event name",
   "Name",
   "WPM",
   "Accuracy %",
@@ -32,12 +34,16 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
   const format = formatters(timeZone);
   const clearedEvents = new Set(events.filter((event) => event.hiddenAt).map((event) => event.id));
 
-  // "Event 3 · Oct 6, 9:00 AM": events are numbered in the order they started.
-  const eventLabels = new Map(
+  // Events are numbered in the order they started: "Event 3". The operator's name, if any, has its own column.
+  const eventInfo = new Map(
     [...events]
       .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
-      .map((event, index) => [event.id, `Event ${index + 1} · ${format.eventStart(event.createdAt)}`]),
+      .map((event, index) => [
+        event.id,
+        { number: `Event ${index + 1}`, started: format.eventStart(event.createdAt), name: event.name ?? "" },
+      ]),
   );
+  const unknownEvent = { number: "Unknown event", started: "", name: "" };
 
   const eventRanks = new Map<string, number>();
   for (const eventId of new Set(scores.map((score) => score.eventId))) {
@@ -54,7 +60,9 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
     .map((score) => [
       format.date(score.createdAt),
       format.time(score.createdAt),
-      eventLabels.get(score.eventId) ?? "Unknown event",
+      (eventInfo.get(score.eventId) ?? unknownEvent).number,
+      (eventInfo.get(score.eventId) ?? unknownEvent).started,
+      (eventInfo.get(score.eventId) ?? unknownEvent).name,
       score.name ?? "",
       String(score.displayedWpm),
       String(Math.round(score.accuracy)),

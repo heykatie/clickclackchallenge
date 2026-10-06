@@ -11,6 +11,7 @@ const event60: EventRecord = {
   passageSetId: "common-sentences-v1",
   boardScope: "event",
   hiddenAt: null,
+  name: null,
   status: "active",
   createdAt: "2026-09-22T00:00:00.000Z",
   updatedAt: "2026-09-22T00:00:00.000Z",
