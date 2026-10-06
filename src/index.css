@@ -885,23 +885,53 @@ button:disabled {
   }
 }
 
-/* The Plinko and place lines only appear for wins, so every pill gets a small pop. */
+/*
+ * The Plinko and place lines only appear for wins, so every pill pops in. They wait for the WPM
+ * count-up (0.8s) to settle, so the eye is free to catch them. The Plinko pill then wiggles twice
+ * so staff spot a prize winner.
+ */
 .result-pill {
-  animation: result-pill-pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  animation: result-pill-pop 600ms ease-out 800ms both;
+}
+
+.result-plinko {
+  animation:
+    result-pill-pop 600ms ease-out 800ms both,
+    result-pill-wiggle 500ms ease-in-out 1500ms 2;
 }
 
 .result-place {
-  animation-delay: 120ms;
+  animation-delay: 950ms;
 }
 
 @keyframes result-pill-pop {
-  from {
+  0% {
     opacity: 0;
-    transform: scale(0.85);
+    transform: scale(0.6);
   }
-  to {
+  60% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  80% {
+    transform: scale(0.97);
+  }
+  100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes result-pill-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(4deg);
   }
 }
 
@@ -910,7 +940,8 @@ button:disabled {
     display: none;
   }
 
-  .result-pill {
+  .result-pill,
+  .result-plinko {
     animation: none;
   }
 }
