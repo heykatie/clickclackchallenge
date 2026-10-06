@@ -2,10 +2,13 @@
 import "../test/domSetup";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { TestDuration, TestMode } from "../db/persistence";
+import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import { EventSetupScreen } from "./EventSetupScreen";
 
-function renderSetup(stored: { duration: TestDuration; mode: TestMode } | null, updateReady = false) {
+function renderSetup(
+  stored: { duration: TestDuration; mode: TestMode; board?: BoardScope } | null,
+  updateReady = false,
+) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
   const onApplyUpdate = vi.fn();
@@ -13,6 +16,7 @@ function renderSetup(stored: { duration: TestDuration; mode: TestMode } | null, 
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
       storedTestMode={stored?.mode ?? null}
+      storedBoardScope={stored?.board ?? null}
       saving={false}
       updateReady={updateReady}
       onApplyUpdate={onApplyUpdate}
@@ -26,11 +30,13 @@ function renderSetup(stored: { duration: TestDuration; mode: TestMode } | null, 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
-/** From START EVENT, one step up is Continue and two steps up is Start fresh. */
+/** From START EVENT, the steps up are All-time leaderboard, Continue, then Start fresh. */
 function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
+  press("ArrowUp");
   press("Enter");
+  press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
 }
@@ -39,7 +45,7 @@ describe("EventSetupScreen", () => {
   it("continues the existing event without asking", () => {
     const { onContinue } = renderSetup(existing);
     press("Enter");
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
   });
 
@@ -117,6 +123,31 @@ describe("EventSetupScreen", () => {
     press("Enter");
     expect(onApplyUpdate).toHaveBeenCalledOnce();
     expect(onContinue).not.toHaveBeenCalled();
+  });
+
+  it("offers the all-time leaderboard only when an event exists", () => {
+    renderSetup(null);
+    expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).disabled).toBe(true);
+  });
+
+  it("keeps the event and switches its board to all-time", () => {
+    const { onContinue, onStartFresh } = renderSetup(existing);
+    press("ArrowUp");
+    press("Enter");
+    expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
+    press("ArrowDown");
+    press("Enter");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time");
+    expect(onStartFresh).not.toHaveBeenCalled();
+    expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
+  });
+
+  it("shows an all-time event as All-time leaderboard, and Continue switches it back", () => {
+    const { onContinue } = renderSetup({ ...existing, board: "all-time" });
+    expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByLabelText("Continue previous event"));
+    fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
   });
 });
 

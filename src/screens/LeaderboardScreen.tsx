@@ -15,6 +15,8 @@ type LeaderboardScreenProps = {
   currentScoreId: string | null;
   /** The best eligible score from every event, or null when none was ever saved. */
   allTimeBest: ScoreRecord | null;
+  /** The board ranks every event's scores. */
+  allTime: boolean;
   onNextPlayer: () => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
@@ -24,6 +26,7 @@ export function LeaderboardScreen({
   scores,
   currentScoreId,
   allTimeBest,
+  allTime,
   onNextPlayer,
   onSetup,
   claimShortEscape,
@@ -109,7 +112,7 @@ export function LeaderboardScreen({
         aria-label="Back to start"
         {...logoHold}
       />
-      <p className="score-kicker">TOP 5</p>
+      <p className="score-kicker">{allTime ? "ALL-TIME TOP 5" : "TOP 5"}</p>
       <h1>Leaderboard</h1>
       <ol className="score-card score-rows leaderboard-rows">
         {slots.map((slot) => (

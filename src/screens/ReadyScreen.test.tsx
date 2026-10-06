@@ -32,6 +32,7 @@ async function renderReady(
   scores: ScoreRecord[] = [qualifying],
   highScore: { displayedWpm: number; name: string | null } | null = { displayedWpm: 60, name: "Alex" },
   allScores: ScoreRecord[] = scores,
+  allTime = false,
 ) {
   listScores.mockImplementation(async (eventId) => scores.filter((score) => score.eventId === eventId));
   listAllScores.mockResolvedValue(allScores);
@@ -41,6 +42,7 @@ async function renderReady(
   render(
     <ReadyScreen
       eventId="event-1"
+      allTime={allTime}
       highScore={highScore}
       onStart={onStart}
       onSetup={onSetup}
@@ -180,6 +182,30 @@ describe("ReadyScreen", () => {
     const rolling = document.querySelector(".screensaver-rows:not([aria-hidden='true'])");
     expect(rolling?.textContent).toContain("Alex");
     expect(rolling?.textContent).not.toContain("Old Champ");
+  });
+
+  it("rolls every event's scores and says ALL-TIME on an all-time board", async () => {
+    const older = { ...qualifying, id: "old", eventId: "event-0", name: "Old Champ", displayedWpm: 99 };
+    await renderReady([qualifying], { displayedWpm: 99, name: "Old Champ" }, [qualifying, older], true);
+    expect(screen.getByText("ALL-TIME HIGH SCORE")).toBeTruthy();
+    tapLogo();
+    expect(screen.getByText("ALL-TIME HIGH SCORES")).toBeTruthy();
+    const rolling = document.querySelector(".screensaver-rows:not([aria-hidden='true'])");
+    expect(rolling?.textContent).toContain("Old Champ");
+    expect(rolling?.textContent).toContain("Alex");
+  });
+
+  it("does not repeat the all-time best line on an all-time board", async () => {
+    const older = { ...qualifying, id: "old", eventId: "event-0", name: "Old Champ", displayedWpm: 99 };
+    await renderReady([qualifying], { displayedWpm: 99, name: "Old Champ" }, [qualifying, older], true);
+    expect(screen.queryByText(/All-time best/)).toBeNull();
+  });
+
+  it("keeps the event labels on an event board", async () => {
+    await renderReady();
+    expect(screen.getByText("CURRENT HIGH SCORE")).toBeTruthy();
+    tapLogo();
+    expect(screen.getByText("HIGH SCORES")).toBeTruthy();
   });
 
   it("does not roll when only other events have scores", async () => {

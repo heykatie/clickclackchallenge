@@ -1,11 +1,13 @@
-import type { TestDuration, TestMode } from "../db/persistence";
+import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 
-export type SetupMode = "fresh" | "continue";
+/** The Leaderboard choice on Event Setup. All-time keeps the event and ranks every event's scores. */
+export type SetupMode = "fresh" | "continue" | "all-time";
 
 export interface EventStart {
   mode: "fresh" | "continue";
   durationSeconds: TestDuration;
   testMode: TestMode;
+  boardScope: BoardScope;
 }
 
 export function planEventStart(
@@ -15,10 +17,15 @@ export function planEventStart(
   selectedTestMode: TestMode,
 ): EventStart {
   const durationSeconds = selectedTestMode === "story" ? 60 : selectedDuration;
-  if (mode === "continue" && hasActiveEvent) {
-    return { mode: "continue", durationSeconds, testMode: selectedTestMode };
+  if ((mode === "continue" || mode === "all-time") && hasActiveEvent) {
+    return {
+      mode: "continue",
+      durationSeconds,
+      testMode: selectedTestMode,
+      boardScope: mode === "all-time" ? "all-time" : "event",
+    };
   }
-  return { mode: "fresh", durationSeconds, testMode: selectedTestMode };
+  return { mode: "fresh", durationSeconds, testMode: selectedTestMode, boardScope: "event" };
 }
 
 /** Start fresh archives the current leaderboard and there is no screen to bring it back, so it asks first. */

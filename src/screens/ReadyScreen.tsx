@@ -11,13 +11,15 @@ const READY_IDLE_MS = 120_000;
 type ReadyScreenProps = {
   /** The active event. The rolling list shows its board. */
   eventId: string | null;
+  /** The event's board ranks every event's scores. */
+  allTime: boolean;
   highScore: HighScoreSummary | null;
   onStart: (key: string) => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
-export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
+export function ReadyScreen({ eventId, allTime, highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
@@ -40,8 +42,8 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
 
   useEffect(() => {
     let cancelled = false;
-    // The rolling list follows the active event's board, whether it was started fresh or continued.
-    (eventId === null ? Promise.resolve([]) : listScores(eventId)).then(
+    // The rolling list follows the active event's board: its own scores, or every event's when all-time.
+    (allTime ? listAllScores() : eventId === null ? Promise.resolve([]) : listScores(eventId)).then(
       (scores) => {
         if (!cancelled) {
           setRolling(rollingListScores(scores));
@@ -68,7 +70,7 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
     return () => {
       cancelled = true;
     };
-  }, [eventId]);
+  }, [eventId, allTime]);
 
   useEffect(() => {
     if (asleep || rolling.length === 0) {
@@ -136,6 +138,7 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
   if (asleep) {
     return (
       <Screensaver
+        title={allTime ? "ALL-TIME HIGH SCORES" : "HIGH SCORES"}
         scores={rolling}
         onWake={() => {
           asleepRef.current = false;
@@ -163,7 +166,7 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
           <h1>GIANT keyboard typing contest!</h1>
           <p className="ready-plinko">Type above 50 WPM for a Plinko drop.</p>
           <section className="high-score-card" aria-label="Current high score">
-            <p className="stat-label">CURRENT HIGH SCORE</p>
+            <p className="stat-label">{allTime ? "ALL-TIME HIGH SCORE" : "CURRENT HIGH SCORE"}</p>
             {highScore ? (
               <>
                 <p className="stat-value">{highScore.displayedWpm} WPM</p>

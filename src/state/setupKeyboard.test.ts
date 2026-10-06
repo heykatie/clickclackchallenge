@@ -11,7 +11,7 @@ const ready: SetupSelection = {
 describe("applySetupKey", () => {
   it("moves the cursor without changing the selected choice", () => {
     const moved = applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true });
-    expect(moved).toEqual({ ...ready, cursor: "continue" });
+    expect(moved).toEqual({ ...ready, cursor: "all-time" });
   });
 
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
@@ -51,6 +51,19 @@ describe("applySetupKey", () => {
     expect(applySetupKey(fresh, "ArrowDown", { shiftKey: false, canContinue: false })).toMatchObject({
       cursor: "start",
     });
+  });
+});
+
+describe("all-time choice", () => {
+  it("follows Continue, and only while an event exists", () => {
+    expect(setupChoices("famous-lines", true).slice(-3)).toEqual(["continue", "all-time", "start"]);
+    expect(setupChoices("famous-lines", false)).not.toContain("all-time");
+  });
+
+  it("selects the all-time leaderboard on Enter", () => {
+    expect(
+      applySetupKey({ ...ready, cursor: "all-time" }, "Enter", { shiftKey: false, canContinue: true }),
+    ).toEqual({ ...ready, cursor: "all-time", leaderboard: "all-time" });
   });
 });
 

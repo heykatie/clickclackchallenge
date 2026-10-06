@@ -7,6 +7,7 @@ describe("planEventStart", () => {
       mode: "continue",
       durationSeconds: 30,
       testMode: "words",
+      boardScope: "event",
     });
   });
 
@@ -15,6 +16,7 @@ describe("planEventStart", () => {
       mode: "fresh",
       durationSeconds: 60,
       testMode: "famous-lines",
+      boardScope: "event",
     });
   });
 
@@ -23,11 +25,13 @@ describe("planEventStart", () => {
       mode: "continue",
       durationSeconds: 60,
       testMode: "story",
+      boardScope: "event",
     });
     expect(planEventStart("fresh", false, 30, "story")).toEqual({
       mode: "fresh",
       durationSeconds: 60,
       testMode: "story",
+      boardScope: "event",
     });
   });
 
@@ -36,6 +40,27 @@ describe("planEventStart", () => {
       mode: "fresh",
       durationSeconds: 30,
       testMode: "famous-lines",
+      boardScope: "event",
+    });
+  });
+});
+
+describe("planEventStart with the all-time leaderboard", () => {
+  it("keeps the event and ranks every event's scores", () => {
+    expect(planEventStart("all-time", true, 60, "words")).toEqual({
+      mode: "continue",
+      durationSeconds: 60,
+      testMode: "words",
+      boardScope: "all-time",
+    });
+  });
+
+  it("starts fresh with an event board when there is no event to keep", () => {
+    expect(planEventStart("all-time", false, 30, "words")).toEqual({
+      mode: "fresh",
+      durationSeconds: 30,
+      testMode: "words",
+      boardScope: "event",
     });
   });
 });

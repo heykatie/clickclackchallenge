@@ -225,9 +225,10 @@ Display three option groups and one main action:
 | --- | --- |
 | Test length | 30 seconds; 60 seconds |
 | Game mode | Standard; Famous Lines; Story. Story fixes Test length at 60 seconds. |
-| Leaderboard | Start fresh; Continue previous event |
+| Leaderboard | Start fresh; Continue previous event; All-time leaderboard |
 | Primary action | START EVENT |
 | Update message | “An update is ready.” (bold), “The app restarts on Event Setup. Scores are kept.”; UPDATE NOW. A mint-tinted card with a mint ring under the hint, only while an update waits |
+| All-time board labels | “ALL-TIME TOP 5” on the Leaderboard pill, “ALL-TIME HIGH SCORE” on Ready, and “ALL-TIME HIGH SCORES” on the rolling list, in place of “TOP 5”, “CURRENT HIGH SCORE”, and “HIGH SCORES” |
 | All-time best line | “All-time best: {WPM} WPM · {name}”, or “All-time best: {WPM} WPM” without a name. Small bold deep-lavender text: inside the Ready high-score card under the name, and on the Leaderboard between the board and NEXT PLAYER |
 | Start fresh confirmation | “Start a fresh leaderboard?”; “The current scores stay saved, but they will not show on the leaderboard again.”; CANCEL; START FRESH |
 

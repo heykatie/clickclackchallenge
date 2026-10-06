@@ -267,6 +267,7 @@ The Event Setup screen must allow the operator to:
 - select a game mode: `Standard`, `Famous Lines`, or `Story`
 - start a fresh event
 - continue the current/most recently active event when one exists
+- switch that event to an all-time leaderboard when one exists
 
 When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Famous Lines are selected. Continue is unavailable.
 
@@ -301,6 +302,10 @@ If no previous event exists, the Continue option should be unavailable.
 `30 seconds` and `60 seconds` stay selectable while Continue is selected, for Standard and Famous Lines. `Standard`, `Famous Lines`, and `Story` stay selectable too. Story always uses 60 seconds. While Story is selected, Test length shows 60 seconds and cannot be changed. Switching back to Standard or Famous Lines restores the length that was selected for those modes. That length applies to the next contestant in those modes. It does not archive the event, clear the leaderboard, or rewrite the duration, game mode, passage set, or WPM stored on earlier scores. A test that has already started keeps the duration and game mode it began with. Start fresh remains the way to open an empty leaderboard.
 
 The operator can do this from the giant keyboard. The cursor starts on START EVENT. Arrow keys move it. Enter selects the choice under the cursor. Enter on START EVENT starts the event. The length choices are skipped while Story is selected. Continue is skipped when no event exists. Touch still works. The hint is in `docs/design_system.md`.
+
+### All-time Leaderboard
+
+All-time leaderboard is the third Leaderboard choice, after Start fresh and Continue previous event. Like Continue, it needs an existing event and keeps it: new scores still save to that event, so its own history stays intact. It changes which scores the board ranks: every eligible score ever saved, from every event including archived ones. The choice is stored on the event, so Event Setup shows it again later, and Continue switches the same event back to ranking only its own scores. Neither switch deletes, moves, or rewrites a score. Start fresh always opens a new event that ranks its own scores. What the all-time board changes on each screen is in §16.
 
 ### Returning to Event Setup
 
@@ -564,6 +569,7 @@ An event must retain:
 - the selected test duration for the next contestant
 - the selected game mode for the next contestant
 - the passage-set version for that mode
+- which scores its leaderboard ranks: its own, or every event's (all-time)
 - whether the event is currently active or archived
 - the event creation time
 - the event's most recent update time
@@ -916,6 +922,17 @@ The leaderboard should not expose:
 - database metadata
 
 Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
+
+### All-time board
+
+When the active event's board is all-time (§9), everything that ranks uses every eligible score ever saved, from every event, instead of the event's own:
+
+- the Leaderboard Top 5, labeled “ALL-TIME TOP 5”
+- Results placement: NEW HIGH SCORE, the Top 5 and Top 10 lines, and name entry through 20th
+- the Ready high score, labeled “ALL-TIME HIGH SCORE”
+- the rolling list, labeled “ALL-TIME HIGH SCORES”
+
+The all-time best line (§17) stays hidden, because the board's first place already is the all-time best. Plinko, the accuracy gates, and saving are unchanged; new scores still save to the active event. House scores appear only when no eligible score was ever saved.
 
 ### House scores on an empty board
 
@@ -1966,6 +1983,7 @@ a short Escape press on Results saves the score and returns to Ready, like a log
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
 after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
+All-time leaderboard ranks every event's scores on the Leaderboard, Results, Ready, and the rolling list with ALL-TIME labels, and Continue switches the same event back
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 the first letter on Results goes into the name

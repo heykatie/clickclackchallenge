@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score.
 
 ```ts
 interface EventRecord {
@@ -393,6 +393,9 @@ interface EventRecord {
   durationSeconds: TestDuration;
   testMode: TestMode;
   passageSetId: string;
+
+  /** Which scores the board ranks. Scores always save to this event. */
+  boardScope: "event" | "all-time";
 
   status: "active" | "archived";
 
@@ -1940,6 +1943,7 @@ Verify IndexedDB behavior independently of UI rendering.
 Required cases:
 
 ```text
+a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
 launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
 score can be written and read
@@ -1974,6 +1978,9 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
+App loads every board through listBoardScores(activeEvent): Results placement, the Ready high score, and the Leaderboard. Ready loads its rolling list the same way.
+an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
+EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"
 EventSetup shows "An update is ready." and UPDATE NOW only while an update waits; UPDATE NOW is first in the arrow-key order and installs it from Enter or a tap
 Start fresh over an existing event asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
 EventSetup can select 30-second mode

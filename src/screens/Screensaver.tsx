@@ -4,11 +4,12 @@ import { rollPlan, type RollPlan } from "../features/leaderboard/rollPlan";
 import { ScoreRow } from "./ScoreRow";
 
 type ScreensaverProps = {
+  title: string;
   scores: readonly RankedScore[];
   onWake: () => void;
 };
 
-export function Screensaver({ scores, onWake }: ScreensaverProps) {
+export function Screensaver({ title, scores, onWake }: ScreensaverProps) {
   const screenRef = useRef<HTMLElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
@@ -51,7 +52,7 @@ export function Screensaver({ scores, onWake }: ScreensaverProps) {
         onWake();
       }}
     >
-      <p className="score-kicker">HIGH SCORES</p>
+      <p className="score-kicker">{title}</p>
       <div
         className={plan.rolls ? "score-card screensaver-window is-rolling" : "score-card screensaver-window"}
         ref={windowRef}
