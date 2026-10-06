@@ -179,7 +179,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is a prominent keyboard invitation, not a Start button. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
+“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
@@ -259,7 +259,7 @@ Visual order:
 1. Contest headline. It bounces a little. Reduced motion keeps it still.
 2. Plinko message on a clear mint-accented surface.
 3. Current high-score WPM and name. The WPM stays charcoal. A saved name uses deep lavender, `--tiny-lavender-deep` (`#6B5A9A`), about 5.83:1 on white. A missing name stays a charcoal dash.
-4. Large keyboard invitation, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
+4. Keyboard invitation, just smaller than the Plinko line, in deep mint, `--tiny-mint-deep` (`#24756E`), about 4.80:1 on blush. It pulses. Reduced motion keeps it still.
 
 After 2 minutes of idle, replace this screen with the rolling list of the active event from `docs/prd.md`. Keep a small “HIGH SCORES” label in a light-lavender pill. Show the scores in a white card with a lavender border, styled like the Leaderboard wireframe: a rank circle, the name, and a large WPM with a small muted “WPM” unit. Each score appears once. Do not repeat or invent rows to fill the card. A short list is an invitation: it shows how few scores stand between the next player and the board. When every score fits, the card shrinks to its rows and does not scroll. The rows rise in one after another, then a slow wave lifts each row in turn every 4 seconds and the rank 1 crown wiggles as it passes, so a short list never looks frozen. When the list is taller than the screen, it rolls upward in a slow loop, with the edges fading into the card. Names use deep lavender. Rank 1 keeps the light-lavender row, a mint rank circle, and a small lavender crown. A missing name stays a charcoal dash. A pink blob and a mint arc sit at the edges. Respect reduced motion by showing the list still.
 

@@ -344,9 +344,10 @@ button.is-cursor {
   color: var(--tiny-lavender-deep);
 }
 
+/* Kept just smaller than the Plinko line above it; the pulse and deep mint still make it the invitation. */
 .ready-prompt {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.125rem;
   color: var(--tiny-mint-deep);
   animation: ready-prompt-pulse 1.6s ease-in-out infinite;
 }
