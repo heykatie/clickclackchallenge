@@ -1069,14 +1069,15 @@ Conceptual flow:
 ```text
 receive TestResult
 → determine result messaging
+→ save the score row at once, with name null
 → if ranked through 20th, focus the name field
-→ one exit writes one score row:
-    Save Score, with the name
-    or View Leaderboard, with name null
+→ the exit finishes that same row:
+    Save Score adds the name
+    or View Leaderboard keeps name null
 → LeaderboardScreen
 ```
 
-Both Results exits write one score row. View Leaderboard does that with a null name, as in `docs/prd.md` §15.
+Each finished test writes one score row, as soon as Results has worked out its standing, so a reload or crash during name entry cannot lose the attempt. The standing is worked out first, so the attempt is not ranked against itself. Save Score then adds the name to that row; View Leaderboard leaves it null, as in `docs/prd.md` §15. `createResultSaver` in `src/state/resultSave.ts` owns this: one row per result, a second request for the same result waits for the first, a failed early save is retried on exit, and a failed rename is reported instead of writing a second row.
 
 Name entry remains part of the Results screen.
 
@@ -1967,6 +1968,7 @@ leaderboard can be reconstructed from persisted scores
 data survives page reload
 submitting Save Score twice for the same result inserts one score row
 View Leaderboard with no name inserts one score row with name null
+Results saves the row as it opens with name null, Save Score renames that same row, a double request saves once, a failed early save is retried on exit, and a failed rename never writes a second row (createResultSaver)
 fresh install uses clickclackchallenge-db and does not create typing-test-db
 legacy events, scores, and settings are copied once
 newer destination records win collisions

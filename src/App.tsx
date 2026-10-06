@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
@@ -13,8 +13,9 @@ import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
 import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
-import { appReducer, initialState } from "./state/appState";
+import { appReducer, initialState, type AppState } from "./state/appState";
 import { createEscapeHold, escapeHoldMs } from "./state/escapeHold";
+import { createResultSaver } from "./state/resultSave";
 import { createStartKeyGate } from "./state/startKey";
 
 function landscapeOnly(screen: BoothScreen, screenNode: ReactNode): ReactNode {
@@ -39,8 +40,7 @@ function App() {
   const [canRestore, setCanRestore] = useState(false);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
-  const saveRequest = useRef<Promise<ScoreRecord> | null>(null);
-  const savedResult = useRef<typeof state.latestResult>(null);
+  const resultSaver = useRef(createResultSaver(saveScore, updateScoreName));
   const shortEscapeRef = useRef<(() => void) | null>(null);
   const claimShortEscape = useCallback((handler: (() => void) | null) => {
     shortEscapeRef.current = handler;
@@ -138,21 +138,16 @@ function App() {
     let cancelled = false;
     listBoardScores(event).then(
       (scores) => {
-        if (!cancelled) {
-          setStanding(
-            describeAttempt(scores, {
-              eventId: event.id,
-              rawWpm: result.rawWpm,
-              displayedWpm: result.displayedWpm,
-              accuracy: result.accuracy,
-              correctCharacters: test.correctCharacters,
-              correctAttempts: test.correctAttempts,
-              incorrectAttempts: test.incorrectAttempts,
-              durationSeconds: test.durationSeconds,
-              testMode: test.testMode,
-              passageSetId: passageSetIdFor(test.testMode),
-            }),
-          );
+        if (cancelled) {
+          return;
+        }
+        // The standing is worked out before the early save, so the attempt is not ranked against itself.
+        setStanding(describeAttempt(scores, { ...attemptRow(event, test, result), accuracy: result.accuracy }));
+        if (result.accuracy !== null) {
+          resultSaver.current.saveEarly(result, attemptRow(event, test, result)).catch((error: unknown) => {
+            // Leaving Results tries the save again, so a failed early save does not stop the event.
+            console.error("Could not save the score early", error);
+          });
         }
       },
       () => {
@@ -246,36 +241,13 @@ function App() {
   }
 
   async function recordScore(name: string | null): Promise<ScoreRecord> {
-    if (saveRequest.current && savedResult.current === state.latestResult) {
-      return saveRequest.current;
-    }
     const event = state.activeEvent;
     const test = state.currentTest;
     const result = state.latestResult;
     if (!event || !test || !result || result.accuracy === null) {
       throw new Error("Result is not ready to save");
     }
-    savedResult.current = result;
-    const request = saveScore({
-      eventId: event.id,
-      name,
-      rawWpm: result.rawWpm,
-      displayedWpm: result.displayedWpm,
-      accuracy: result.accuracy,
-      correctCharacters: test.correctCharacters,
-      correctAttempts: test.correctAttempts,
-      incorrectAttempts: test.incorrectAttempts,
-      durationSeconds: test.durationSeconds,
-      testMode: test.testMode,
-      passageSetId: passageSetIdFor(test.testMode),
-    });
-    saveRequest.current = request;
-    try {
-      return await request;
-    } catch (error) {
-      saveRequest.current = null;
-      throw error;
-    }
+    return resultSaver.current.finish(result, attemptRow(event, test, result), name);
   }
 
   async function leaveResults(name: string | null) {
@@ -436,3 +408,24 @@ function App() {
 }
 
 export default App;
+
+/** The score row for a finished test, before it has a name. */
+function attemptRow(
+  event: EventRecord,
+  test: NonNullable<AppState["currentTest"]>,
+  result: NonNullable<AppState["latestResult"]>,
+): NewScore & { accuracy: number } {
+  return {
+    eventId: event.id,
+    name: null,
+    rawWpm: result.rawWpm,
+    displayedWpm: result.displayedWpm,
+    accuracy: result.accuracy ?? 0,
+    correctCharacters: test.correctCharacters,
+    correctAttempts: test.correctAttempts,
+    incorrectAttempts: test.incorrectAttempts,
+    durationSeconds: test.durationSeconds,
+    testMode: test.testMode,
+    passageSetId: passageSetIdFor(test.testMode),
+  };
+}
