@@ -59,6 +59,8 @@ export interface AppSettings {
 export interface BoothState {
   settings: AppSettings;
   activeEvent: EventRecord | null;
+  /** A clear can be undone: Event Setup offers RESTORE. */
+  hasClearedScores: boolean;
 }
 
 export interface NewScore {
@@ -314,17 +316,17 @@ export async function loadBooth(): Promise<BoothState> {
   const database = await openDatabase();
   const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
   if (!settings.activeEventId) {
-    return { settings, activeEvent: null };
+    return { settings, activeEvent: null, hasClearedScores: await hasClearedScores() };
   }
 
   const event = await database.get("events", settings.activeEventId);
   if (!event || event.status !== "active") {
     const cleared = { ...settings, activeEventId: null };
     await database.put("settings", cleared, SETTINGS_KEY);
-    return { settings: cleared, activeEvent: null };
+    return { settings: cleared, activeEvent: null, hasClearedScores: await hasClearedScores() };
   }
 
-  return { settings, activeEvent: normalizeEvent(event) };
+  return { settings, activeEvent: normalizeEvent(event), hasClearedScores: await hasClearedScores() };
 }
 
 export async function startFreshEvent(
@@ -422,6 +424,37 @@ export async function updateActiveEvent(
  */
 export function clearAllScores(durationSeconds: TestDuration, testMode: TestMode): Promise<EventRecord> {
   return startFreshEvent(durationSeconds, testMode, { clearScores: true });
+}
+
+export async function hasClearedScores(): Promise<boolean> {
+  const database = await openDatabase();
+  return (await database.getAll("events")).some((event) => Boolean(event.hiddenAt));
+}
+
+/**
+ * Undoes the most recent clear: shows again the events it hid, which share its hiddenAt time. The current
+ * event stays active. Returns false when nothing is hidden. Earlier clears are restored by later calls.
+ */
+export async function restoreClearedScores(): Promise<boolean> {
+  const database = await openDatabase();
+  const transaction = database.transaction("events", "readwrite");
+  const events = await transaction.store.getAll();
+  const latest = events.reduce<string | null>(
+    (newest, event) => (event.hiddenAt && (newest === null || event.hiddenAt > newest) ? event.hiddenAt : newest),
+    null,
+  );
+  if (latest === null) {
+    await transaction.done;
+    return false;
+  }
+  const now = new Date().toISOString();
+  for (const event of events) {
+    if (event.hiddenAt === latest) {
+      await transaction.store.put({ ...event, hiddenAt: null, updatedAt: now });
+    }
+  }
+  await transaction.done;
+  return true;
 }
 
 async function visibleScores(
