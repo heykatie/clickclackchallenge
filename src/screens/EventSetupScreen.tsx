@@ -324,7 +324,7 @@ export function EventSetupScreen({
                   remember({ ...selectionRef.current, cursor: "famous-lines", testMode: "famous-lines" })
                 }
                 title="Famous Lines"
-                description="Iconic geeky quotes"
+                description="Iconic quotes"
               />
               <SetupOption
                 className={choiceClass("story")}
