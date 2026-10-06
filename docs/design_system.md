@@ -80,7 +80,7 @@ These are the latest documented design values. They are approximate visual match
 | Gold | `--tiny-gold` | `#F2C14E` | Crown fill everywhere |
 | Deep gold | `--tiny-gold-deep` | `#8A5D00` | Crown outline everywhere, Ready high-score name |
 | Charcoal | `--tiny-charcoal` | `#403738` | Essential text, scores, button labels |
-| Muted gray | `--tiny-muted` | `#8C8788` | Secondary text outside the passage, and only where contrast is sufficient |
+| Muted gray | `--tiny-muted` | `#6A6566` | Secondary text outside the passage; at least 4.5:1 on the page, cards, and selected setup tiles (checked by `src/designTokens.test.ts`) |
 | Error red | `--tiny-error` | `#D95D5D` | Incorrect characters and validation feedback |
 
 ### Color hierarchy
@@ -490,7 +490,7 @@ Keep wording consistent across screens. Avoid corporate language, technical jarg
 
   /* Text and feedback */
   --tiny-charcoal: #403738;
-  --tiny-muted: #8C8788;
+  --tiny-muted: #6A6566;
   --tiny-error: #D95D5D;
 
   /* Typography */
