@@ -11,7 +11,7 @@ const result: TestResult = { rawWpm: 42, displayedWpm: 42, accuracy: 96, display
 const ranked: ResultStanding = { isNewHighScore: false, isTop5: true, isTop10: true, showNameEntry: true };
 const unranked: ResultStanding = { isNewHighScore: false, isTop5: false, isTop10: false, showNameEntry: false };
 
-function renderResults(standing: ResultStanding) {
+function renderResults(standing: ResultStanding, shown: TestResult = result) {
   const handlers = {
     onSave: vi.fn(),
     onViewLeaderboard: vi.fn(),
@@ -21,7 +21,7 @@ function renderResults(standing: ResultStanding) {
   let shortEscape: (() => void) | null = null;
   render(
     <ResultsScreen
-      result={result}
+      result={shown}
       standing={standing}
       saving={false}
       {...handlers}
@@ -385,6 +385,22 @@ describe("ResultsScreen celebration", () => {
     expect((letters[3] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("3");
     expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
     expect(heading.querySelector(".typed-letter")).toBeNull();
+  });
+
+  it("floats the letters of Casper, is that you? like a ghost, keeping the heading's name", () => {
+    renderResults(unranked, { rawWpm: 0, displayedWpm: 0, accuracy: 0, displayedAccuracy: 0 });
+    const heading = screen.getByRole("heading", { name: "Casper, is that you?" });
+    const letters = [...heading.querySelectorAll(".ghost-letter")];
+    expect(letters.map((letter) => letter.textContent).join("")).toBe("Casper, is that you?");
+    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("stamps in the letters of NEW HIGH SCORE!, keeping the heading's name", () => {
+    renderResults(newHigh);
+    const heading = screen.getByRole("heading", { name: "NEW HIGH SCORE!" });
+    const letters = [...heading.querySelectorAll(".stamp-letter")];
+    expect(letters.map((letter) => letter.textContent).join("")).toBe("NEW HIGH SCORE!");
+    expect((letters[4] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("4");
   });
 
   it("does not type out NEW HIGH SCORE!", () => {

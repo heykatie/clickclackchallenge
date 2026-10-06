@@ -280,10 +280,8 @@ export function ResultsScreen({
             standing && celebratesNewHighScore(standing, result.displayedWpm) ? "is-new-high-score" : undefined
           }
         >
-          {copy.headline === "Nice typing!" ? (
-            <LetterHeadline text={copy.headline} letterClass="typed-letter" />
-          ) : copy.headline === "Thanks for playing!" ? (
-            <LetterHeadline text={copy.headline} letterClass="wave-letter" />
+          {HEADLINE_LETTER_CLASS[copy.headline] ? (
+            <LetterHeadline text={copy.headline} letterClass={HEADLINE_LETTER_CLASS[copy.headline]} />
           ) : (
             copy.headline
           )}
@@ -334,6 +332,14 @@ export function ResultsScreen({
     </main>
   );
 }
+
+/** How each Results headline's letters move: typed in, waving hello, floating like a ghost, or stamped in. */
+const HEADLINE_LETTER_CLASS: Record<string, string> = {
+  "Nice typing!": "typed-letter",
+  "Thanks for playing!": "wave-letter",
+  "Casper, is that you?": "ghost-letter",
+  "NEW HIGH SCORE!": "stamp-letter",
+};
 
 /** Splits the headline into letters the CSS animates in turn: typed in, or waving hello. */
 function LetterHeadline({ text, letterClass }: { text: string; letterClass: string }) {
