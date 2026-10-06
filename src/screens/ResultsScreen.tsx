@@ -7,7 +7,7 @@ import {
   nameTimerSeconds,
 } from "../features/results/nameTimeout";
 import { isViewLeaderboardKey } from "../features/results/viewLeaderboardKey";
-import { celebratesNewHighScore, resultCopy, type ResultStanding } from "../features/results/resultPlacement";
+import { celebratesNewHighScore, resultCopy, type ResultKind, type ResultStanding } from "../features/results/resultPlacement";
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { Celebration } from "./Celebration";
@@ -281,11 +281,7 @@ export function ResultsScreen({
             standing && celebratesNewHighScore(standing, result.displayedWpm) ? "is-new-high-score" : undefined
           }
         >
-          {HEADLINE_LETTER_CLASS[copy.headline] ? (
-            <LetterHeadline text={copy.headline} letterClass={HEADLINE_LETTER_CLASS[copy.headline]} />
-          ) : (
-            copy.headline
-          )}
+          <LetterHeadline text={copy.headline} letterClass={HEADLINE_LETTER_CLASS[copy.kind]} />
         </h1>
       ) : null}
       <p className="stat-value">
@@ -336,12 +332,12 @@ export function ResultsScreen({
   );
 }
 
-/** How each Results headline's letters move: typed in, waving hello, floating like a ghost, or stamped in. */
-const HEADLINE_LETTER_CLASS: Record<string, string> = {
-  "Nice typing!": "typed-letter",
-  "Thanks for playing!": "wave-letter",
-  "Casper, is that you?": "ghost-letter",
-  "NEW HIGH SCORE!": "stamp-letter",
+/** How each kind of result moves its headline letters: typed in, waving hello, floating like a ghost, or stamped in. */
+const HEADLINE_LETTER_CLASS: Record<ResultKind, string> = {
+  nice: "typed-letter",
+  thanks: "wave-letter",
+  casper: "ghost-letter",
+  "new-high-score": "stamp-letter",
 };
 
 /** Splits the headline into letters the CSS animates in turn: typed in, or waving hello. */

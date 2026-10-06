@@ -48,6 +48,7 @@ describe("resultCopy", () => {
   it("congratulates a Top 5 result and adds the Plinko line above 50 WPM", () => {
     expect(resultCopy(standing({ isTop5: true, showNameEntry: true }), 80, 100)).toEqual({
       headline: "Nice typing!",
+      kind: "nice",
       placedLine: "You made the Top 5!",
       plinkoLine: "You win a Plinko drop!",
     });
@@ -58,6 +59,7 @@ describe("resultCopy", () => {
       resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 80, 100),
     ).toEqual({
       headline: "NEW HIGH SCORE!",
+      kind: "new-high-score",
       placedLine: null,
       plinkoLine: "You win a Plinko drop!",
     });
@@ -65,6 +67,7 @@ describe("resultCopy", () => {
       resultCopy(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 50, 100),
     ).toEqual({
       headline: "NEW HIGH SCORE!",
+      kind: "new-high-score",
       placedLine: null,
       plinkoLine: null,
     });
@@ -81,6 +84,7 @@ describe("resultCopy", () => {
   it("offers a name past 10th without the Top 10 cheer", () => {
     expect(resultCopy(standing({ showNameEntry: true }), 40, 100)).toEqual({
       headline: "Thanks for playing!",
+      kind: "thanks",
       placedLine: null,
       plinkoLine: null,
     });
@@ -89,6 +93,7 @@ describe("resultCopy", () => {
   it("gives a Plinko line without a place when the score is above 50 WPM", () => {
     expect(resultCopy(standing(), 51, 100)).toEqual({
       headline: "Nice typing!",
+      kind: "nice",
       placedLine: null,
       plinkoLine: "You win a Plinko drop!",
     });
@@ -97,6 +102,7 @@ describe("resultCopy", () => {
   it("asks if a 0 WPM result is a ghost and does not place them", () => {
     expect(resultCopy(standing({ isTop5: true, showNameEntry: true, isNewHighScore: true }), 0, 100)).toEqual({
       headline: "Casper, is that you?",
+      kind: "casper",
       placedLine: null,
       plinkoLine: null,
     });
@@ -105,6 +111,7 @@ describe("resultCopy", () => {
   it("thanks a result that misses the board and does not win a Plinko drop", () => {
     expect(resultCopy(standing(), 50, 100)).toEqual({
       headline: "Thanks for playing!",
+      kind: "thanks",
       placedLine: null,
       plinkoLine: null,
     });
@@ -218,6 +225,7 @@ describe("resultCopy with the Plinko accuracy gate", () => {
   it("gives no Plinko drop below 30% accuracy, even far above 50 WPM", () => {
     expect(resultCopy(standing(), 380, 29.99)).toEqual({
       headline: "Thanks for playing!",
+      kind: "thanks",
       placedLine: null,
       plinkoLine: null,
     });
@@ -240,3 +248,11 @@ describe("celebratesNewHighScore", () => {
   });
 });
 
+describe("resultCopy kind", () => {
+  it("names the kind of result, so the screen does not depend on the headline's wording", () => {
+    expect(resultCopy(standing(), 0, 100).kind).toBe("casper");
+    expect(resultCopy(standing({ isNewHighScore: true, isTop5: true, isTop10: true }), 80, 100).kind).toBe("new-high-score");
+    expect(resultCopy(standing({ isTop5: true }), 40, 100).kind).toBe("nice");
+    expect(resultCopy(standing(), 40, 100).kind).toBe("thanks");
+  });
+});

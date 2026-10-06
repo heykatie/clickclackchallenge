@@ -25,28 +25,38 @@ export interface ResultStanding {
   showNameEntry: boolean;
 }
 
+/** What kind of result this is. The screen styles the headline by kind, never by its wording. */
+export type ResultKind = "casper" | "new-high-score" | "nice" | "thanks";
+
 export interface ResultCopy {
   headline: string;
+  kind: ResultKind;
   placedLine: string | null;
   plinkoLine: string | null;
 }
 
+const HEADLINES: Record<ResultKind, string> = {
+  casper: "Casper, is that you?",
+  "new-high-score": "NEW HIGH SCORE!",
+  nice: "Nice typing!",
+  thanks: "Thanks for playing!",
+};
+
 export function resultCopy(standing: ResultStanding, displayedWpm: number, accuracy: number | null): ResultCopy {
   if (displayedWpm === 0) {
     return {
-      headline: "Casper, is that you?",
+      headline: HEADLINES.casper,
+      kind: "casper",
       placedLine: null,
       plinkoLine: null,
     };
   }
   const cheered = standing.isTop5 || standing.isTop10;
   const plinko = winsPlinko(displayedWpm, accuracy);
+  const kind: ResultKind = standing.isNewHighScore ? "new-high-score" : cheered || plinko ? "nice" : "thanks";
   return {
-    headline: standing.isNewHighScore
-      ? "NEW HIGH SCORE!"
-      : cheered || plinko
-        ? "Nice typing!"
-        : "Thanks for playing!",
+    headline: HEADLINES[kind],
+    kind,
     placedLine: standing.isNewHighScore
       ? null
       : standing.isTop5
