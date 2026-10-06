@@ -231,6 +231,7 @@ Display three option groups and one main action:
 | All-time board labels | “ALL-TIME TOP 5” on the Leaderboard pill, “ALL-TIME HIGH SCORE” on Ready, and “ALL-TIME HIGH SCORES” on the rolling list, in place of “TOP 5”, “CURRENT HIGH SCORE”, and “HIGH SCORES” |
 | All-time best line | “All-time best: {WPM} WPM · {name}”, or “All-time best: {WPM} WPM” without a name. Small bold deep-lavender text: inside the Ready high-score card under the name, and on the Leaderboard between the board and NEXT PLAYER |
 | Clear all scores | CLEAR ALL SCORES, a quieter white button with a lavender ring below START EVENT, only when an event exists. Its confirmation reads “Clear all scores?”, “Every score so far is hidden from all leaderboards, the high-score list, and the all-time best, and an empty event starts. The scores stay saved on this device.”; CANCEL; CLEAR SCORES |
+| Restore cleared scores | RESTORE CLEARED SCORES, the same quiet button style, below CLEAR ALL SCORES only after a clear. Its confirmation reads “Restore cleared scores?”, “The scores hidden by the last clear show again on every board and list. The current event and its scores stay.”; CANCEL; RESTORE |
 | Start fresh confirmation | “Start a fresh leaderboard?”; “The current scores stay saved, but they will not show on the leaderboard again.”; CANCEL; START FRESH |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.

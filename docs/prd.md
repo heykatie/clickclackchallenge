@@ -309,7 +309,9 @@ All-time leaderboard is the third Leaderboard choice, after Start fresh and Cont
 
 ### Clear All Scores
 
-When an event exists, Event Setup shows CLEAR ALL SCORES below START EVENT, for removing test scores before a real event. It asks first: “Clear all scores?”, with CANCEL chosen; Escape cancels. CLEAR SCORES hides every event and score saved so far and starts an empty event with the selected length and mode. Hidden scores leave every board, Results placement, the Ready high score, the rolling list, and the all-time best, including on an all-time board. Nothing is deleted: the scores stay on the device and can be restored by un-hiding their events. Scores saved after the clear show normally. In the arrow-key order it comes right after START EVENT.
+When an event exists, Event Setup shows CLEAR ALL SCORES below START EVENT, for removing test scores before a real event. It asks first: “Clear all scores?”, with CANCEL chosen; Escape cancels. CLEAR SCORES hides every event and score saved so far and starts an empty event with the selected length and mode. Hidden scores leave every board, Results placement, the Ready high score, the rolling list, and the all-time best, including on an all-time board. Nothing is deleted: the scores stay on the device. Scores saved after the clear show normally. In the arrow-key order it comes right after START EVENT.
+
+After a clear, Event Setup also shows RESTORE CLEARED SCORES below CLEAR ALL SCORES. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
 
 ### Returning to Event Setup
 
@@ -1991,6 +1993,7 @@ All-time leaderboard ranks every event's scores on the Leaderboard, Results, Rea
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 before a real event, CLEAR ALL SCORES hides every test score from every board and list without deleting them
+RESTORE CLEARED SCORES appears after a clear, asks first, and brings back the last clear's scores
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard

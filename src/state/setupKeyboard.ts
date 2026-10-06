@@ -12,7 +12,8 @@ export type SetupChoice =
   | "continue"
   | "all-time"
   | "start"
-  | "clear";
+  | "clear"
+  | "restore";
 
 export interface SetupSelection {
   cursor: SetupChoice;
@@ -21,7 +22,12 @@ export interface SetupSelection {
   leaderboard: SetupMode;
 }
 
-export function setupChoices(testMode: TestMode, canContinue: boolean, updateReady = false): SetupChoice[] {
+export function setupChoices(
+  testMode: TestMode,
+  canContinue: boolean,
+  updateReady = false,
+  canRestore = false,
+): SetupChoice[] {
   const choices: SetupChoice[] = updateReady ? ["update"] : [];
   if (testMode !== "story") {
     choices.push("30", "60");
@@ -33,6 +39,9 @@ export function setupChoices(testMode: TestMode, canContinue: boolean, updateRea
   choices.push("start");
   if (canContinue) {
     choices.push("clear");
+  }
+  if (canRestore) {
+    choices.push("restore");
   }
   return choices;
 }
@@ -61,14 +70,14 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", and on CLEAR ALL SCORES "clear".
+ * "update", on CLEAR ALL SCORES "clear", and on RESTORE CLEARED SCORES "restore".
  */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
-  options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean },
-): SetupSelection | "start" | "update" | "clear" | null {
-  const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady);
+  options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean },
+): SetupSelection | "start" | "update" | "clear" | "restore" | null {
+  const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
   if (key === "ArrowDown" || key === "ArrowRight" || (key === "Tab" && !options.shiftKey)) {
@@ -86,6 +95,9 @@ export function applySetupKey(
     }
     if (current.cursor === "clear") {
       return "clear";
+    }
+    if (current.cursor === "restore") {
+      return "restore";
     }
     return selectChoice(current, current.cursor);
   }

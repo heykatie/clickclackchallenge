@@ -81,6 +81,19 @@ describe("clear choice", () => {
   });
 });
 
+describe("restore choice", () => {
+  it("comes after CLEAR ALL SCORES, and only while a clear can be undone", () => {
+    expect(setupChoices("famous-lines", true, false, true).slice(-3)).toEqual(["start", "clear", "restore"]);
+    expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");
+  });
+
+  it("asks to restore on Enter", () => {
+    expect(
+      applySetupKey({ ...ready, cursor: "restore" }, "Enter", { shiftKey: false, canContinue: true, canRestore: true }),
+    ).toBe("restore");
+  });
+});
+
 describe("update choice", () => {
   it("puts UPDATE NOW first only while an update is ready", () => {
     expect(setupChoices("famous-lines", true, true)[0]).toBe("update");

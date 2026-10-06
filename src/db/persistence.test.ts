@@ -5,6 +5,8 @@ import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 import {
   clearAllScores,
+  hasClearedScores,
+  restoreClearedScores,
   closeDatabase,
   DB_NAME,
   LEGACY_DB_NAME,
@@ -294,6 +296,45 @@ describe("persistence", () => {
     expect(hidden?.hiddenAt).toEqual(expect.any(String));
     await database.put("events", { ...hidden!, hiddenAt: null });
     expect(await listAllScores()).toEqual([earned]);
+  });
+
+  it("knows when there are cleared scores to restore", async () => {
+    const event = await startFreshEvent(30);
+    await saveScore(scoreInput(event.id, 70));
+    expect(await hasClearedScores()).toBe(false);
+    expect((await loadBooth()).hasClearedScores).toBe(false);
+    await clearAllScores(30, "famous-lines");
+    expect(await hasClearedScores()).toBe(true);
+    expect((await loadBooth()).hasClearedScores).toBe(true);
+  });
+
+  it("restores the scores hidden by the last clear and keeps the current event", async () => {
+    const old = await startFreshEvent(30);
+    const oldScore = await saveScore(scoreInput(old.id, 70));
+    const cleared = await clearAllScores(30, "famous-lines");
+    const newScore = await saveScore(scoreInput(cleared.id, 40));
+
+    expect(await restoreClearedScores()).toBe(true);
+    expect((await listAllScores()).map((score) => score.id).sort()).toEqual([oldScore.id, newScore.id].sort());
+    expect((await loadBooth()).activeEvent?.id).toBe(cleared.id);
+    expect(await listScores(cleared.id)).toEqual([newScore]);
+    expect(await hasClearedScores()).toBe(false);
+  });
+
+  it("restores one clear at a time, the most recent first", async () => {
+    const first = await startFreshEvent(30);
+    const firstScore = await saveScore(scoreInput(first.id, 70));
+    const second = await clearAllScores(30, "famous-lines");
+    // Each clear is stamped with its own time.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    const secondScore = await saveScore(scoreInput(second.id, 60));
+    await clearAllScores(30, "famous-lines");
+
+    await restoreClearedScores();
+    expect(await listAllScores()).toEqual([secondScore]);
+    await restoreClearedScores();
+    expect((await listAllScores()).map((score) => score.id).sort()).toEqual([firstScore.id, secondScore.id].sort());
+    expect(await restoreClearedScores()).toBe(false);
   });
 
   it("reads an event saved before text modes as Famous Lines and keeps its WPM", async () => {
