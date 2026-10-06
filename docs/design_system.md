@@ -388,7 +388,7 @@ Returning to ready screen in 5s
 
 Show actual event data. The one exception is the board with no eligible score, which shows the two house scores from `docs/prd.md` §16 (Clicky and Clacky) styled like ordinary rows.
 
-Preserve five row positions. An unoccupied place keeps its rank in an outlined circle, with a muted dash for the name and the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, podium circle, and crown only when a score holds it.
+Preserve five row positions. An unoccupied place shows only its rank in an outlined circle, with no name or WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, podium circle, and crown only when a score holds it.
 
 Leaderboard motion: the just-saved row waits a moment, then climbs into place from the board's bottom edge, clipped by the card, over 2.2 seconds while the scored rows under it slide down one row, then a white shimmer sweeps across it twice, and the pair repeats every 5 seconds. The rank 1 crown drops in and wobbles once the climb lands, then hops and wobbles again every 3 seconds. A thin mint bar along the bottom of NEXT PLAYER drains over the auto-return time; the text countdown stays. When the contestant is the new rank 1, the Results sparkle burst plays here too. Reduced motion keeps the rows and crown still and hides the bar.
 

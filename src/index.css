@@ -573,12 +573,6 @@ button.is-cursor {
   color: var(--tiny-muted);
 }
 
-.score-row.is-empty .score-name,
-.score-row.is-empty .score-wpm-value {
-  color: var(--tiny-muted);
-  font-weight: 600;
-}
-
 .you-pill {
   flex: none;
   padding: 0.15rem 0.7rem;
