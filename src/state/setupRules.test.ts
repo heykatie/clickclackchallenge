@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planEventStart } from "./setupRules";
+import { applyFreshConfirmKey, needsFreshConfirm, planEventStart } from "./setupRules";
 
 describe("planEventStart", () => {
   it("keeps the event when Continue selects the other duration", () => {
@@ -39,3 +39,40 @@ describe("planEventStart", () => {
     });
   });
 });
+
+describe("needsFreshConfirm", () => {
+  it("asks before Start fresh replaces an existing event's leaderboard", () => {
+    expect(needsFreshConfirm(planEventStart("fresh", true, 30, "words"), true)).toBe(true);
+  });
+
+  it("does not ask when there is no event yet, or when continuing", () => {
+    expect(needsFreshConfirm(planEventStart("fresh", false, 30, "words"), false)).toBe(false);
+    expect(needsFreshConfirm(planEventStart("continue", true, 30, "words"), true)).toBe(false);
+  });
+});
+
+describe("applyFreshConfirmKey", () => {
+  it("moves between CANCEL and START FRESH with the arrows and Tab", () => {
+    expect(applyFreshConfirmKey("cancel", "ArrowRight")).toBe("confirm");
+    expect(applyFreshConfirmKey("confirm", "ArrowLeft")).toBe("cancel");
+    expect(applyFreshConfirmKey("cancel", "ArrowDown")).toBe("confirm");
+    expect(applyFreshConfirmKey("confirm", "ArrowDown")).toBe("cancel");
+    expect(applyFreshConfirmKey("cancel", "Tab")).toBe("confirm");
+    expect(applyFreshConfirmKey("confirm", "Tab")).toBe("cancel");
+  });
+
+  it("picks the button under the cursor on Enter or Space", () => {
+    expect(applyFreshConfirmKey("cancel", "Enter")).toEqual({ choose: "cancel" });
+    expect(applyFreshConfirmKey("confirm", "Enter")).toEqual({ choose: "confirm" });
+    expect(applyFreshConfirmKey("confirm", " ")).toEqual({ choose: "confirm" });
+  });
+
+  it("cancels on Escape wherever the cursor is", () => {
+    expect(applyFreshConfirmKey("confirm", "Escape")).toEqual({ choose: "cancel" });
+  });
+
+  it("ignores other keys", () => {
+    expect(applyFreshConfirmKey("cancel", "a")).toBeNull();
+  });
+});
+

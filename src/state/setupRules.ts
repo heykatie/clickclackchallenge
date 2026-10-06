@@ -20,3 +20,28 @@ export function planEventStart(
   }
   return { mode: "fresh", durationSeconds, testMode: selectedTestMode };
 }
+
+/** Start fresh archives the current leaderboard and there is no screen to bring it back, so it asks first. */
+export function needsFreshConfirm(plan: EventStart, hasActiveEvent: boolean): boolean {
+  return plan.mode === "fresh" && hasActiveEvent;
+}
+
+export type FreshConfirmChoice = "cancel" | "confirm";
+
+/** Keys on the Start fresh confirmation. The cursor starts on CANCEL. */
+export function applyFreshConfirmKey(
+  cursor: FreshConfirmChoice,
+  key: string,
+): FreshConfirmChoice | { choose: FreshConfirmChoice } | null {
+  if (key === "Escape") {
+    return { choose: "cancel" };
+  }
+  if (key === "Enter" || key === "NumpadEnter" || key === " ") {
+    return { choose: cursor };
+  }
+  // Two buttons, so every arrow, Tab, and Shift+Tab lands on the other one.
+  if (key === "Tab" || key.startsWith("Arrow")) {
+    return cursor === "cancel" ? "confirm" : "cancel";
+  }
+  return null;
+}

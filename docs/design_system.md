@@ -227,10 +227,13 @@ Display three option groups and one main action:
 | Game mode | Standard; Famous Lines; Story. Story fixes Test length at 60 seconds. |
 | Leaderboard | Start fresh; Continue previous event |
 | Primary action | START EVENT |
+| Start fresh confirmation | “Start a fresh leaderboard?”; “The current scores stay saved, but they will not show on the leaderboard again.”; CANCEL; START FRESH |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
 Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
+
+The Start fresh confirmation replaces the choices with one white card with a lavender border, the question, the explanation, and two buttons. CANCEL is the quieter white button with a lavender ring and starts chosen. START FRESH is the mint button.
 
 The operator can move through these choices with the arrow keys. Show “Arrow keys move. Enter selects.” The cursor starts on START EVENT and uses a charcoal outline, separate from the filled radio. Keyboard behavior is in `docs/prd.md` §9.
 
