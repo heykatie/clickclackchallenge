@@ -88,8 +88,11 @@ function houseScore(rank: number, name: string, displayedWpm: number): RankedSco
   };
 }
 
-/** Arcade-style targets for an empty board. Display only: never saved, ranked, or counted for a high score or prize. */
-const HOUSE_SCORES: readonly RankedScore[] = [houseScore(1, "Clicky", 60), houseScore(2, "Clacky", 45)];
+/**
+ * Realistic targets for an empty board, one either side of the 51 WPM Plinko line.
+ * Display only: never saved, ranked, or counted for a high score or prize.
+ */
+const HOUSE_SCORES: readonly RankedScore[] = [houseScore(1, "Clicky", 54), houseScore(2, "Clacky", 47)];
 
 /** The Leaderboard's entries: the ranked event scores, or the house scores until the first real one exists. */
 export function boardEntries(ranked: readonly RankedScore[]): readonly RankedScore[] {

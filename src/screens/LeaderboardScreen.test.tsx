@@ -76,7 +76,7 @@ describe("LeaderboardScreen", () => {
 
   it("fills an empty board with two house scores and three empty places", () => {
     renderBoard([]);
-    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky60WPM", "2Clacky45WPM", "3——", "4——", "5——"]);
+    expect(rows().map((row) => row.textContent)).toEqual(["1Clicky54WPM", "2Clacky47WPM", "3——", "4——", "5——"]);
     expect(screen.queryByText("No scores yet")).toBeNull();
     expect(screen.queryByText("YOU")).toBeNull();
   });

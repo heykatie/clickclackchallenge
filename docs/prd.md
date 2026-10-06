@@ -936,7 +936,7 @@ The all-time best line (§17) stays hidden, because the board's first place alre
 
 ### House scores on an empty board
 
-While the active event has no eligible score, the Leaderboard shows two arcade-style house scores in places 1 and 2: Clicky at 60 WPM and Clacky at 45 WPM. The other three places stay empty. House scores are display only. They are never saved, never ranked against real scores, and never count toward the Ready high score, Results placement, Plinko, or the rolling high-score list. The first eligible score replaces both of them, even when it is lower. They never get the YOU marker.
+While the active event has no eligible score, the Leaderboard shows two house scores in places 1 and 2: Clicky at 54 WPM and Clacky at 47 WPM, realistic scores one either side of the Plinko line. The other three places stay empty. House scores are display only. They are never saved, never ranked against real scores, and never count toward the Ready high score, Results placement, Plinko, or the rolling high-score list. The first eligible score replaces both of them, even when it is lower. They never get the YOU marker.
 
 ---
 
@@ -1981,7 +1981,7 @@ holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typ
 a short Escape press on Ready does not start the test and opens the rolling high-score list
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
-an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
+an event with no eligible score shows Clicky 54 WPM and Clacky 47 WPM on the Leaderboard, and the first real score replaces them
 after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
 All-time leaderboard ranks every event's scores on the Leaderboard, Results, Ready, and the rolling list with ALL-TIME labels, and Continue switches the same event back
 the operator can change Event Setup with the arrow keys and Enter
