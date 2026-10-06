@@ -281,7 +281,7 @@ export function EventSetupScreen({
               disabled={storedDuration === null}
               onChange={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
             />
-            Continue previous event
+            Continue previous
           </label>
           <label className={choiceClass("all-time")}>
             <input

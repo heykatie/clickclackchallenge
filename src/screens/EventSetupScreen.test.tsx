@@ -145,7 +145,7 @@ describe("EventSetupScreen", () => {
   it("shows an all-time event as All-time leaderboard, and Continue switches it back", () => {
     const { onContinue } = renderSetup({ ...existing, board: "all-time" });
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
-    fireEvent.click(screen.getByLabelText("Continue previous event"));
+    fireEvent.click(screen.getByLabelText("Continue previous"));
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event");
   });
