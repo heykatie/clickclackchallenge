@@ -235,11 +235,11 @@ describe("topFiveSlots", () => {
 });
 
 describe("boardEntries", () => {
-  it("shows two arcade-style house scores on an empty board", () => {
+  it("shows two realistic house scores, one either side of the Plinko line, on an empty board", () => {
     const entries = boardEntries([]);
     expect(entries.map((entry) => [entry.rank, entry.score.name, entry.score.displayedWpm])).toEqual([
-      [1, "Clicky", 60],
-      [2, "Clacky", 45],
+      [1, "Clicky", 54],
+      [2, "Clacky", 47],
     ]);
   });
 
