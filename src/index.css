@@ -383,6 +383,10 @@ button.is-cursor {
   font-weight: 700;
 }
 
+.high-score-card .high-score-empty {
+  margin-top: 0.9rem;
+}
+
 .high-score-name {
   overflow: hidden;
   font-family: var(--font-name);
@@ -459,7 +463,7 @@ button.is-cursor {
 /* Just smaller than PRESS ANY KEY TO START above it. */
 .ready-helper {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 /* Sparse edge motifs for score screens: a blush-pink blob low left and a mint arc high right. */
