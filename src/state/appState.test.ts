@@ -8,6 +8,7 @@ const event60: EventRecord = {
   testMode: "famous-lines",
   passageSetId: "common-sentences-v1",
   boardScope: "event",
+  hiddenAt: null,
   status: "active",
   createdAt: "2026-09-22T00:00:00.000Z",
   updatedAt: "2026-09-22T00:00:00.000Z",

@@ -24,6 +24,11 @@ export interface EventRecord {
   testMode: TestMode;
   passageSetId: string;
   boardScope: BoardScope;
+  /**
+   * Set by Clear all scores. A hidden event's scores are kept on the device but left out of every
+   * board, the rolling list, and the all-time best. Setting it back to null shows them again.
+   */
+  hiddenAt: string | null;
   status: "active" | "archived";
   createdAt: string;
   updatedAt: string;
@@ -281,6 +286,7 @@ function normalizeEvent(event: EventRecord): EventRecord {
     ...event,
     // Events saved before the board choice existed rank their own scores.
     boardScope: event.boardScope === "all-time" ? "all-time" : "event",
+    hiddenAt: event.hiddenAt ?? null,
     testMode,
     passageSetId: event.passageSetId || passageSetIdFor(testMode),
   };
@@ -324,6 +330,7 @@ export async function loadBooth(): Promise<BoothState> {
 export async function startFreshEvent(
   durationSeconds: TestDuration,
   testMode: TestMode = "famous-lines",
+  options: { clearScores?: boolean } = {},
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -335,6 +342,13 @@ export async function startFreshEvent(
   for (const event of activeEvents) {
     await events.put({ ...event, status: "archived", updatedAt: now });
   }
+  if (options.clearScores) {
+    for (const event of await events.getAll()) {
+      if (!event.hiddenAt) {
+        await events.put({ ...event, status: "archived", hiddenAt: now, updatedAt: now });
+      }
+    }
+  }
 
   const event: EventRecord = {
     id: crypto.randomUUID(),
@@ -342,6 +356,7 @@ export async function startFreshEvent(
     testMode,
     passageSetId: passageSetIdFor(testMode),
     boardScope: "event",
+    hiddenAt: null,
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -401,16 +416,30 @@ export async function updateActiveEvent(
   return updated;
 }
 
+/**
+ * Hides every event, and so every score, from view and starts an empty event with the given choices.
+ * Nothing is deleted: setting an event's hiddenAt back to null brings its scores back.
+ */
+export function clearAllScores(durationSeconds: TestDuration, testMode: TestMode): Promise<EventRecord> {
+  return startFreshEvent(durationSeconds, testMode, { clearScores: true });
+}
+
+async function visibleScores(
+  database: IDBPDatabase<ClickClackChallengeDB>,
+  scores: readonly ScoreRecord[],
+): Promise<ScoreRecord[]> {
+  const hidden = new Set((await database.getAll("events")).filter((event) => event.hiddenAt).map((event) => event.id));
+  return scores.filter((score) => !hidden.has(score.eventId)).map(normalizeScore);
+}
+
 export async function listScores(eventId: string): Promise<ScoreRecord[]> {
   const database = await openDatabase();
-  const scores = await database.getAllFromIndex("scores", "eventId", eventId);
-  return scores.map(normalizeScore);
+  return visibleScores(database, await database.getAllFromIndex("scores", "eventId", eventId));
 }
 
 export async function listAllScores(): Promise<ScoreRecord[]> {
   const database = await openDatabase();
-  const scores = await database.getAll("scores");
-  return scores.map(normalizeScore);
+  return visibleScores(database, await database.getAll("scores"));
 }
 
 /** The scores the event's board ranks: its own, or every event's when the board is all-time. */

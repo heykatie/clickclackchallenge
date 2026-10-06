@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 import {
+  clearAllScores,
   closeDatabase,
   DB_NAME,
   LEGACY_DB_NAME,
@@ -242,6 +243,57 @@ describe("persistence", () => {
     await openVersionOneBooth();
     const booth = await loadBooth();
     expect(booth.activeEvent?.boardScope).toBe("event");
+  });
+
+  it("clears every earlier score from view and starts an empty event, without deleting anything", async () => {
+    const first = await startFreshEvent(30);
+    await saveScore(scoreInput(first.id, 70));
+    const second = await startFreshEvent(30);
+    await saveScore(scoreInput(second.id, 90));
+
+    const cleared = await clearAllScores(60, "words");
+    expect(cleared.id).not.toBe(second.id);
+    expect(cleared).toMatchObject({ durationSeconds: 60, testMode: "words", status: "active", boardScope: "event" });
+    expect((await loadBooth()).activeEvent?.id).toBe(cleared.id);
+
+    expect(await listAllScores()).toEqual([]);
+    expect(await listScores(first.id)).toEqual([]);
+    expect(await listScores(cleared.id)).toEqual([]);
+    const database = await openDatabase();
+    expect(await database.count("scores")).toBe(2);
+    expect(await database.count("events")).toBe(3);
+  });
+
+  it("shows scores saved after the clear", async () => {
+    const old = await startFreshEvent(30);
+    await saveScore(scoreInput(old.id, 70));
+    const cleared = await clearAllScores(30, "famous-lines");
+    const fresh = await saveScore(scoreInput(cleared.id, 40));
+
+    expect(await listAllScores()).toEqual([fresh]);
+    expect(await listScores(cleared.id)).toEqual([fresh]);
+  });
+
+  it("keeps cleared scores hidden after a later Start fresh or board change", async () => {
+    const old = await startFreshEvent(30);
+    await saveScore(scoreInput(old.id, 70));
+    const cleared = await clearAllScores(30, "famous-lines");
+    await updateActiveEvent(cleared.id, { durationSeconds: 60, testMode: "words", boardScope: "all-time" });
+    await startFreshEvent(30);
+
+    expect(await listAllScores()).toEqual([]);
+  });
+
+  it("brings cleared scores back when their event is unhidden", async () => {
+    const old = await startFreshEvent(30);
+    const earned = await saveScore(scoreInput(old.id, 70));
+    await clearAllScores(30, "famous-lines");
+
+    const database = await openDatabase();
+    const hidden = await database.get("events", old.id);
+    expect(hidden?.hiddenAt).toEqual(expect.any(String));
+    await database.put("events", { ...hidden!, hiddenAt: null });
+    expect(await listAllScores()).toEqual([earned]);
   });
 
   it("reads an event saved before text modes as Famous Lines and keeps its WPM", async () => {

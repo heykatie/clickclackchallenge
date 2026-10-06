@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearAllScores` sets it on every existing event and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores.
 
 ```ts
 interface EventRecord {
@@ -396,6 +396,9 @@ interface EventRecord {
 
   /** Which scores the board ranks. Scores always save to this event. */
   boardScope: "event" | "all-time";
+
+  /** Set by Clear all scores. Hides the event's scores everywhere without deleting them. */
+  hiddenAt: string | null;
 
   status: "active" | "archived";
 
@@ -1944,6 +1947,7 @@ Verify IndexedDB behavior independently of UI rendering.
 Required cases:
 
 ```text
+Clear all scores hides every earlier event and score, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearAllScores)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
 launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
