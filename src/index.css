@@ -1251,7 +1251,7 @@ label.setup-option-big {
   z-index: 1;
   animation:
     board-row-climb 2.2s cubic-bezier(0.45, 0, 0.2, 1.1) 350ms both,
-    board-row-glow 1.1s ease-in-out 2.6s 2;
+    board-row-glow 5s ease-in-out 2.6s infinite;
   background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
   background-size: 250% 100%;
   background-repeat: no-repeat;
@@ -1280,12 +1280,19 @@ label.setup-option-big {
   }
 }
 
-/* A mint-white shimmer crosses the YOU row twice after it lands. */
+/* After it lands, a white shimmer crosses the YOU row twice, then rests; the pair repeats every 5 seconds. */
 @keyframes board-row-glow {
-  from {
+  0% {
     background-position: 150% 0;
   }
-  to {
+  22% {
+    background-position: -50% 0;
+  }
+  22.01% {
+    background-position: 150% 0;
+  }
+  44%,
+  100% {
     background-position: -50% 0;
   }
 }
