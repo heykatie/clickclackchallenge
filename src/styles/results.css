@@ -288,3 +288,16 @@
     transform: rotate(4deg);
   }
 }
+
+/* A very short window (a small laptop) tightens Results so SAVE SCORE and VIEW LEADERBOARD stay on screen. */
+@media (max-height: 640px) {
+  .results-screen {
+    padding-top: 3.75rem;
+    padding-bottom: 1rem;
+    gap: 0.5rem;
+  }
+
+  .results-screen .stat-value {
+    font-size: 3.5rem;
+  }
+}

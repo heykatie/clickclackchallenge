@@ -173,7 +173,7 @@ During Typing, remove or greatly reduce decoration. On Results, use small celebr
 
 Use Fredoka 600–700, a strong mint fill, charcoal text, and rounded corners.
 
-Every pressable button has a chunky deep-mint edge under it, `0 0.3rem 0 var(--tiny-mint-deep)`, and sinks onto that edge while pressed. Pills such as the Plinko and place lines are flat, with no edge, because they are labels, not controls. The logo badge and the small text links keep no edge.
+Every pressable button has a chunky deep-mint edge under it, `0 0.3rem 0 var(--tiny-mint-deep)`, and sinks onto that edge while pressed. Everything pressable answers a tap, subtly: a button also dims a touch as it sinks; a small text link darkens to charcoal and dips a pixel; an Event Setup tile squeezes to 98%; the logo badge squeezes to 94%. Disabled controls do not react. Safari's gray tap flash is turned off, and the page listens for touches so iPad Safari shows these pressed styles on a tap. Pills such as the Plinko and place lines are flat, with no edge, because they are labels, not controls. The logo badge and the small text links keep no edge.
 
 Confirmed action labels:
 
@@ -391,6 +391,7 @@ Returning to ready screen in 5s
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
 - Place a large mint NEXT PLAYER button below the panel, with a decorative arrow and the automatic-return message beneath it.
 - Keep peripheral motifs sparse and separate from the rows and button: a pink blob low left and a mint arc high right, the same as the rolling list. In portrait the Leaderboard stage ends mid-screen, so it drops them there.
+- On short screens the Leaderboard tightens so NEXT PLAYER stays on screen: below 760px of height (an iPad mini, an iPad in Safari with its toolbar) the rows, gaps, title, and button shrink a little; below 640px (a small laptop window) the kicker, rank circles, and WPM shrink too. Results does the same below 640px, so SAVE SCORE and VIEW LEADERBOARD stay on screen. The 820px-tall booth iPad keeps the full layout.
 - The Leaderboard and the rolling list share one row style: a rank circle, a crown slot, the name, and a large WPM with a small muted unit. Quiet rows are separated by straight hairlines; only highlighted rows are rounded.
 
 ### Empty and partial boards

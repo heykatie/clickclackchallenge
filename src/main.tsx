@@ -13,6 +13,9 @@ import "@fontsource/chewy/400.css";
 import "./index.css";
 import App from "./App.tsx";
 
+// iPad Safari only shows :active pressed styles on a tap when the page listens for touches.
+document.addEventListener("touchstart", () => {}, { passive: true });
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

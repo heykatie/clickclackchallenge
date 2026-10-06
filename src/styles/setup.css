@@ -191,6 +191,12 @@ label.setup-option {
   border-radius: 1.25rem;
   background: color-mix(in srgb, var(--tiny-blush) 70%, var(--tiny-white));
   cursor: pointer;
+  transition: transform 80ms ease-out;
+}
+
+/* A pressed tile gives a tiny squeeze. Disabled tiles do not react. */
+label.setup-option:not(.is-disabled):active {
+  transform: scale(0.98);
 }
 
 /* The radio stays real for keyboard and screen readers; the tile shows its state. */
@@ -333,6 +339,14 @@ label.setup-option-big {
   text-decoration: underline;
   text-underline-offset: 0.2em;
   box-shadow: none;
+}
+
+/* A pressed link darkens and dips a pixel: subtle, but enough to show the tap landed. */
+button.setup-tool:active:not(:disabled) {
+  color: var(--tiny-charcoal);
+  transform: translateY(1px);
+  box-shadow: none;
+  filter: none;
 }
 
 .setup-start-group {
