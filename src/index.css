@@ -985,11 +985,23 @@ button:disabled {
   }
 }
 
-/* Clear all scores is an operator tool, so it reads quieter than START EVENT and sits below it. */
-.setup-clear {
-  display: block;
-  margin-top: 1rem;
+/* Clear and restore are operator tools: small, quiet, and in the top-right corner, away from START EVENT. */
+.setup-tools {
+  position: absolute;
+  z-index: 2;
+  top: calc(1.25rem + env(safe-area-inset-top));
+  right: calc(1.25rem + env(safe-area-inset-right));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  max-width: calc(100% - 7rem);
+}
+
+.setup-tool {
+  min-height: 40px;
+  padding: 0.35rem 0.9rem;
   background: var(--tiny-white);
   box-shadow: inset 0 0 0 2px var(--tiny-lavender);
-  font-size: 0.95rem;
+  font-size: 0.8rem;
 }

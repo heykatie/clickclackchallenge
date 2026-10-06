@@ -223,6 +223,31 @@ export function EventSetupScreen({
   return (
     <main className="screen" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
+      {/* Operator tools sit small in the corner, away from START EVENT, so they are not pressed by mistake. */}
+      {confirmCursor === null && (storedDuration !== null || canRestore) ? (
+        <div className="setup-tools">
+          {storedDuration !== null ? (
+            <button
+              type="button"
+              className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
+              onClick={askToClear}
+              disabled={saving}
+            >
+              CLEAR ALL SCORES
+            </button>
+          ) : null}
+          {canRestore ? (
+            <button
+              type="button"
+              className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+              onClick={askToRestore}
+              disabled={saving}
+            >
+              RESTORE CLEARED SCORES
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <h1>Event setup</h1>
       <p className="setup-hint">Arrow keys move. Enter selects.</p>
       {updateReady && confirmCursor === null ? (
@@ -374,26 +399,6 @@ export function EventSetupScreen({
         <button type="button" className={cursor === "start" ? "is-cursor" : undefined} onClick={() => startEvent()} disabled={saving}>
           START EVENT
         </button>
-        {storedDuration !== null ? (
-          <button
-            type="button"
-            className={cursor === "clear" ? "setup-clear is-cursor" : "setup-clear"}
-            onClick={askToClear}
-            disabled={saving}
-          >
-            CLEAR ALL SCORES
-          </button>
-        ) : null}
-        {canRestore ? (
-          <button
-            type="button"
-            className={cursor === "restore" ? "setup-clear is-cursor" : "setup-clear"}
-            onClick={askToRestore}
-            disabled={saving}
-          >
-            RESTORE CLEARED SCORES
-          </button>
-        ) : null}
         </>
       )}
     </main>
