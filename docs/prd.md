@@ -285,6 +285,8 @@ Starting fresh should:
 
 Starting fresh must **not** permanently delete prior scores or events.
 
+When an event already exists, START EVENT with Start fresh asks first: “Start a fresh leaderboard?” with CANCEL and START FRESH. There is no screen that brings an archived leaderboard back, so the cursor starts on CANCEL. Arrow keys and Tab switch between the two, Enter or Space picks one, and Escape cancels. Touch works too. CANCEL returns to the setup choices without changing anything. Starting fresh when no event exists, and Continue, do not ask.
+
 ### Continue Previous Event
 
 Continuing should:
@@ -1654,7 +1656,7 @@ Once the timer has started, those 5 seconds no longer apply.
 
 **When**
 
-- the operator chooses **Start Fresh**
+- the operator chooses **Start Fresh** and confirms with START FRESH
 
 **Then**
 
@@ -1954,6 +1956,7 @@ a short Escape press on Results saves the score and returns to Ready, like a log
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
 the operator can change Event Setup with the arrow keys and Enter
+Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard
