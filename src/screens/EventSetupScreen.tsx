@@ -394,7 +394,7 @@ export function EventSetupScreen({
                 disabled={storedDuration === null}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "continue", leaderboard: "continue" })}
                 title="Continue previous"
-                description="Keep this board"
+                description="Keep last board"
               />
               <SetupOption
                 className={choiceClass("all-time")}
