@@ -1875,6 +1875,7 @@ an empty name and a name past 20 characters are rejected
 a profane name is rejected, including spaces and number substitutions
 an ordinary name that only shares those letters, such as Cass or hello, is kept
 a finished story scores the time from the first character to the last
+the Results WPM count-up starts at 0, only rises, eases out, and settles exactly on the score within 0.8 seconds; 0 WPM stays 0 (countUpValue)
 an unfinished story scores the full selected duration
 a leave key is ignored for the first second after Results or the Leaderboard appears
 ```
@@ -2014,6 +2015,8 @@ a result ranked through 20th shows the name field, focused
 Enter on Results saves the score with the typed name
 a result outside 20th does not show the name field
 Enter or Space on Results without name entry opens the leaderboard
+a NEW HIGH SCORE shows the doodle burst, hidden from screen readers, while the name field stays focused and Enter still saves; a Top 5 place or calm result has no burst (celebratesNewHighScore)
+Results gives screen readers the final WPM at once, rolls the visible number up to it, and shows it at once with reduced motion
 a short Escape press on Results saves with the allowed name or null and opens Ready, like a logo tap
 non-Top-10 View Leaderboard opens the Top 5
 name validation rejects empty values

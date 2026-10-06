@@ -29,7 +29,16 @@ if (typeof window.ResizeObserver === "undefined") {
 /** Fake every clock the screens read, including performance.now for the leave-key grace. */
 export function fakeBoothClock() {
   vi.useFakeTimers({
-    toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "performance", "Date"],
+    toFake: [
+      "setTimeout",
+      "clearTimeout",
+      "setInterval",
+      "clearInterval",
+      "requestAnimationFrame",
+      "cancelAnimationFrame",
+      "performance",
+      "Date",
+    ],
   });
 }
 

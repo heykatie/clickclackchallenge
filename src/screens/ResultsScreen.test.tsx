@@ -294,3 +294,63 @@ describe("ResultsScreen arrow keys", () => {
   });
 });
 
+describe("ResultsScreen WPM count-up", () => {
+  beforeEach(fakeBoothClock);
+
+  const shownWpm = () => document.querySelector(".result-wpm-count")?.textContent;
+
+  it("gives screen readers the final WPM at once and hides the rolling number", () => {
+    renderResults(unranked);
+    expect(screen.getByText("42 WPM")).toBeTruthy();
+    expect(document.querySelector(".result-wpm-count")?.closest("[aria-hidden='true']")).toBeTruthy();
+  });
+
+  it("rolls the WPM up from 0 and settles on the final score", () => {
+    renderResults(unranked);
+    expect(shownWpm()).toBe("0");
+    act(() => vi.advanceTimersByTime(400));
+    const midway = Number(shownWpm());
+    expect(midway).toBeGreaterThan(0);
+    expect(midway).toBeLessThan(42);
+    act(() => vi.advanceTimersByTime(500));
+    expect(shownWpm()).toBe("42");
+  });
+
+  it("shows the final WPM at once with reduced motion", () => {
+    window.matchMedia = vi.fn((query: string) => ({ matches: query.includes("reduce") }) as MediaQueryList);
+    try {
+      renderResults(unranked);
+      expect(shownWpm()).toBe("42");
+    } finally {
+      delete (window as { matchMedia?: unknown }).matchMedia;
+    }
+  });
+});
+
+describe("ResultsScreen celebration", () => {
+  beforeEach(fakeBoothClock);
+
+  const newHigh: ResultStanding = { isNewHighScore: true, isTop5: true, isTop10: true, showNameEntry: true };
+
+  it("bursts doodles around a new high score, hidden from screen readers", () => {
+    renderResults(newHigh);
+    const burst = document.querySelector(".result-celebration");
+    expect(burst?.getAttribute("aria-hidden")).toBe("true");
+    expect(burst?.querySelectorAll(".celebration-piece").length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("keeps the name field focused and usable during the burst", () => {
+    const { onSave } = renderResults(newHigh);
+    expect(document.activeElement).toBe(nameField());
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith("Zed");
+  });
+
+  it("does not burst for a Top 5 place or a calm result", () => {
+    renderResults(ranked);
+    expect(document.querySelector(".result-celebration")).toBeNull();
+  });
+});
+
