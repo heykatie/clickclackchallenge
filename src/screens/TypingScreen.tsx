@@ -158,10 +158,10 @@ export function TypingScreen({
           </span>
         </p>
         <p>
-          <span className="stat-label">ACCURACY</span>
           <span className="stat-value">
             {accuracy === null ? "—%" : `${displayedAccuracy(accuracy)}%`}
           </span>
+          <span className="stat-label">ACCURACY</span>
         </p>
       </div>
     </main>
