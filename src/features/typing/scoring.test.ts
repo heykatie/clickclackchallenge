@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  liveWpm,
+  LIVE_WPM_WARMUP_SECONDS,
   calculateAccuracy,
   calculateWpm,
   displayedAccuracy,
@@ -62,5 +64,18 @@ describe("winsPlinko", () => {
     expect(winsPlinko(50, 100)).toBe(false);
     expect(winsPlinko(51, 29.99)).toBe(false);
     expect(winsPlinko(51, null)).toBe(false);
+  });
+});
+
+describe("liveWpm", () => {
+  it("shows 0 for the first 2 seconds, while a few keys would read as wild speeds", () => {
+    expect(LIVE_WPM_WARMUP_SECONDS).toBe(2);
+    expect(liveWpm(3, 0.2)).toBe(0);
+    expect(liveWpm(10, 1.99)).toBe(0);
+  });
+
+  it("shows the rounded running WPM once the warm-up is over", () => {
+    expect(liveWpm(10, 2)).toBe(60);
+    expect(liveWpm(25, 6)).toBe(50);
   });
 });
