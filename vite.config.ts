@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // A waiting worker activates after the installed app is closed. Do not skipWaiting or reload.
+      // A waiting worker activates after the installed app is closed, or when the operator picks UPDATE NOW
+      // on Event Setup. Never skipWaiting or reload on its own: that would interrupt a contestant.
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/apple-touch-icon.png"],
       manifest: {

@@ -13,6 +13,10 @@ type EventSetupScreenProps = {
   storedDuration: TestDuration | null;
   storedTestMode: TestMode | null;
   saving: boolean;
+  /** A new version is installed and waiting. */
+  updateReady: boolean;
+  /** Activates the waiting version and reloads the app. */
+  onApplyUpdate: () => void;
   onStartFresh: (durationSeconds: TestDuration, testMode: TestMode) => void;
   onContinue: (durationSeconds: TestDuration, testMode: TestMode) => void;
 };
@@ -21,6 +25,8 @@ export function EventSetupScreen({
   storedDuration,
   storedTestMode,
   saving,
+  updateReady,
+  onApplyUpdate,
   onStartFresh,
   onContinue,
 }: EventSetupScreenProps) {
@@ -38,6 +44,8 @@ export function EventSetupScreen({
     leaderboard: mode,
   });
   const savingRef = useRef(saving);
+  const updateReadyRef = useRef(updateReady);
+  const onApplyUpdateRef = useRef(onApplyUpdate);
   /** Null while the setup choices show. Otherwise the Start fresh confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
@@ -82,6 +90,8 @@ export function EventSetupScreen({
     startRef.current = startEvent;
     rememberRef.current = remember;
     savingRef.current = saving;
+    updateReadyRef.current = updateReady;
+    onApplyUpdateRef.current = onApplyUpdate;
     confirmCursorRef.current = confirmCursor;
     selectionRef.current = {
       cursor,
@@ -118,11 +128,16 @@ export function EventSetupScreen({
       const result = applySetupKey(selectionRef.current, event.key, {
         shiftKey: event.shiftKey,
         canContinue: storedDuration !== null,
+        updateReady: updateReadyRef.current,
       });
       if (result === null) {
         return;
       }
       event.preventDefault();
+      if (result === "update") {
+        onApplyUpdateRef.current();
+        return;
+      }
       if (result === "start") {
         if (!savingRef.current) {
           startRef.current();
@@ -151,6 +166,16 @@ export function EventSetupScreen({
       <span className="logo-badge" aria-hidden="true" />
       <h1>Event setup</h1>
       <p className="setup-hint">Arrow keys move. Enter selects.</p>
+      {updateReady && confirmCursor === null ? (
+        <section className="setup-update" aria-labelledby="setup-update-title">
+          <p id="setup-update-title">
+            <strong>An update is ready.</strong> The app restarts on Event Setup. Scores are kept.
+          </p>
+          <button type="button" className={cursor === "update" ? "is-cursor" : undefined} onClick={onApplyUpdate}>
+            UPDATE NOW
+          </button>
+        </section>
+      ) : null}
       {confirmCursor !== null ? (
         <section className="setup-confirm" role="alertdialog" aria-labelledby="setup-confirm-title">
           <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>

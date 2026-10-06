@@ -2,6 +2,7 @@ import type { TestDuration, TestMode } from "../db/persistence";
 import type { SetupMode } from "./setupRules";
 
 export type SetupChoice =
+  | "update"
   | "30"
   | "60"
   | "words"
@@ -18,8 +19,8 @@ export interface SetupSelection {
   leaderboard: SetupMode;
 }
 
-export function setupChoices(testMode: TestMode, canContinue: boolean): SetupChoice[] {
-  const choices: SetupChoice[] = [];
+export function setupChoices(testMode: TestMode, canContinue: boolean, updateReady = false): SetupChoice[] {
+  const choices: SetupChoice[] = updateReady ? ["update"] : [];
   if (testMode !== "story") {
     choices.push("30", "60");
   }
@@ -53,13 +54,13 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
   return { ...selection, cursor: "start" };
 }
 
-/** Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start". */
+/** Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", and on UPDATE NOW "update". */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
-  options: { shiftKey: boolean; canContinue: boolean },
-): SetupSelection | "start" | null {
-  const choices = setupChoices(selection.testMode, options.canContinue);
+  options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean },
+): SetupSelection | "start" | "update" | null {
+  const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
   if (key === "ArrowDown" || key === "ArrowRight" || (key === "Tab" && !options.shiftKey)) {
@@ -71,6 +72,9 @@ export function applySetupKey(
   if (key === "Enter" || key === "NumpadEnter" || key === " ") {
     if (current.cursor === "start") {
       return "start";
+    }
+    if (current.cursor === "update") {
+      return "update";
     }
     return selectChoice(current, current.cursor);
   }

@@ -5,19 +5,22 @@ import { describe, expect, it, vi } from "vitest";
 import type { TestDuration, TestMode } from "../db/persistence";
 import { EventSetupScreen } from "./EventSetupScreen";
 
-function renderSetup(stored: { duration: TestDuration; mode: TestMode } | null) {
+function renderSetup(stored: { duration: TestDuration; mode: TestMode } | null, updateReady = false) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
+  const onApplyUpdate = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
       storedTestMode={stored?.mode ?? null}
       saving={false}
+      updateReady={updateReady}
+      onApplyUpdate={onApplyUpdate}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue };
+  return { onStartFresh, onContinue, onApplyUpdate };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -93,4 +96,27 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
     expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines");
   });
+
+  it("shows no update message when there is no update", () => {
+    renderSetup(existing);
+    expect(screen.queryByText("An update is ready.")).toBeNull();
+    expect(screen.queryByRole("button", { name: "UPDATE NOW" })).toBeNull();
+  });
+
+  it("shows the update message and installs it from UPDATE NOW", () => {
+    const { onApplyUpdate } = renderSetup(existing, true);
+    expect(screen.getByText("An update is ready.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "UPDATE NOW" }));
+    expect(onApplyUpdate).toHaveBeenCalledOnce();
+  });
+
+  it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
+    const { onApplyUpdate, onContinue } = renderSetup(existing, true);
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "UPDATE NOW" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(onApplyUpdate).toHaveBeenCalledOnce();
+    expect(onContinue).not.toHaveBeenCalled();
+  });
 });
+

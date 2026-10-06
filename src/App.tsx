@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
 import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
@@ -24,6 +25,11 @@ function landscapeOnly(screen: BoothScreen, screenNode: ReactNode): ReactNode {
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
+  // A new version waits until the operator installs it from Event Setup or the app is closed.
+  const {
+    needRefresh: [updateReady],
+    updateServiceWorker,
+  } = useRegisterSW();
   const [saving, setSaving] = useState(false);
   const [standing, setStanding] = useState<ResultStanding | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
@@ -281,6 +287,10 @@ function App() {
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
           saving={saving}
+          updateReady={updateReady}
+          onApplyUpdate={() => {
+            void updateServiceWorker(true);
+          }}
           onStartFresh={(durationSeconds, testMode) => {
             void startFresh(durationSeconds, testMode);
           }}

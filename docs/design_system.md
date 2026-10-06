@@ -227,6 +227,7 @@ Display three option groups and one main action:
 | Game mode | Standard; Famous Lines; Story. Story fixes Test length at 60 seconds. |
 | Leaderboard | Start fresh; Continue previous event |
 | Primary action | START EVENT |
+| Update message | “An update is ready.” (bold), “The app restarts on Event Setup. Scores are kept.”; UPDATE NOW. A mint-tinted card with a mint ring under the hint, only while an update waits |
 | Start fresh confirmation | “Start a fresh leaderboard?”; “The current scores stay saved, but they will not show on the leaderboard again.”; CANCEL; START FRESH |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
