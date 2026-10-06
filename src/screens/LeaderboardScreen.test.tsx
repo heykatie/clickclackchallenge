@@ -247,7 +247,7 @@ describe("LeaderboardScreen", () => {
 
   it("drains a countdown bar on NEXT PLAYER over the 25 seconds", () => {
     renderBoard([score("a", "Alex", 60, 0)]);
-    const bar = screen.getByRole("button", { name: /NEXT PLAYER/ }).querySelector(".next-player-countdown");
+    const bar = screen.getByRole("button", { name: /NEXT PLAYER/ }).querySelector(".button-countdown");
     expect(bar?.getAttribute("aria-hidden")).toBe("true");
   });
 });

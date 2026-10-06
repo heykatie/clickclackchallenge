@@ -6,6 +6,7 @@ import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { rowMotion } from "../features/leaderboard/boardMotion";
 import { Celebration } from "./Celebration";
+import { ButtonCountdown } from "./ButtonCountdown";
 import { ScoreRow } from "./ScoreRow";
 import { useLogoHold } from "./useLogoHold";
 
@@ -134,12 +135,7 @@ export function LeaderboardScreen({
       {bestLine ? <p className="all-time-best">{bestLine}</p> : null}
       <button type="button" ref={nextButtonRef} className="next-player-button" onClick={leave}>
         NEXT PLAYER <span aria-hidden="true">→</span>
-        {/* Drains over the auto-return time, so leaving on its own never feels abrupt. */}
-        <span
-          className="next-player-countdown"
-          aria-hidden="true"
-          style={{ animationDuration: `${RESET_SECONDS}s` }}
-        />
+        <ButtonCountdown seconds={RESET_SECONDS} />
       </button>
       {secondsLeft <= RESET_COUNTDOWN_AT && secondsLeft > 0 ? (
         <p className="leaderboard-countdown">Returning to ready screen in {secondsLeft}s</p>

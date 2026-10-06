@@ -1533,13 +1533,13 @@ label.setup-option-big {
   }
 }
 
-/* NEXT PLAYER drains like a progress bar over the auto-return time. */
-.next-player-button {
+/* A button that will press itself drains like a progress bar: NEXT PLAYER, and SAVE SCORE or VIEW LEADERBOARD on Results. */
+button:has(> .button-countdown) {
   position: relative;
   overflow: hidden;
 }
 
-.next-player-countdown {
+.button-countdown {
   position: absolute;
   left: 0;
   bottom: 0;
@@ -1569,7 +1569,7 @@ label.setup-option-big {
     animation: none;
   }
 
-  .next-player-countdown {
+  .button-countdown {
     display: none;
   }
 }
