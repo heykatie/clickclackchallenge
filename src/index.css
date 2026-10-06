@@ -1202,8 +1202,8 @@ label.setup-option-big {
 
 .setup-start-group {
   display: grid;
-  justify-items: end;
-  gap: 0.35rem;
+  justify-items: center;
+  gap: 0.75rem;
   margin-left: auto;
 }
 
