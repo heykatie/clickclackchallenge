@@ -318,6 +318,12 @@ describe("ResultsScreen WPM count-up", () => {
     expect(shownWpm()).toBe("42");
   });
 
+  it("times the pills to pop in when this score's count-up settles", () => {
+    renderResults(unranked);
+    const main = document.querySelector("main") as HTMLElement;
+    expect(main.style.getPropertyValue("--count-up-end")).toBe("2324ms");
+  });
+
   it("shows the final WPM at once with reduced motion", () => {
     window.matchMedia = vi.fn((query: string) => ({ matches: query.includes("reduce") }) as MediaQueryList);
     try {

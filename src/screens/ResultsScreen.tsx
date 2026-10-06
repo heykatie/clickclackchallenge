@@ -12,6 +12,7 @@ import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { Celebration } from "./Celebration";
 import { useCountUp } from "./useCountUp";
+import { COUNT_UP_DELAY_MS, countUpMs } from "../features/results/countUp";
 import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
 
@@ -259,7 +260,13 @@ export function ResultsScreen({
   }
 
   return (
-    <main className="screen results-screen" ref={screenRef} tabIndex={-1}>
+    <main
+      className="screen results-screen"
+      ref={screenRef}
+      tabIndex={-1}
+      // The pills pop in once this score's count-up settles.
+      style={{ "--count-up-end": `${COUNT_UP_DELAY_MS + countUpMs(result.displayedWpm)}ms` } as CSSProperties}
+    >
       <button
         type="button"
         className="logo-badge"

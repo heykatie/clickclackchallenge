@@ -223,6 +223,18 @@ describe("LeaderboardScreen", () => {
     expect(rows()[0]?.className).not.toMatch(/is-climbing|is-nudged/);
   });
 
+  it("shimmers the top score when the player did not make the Top 5", () => {
+    const board = [90, 80, 70, 60, 50, 40].map((wpm, index) => score(String(index), `P${index}`, wpm, index));
+    renderBoard(board, "5");
+    expect(rows()[0]?.className).toContain("is-shining");
+    expect(rows().slice(1).some((row) => row.className.includes("is-shining"))).toBe(false);
+  });
+
+  it("does not shimmer the top score when the player placed", () => {
+    renderBoard([score("a", "Alex", 90, 0), score("b", "Bo", 70, 1)], "b");
+    expect(rows().some((row) => row.className.includes("is-shining"))).toBe(false);
+  });
+
   it("bursts confetti only when the player is the new first place", () => {
     renderBoard([score("a", "Alex", 90, 0)], "a");
     expect(document.querySelector(".result-celebration")).toBeTruthy();

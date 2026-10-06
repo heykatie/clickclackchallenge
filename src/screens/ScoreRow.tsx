@@ -11,6 +11,8 @@ type ScoreRowProps = {
   style?: CSSProperties;
   /** How the row moves as the Leaderboard opens. */
   motion?: RowMotion;
+  /** The top score shimmers when the player did not make the board. */
+  shining?: boolean;
 };
 
 /** One ranked row, shared by the Leaderboard and the rolling high-score list. */
@@ -21,6 +23,7 @@ export function ScoreRow({
   isCurrent = false,
   style,
   motion = null,
+  shining = false,
 }: ScoreRowProps) {
   const empty = displayedWpm === null;
   const first = rank === 1 && !empty;
@@ -32,6 +35,7 @@ export function ScoreRow({
     rank <= 3 && !empty ? `is-podium-${rank}` : "",
     motion?.kind === "climb" ? "is-climbing" : "",
     motion?.kind === "nudge" ? "is-nudged" : "",
+    shining ? "is-shining" : "",
   ]
     .filter(Boolean)
     .join(" ");
