@@ -5,6 +5,7 @@ import type { HighScoreSummary } from "../state/appState";
 import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
 import { useLogoHold } from "./useLogoHold";
+import { Crown } from "./ScoreRow";
 
 const READY_IDLE_MS = 120_000;
 
@@ -171,6 +172,9 @@ export function ReadyScreen({ eventId, allTime, highScore, onStart, onSetup, cla
               <>
                 <p className="stat-value">{highScore.displayedWpm} WPM</p>
                 <p className={highScore.name ? "high-score-name has-name" : "high-score-name"}>
+                  <span className="high-score-crown" aria-hidden="true">
+                    <Crown />
+                  </span>
                   {highScore.name ?? "—"}
                 </p>
               </>

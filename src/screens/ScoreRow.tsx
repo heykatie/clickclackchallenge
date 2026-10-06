@@ -63,7 +63,7 @@ export function ScoreRow({
   );
 }
 
-function Crown() {
+export function Crown() {
   return (
     <svg viewBox="0 0 32 26" width="32" height="26" focusable="false">
       <path

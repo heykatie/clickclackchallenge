@@ -77,9 +77,16 @@ describe("ReadyScreen", () => {
     expect(screen.getByText("Alex")).toBeTruthy();
   });
 
+  it("crowns the high score's name", async () => {
+    await renderReady();
+    const crown = screen.getByText("Alex").querySelector(".high-score-crown");
+    expect(crown?.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("invites the first high score of the day when the event has none", async () => {
     await renderReady([], null);
     expect(screen.getByText("Be the first high score today!")).toBeTruthy();
+    expect(document.querySelector(".high-score-crown")).toBeNull();
   });
 
   it("shows the all-time best under the event's high score when another event holds it", async () => {

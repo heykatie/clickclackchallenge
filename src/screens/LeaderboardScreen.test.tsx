@@ -139,10 +139,10 @@ describe("LeaderboardScreen", () => {
     expect(onNextPlayer).toHaveBeenCalledOnce();
   });
 
-  it("returns to Ready on its own after 15 seconds, showing the countdown for the last 5", () => {
+  it("returns to Ready on its own after 25 seconds, showing the countdown for the last 5", () => {
     fakeBoothClock();
     const { onNextPlayer } = renderBoard([score("a", "Alex", 60, 0)]);
-    act(() => vi.advanceTimersByTime(9_000));
+    act(() => vi.advanceTimersByTime(19_000));
     expect(screen.queryByText(/Returning to ready screen/)).toBeNull();
     act(() => vi.advanceTimersByTime(1_000));
     expect(screen.getByText("Returning to ready screen in 5s")).toBeTruthy();
@@ -233,7 +233,7 @@ describe("LeaderboardScreen", () => {
     expect(document.querySelector(".result-celebration")).toBeNull();
   });
 
-  it("drains a countdown bar on NEXT PLAYER over the 15 seconds", () => {
+  it("drains a countdown bar on NEXT PLAYER over the 25 seconds", () => {
     renderBoard([score("a", "Alex", 60, 0)]);
     const bar = screen.getByRole("button", { name: /NEXT PLAYER/ }).querySelector(".next-player-countdown");
     expect(bar?.getAttribute("aria-hidden")).toBe("true");
