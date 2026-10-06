@@ -919,6 +919,8 @@ The leaderboard may:
 - emphasize rank #1
 - highlight the newest contestant if they are in the Top 5
 
+When the newest contestant takes rank #1, the Leaderboard plays the new-high-score burst; otherwise it does not.
+
 The leaderboard should not expose:
 
 - raw character counts
