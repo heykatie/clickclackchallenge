@@ -26,8 +26,10 @@
   --font-display: "Fredoka", sans-serif;
   --font-ui: "Nunito", sans-serif;
   --font-typing: "Atkinson Hyperlegible", sans-serif;
-  /* Player names on Ready and the leaderboards. Scores stay Fredoka. */
+  /* Player names on Ready and the leaderboards, at 700. */
   --font-name: "Baloo 2", "Fredoka", sans-serif;
+  /* Scores and rank numbers, at 800. */
+  --font-number: "Baloo 2", "Fredoka", sans-serif;
   /* The NEW HIGH SCORE headline only. */
   --font-celebrate: "Chewy", "Fredoka", sans-serif;
 
@@ -322,7 +324,9 @@ button.is-cursor {
 }
 
 .high-score-card .stat-value {
+  font-family: var(--font-number);
   font-size: 3rem;
+  font-weight: 800;
 }
 
 .high-score-name,
@@ -478,9 +482,9 @@ button.is-cursor {
   height: 2.75rem;
   border-radius: 50%;
   background: var(--tiny-lavender-light);
-  font-family: var(--font-display);
+  font-family: var(--font-number);
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .score-row.is-first .score-rank {
@@ -516,9 +520,9 @@ button.is-cursor {
 }
 
 .score-wpm-value {
-  font-family: var(--font-display);
+  font-family: var(--font-number);
   font-size: 2.25rem;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
@@ -717,7 +721,9 @@ button.is-cursor {
 
 .results-screen .stat-value {
   margin: 0;
+  font-family: var(--font-number);
   font-size: 4.5rem;
+  font-weight: 800;
 }
 
 /* Chewy is narrow, so it runs larger than the other headlines to read as the big moment. */

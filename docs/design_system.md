@@ -108,7 +108,8 @@ Use three primary font families. Required font files must be packaged or cached 
 | Display | Fredoka | 600, 700 | Headlines, large scores, primary actions, leaderboard headings |
 | Interface | Nunito | 400, 600, 700 | Instructions, labels, settings, names, helper copy |
 | Typing passage | Atkinson Hyperlegible | 400, 700 | Sentences and character-level feedback |
-| Names | Baloo 2 | 700 | Player names on the Ready high-score card, the Leaderboard, and the rolling list. Every WPM stays Fredoka |
+| Names | Baloo 2 | 700 | Player names on the Ready high-score card, the Leaderboard, and the rolling list |
+| Numbers | Baloo 2 | 800 | WPM on Results and the Ready high-score card; WPM and rank numbers on the Leaderboard and rolling list. Typing's live stats stay Fredoka |
 | Celebration | Chewy | 400 | The Results headline only when it is NEW HIGH SCORE!, at 3rem because Chewy runs narrow |
 
 Fredoka also sets the Plinko and place pills, at 600. Five fonts is more than usual; each is limited to the roles above, so the mix stays deliberate.
@@ -475,6 +476,7 @@ Keep wording consistent across screens. Avoid corporate language, technical jarg
   --font-ui: "Nunito", sans-serif;
   --font-typing: "Atkinson Hyperlegible", sans-serif;
   --font-name: "Baloo 2", "Fredoka", sans-serif;
+  --font-number: "Baloo 2", "Fredoka", sans-serif;
   --font-celebrate: "Chewy", "Fredoka", sans-serif;
 }
 ```
