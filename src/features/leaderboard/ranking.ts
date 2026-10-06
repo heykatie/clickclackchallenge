@@ -1,5 +1,5 @@
 import type { ScoreRecord } from "../../db/persistence";
-import { displayedAccuracy, meetsLeaderboardAccuracy } from "../typing/scoring";
+import { displayedAccuracy, isPlausibleWpm, meetsLeaderboardAccuracy } from "../typing/scoring";
 
 export interface RankedScore {
   score: ScoreRecord;
@@ -10,7 +10,7 @@ export interface RankedScore {
 
 export function rankScores(scores: readonly ScoreRecord[]): RankedScore[] {
   const eligible = scores.filter(
-    (score) => meetsLeaderboardAccuracy(score.accuracy) && score.displayedWpm > 0,
+    (score) => meetsLeaderboardAccuracy(score.accuracy) && score.displayedWpm > 0 && isPlausibleWpm(score.displayedWpm),
   );
   const ordered = [...eligible].sort((left, right) => {
     if (right.displayedWpm !== left.displayedWpm) {

@@ -1844,6 +1844,7 @@ Top 5 selection is correct
 high score is the first eligible ranked score
 the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
+a score above 250 WPM is saved but never ranks, never becomes the high score, and never wins a Plinko drop (isPlausibleWpm, MAX_PLAUSIBLE_WPM)
 the scores download lists every score newest first with its event rank, Plinko win, and cleared state, quotes commas, and defuses spreadsheet formulas in names (scoresCsv); it reads cleared events too (listEverything)
 the all-time line names the best eligible score from every event, drops a missing name, and hides when it is the event's own first place or nothing was saved (allTimeBestLine)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)

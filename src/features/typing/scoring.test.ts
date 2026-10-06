@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  isPlausibleWpm,
+  MAX_PLAUSIBLE_WPM,
   liveWpm,
   LIVE_WPM_WARMUP_SECONDS,
   calculateAccuracy,
@@ -64,6 +66,19 @@ describe("winsPlinko", () => {
     expect(winsPlinko(50, 100)).toBe(false);
     expect(winsPlinko(51, 29.99)).toBe(false);
     expect(winsPlinko(51, null)).toBe(false);
+  });
+});
+
+describe("isPlausibleWpm", () => {
+  it("accepts up to 250 displayed WPM, above the fastest typists on a normal keyboard", () => {
+    expect(MAX_PLAUSIBLE_WPM).toBe(250);
+    expect(isPlausibleWpm(250)).toBe(true);
+    expect(isPlausibleWpm(251)).toBe(false);
+  });
+
+  it("gives no Plinko drop for a score no person could type", () => {
+    expect(winsPlinko(250, 100)).toBe(true);
+    expect(winsPlinko(251, 100)).toBe(false);
   });
 });
 
