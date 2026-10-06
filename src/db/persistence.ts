@@ -5,6 +5,8 @@ import { STORY_ID } from "../data/story";
 
 export type TestDuration = 30 | 60;
 export type TestMode = "words" | "famous-lines" | "story";
+/** Which scores the board ranks: this event's own, or every event's ever saved. Scores always save to the event. */
+export type BoardScope = "event" | "all-time";
 
 export function passageSetIdFor(testMode: TestMode): string {
   if (testMode === "words") {
@@ -21,6 +23,7 @@ export interface EventRecord {
   durationSeconds: TestDuration;
   testMode: TestMode;
   passageSetId: string;
+  boardScope: BoardScope;
   status: "active" | "archived";
   createdAt: string;
   updatedAt: string;
@@ -276,6 +279,8 @@ function normalizeEvent(event: EventRecord): EventRecord {
   const testMode = asTestMode(event.testMode);
   return {
     ...event,
+    // Events saved before the board choice existed rank their own scores.
+    boardScope: event.boardScope === "all-time" ? "all-time" : "event",
     testMode,
     passageSetId: event.passageSetId || passageSetIdFor(testMode),
   };
@@ -336,6 +341,7 @@ export async function startFreshEvent(
     durationSeconds,
     testMode,
     passageSetId: passageSetIdFor(testMode),
+    boardScope: "event",
     status: "active",
     createdAt: now,
     updatedAt: now,
@@ -356,7 +362,7 @@ export async function startFreshEvent(
 
 export async function updateActiveEvent(
   eventId: string,
-  next: { durationSeconds: TestDuration; testMode: TestMode },
+  next: { durationSeconds: TestDuration; testMode: TestMode; boardScope?: BoardScope },
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const event = await database.get("events", eventId);
@@ -364,10 +370,12 @@ export async function updateActiveEvent(
     throw new Error("No active event to update");
   }
   const current = normalizeEvent(event);
+  const boardScope = next.boardScope ?? current.boardScope;
   if (
     current.durationSeconds === next.durationSeconds &&
     current.testMode === next.testMode &&
-    current.passageSetId === passageSetIdFor(next.testMode)
+    current.passageSetId === passageSetIdFor(next.testMode) &&
+    current.boardScope === boardScope
   ) {
     return current;
   }
@@ -377,6 +385,7 @@ export async function updateActiveEvent(
     durationSeconds: next.durationSeconds,
     testMode: next.testMode,
     passageSetId: passageSetIdFor(next.testMode),
+    boardScope,
     updatedAt: new Date().toISOString(),
   };
   const transaction = database.transaction(["events", "settings"], "readwrite");
@@ -402,6 +411,11 @@ export async function listAllScores(): Promise<ScoreRecord[]> {
   const database = await openDatabase();
   const scores = await database.getAll("scores");
   return scores.map(normalizeScore);
+}
+
+/** The scores the event's board ranks: its own, or every event's when the board is all-time. */
+export function listBoardScores(event: EventRecord): Promise<ScoreRecord[]> {
+  return event.boardScope === "all-time" ? listAllScores() : listScores(event.id);
 }
 
 export async function saveScore(input: NewScore): Promise<ScoreRecord> {

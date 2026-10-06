@@ -564,6 +564,7 @@ An event must retain:
 - the selected test duration for the next contestant
 - the selected game mode for the next contestant
 - the passage-set version for that mode
+- which scores its leaderboard ranks: its own, or every event's (all-time)
 - whether the event is currently active or archived
 - the event creation time
 - the event's most recent update time

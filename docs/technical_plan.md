@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score.
 
 ```ts
 interface EventRecord {
@@ -393,6 +393,9 @@ interface EventRecord {
   durationSeconds: TestDuration;
   testMode: TestMode;
   passageSetId: string;
+
+  /** Which scores the board ranks. Scores always save to this event. */
+  boardScope: "event" | "all-time";
 
   status: "active" | "archived";
 
@@ -1940,6 +1943,7 @@ Verify IndexedDB behavior independently of UI rendering.
 Required cases:
 
 ```text
+a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
 launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
 score can be written and read

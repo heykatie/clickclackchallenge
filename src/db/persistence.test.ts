@@ -8,6 +8,7 @@ import {
   DB_NAME,
   LEGACY_DB_NAME,
   listAllScores,
+  listBoardScores,
   listScores,
   loadBooth,
   openDatabase,
@@ -193,6 +194,54 @@ describe("persistence", () => {
     expect(scores[0]?.testMode).toBe("famous-lines");
     expect(scores[0]?.passageSetId).toBe(PASSAGE_SET_ID);
     expect(rankScores(scores).map((entry) => entry.score.id)).toEqual([earned.id]);
+  });
+
+  it("starts a fresh event with a board of its own scores", async () => {
+    const event = await startFreshEvent(30);
+    expect(event.boardScope).toBe("event");
+  });
+
+  it("switches the active event to an all-time board and back without touching scores", async () => {
+    const event = await startFreshEvent(30);
+    const earned = await saveScore(scoreInput(event.id, 40));
+
+    const allTime = await updateActiveEvent(event.id, {
+      durationSeconds: 30,
+      testMode: "famous-lines",
+      boardScope: "all-time",
+    });
+    expect(allTime.id).toBe(event.id);
+    expect(allTime.boardScope).toBe("all-time");
+    expect((await loadBooth()).activeEvent?.boardScope).toBe("all-time");
+
+    const changedMode = await updateActiveEvent(event.id, { durationSeconds: 60, testMode: "words" });
+    expect(changedMode.boardScope).toBe("all-time");
+
+    const back = await updateActiveEvent(event.id, { durationSeconds: 60, testMode: "words", boardScope: "event" });
+    expect(back.boardScope).toBe("event");
+    expect(await listScores(event.id)).toEqual([earned]);
+  });
+
+  it("loads the board's scores: the event's own, or every event's when all-time", async () => {
+    const old = await startFreshEvent(30);
+    const oldScore = await saveScore(scoreInput(old.id, 70));
+    const current = await startFreshEvent(30);
+    const currentScore = await saveScore(scoreInput(current.id, 40));
+
+    expect(await listBoardScores(current)).toEqual([currentScore]);
+    const allTime = await updateActiveEvent(current.id, {
+      durationSeconds: 30,
+      testMode: "famous-lines",
+      boardScope: "all-time",
+    });
+    const board = await listBoardScores(allTime);
+    expect(board.map((score) => score.id).sort()).toEqual([oldScore.id, currentScore.id].sort());
+  });
+
+  it("reads an event saved before board choices as a board of its own scores", async () => {
+    await openVersionOneBooth();
+    const booth = await loadBooth();
+    expect(booth.activeEvent?.boardScope).toBe("event");
   });
 
   it("reads an event saved before text modes as Famous Lines and keeps its WPM", async () => {
