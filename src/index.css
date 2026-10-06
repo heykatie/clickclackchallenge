@@ -365,9 +365,10 @@ button.is-cursor {
   }
 }
 
+/* Just smaller than PRESS ANY KEY TO START above it. */
 .ready-helper {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1rem;
 }
 
 /* Sparse edge motifs for score screens: a blush-pink blob low left and a mint arc high right. */

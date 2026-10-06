@@ -179,7 +179,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
+“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
