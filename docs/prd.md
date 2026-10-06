@@ -324,7 +324,7 @@ The Ready screen must **not** show:
 - Start button
 - operator settings
 
-After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling all-time list. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list includes qualifying scores from archived events and keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
+After 2 minutes with no key and no tap, or at once after a tap on the logo badge, and only when at least one qualifying score exists, Ready is replaced by a rolling high-score list of the active event. A score qualifies when it meets the accuracy gate and its displayed WPM is at least 1. The list shows the active event's board: its own scores, whether the operator started fresh or continued, and not those of archived events. It keeps at most 20. Any key or a tap returns to Ready and does not start the test. Holding Escape opens Event Setup. The next key starts it, the same way a key does from the normal Ready screen.
 
 ### Start Behavior
 
@@ -530,7 +530,7 @@ A contestant below the threshold:
 - does not qualify for leaderboard ranking
 - is not prompted for a leaderboard name
 
-A score that displays as 0 WPM also stays off every board, including the event Top 5 and the all-time roll. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
+A score that displays as 0 WPM also stays off every board, including the event Top 5 and the rolling list. 1 WPM still qualifies when accuracy passes. On Results, that 0 WPM attempt shows “Casper, is that you?” and no place line, Plinko line, or name field.
 
 ### Ranking and Ties
 

@@ -302,6 +302,7 @@ function App() {
     case "ready":
       return (
         <ReadyScreen
+          eventId={state.activeEvent?.id ?? null}
           highScore={state.highScore}
           onStart={(key) => {
             if (key !== "") {

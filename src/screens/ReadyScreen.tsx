@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { listAllScores } from "../db/persistence";
-import { allTimeScores, type RankedScore } from "../features/leaderboard/ranking";
+import { listScores } from "../db/persistence";
+import { rollingListScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
 import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
@@ -9,22 +9,24 @@ import { useLogoHold } from "./useLogoHold";
 const READY_IDLE_MS = 120_000;
 
 type ReadyScreenProps = {
+  /** The active event. The rolling list shows its board. */
+  eventId: string | null;
   highScore: HighScoreSummary | null;
   onStart: (key: string) => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
-export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
+export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
-  const [allTime, setAllTime] = useState<RankedScore[]>([]);
+  const [rolling, setRolling] = useState<RankedScore[]>([]);
 
   const logoHold = useLogoHold(onSetup, () => {
-    if (readyLogoTap(allTime.length) === "roll") {
+    if (readyLogoTap(rolling.length) === "roll") {
       asleepRef.current = true;
       setAsleep(true);
     }
@@ -36,25 +38,26 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
 
   useEffect(() => {
     let cancelled = false;
-    listAllScores().then(
+    // The rolling list follows the active event's board, whether it was started fresh or continued.
+    (eventId === null ? Promise.resolve([]) : listScores(eventId)).then(
       (scores) => {
         if (!cancelled) {
-          setAllTime(allTimeScores(scores));
+          setRolling(rollingListScores(scores));
         }
       },
       () => {
         if (!cancelled) {
-          setAllTime([]);
+          setRolling([]);
         }
       },
     );
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [eventId]);
 
   useEffect(() => {
-    if (asleep || allTime.length === 0) {
+    if (asleep || rolling.length === 0) {
       return;
     }
     const id = window.setTimeout(() => {
@@ -62,7 +65,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
       setAsleep(true);
     }, READY_IDLE_MS);
     return () => window.clearTimeout(id);
-  }, [asleep, activity, allTime.length]);
+  }, [asleep, activity, rolling.length]);
 
   // A short Escape does what a logo tap does: open the rolling list, or close it when it is up.
   useEffect(() => {
@@ -72,13 +75,13 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
         setAsleep(false);
         return;
       }
-      if (readyLogoTap(allTime.length) === "roll") {
+      if (readyLogoTap(rolling.length) === "roll") {
         asleepRef.current = true;
         setAsleep(true);
       }
     });
     return () => claimShortEscape(null);
-  }, [claimShortEscape, allTime.length]);
+  }, [claimShortEscape, rolling.length]);
 
   useEffect(() => {
     screenRef.current?.focus();
@@ -119,7 +122,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
   if (asleep) {
     return (
       <Screensaver
-        scores={allTime}
+        scores={rolling}
         onWake={() => {
           asleepRef.current = false;
           setAsleep(false);

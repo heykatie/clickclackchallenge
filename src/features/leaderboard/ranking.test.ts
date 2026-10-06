@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreRecord } from "../../db/persistence";
 import { calculateWpm, displayedWpm } from "../typing/scoring";
-import { allTimeScores, boardEntries, highScore, rankScores, topFiveSlots } from "./ranking";
+import { rollingListScores, boardEntries, highScore, rankScores, topFiveSlots } from "./ranking";
 
 function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm" | "accuracy" | "createdAt">): ScoreRecord {
   return {
@@ -137,7 +137,7 @@ describe("rankScores", () => {
   });
 });
 
-describe("allTimeScores", () => {
+describe("rollingListScores", () => {
   it("defaults the roll to 20 scores", () => {
     const scores = Array.from({ length: 25 }, (_, index) =>
       score({
@@ -147,8 +147,8 @@ describe("allTimeScores", () => {
         createdAt: `2026-09-22T02:${String(index).padStart(2, "0")}:00.000Z`,
       }),
     );
-    expect(allTimeScores(scores)).toHaveLength(20);
-    expect(allTimeScores(scores)[0]?.rank).toBe(1);
+    expect(rollingListScores(scores)).toHaveLength(20);
+    expect(rollingListScores(scores)[0]?.rank).toBe(1);
   });
 
   it("keeps eligible scores from every event and caps the roll", () => {
@@ -178,7 +178,7 @@ describe("allTimeScores", () => {
         }),
       ),
     ];
-    const rolled = allTimeScores(scores, 50);
+    const rolled = rollingListScores(scores, 50);
     expect(rolled).toHaveLength(50);
     expect(rolled.map((entry) => entry.score.id)).not.toContain("low");
     expect(rolled[0]?.rank).toBe(1);
@@ -186,7 +186,7 @@ describe("allTimeScores", () => {
   });
 
   it("drops a displayed 0 WPM score and keeps 1 WPM", () => {
-    const rolled = allTimeScores([
+    const rolled = rollingListScores([
       score({
         id: "zero",
         displayedWpm: 0,

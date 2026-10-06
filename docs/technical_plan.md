@@ -1981,7 +1981,7 @@ while Continue is selected, choosing the other duration updates the next contest
 Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test and opens the rolling list when it has a score
 holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard; an earlier release is a short press (escapeHoldMs)
-after 2 idle minutes, Ready shows a rolling all-time list of at most 20 scores that meet the accuracy gate and display at least 1 WPM
+after 2 idle minutes, Ready shows a rolling list of at most 20 of the active event's scores that meet the accuracy gate and display at least 1 WPM; other events' scores are not on it
 each score on that list appears once, with no repeated rows
 any key or a tap on that list returns to Ready and does not start the test
 a tap on the logo badge on Ready opens that list at once when it has a score, and does nothing otherwise
