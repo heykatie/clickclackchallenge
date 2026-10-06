@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { requestPersistentStorage } from "./db/persistentStorage";
 import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
@@ -102,6 +103,8 @@ function App() {
           dispatch({ type: "SET_ACTIVE_EVENT", event: booth.activeEvent });
         }
         setStatus("ready");
+        // Storage works without this; it only asks the browser not to evict the scores.
+        void requestPersistentStorage();
       },
       () => {
         if (!cancelled) {
