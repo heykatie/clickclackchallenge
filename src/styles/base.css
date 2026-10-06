@@ -44,6 +44,11 @@
   -webkit-font-smoothing: antialiased;
 }
 
+html {
+  /* Pressed styles below replace Safari's gray tap flash. */
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body,
 #root {
@@ -162,12 +167,12 @@ button {
 button:active:not(:disabled) {
   transform: translateY(0.3rem);
   box-shadow: 0 0 0 var(--tiny-mint-deep);
+  filter: brightness(0.96);
 }
 
-/* The logo badge and the small text links have no edge, so they do not sink. */
-button.logo-badge:active,
-button.setup-tool:active {
-  transform: none;
+/* The logo badge has no edge to sink onto, so it gives a small squeeze instead. */
+button.logo-badge:active {
+  transform: scale(0.94);
   box-shadow: none;
 }
 
