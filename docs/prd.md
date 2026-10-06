@@ -923,6 +923,17 @@ The leaderboard should not expose:
 
 Only scores that meet the accuracy gate and display at least 1 WPM are eligible for ranking. A displayed 0 WPM score stays off the board.
 
+### All-time board
+
+When the active event's board is all-time (§9), everything that ranks uses every eligible score ever saved, from every event, instead of the event's own:
+
+- the Leaderboard Top 5, labeled “ALL-TIME TOP 5”
+- Results placement: NEW HIGH SCORE, the Top 5 and Top 10 lines, and name entry through 20th
+- the Ready high score, labeled “ALL-TIME HIGH SCORE”
+- the rolling list, labeled “ALL-TIME HIGH SCORES”
+
+The all-time best line (§17) stays hidden, because the board's first place already is the all-time best. Plinko, the accuracy gates, and saving are unchanged; new scores still save to the active event. House scores appear only when no eligible score was ever saved.
+
 ### House scores on an empty board
 
 While the active event has no eligible score, the Leaderboard shows two arcade-style house scores in places 1 and 2: Clicky at 60 WPM and Clacky at 45 WPM. The other three places stay empty. House scores are display only. They are never saved, never ranked against real scores, and never count toward the Ready high score, Results placement, Plinko, or the rolling high-score list. The first eligible score replaces both of them, even when it is lower. They never get the YOU marker.
@@ -1972,6 +1983,7 @@ a short Escape press on Results saves the score and returns to Ready, like a log
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
 after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
+All-time leaderboard ranks every event's scores on the Leaderboard, Results, Ready, and the rolling list with ALL-TIME labels, and Continue switches the same event back
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 the first letter on Results goes into the name

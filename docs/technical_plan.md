@@ -1978,6 +1978,8 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
+App loads every board through listBoardScores(activeEvent): Results placement, the Ready high score, and the Leaderboard. Ready loads its rolling list the same way.
+an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
 EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"
 EventSetup shows "An update is ready." and UPDATE NOW only while an update waits; UPDATE NOW is first in the arrow-key order and installs it from Enter or a tap
 Start fresh over an existing event asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)

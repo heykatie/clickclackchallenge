@@ -28,6 +28,7 @@ function renderBoard(
   scores: ScoreRecord[],
   currentScoreId: string | null = null,
   allTimeBest: ScoreRecord | null = null,
+  allTime = false,
 ) {
   const onNextPlayer = vi.fn();
   const onSetup = vi.fn();
@@ -37,6 +38,7 @@ function renderBoard(
       scores={scores}
       currentScoreId={currentScoreId}
       allTimeBest={allTimeBest}
+      allTime={allTime}
       onNextPlayer={onNextPlayer}
       onSetup={onSetup}
       claimShortEscape={(handler) => {
@@ -200,6 +202,17 @@ describe("LeaderboardScreen", () => {
     const alex = score("a", "Alex", 60, 1);
     renderBoard([alex], null, alex);
     expect(screen.queryByText(/All-time best/)).toBeNull();
+  });
+
+  it("labels an all-time board ALL-TIME TOP 5 and an event board TOP 5", () => {
+    renderBoard([score("a", "Alex", 60, 1)], null, null, true);
+    expect(screen.getByText("ALL-TIME TOP 5")).toBeTruthy();
+  });
+
+  it("keeps TOP 5 on an event board", () => {
+    renderBoard([score("a", "Alex", 60, 1)]);
+    expect(screen.getByText("TOP 5")).toBeTruthy();
+    expect(screen.queryByText("ALL-TIME TOP 5")).toBeNull();
   });
 });
 

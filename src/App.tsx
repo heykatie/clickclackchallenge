@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores } from "./db/persistence";
+import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -132,7 +132,7 @@ function App() {
     const test = state.currentTest;
     const result = state.latestResult;
     let cancelled = false;
-    listScores(event.id).then(
+    listBoardScores(event).then(
       (scores) => {
         if (!cancelled) {
           setStanding(
@@ -163,7 +163,7 @@ function App() {
   }, [state.screen, state.latestResult, state.currentTest, state.activeEvent]);
 
   async function openReady(event: EventRecord) {
-    const top = highScore(await listScores(event.id));
+    const top = highScore(await listBoardScores(event));
     dispatch({ type: "SET_ACTIVE_EVENT", event });
     dispatch({
       type: "ENTER_READY",
@@ -239,7 +239,8 @@ function App() {
     setSaving(true);
     try {
       const score = await recordScore(name);
-      setLeaderboardScores(await listScores(score.eventId));
+      const event = state.activeEvent;
+      setLeaderboardScores(event ? await listBoardScores(event) : await listScores(score.eventId));
       setAllTimeBest(highScore(await listAllScores()));
       dispatch({ type: "SHOW_LEADERBOARD", currentScoreId: score.id });
     } catch {
@@ -306,6 +307,7 @@ function App() {
       return (
         <ReadyScreen
           eventId={state.activeEvent?.id ?? null}
+          allTime={state.activeEvent?.boardScope === "all-time"}
           highScore={state.highScore}
           onStart={(key) => {
             if (key !== "") {
@@ -364,6 +366,7 @@ function App() {
         <LeaderboardScreen
           scores={leaderboardScores}
           allTimeBest={allTimeBest}
+          allTime={state.activeEvent?.boardScope === "all-time"}
           currentScoreId={state.currentScoreId}
           onNextPlayer={() => {
             const event = state.activeEvent;
