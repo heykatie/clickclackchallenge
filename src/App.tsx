@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
+import { clearAllScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores } from "./db/persistence";
 import { highScore } from "./features/leaderboard/ranking";
 import { describeAttempt, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -190,6 +190,18 @@ function App() {
     }
   }
 
+  async function clearScores(durationSeconds: TestDuration, testMode: TestMode) {
+    setSaving(true);
+    try {
+      const event = await clearAllScores(durationSeconds, testMode);
+      await openReady(event);
+    } catch {
+      setStatus("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function startFresh(durationSeconds: TestDuration, testMode: TestMode) {
     setSaving(true);
     try {
@@ -300,6 +312,9 @@ function App() {
           }}
           onContinue={(durationSeconds, testMode, boardScope) => {
             void continueEvent(durationSeconds, testMode, boardScope);
+          }}
+          onClearScores={(durationSeconds, testMode) => {
+            void clearScores(durationSeconds, testMode);
           }}
         />,
       );

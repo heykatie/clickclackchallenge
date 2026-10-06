@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearAllScores` sets it on every existing event and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores.
 
 ```ts
 interface EventRecord {
@@ -396,6 +396,9 @@ interface EventRecord {
 
   /** Which scores the board ranks. Scores always save to this event. */
   boardScope: "event" | "all-time";
+
+  /** Set by Clear all scores. Hides the event's scores everywhere without deleting them. */
+  hiddenAt: string | null;
 
   status: "active" | "archived";
 
@@ -1944,6 +1947,7 @@ Verify IndexedDB behavior independently of UI rendering.
 Required cases:
 
 ```text
+Clear all scores hides every earlier event and score, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearAllScores)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
 launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
@@ -1979,6 +1983,7 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
+EventSetup shows CLEAR ALL SCORES only with an event, right after START EVENT in the arrow-key order; it asks with CANCEL chosen, CANCEL or Escape changes nothing, and CLEAR SCORES clears with the selected length and mode
 App loads every board through listBoardScores(activeEvent): Results placement, the Ready high score, and the Leaderboard. Ready loads its rolling list the same way.
 an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
 EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"

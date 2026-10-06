@@ -20,6 +20,8 @@ type EventSetupScreenProps = {
   onApplyUpdate: () => void;
   onStartFresh: (durationSeconds: TestDuration, testMode: TestMode) => void;
   onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope) => void;
+  /** Hides every score so far and starts an empty event with these choices. */
+  onClearScores: (durationSeconds: TestDuration, testMode: TestMode) => void;
 };
 
 export function EventSetupScreen({
@@ -31,6 +33,7 @@ export function EventSetupScreen({
   onApplyUpdate,
   onStartFresh,
   onContinue,
+  onClearScores,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -50,9 +53,11 @@ export function EventSetupScreen({
   const savingRef = useRef(saving);
   const updateReadyRef = useRef(updateReady);
   const onApplyUpdateRef = useRef(onApplyUpdate);
-  /** Null while the setup choices show. Otherwise the Start fresh confirmation is up, with this button chosen. */
+  /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
+  /** Which confirmation is up: Start fresh, or Clear all scores. */
+  const [confirmKind, setConfirmKind] = useState<"fresh" | "clear">("fresh");
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -81,17 +86,35 @@ export function EventSetupScreen({
       return;
     }
     if (!confirmed && needsFreshConfirm(plan, storedDuration !== null)) {
+      setConfirmKind("fresh");
       setConfirmCursor("cancel");
       return;
     }
     onStartFresh(plan.durationSeconds, plan.testMode);
   }
 
+  function askToClear() {
+    setConfirmKind("clear");
+    setConfirmCursor("cancel");
+  }
+
+  function confirm() {
+    if (confirmKind === "clear") {
+      onClearScores(visibleDuration, selectedTestMode);
+      return;
+    }
+    startEvent(true);
+  }
+
   const startRef = useRef(startEvent);
+  const confirmRef = useRef(confirm);
+  const askToClearRef = useRef(askToClear);
   const rememberRef = useRef(remember);
 
   useEffect(() => {
     startRef.current = startEvent;
+    confirmRef.current = confirm;
+    askToClearRef.current = askToClear;
     rememberRef.current = remember;
     savingRef.current = saving;
     updateReadyRef.current = updateReady;
@@ -125,7 +148,7 @@ export function EventSetupScreen({
           confirmCursorRef.current = null;
           setConfirmCursor(null);
         } else if (!savingRef.current) {
-          startRef.current(true);
+          confirmRef.current();
         }
         return;
       }
@@ -140,6 +163,12 @@ export function EventSetupScreen({
       event.preventDefault();
       if (result === "update") {
         onApplyUpdateRef.current();
+        return;
+      }
+      if (result === "clear") {
+        if (!savingRef.current) {
+          askToClearRef.current();
+        }
         return;
       }
       if (result === "start") {
@@ -182,8 +211,20 @@ export function EventSetupScreen({
       ) : null}
       {confirmCursor !== null ? (
         <section className="setup-confirm" role="alertdialog" aria-labelledby="setup-confirm-title">
-          <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
-          <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
+          {confirmKind === "clear" ? (
+            <>
+              <h2 id="setup-confirm-title">Clear all scores?</h2>
+              <p>
+                Every score so far is hidden from all leaderboards, the high-score list, and the all-time best, and
+                an empty event starts. The scores stay saved on this device.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
+              <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
+            </>
+          )}
           <div className="setup-confirm-actions">
             <button
               type="button"
@@ -193,8 +234,8 @@ export function EventSetupScreen({
             >
               CANCEL
             </button>
-            <button type="button" ref={confirmButtonRef} onClick={() => startEvent(true)} disabled={saving}>
-              START FRESH
+            <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
+              {confirmKind === "clear" ? "CLEAR SCORES" : "START FRESH"}
             </button>
           </div>
         </section>
@@ -299,6 +340,16 @@ export function EventSetupScreen({
         <button type="button" className={cursor === "start" ? "is-cursor" : undefined} onClick={() => startEvent()} disabled={saving}>
           START EVENT
         </button>
+        {storedDuration !== null ? (
+          <button
+            type="button"
+            className={cursor === "clear" ? "setup-clear is-cursor" : "setup-clear"}
+            onClick={askToClear}
+            disabled={saving}
+          >
+            CLEAR ALL SCORES
+          </button>
+        ) : null}
         </>
       )}
     </main>

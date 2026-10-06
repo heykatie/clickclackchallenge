@@ -307,6 +307,10 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 All-time leaderboard is the third Leaderboard choice, after Start fresh and Continue previous. Like Continue, it needs an existing event and keeps it: new scores still save to that event, so its own history stays intact. It changes which scores the board ranks: every eligible score ever saved, from every event including archived ones. The choice is stored on the event, so Event Setup shows it again later, and Continue switches the same event back to ranking only its own scores. Neither switch deletes, moves, or rewrites a score. Start fresh always opens a new event that ranks its own scores. What the all-time board changes on each screen is in §16.
 
+### Clear All Scores
+
+When an event exists, Event Setup shows CLEAR ALL SCORES below START EVENT, for removing test scores before a real event. It asks first: “Clear all scores?”, with CANCEL chosen; Escape cancels. CLEAR SCORES hides every event and score saved so far and starts an empty event with the selected length and mode. Hidden scores leave every board, Results placement, the Ready high score, the rolling list, and the all-time best, including on an all-time board. Nothing is deleted: the scores stay on the device and can be restored by un-hiding their events. Scores saved after the clear show normally. In the arrow-key order it comes right after START EVENT.
+
 ### Returning to Event Setup
 
 After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. The Escape key mirrors the badge on every screen after Start Event: a short press does what a tap does, and holding it does what a long-press does. The Escape hold is longer than the badge's long-press, because the giant keyboard is in contestants' hands: 1.5 seconds on Ready and the rolling list, and 3 seconds on Typing, Results, and the Leaderboard. Releasing sooner is a short press. Holding Escape also opens Event Setup from the rolling high-score list. Space and Enter on the Leaderboard return to Ready. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
@@ -1986,6 +1990,7 @@ after Start fresh, Ready and the Leaderboard show All-time best with the earlier
 All-time leaderboard ranks every event's scores on the Leaderboard, Results, Ready, and the rolling list with ALL-TIME labels, and Continue switches the same event back
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
+before a real event, CLEAR ALL SCORES hides every test score from every board and list without deleting them
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard

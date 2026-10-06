@@ -11,7 +11,8 @@ export type SetupChoice =
   | "fresh"
   | "continue"
   | "all-time"
-  | "start";
+  | "start"
+  | "clear";
 
 export interface SetupSelection {
   cursor: SetupChoice;
@@ -30,6 +31,9 @@ export function setupChoices(testMode: TestMode, canContinue: boolean, updateRea
     choices.push("continue", "all-time");
   }
   choices.push("start");
+  if (canContinue) {
+    choices.push("clear");
+  }
   return choices;
 }
 
@@ -55,12 +59,15 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
   return { ...selection, cursor: "start" };
 }
 
-/** Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", and on UPDATE NOW "update". */
+/**
+ * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
+ * "update", and on CLEAR ALL SCORES "clear".
+ */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
   options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean },
-): SetupSelection | "start" | "update" | null {
+): SetupSelection | "start" | "update" | "clear" | null {
   const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
@@ -76,6 +83,9 @@ export function applySetupKey(
     }
     if (current.cursor === "update") {
       return "update";
+    }
+    if (current.cursor === "clear") {
+      return "clear";
     }
     return selectChoice(current, current.cursor);
   }
