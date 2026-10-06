@@ -327,3 +327,30 @@ describe("ResultsScreen WPM count-up", () => {
   });
 });
 
+describe("ResultsScreen celebration", () => {
+  beforeEach(fakeBoothClock);
+
+  const newHigh: ResultStanding = { isNewHighScore: true, isTop5: true, isTop10: true, showNameEntry: true };
+
+  it("bursts doodles around a new high score, hidden from screen readers", () => {
+    renderResults(newHigh);
+    const burst = document.querySelector(".result-celebration");
+    expect(burst?.getAttribute("aria-hidden")).toBe("true");
+    expect(burst?.querySelectorAll(".celebration-piece").length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("keeps the name field focused and usable during the burst", () => {
+    const { onSave } = renderResults(newHigh);
+    expect(document.activeElement).toBe(nameField());
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith("Zed");
+  });
+
+  it("does not burst for a Top 5 place or a calm result", () => {
+    renderResults(ranked);
+    expect(document.querySelector(".result-celebration")).toBeNull();
+  });
+});
+

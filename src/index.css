@@ -842,3 +842,75 @@ button:disabled {
 .result-wpm-count {
   font-variant-numeric: tabular-nums;
 }
+
+/* Results celebration. The burst sits behind the content, so it never covers the score or blocks a tap. */
+.results-screen {
+  isolation: isolate;
+}
+
+.result-celebration {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.celebration-piece {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
+  animation: celebration-burst 1.5s ease-out var(--delay) both;
+}
+
+.celebration-dot {
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@keyframes celebration-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.3)) scale(1.1) rotate(25deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.9) rotate(70deg);
+  }
+}
+
+/* The Plinko and place lines only appear for wins, so every pill gets a small pop. */
+.result-pill {
+  animation: result-pill-pop 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.result-place {
+  animation-delay: 120ms;
+}
+
+@keyframes result-pill-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-celebration {
+    display: none;
+  }
+
+  .result-pill {
+    animation: none;
+  }
+}

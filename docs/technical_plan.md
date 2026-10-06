@@ -2015,6 +2015,7 @@ a result ranked through 20th shows the name field, focused
 Enter on Results saves the score with the typed name
 a result outside 20th does not show the name field
 Enter or Space on Results without name entry opens the leaderboard
+a NEW HIGH SCORE shows the doodle burst, hidden from screen readers, while the name field stays focused and Enter still saves; a Top 5 place or calm result has no burst (celebratesNewHighScore)
 Results gives screen readers the final WPM at once, rolls the visible number up to it, and shows it at once with reduced motion
 a short Escape press on Results saves with the allowed name or null and opens Ready, like a logo tap
 non-Top-10 View Leaderboard opens the Top 5

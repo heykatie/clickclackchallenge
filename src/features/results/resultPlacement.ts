@@ -89,3 +89,8 @@ export function describeAttempt(
     showNameEntry: mine !== undefined && mine.rank <= NAME_ENTRY_RANK,
   };
 }
+
+/** Only a new high score gets the doodle burst. Other wins pop their pills; everything else stays calm. */
+export function celebratesNewHighScore(standing: ResultStanding, displayedWpm: number): boolean {
+  return standing.isNewHighScore && displayedWpm > 0;
+}

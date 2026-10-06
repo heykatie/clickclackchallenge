@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreRecord } from "../../db/persistence";
-import { describeAttempt, resultCopy, type AttemptSnapshot, type ResultStanding } from "./resultPlacement";
+import { celebratesNewHighScore, describeAttempt, resultCopy, type AttemptSnapshot, type ResultStanding } from "./resultPlacement";
 
 function saved(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "id" | "displayedWpm" | "createdAt">): ScoreRecord {
   return {
@@ -227,3 +227,16 @@ describe("resultCopy with the Plinko accuracy gate", () => {
     expect(resultCopy(standing(), 60, null).plinkoLine).toBeNull();
   });
 });
+
+describe("celebratesNewHighScore", () => {
+  it("bursts only for a new high score", () => {
+    expect(celebratesNewHighScore(standing({ isNewHighScore: true, isTop5: true, showNameEntry: true }), 80)).toBe(true);
+    expect(celebratesNewHighScore(standing({ isTop5: true, showNameEntry: true }), 80)).toBe(false);
+    expect(celebratesNewHighScore(standing(), 80)).toBe(false);
+  });
+
+  it("never bursts for a 0 WPM result", () => {
+    expect(celebratesNewHighScore(standing({ isNewHighScore: true }), 0)).toBe(false);
+  });
+});
+
