@@ -932,7 +932,7 @@ The Ready screen should show:
 - high-score WPM
 - name, or a dash when that score has no name
 
-If the active event has no eligible scores yet, show “Be the first high score!”
+If the active event has no eligible scores yet, show “Be the first high score today!”
 
 ---
 

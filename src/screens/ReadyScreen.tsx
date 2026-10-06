@@ -155,7 +155,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
                 </p>
               </>
             ) : (
-              <p className="high-score-empty">Be the first high score!</p>
+              <p className="high-score-empty">Be the first high score today!</p>
             )}
           </section>
           <p className="display ready-prompt">PRESS ANY KEY TO START</p>
