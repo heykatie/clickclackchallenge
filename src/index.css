@@ -148,10 +148,26 @@ h1,
   height: 1.1em;
   border-left: 3px solid var(--tiny-mint-strong);
   pointer-events: none;
+  /* Each key moves the caret into a new element, so the cycle restarts solid and only blinks once typing pauses. */
+  animation: caret-blink 1.2s ease-in-out infinite;
 }
 
 .caret-end {
   left: 100%;
+}
+
+@keyframes caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  60%,
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .stats {
@@ -626,6 +642,7 @@ button.is-cursor {
     overflow: auto;
   }
 
+  .caret,
   .screensaver-window.is-rolling .screensaver-track,
   .screensaver-window:not(.is-rolling) .score-row,
   .ready-copy h1,

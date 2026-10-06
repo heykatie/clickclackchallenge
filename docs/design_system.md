@@ -380,9 +380,9 @@ Preserve five row positions. An unoccupied place keeps its rank in an outlined c
 
 ## 14. Motion
 
-Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. Reduced motion keeps both still.
+Motion should be brief and purposeful: button feedback, a result reveal, a new-high-score celebration, or a restrained leaderboard transition. On Ready, the contest headline bounces a little and “PRESS ANY KEY TO START” pulses. On Typing, the caret blinks slowly: visible for the first 0.6 seconds of a 1.2-second cycle, then a short fade out and back. Each key restarts the cycle, so the caret stays solid while someone is typing. Reduced motion keeps all three still.
 
-- Do not animate the passage position or use moving backgrounds during Typing.
+- Do not animate the passage position or use moving backgrounds during Typing. The slow caret blink is the only motion there.
 - Do not let celebrations obscure scores, delay controls, or interfere with name entry.
 - Respect `prefers-reduced-motion`; essential feedback must remain understandable without animation.
 - A visible timer and reset message provide information independently of decorative motion.
