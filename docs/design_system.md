@@ -235,22 +235,23 @@ Display three option groups and one main action:
 | Update message | “An update is ready.” (bold), “The app restarts on Event Setup. Scores are kept.”; UPDATE NOW. A mint-tinted card with a mint ring under the hint, only while an update waits |
 | All-time board labels | “ALL-TIME TOP 5” on the Leaderboard pill, “ALL-TIME HIGH SCORE” on Ready, and “ALL-TIME HIGH SCORES” on the rolling list, in place of “TOP 5”, “CURRENT HIGH SCORE”, and “HIGH SCORES” |
 | All-time best line | “All-time best: {WPM} WPM · {name}”, or “All-time best: {WPM} WPM” without a name. Small bold deep-lavender text: inside the Ready high-score card under the name, and on the Leaderboard between the board and NEXT PLAYER |
-| Clear all scores | CLEAR ALL SCORES, a small white pill with a lavender ring in the top-right corner, level with the logo badge and away from START EVENT, only when an event exists. Its confirmation reads “Clear all scores?”, “Every score so far is hidden from all leaderboards, the high-score list, and the all-time best, and an empty event starts. The scores stay saved on this device.”; CANCEL; CLEAR SCORES |
-| Restore cleared scores | RESTORE CLEARED SCORES, the same small pill, next to CLEAR ALL SCORES only after a clear. Its confirmation reads “Restore cleared scores?”, “The scores hidden by the last clear show again on every board and list. The current event and its scores stay.”; CANCEL; RESTORE |
+| Clear all scores | CLEAR ALL SCORES, a small underlined muted link at the bottom left, away from START EVENT, only when an event exists. Its confirmation reads “Clear all scores?”, “Every score so far is hidden from all leaderboards, the high-score list, and the all-time best, and an empty event starts. The scores stay saved on this device.”; CANCEL; CLEAR SCORES |
+| Restore cleared scores | RESTORE CLEARED SCORES, the same small link, next to CLEAR ALL SCORES only after a clear. Its confirmation reads “Restore cleared scores?”, “The scores hidden by the last clear show again on every board and list. The current event and its scores stay.”; CANCEL; RESTORE |
 | Start fresh confirmation | “Start a fresh leaderboard?”; “The current scores stay saved, but they will not show on the leaderboard again.”; CANCEL; START FRESH |
 
 Use a blush or soft-white background, rounded option controls, clear selection indicators, and sparse edge decoration. An optional logo-only badge may sit in a corner.
 
-Layout, after `01-setup.png`:
+Layout, after `01-setup.png` but pared back so the choices stand out:
 
-- Header: a mint “OPERATOR SETUP” pill, the headline “Set up today's typing test”, and the muted line “Pick a length, game, and leaderboard.”
-- Three white group cards with a lavender ring, each titled with a numbered lavender circle: “1 Test length”, “2 Game mode”, “3 Leaderboard”. On a wide screen Test length and Game mode sit side by side above Leaderboard; below 900px they stack.
-- Each choice is a tile: a dot, a Fredoka title, and a muted one-line description. Test length tiles show “30s” and “60s” as big Baloo 2 numbers with “Faster flow” and “Bigger challenge”. Game mode: Standard “Common words, new mix”; Famous Lines “Same lines for all”; Story “One short story”. Leaderboard: Start fresh “New, empty board”; Continue previous “Keep last board”; All-time leaderboard “Every score ever”. Keep these lines to a few words.
-- A selected tile fills its dot and takes a tint and ring: mint for Test length and Game mode, lavender for Leaderboard. The keyboard cursor is the charcoal outline. Unavailable tiles fade to half strength. While Story is selected, “Story is always 60s.” sits under Test length; with no event, “No previous event yet.” sits under Leaderboard.
-- A white footer bar holds “Arrow keys move. Enter selects.” on the left and a large mint “START EVENT →” on the right.
-- Only the pink corner blob; the mint arc is left out because the operator tools sit in the top-right corner.
+- The headline “Set up today's typing test” on its own. No pill or subtitle above or under it.
+- Three borderless white cards titled “Test length”, “Game mode”, and “Leaderboard”, with no step numbers. On a wide screen Test length and Game mode sit side by side above Leaderboard; below 900px they stack.
+- Each choice is a tile with a soft blush fill and no border or dot. Test length tiles show “30s” and “60s” as big Baloo 2 numbers with “Faster flow” and “Bigger challenge”. Game mode: Standard “Common words, new mix”; Famous Lines “Same lines for all”; Story “One short story”. Leaderboard: Start fresh “New, empty board”; Continue previous “Keep last board”; All-time leaderboard “Every score ever”. Keep these lines to a few words.
+- Only the selected tile gets a ring and tint: mint for Test length and Game mode, lavender for Leaderboard. The keyboard cursor is the charcoal outline. Unavailable tiles fade. While Story is selected, “Story is always 60s.” sits under Test length; with no event, “No previous event yet.” sits under Leaderboard.
+- START EVENT → stands on its own at the bottom right, with “Arrow keys move. Enter selects.” in small muted text centered under it, with a little space between. No footer box.
+- CLEAR ALL SCORES and RESTORE CLEARED SCORES are small underlined muted links at the bottom left.
+- Only the pink corner blob.
 
-Each tile stays a real radio button named by its title and described by its line, so keyboard order, touch, and screen readers are unchanged.
+Each tile stays a real radio button named by its title, so keyboard order, touch, and screen readers are unchanged.
 
 Fresh-event and continue-event behavior, including saved duration and game mode, is defined in `docs/prd.md`. When no event exists, Start Fresh, 30 seconds, and Famous Lines are selected, and Continue is unavailable. When an event exists, Continue is selected and the duration and game mode controls show the stored choices. Standard and Famous Lines keep both lengths selectable. Story keeps Test length visible and fixed at 60 seconds. Switching back to Standard or Famous Lines restores the length selected for those modes. Those choices apply to the next contestant. They keep the event and its leaderboard.
 
