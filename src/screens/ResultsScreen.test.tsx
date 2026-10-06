@@ -305,14 +305,16 @@ describe("ResultsScreen WPM count-up", () => {
     expect(document.querySelector(".result-wpm-count")?.closest("[aria-hidden='true']")).toBeTruthy();
   });
 
-  it("rolls the WPM up from 0 and settles on the final score", () => {
+  it("holds the WPM at 0 while the headline types, then rolls up and settles on the final score", () => {
     renderResults(unranked);
     expect(shownWpm()).toBe("0");
-    act(() => vi.advanceTimersByTime(400));
+    act(() => vi.advanceTimersByTime(850));
+    expect(shownWpm()).toBe("0");
+    act(() => vi.advanceTimersByTime(450));
     const midway = Number(shownWpm());
     expect(midway).toBeGreaterThan(0);
     expect(midway).toBeLessThan(42);
-    act(() => vi.advanceTimersByTime(500));
+    act(() => vi.advanceTimersByTime(1300));
     expect(shownWpm()).toBe("42");
   });
 
@@ -367,6 +369,16 @@ describe("ResultsScreen celebration", () => {
       [..."Nice typing!"].map((_, index) => String(index)),
     );
     expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("waves the letters of Thanks for playing! one after another, keeping the heading's name", () => {
+    renderResults(unranked);
+    const heading = screen.getByRole("heading", { name: "Thanks for playing!" });
+    const letters = [...heading.querySelectorAll(".wave-letter")];
+    expect(letters.map((letter) => letter.textContent).join("")).toBe("Thanks for playing!");
+    expect((letters[3] as HTMLElement).style.getPropertyValue("--letter-index")).toBe("3");
+    expect(letters[0]?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    expect(heading.querySelector(".typed-letter")).toBeNull();
   });
 
   it("does not type out NEW HIGH SCORE!", () => {

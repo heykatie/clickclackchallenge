@@ -329,8 +329,8 @@ button.is-cursor {
   }
   50% {
     box-shadow:
-      0 0 0 2.5px var(--tiny-mint-deep),
-      0 0 11px 4px rgb(108 207 199 / 0.75);
+      0 0 0 2.5px var(--tiny-mint-strong),
+      0 0 11px 4px rgb(36 117 110 / 0.45);
   }
 }
 
@@ -758,6 +758,23 @@ button.is-cursor {
   animation: typed-letter-in 1ms linear calc(var(--letter-index, 0) * 70ms) both;
 }
 
+/* "Thanks for playing!" waves hello: each letter bobs up in turn, twice. */
+.wave-letter {
+  display: inline-block;
+  white-space: pre;
+  animation: wave-letter-bob 600ms ease-in-out calc(300ms + var(--letter-index, 0) * 50ms) 2;
+}
+
+@keyframes wave-letter-bob {
+  0%,
+  100% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-0.3em) rotate(-4deg);
+  }
+}
+
 @keyframes typed-letter-in {
   from {
     opacity: 0;
@@ -779,7 +796,8 @@ button.is-cursor {
   .ready-copy h1,
   .ready-plinko,
   .ready-prompt,
-  .typed-letter {
+  .typed-letter,
+  .wave-letter {
     animation: none;
   }
 
@@ -1035,17 +1053,18 @@ button:disabled {
  * so staff spot a prize winner.
  */
 .result-pill {
-  animation: result-pill-pop 600ms ease-out 800ms both;
+  animation: result-pill-pop 600ms ease-out 2.5s both;
 }
 
+/* The prize keeps wiggling every 3 seconds so staff and passers-by spot a winner. */
 .result-plinko {
   animation:
-    result-pill-pop 600ms ease-out 800ms both,
-    result-pill-wiggle 500ms ease-in-out 1500ms 2;
+    result-pill-pop 600ms ease-out 2.5s both,
+    result-pill-wiggle 3s ease-in-out 3.2s infinite;
 }
 
 .result-place {
-  animation-delay: 950ms;
+  animation-delay: 2.65s;
 }
 
 @keyframes result-pill-pop {
@@ -1066,15 +1085,19 @@ button:disabled {
   }
 }
 
+/* Two quick wiggles, then rest until the next 3-second beat. */
 @keyframes result-pill-wiggle {
   0%,
+  34%,
   100% {
     transform: rotate(0deg);
   }
-  25% {
+  4%,
+  21% {
     transform: rotate(-4deg);
   }
-  75% {
+  12%,
+  29% {
     transform: rotate(4deg);
   }
 }

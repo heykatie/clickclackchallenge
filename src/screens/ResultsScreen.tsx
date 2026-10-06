@@ -273,7 +273,13 @@ export function ResultsScreen({
             standing && celebratesNewHighScore(standing, result.displayedWpm) ? "is-new-high-score" : undefined
           }
         >
-          {copy.headline === "Nice typing!" ? <TypedHeadline text={copy.headline} /> : copy.headline}
+          {copy.headline === "Nice typing!" ? (
+            <LetterHeadline text={copy.headline} letterClass="typed-letter" />
+          ) : copy.headline === "Thanks for playing!" ? (
+            <LetterHeadline text={copy.headline} letterClass="wave-letter" />
+          ) : (
+            copy.headline
+          )}
         </h1>
       ) : null}
       <p className="stat-value">
@@ -322,14 +328,14 @@ export function ResultsScreen({
   );
 }
 
-/** Shows the text appearing one letter after another, as if it were being typed. */
-function TypedHeadline({ text }: { text: string }) {
+/** Splits the headline into letters the CSS animates in turn: typed in, or waving hello. */
+function LetterHeadline({ text, letterClass }: { text: string; letterClass: string }) {
   return (
     <>
       <span className="visually-hidden">{text}</span>
       <span aria-hidden="true">
         {[...text].map((letter, index) => (
-          <span key={index} className="typed-letter" style={{ "--letter-index": index } as CSSProperties}>
+          <span key={index} className={letterClass} style={{ "--letter-index": index } as CSSProperties}>
             {letter}
           </span>
         ))}
