@@ -462,7 +462,8 @@ button.is-cursor {
 
 /* Just smaller than PRESS ANY KEY TO START above it. */
 .ready-helper {
-  margin: 0;
+  /* Tucks the hint up under PRESS ANY KEY TO START instead of a full section gap away. */
+  margin: -1rem 0 0;
   font-size: 0.85rem;
 }
 
