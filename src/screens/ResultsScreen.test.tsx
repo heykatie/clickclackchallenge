@@ -348,6 +348,16 @@ describe("ResultsScreen celebration", () => {
     expect(onSave).toHaveBeenCalledExactlyOnceWith("Zed");
   });
 
+  it("marks only the NEW HIGH SCORE headline for its celebration font", () => {
+    renderResults(newHigh);
+    expect(screen.getByRole("heading", { name: "NEW HIGH SCORE!" }).className).toContain("is-new-high-score");
+  });
+
+  it("keeps other headlines in the regular display font", () => {
+    renderResults(ranked);
+    expect(screen.getByRole("heading", { name: "Nice typing!" }).className).not.toContain("is-new-high-score");
+  });
+
   it("does not burst for a Top 5 place or a calm result", () => {
     renderResults(ranked);
     expect(document.querySelector(".result-celebration")).toBeNull();
