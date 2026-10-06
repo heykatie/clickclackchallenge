@@ -13,7 +13,8 @@ import {
 } from "../features/typing/typingEngine";
 import { useLogoHold } from "./useLogoHold";
 
-const WAITING_RETURN_MS = 5000;
+/** Long enough to read the first sentence before the first key; shorter than a walk-away. */
+const WAITING_RETURN_MS = 8000;
 
 type TypingScreenProps = {
   session: TestSession;

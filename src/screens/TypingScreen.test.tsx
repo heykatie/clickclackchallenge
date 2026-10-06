@@ -57,9 +57,9 @@ describe("TypingScreen", () => {
     expect(onType).not.toHaveBeenCalled();
   });
 
-  it("returns to Ready after 5 seconds without a key that starts the timer", () => {
+  it("returns to Ready after 8 seconds without a key that starts the timer", () => {
     const { onReturnToReady } = renderTyping();
-    act(() => vi.advanceTimersByTime(4_999));
+    act(() => vi.advanceTimersByTime(7_999));
     expect(onReturnToReady).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(1));
     expect(onReturnToReady).toHaveBeenCalledOnce();
