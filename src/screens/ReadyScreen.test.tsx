@@ -54,7 +54,7 @@ function tap(element: Element) {
 }
 
 function tapLogo() {
-  const logo = screen.getByRole("button", { name: "Logo" });
+  const logo = screen.getByRole("button", { name: "Show high scores" });
   fireEvent.pointerDown(logo, { button: 0 });
   fireEvent.pointerUp(logo, { button: 0 });
 }
@@ -133,7 +133,7 @@ describe("ReadyScreen", () => {
 
   it("opens Event Setup on a logo hold without starting the test", async () => {
     const { onStart, onSetup } = await renderReady();
-    const logo = screen.getByRole("button", { name: "Logo" });
+    const logo = screen.getByRole("button", { name: "Show high scores" });
     fireEvent.pointerDown(logo, { button: 0 });
     act(() => vi.advanceTimersByTime(600));
     expect(onSetup).toHaveBeenCalledOnce();
