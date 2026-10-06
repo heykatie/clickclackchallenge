@@ -839,6 +839,11 @@ button.is-cursor {
   margin: 0;
 }
 
+/* Every Results headline matches the deep-lavender Ready headline. */
+.results-screen h1 {
+  color: var(--tiny-lavender-deep);
+}
+
 .result-pill {
   margin: 0;
   padding: 0.75rem 1.25rem;
