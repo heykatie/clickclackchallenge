@@ -304,6 +304,19 @@ label.setup-option-big {
   border-color: var(--tiny-lavender);
 }
 
+/*
+ * One rounded ring on the field itself, whether the keyboard cursor is on it or someone is typing in it,
+ * instead of a square box around the label as well.
+ */
+.setup-name.is-cursor {
+  outline: none;
+}
+
+.setup-name.is-cursor input {
+  outline: 3px solid var(--tiny-charcoal);
+  outline-offset: 3px;
+}
+
 .setup-tools {
   display: flex;
   flex-wrap: wrap;
