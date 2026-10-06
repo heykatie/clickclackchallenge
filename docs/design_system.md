@@ -185,7 +185,7 @@ Touch targets must be at least 44 × 44 px. Prefer a height of 56 px or more for
 
 ### Ready prompt
 
-“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. The Ready contest headline is deep lavender. The Ready Plinko pill is light mint with charcoal text, and a thin mint ring and a soft teal glow fade in and out around it every 2.4 seconds; reduced motion keeps it plain. The helper line under it is smaller again, at 1rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
+“PRESS ANY KEY TO START” is the keyboard invitation, not a Start button. It is set just smaller than the Plinko line (1.125rem against 1.25rem) and stands out by its deep mint and pulse rather than its size. The Ready contest headline is deep lavender. The Ready Plinko pill is light mint with charcoal text, and a thin mint ring and a soft teal glow fade in and out around it every 2.4 seconds; reduced motion keeps it plain. The helper line under it is smaller again, at 0.85rem. A tap anywhere on Ready also starts the test. Use deep mint text, `--tiny-mint-deep`. It pulses. Reduced motion keeps it still.
 
 ### Option groups
 
@@ -250,7 +250,7 @@ Layout, after `01-setup.png` but pared back so the choices stand out:
 
 - The headline “Set up today's typing test” on its own. No pill or subtitle above or under it.
 - Three borderless white cards titled “Test length”, “Game mode”, and “Leaderboard”, with no step numbers. On a wide screen Test length and Game mode sit side by side above Leaderboard; below 900px they stack.
-- Each choice is a tile with a soft blush fill and no border or dot. Test length tiles show “30s” and “60s” as big Baloo 2 numbers with “Faster flow” and “Bigger challenge”. Game mode: Standard “Common words, new mix”; Famous Lines “Same lines for all”; Story “One short story”. Leaderboard: Start fresh “New, empty board”; Continue previous “Keep last board”; All-time leaderboard “Every score ever”. Keep these lines to a few words.
+- Each choice is a tile with a soft blush fill and no border or dot. Test length tiles show “30s” and “60s” as big Baloo 2 numbers with “Faster flow” and “Bigger challenge”. Game mode: Standard “Random easy words”; Famous Lines “Same lines for all”; Story “Race with a short story”. Leaderboard: Start fresh “New, empty board”; Continue previous “Keep last board”; All-time leaderboard “Every score ever”. Keep these lines to a few words.
 - Only the selected tile gets a ring and tint: mint for Test length and Game mode, lavender for Leaderboard. The keyboard cursor is the charcoal outline. Unavailable tiles fade. While Story is selected, “Story is always 60s.” sits under Test length; with no event, “No previous event yet.” sits under Leaderboard.
 - START EVENT → stands on its own at the bottom right, with “Arrow keys move. Enter selects.” in small muted text centered under it, with a little space between. No footer box.
 - CLEAR ALL SCORES and RESTORE CLEARED SCORES are small underlined muted links at the bottom left.

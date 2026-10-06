@@ -299,7 +299,7 @@ button.is-cursor {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1.75rem;
   text-align: center;
   max-width: 40rem;
 }
@@ -354,7 +354,7 @@ button.is-cursor {
 
 .high-score-card {
   width: min(100%, 22rem);
-  padding: 1.25rem 1.5rem;
+  padding: 1.6rem 1.75rem;
   border-radius: 1.75rem;
   background: var(--tiny-white);
 }
@@ -363,9 +363,13 @@ button.is-cursor {
   margin: 0;
 }
 
+.high-score-card .all-time-best {
+  margin-top: 0.75rem;
+}
+
 .high-score-card .stat-value {
   /* Baloo 2's tall default line height and the paragraph margin left a wide gap around the number. */
-  margin: 0.6rem 0 0.4rem;
+  margin: 0.75rem 0 0.6rem;
   line-height: 1;
   font-family: var(--font-number);
   font-size: 3rem;
@@ -377,6 +381,10 @@ button.is-cursor {
   margin: 0;
   font-size: 1.375rem;
   font-weight: 700;
+}
+
+.high-score-card .high-score-empty {
+  margin-top: 0.9rem;
 }
 
 .high-score-name {
@@ -454,8 +462,9 @@ button.is-cursor {
 
 /* Just smaller than PRESS ANY KEY TO START above it. */
 .ready-helper {
-  margin: 0;
-  font-size: 1rem;
+  /* Tucks the hint up under PRESS ANY KEY TO START instead of a full section gap away. */
+  margin: -1rem 0 0;
+  font-size: 0.85rem;
 }
 
 /* Sparse edge motifs for score screens: a blush-pink blob low left and a mint arc high right. */
@@ -774,6 +783,10 @@ button.is-cursor {
 .typed-letter {
   white-space: pre;
   animation: typed-letter-in 1ms linear calc(var(--letter-index, 0) * 70ms) both;
+}
+
+.headline-word {
+  white-space: nowrap;
 }
 
 /* "Thanks for playing!" waves hello: each letter bobs up in turn, twice. */

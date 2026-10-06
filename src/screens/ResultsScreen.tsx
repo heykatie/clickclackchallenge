@@ -350,12 +350,37 @@ function LetterHeadline({ text, letterClass }: { text: string; letterClass: stri
     <>
       <span className="visually-hidden">{text}</span>
       <span aria-hidden="true">
-        {[...text].map((letter, index) => (
-          <span key={index} className={letterClass} style={{ "--letter-index": index } as CSSProperties}>
-            {letter}
-          </span>
-        ))}
+        {headlineWords(text).map(({ word, start }) => {
+          const letters = [...word].map((letter, offset) => (
+            <span
+              key={start + offset}
+              className={letterClass}
+              style={{ "--letter-index": start + offset } as CSSProperties}
+            >
+              {letter}
+            </span>
+          ));
+          // Each letter is its own box, so a word is held together or the line could break inside it.
+          return word === " " ? letters : (
+            <span key={`word-${start}`} className="headline-word">
+              {letters}
+            </span>
+          );
+        })}
       </span>
     </>
   );
+}
+
+/** Splits a headline into words and the single spaces between them, keeping each piece's letter position. */
+function headlineWords(text: string): { word: string; start: number }[] {
+  const pieces: { word: string; start: number }[] = [];
+  let start = 0;
+  for (const word of text.split(/( )/)) {
+    if (word) {
+      pieces.push({ word, start });
+    }
+    start += [...word].length;
+  }
+  return pieces;
 }
