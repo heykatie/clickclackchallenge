@@ -139,7 +139,7 @@ export function ReadyScreen({ highScore, onStart, onSetup, claimShortEscape }: R
         <button
           type="button"
           className="logo-badge"
-          aria-label="Logo"
+          aria-label="Show high scores"
           {...logoHold}
         />
         <div className="ready-copy">
