@@ -302,7 +302,7 @@ The operator can do this from the giant keyboard. The cursor starts on START EVE
 
 ### Returning to Event Setup
 
-After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. The Escape key mirrors the badge on every screen after Start Event: a short press does what a tap does, and holding it for that same moment does what a long-press does. Holding Escape also opens Event Setup from the rolling high-score list. Space and Enter on the Leaderboard return to Ready. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
+After Start Event, a long-press on the logo-only badge opens Event Setup from Ready, Typing, Results, and the Leaderboard. A single tap on the badge returns to Ready from Typing, Results, and the Leaderboard. On Ready, a tap on the badge opens the rolling high-score list at once, when at least one qualifying score exists, and otherwise does nothing. The Escape key mirrors the badge on every screen after Start Event: a short press does what a tap does, and holding it does what a long-press does. The Escape hold is longer than the badge's long-press, because the giant keyboard is in contestants' hands: 1.5 seconds on Ready and the rolling list, and 3 seconds on Typing, Results, and the Leaderboard. Releasing sooner is a short press. Holding Escape also opens Event Setup from the rolling high-score list. Space and Enter on the Leaderboard return to Ready. The active event stays as it is. An attempt that has not been saved is discarded. Other keys do not open Event Setup. Ready still shows no operator settings.
 
 ---
 
@@ -1948,7 +1948,7 @@ an unfinished Story scores the full minute
 every Famous Lines sentence and Standard line fits on one line
 Next Player reset passes
 Space, Enter, or a short Escape press on the Leaderboard returns to Ready
-holding Escape on Ready, Typing, Results, or the Leaderboard opens Event Setup
+holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard
 a short Escape press on Ready does not start the test and opens the rolling high-score list
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
