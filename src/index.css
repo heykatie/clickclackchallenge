@@ -800,3 +800,10 @@ button:disabled {
 .setup-update p {
   margin: 0;
 }
+
+.all-time-best {
+  margin: 0.5rem 0 0;
+  color: var(--tiny-lavender-deep);
+  font-size: 1rem;
+  font-weight: 700;
+}

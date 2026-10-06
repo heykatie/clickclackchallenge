@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ScoreRecord } from "../db/persistence";
 import { isLeaderboardLeaveKey } from "../features/leaderboard/leaveKeys";
-import { boardEntries, rankScores, topFiveSlots } from "../features/leaderboard/ranking";
+import { allTimeBestLine, boardEntries, rankScores, topFiveSlots } from "../features/leaderboard/ranking";
 import { moveActionFocus } from "../state/actionFocus";
 import { acceptsLeaveKey } from "../state/leaveKeyGrace";
 import { ScoreRow } from "./ScoreRow";
@@ -13,6 +13,8 @@ const RESET_COUNTDOWN_AT = 5;
 type LeaderboardScreenProps = {
   scores: readonly ScoreRecord[];
   currentScoreId: string | null;
+  /** The best eligible score from every event, or null when none was ever saved. */
+  allTimeBest: ScoreRecord | null;
   onNextPlayer: () => void;
   onSetup: () => void;
   claimShortEscape: (handler: (() => void) | null) => void;
@@ -21,6 +23,7 @@ type LeaderboardScreenProps = {
 export function LeaderboardScreen({
   scores,
   currentScoreId,
+  allTimeBest,
   onNextPlayer,
   onSetup,
   claimShortEscape,
@@ -31,7 +34,9 @@ export function LeaderboardScreen({
   const left = useRef(false);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const onNextPlayerRef = useRef(onNextPlayer);
-  const slots = topFiveSlots(boardEntries(rankScores(scores)));
+  const ranked = rankScores(scores);
+  const slots = topFiveSlots(boardEntries(ranked));
+  const bestLine = allTimeBestLine(allTimeBest, ranked[0]?.score ?? null);
   const logoHold = useLogoHold(() => {
     left.current = true;
     onSetup();
@@ -117,6 +122,7 @@ export function LeaderboardScreen({
           />
         ))}
       </ol>
+      {bestLine ? <p className="all-time-best">{bestLine}</p> : null}
       <button type="button" ref={nextButtonRef} className="next-player-button" onClick={leave}>
         NEXT PLAYER <span aria-hidden="true">→</span>
       </button>

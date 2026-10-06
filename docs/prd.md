@@ -934,6 +934,10 @@ The Ready screen should show:
 
 If the active event has no eligible scores yet, show “Be the first high score today!”
 
+### All-time best
+
+Ready, under the event's high score, and the Leaderboard, under the board, show one line with the best eligible score ever saved, from any event including archived ones: “All-time best: {WPM} WPM · {name}”, or without the name when the score has none. The line is hidden when nothing was ever saved, and when the all-time best is this event's own first place, which is already shown. It is display only and never changes ranking, placement, or prizes. House scores are never the all-time best.
+
 ---
 
 ## 18. Next Player and Reset Behavior
@@ -1961,6 +1965,7 @@ a short Escape press on Ready does not start the test and opens the rolling high
 a short Escape press on Results saves the score and returns to Ready, like a logo tap
 arrow keys, Tab, and Shift+Tab choose SAVE SCORE or VIEW LEADERBOARD on Results and NEXT PLAYER on the Leaderboard, and Enter or Space selects the chosen one
 an event with no eligible score shows Clicky 60 WPM and Clacky 45 WPM on the Leaderboard, and the first real score replaces them
+after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
 the operator can change Event Setup with the arrow keys and Enter
 Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
 the first letter on Results goes into the name

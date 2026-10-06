@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScoreRecord } from "../../db/persistence";
 import { calculateWpm, displayedWpm } from "../typing/scoring";
-import { rollingListScores, boardEntries, highScore, rankScores, topFiveSlots } from "./ranking";
+import { allTimeBestLine, boardEntries, highScore, rankScores, rollingListScores, topFiveSlots } from "./ranking";
 
 function score(overrides: Partial<ScoreRecord> & Pick<ScoreRecord, "displayedWpm" | "accuracy" | "createdAt">): ScoreRecord {
   return {
@@ -253,6 +253,28 @@ describe("boardEntries", () => {
   it("drops the house scores once one real score is on the board", () => {
     const ranked = rankScores([score({ displayedWpm: 20, accuracy: 95, createdAt: "2026-09-22T00:00:00.000Z" })]);
     expect(boardEntries(ranked)).toBe(ranked);
+  });
+});
+
+describe("allTimeBestLine", () => {
+  const best = score({ id: "best", name: "Zed", displayedWpm: 196, accuracy: 100, createdAt: "2026-09-21T00:00:00.000Z" });
+  const eventTop = score({ id: "today", name: "Alex", displayedWpm: 60, accuracy: 95, createdAt: "2026-09-22T00:00:00.000Z" });
+
+  it("names the all-time best score", () => {
+    expect(allTimeBestLine(best, eventTop)).toBe("All-time best: 196 WPM · Zed");
+  });
+
+  it("leaves out the name of a score saved without one", () => {
+    expect(allTimeBestLine({ ...best, name: null }, eventTop)).toBe("All-time best: 196 WPM");
+  });
+
+  it("shows on an event with no score yet", () => {
+    expect(allTimeBestLine(best, null)).toBe("All-time best: 196 WPM · Zed");
+  });
+
+  it("is hidden when this event's high score is the all-time best, or nothing was ever saved", () => {
+    expect(allTimeBestLine(best, best)).toBeNull();
+    expect(allTimeBestLine(null, null)).toBeNull();
   });
 });
 

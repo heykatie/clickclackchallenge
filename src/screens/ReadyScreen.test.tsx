@@ -80,6 +80,24 @@ describe("ReadyScreen", () => {
     expect(screen.getByText("Be the first high score today!")).toBeTruthy();
   });
 
+  it("shows the all-time best under the event's high score when another event holds it", async () => {
+    const best = { ...qualifying, id: "best", eventId: "event-0", name: "Zed", displayedWpm: 196 };
+    await renderReady([qualifying], { displayedWpm: 60, name: "Alex" }, [qualifying, best]);
+    expect(screen.getByText("All-time best: 196 WPM · Zed")).toBeTruthy();
+  });
+
+  it("shows the all-time best on an event with no score yet", async () => {
+    const best = { ...qualifying, id: "best", eventId: "event-0", name: "Zed", displayedWpm: 196 };
+    await renderReady([], null, [best]);
+    expect(screen.getByText("Be the first high score today!")).toBeTruthy();
+    expect(screen.getByText("All-time best: 196 WPM · Zed")).toBeTruthy();
+  });
+
+  it("hides the all-time line when this event's high score is the all-time best", async () => {
+    await renderReady();
+    expect(screen.queryByText(/All-time best/)).toBeNull();
+  });
+
   it("starts the test from any key through the window listener", async () => {
     const { onStart } = await renderReady();
     fireEvent.keyDown(window, { key: "a" });

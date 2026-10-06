@@ -95,3 +95,15 @@ const HOUSE_SCORES: readonly RankedScore[] = [houseScore(1, "Clicky", 60), house
 export function boardEntries(ranked: readonly RankedScore[]): readonly RankedScore[] {
   return ranked.length > 0 ? ranked : HOUSE_SCORES;
 }
+
+/**
+ * "All-time best: 196 WPM · Zed" for the best eligible score ever saved, from any event.
+ * Null when nothing was saved, or when it is this event's own first place, which the screen already shows.
+ */
+export function allTimeBestLine(best: ScoreRecord | null, eventBest: ScoreRecord | null): string | null {
+  if (best === null || (eventBest !== null && best.id === eventBest.id)) {
+    return null;
+  }
+  const line = `All-time best: ${best.displayedWpm} WPM`;
+  return best.name ? `${line} · ${best.name}` : line;
+}

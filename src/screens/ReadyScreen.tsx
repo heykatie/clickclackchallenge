@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { listScores } from "../db/persistence";
-import { rollingListScores, type RankedScore } from "../features/leaderboard/ranking";
+import { listAllScores, listScores, type ScoreRecord } from "../db/persistence";
+import { allTimeBestLine, highScore as bestOf, rollingListScores, type RankedScore } from "../features/leaderboard/ranking";
 import type { HighScoreSummary } from "../state/appState";
 import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
@@ -24,6 +24,8 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
   const [rolling, setRolling] = useState<RankedScore[]>([]);
+  const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
+  const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
   const logoHold = useLogoHold(onSetup, () => {
     if (readyLogoTap(rolling.length) === "roll") {
@@ -48,6 +50,18 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
       () => {
         if (!cancelled) {
           setRolling([]);
+        }
+      },
+    );
+    listAllScores().then(
+      (scores) => {
+        if (!cancelled) {
+          setAllTimeBest(bestOf(scores));
+        }
+      },
+      () => {
+        if (!cancelled) {
+          setAllTimeBest(null);
         }
       },
     );
@@ -160,6 +174,7 @@ export function ReadyScreen({ eventId, highScore, onStart, onSetup, claimShortEs
             ) : (
               <p className="high-score-empty">Be the first high score today!</p>
             )}
+            {bestLine ? <p className="all-time-best">{bestLine}</p> : null}
           </section>
           <p className="display ready-prompt">PRESS ANY KEY TO START</p>
           <p className="ready-helper">Your timer starts when you begin typing.</p>
