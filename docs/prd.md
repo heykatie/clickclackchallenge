@@ -1194,6 +1194,8 @@ Leaderboard state should be derived from persisted scores.
 
 A partially completed contestant test does not need to be restored after the app closes unexpectedly. Returning to Ready is acceptable.
 
+At launch the app asks the browser to keep its storage (`navigator.storage.persist()`), so the browser does not clear the scores to free space or after a period without use. The browser decides whether to grant it; Safari keeps a Home Screen app's data, but a regular Safari tab can lose it after about 7 days without use. Running the booth from the Home Screen app remains required. The request never blocks the booth.
+
 ---
 
 ## 21. Accessibility Requirements
@@ -1967,6 +1969,7 @@ a tap on the logo badge returns to Ready from Typing without saving, from Result
 automatic reset passes
 giant keyboard input passes
 PWA launches offline
+the booth runs from the Home Screen app, not a Safari tab, so its saved scores are kept
 full airplane-mode flow passes
 saved scores survive offline relaunch
 ```

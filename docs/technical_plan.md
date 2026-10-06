@@ -1939,6 +1939,7 @@ Verify IndexedDB behavior independently of UI rendering.
 Required cases:
 
 ```text
+launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
 score can be written and read
 multiple scores can be retrieved by eventId
