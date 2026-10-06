@@ -1238,6 +1238,11 @@ label.setup-option-big {
 }
 
 /* Leaderboard motion. The just-saved row climbs from below the board; the rows below it slide down. */
+/* The climbing row rises from inside the board's bottom edge, not over NEXT PLAYER. */
+.leaderboard-rows {
+  overflow: clip;
+}
+
 .leaderboard-rows .score-row {
   position: relative;
 }

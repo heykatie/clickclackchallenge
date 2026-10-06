@@ -390,7 +390,7 @@ Show actual event data. The one exception is the board with no eligible score, w
 
 Preserve five row positions. An unoccupied place keeps its rank in an outlined circle, with a muted dash for the name and the WPM. Do not style an empty placeholder as a winning score: rank 1 gets its lavender row, podium circle, and crown only when a score holds it.
 
-Leaderboard motion: the just-saved row waits a moment, then climbs into place from below the board over 1.3 seconds while the scored rows under it slide down one row, then a white shimmer sweeps across it twice. The rank 1 crown drops in and wobbles once the climb lands. A thin mint bar along the bottom of NEXT PLAYER drains over the auto-return time; the text countdown stays. When the contestant is the new rank 1, the Results sparkle burst plays here too. Reduced motion keeps the rows and crown still and hides the bar.
+Leaderboard motion: the just-saved row waits a moment, then climbs into place from the board's bottom edge, clipped by the card, over 1.3 seconds while the scored rows under it slide down one row, then a white shimmer sweeps across it twice. The rank 1 crown drops in and wobbles once the climb lands. A thin mint bar along the bottom of NEXT PLAYER drains over the auto-return time; the text countdown stays. When the contestant is the new rank 1, the Results sparkle burst plays here too. Reduced motion keeps the rows and crown still and hides the bar.
 
 ### Automatic return
 
