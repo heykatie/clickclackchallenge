@@ -612,9 +612,47 @@ button.is-cursor {
   font-size: 2.75rem;
 }
 
+/*
+ * A list short enough to hold still would look frozen, so after the rows rise in, a slow wave
+ * lifts each row in turn every 4 seconds, and the rank 1 crown wiggles as it passes.
+ */
 .screensaver-window:not(.is-rolling) .score-row {
-  animation: score-row-in 420ms ease-out both;
-  animation-delay: calc(var(--row-index, 0) * 90ms);
+  animation:
+    score-row-in 420ms ease-out both,
+    score-row-wave 4s ease-in-out infinite;
+  animation-delay:
+    calc(var(--row-index, 0) * 90ms),
+    calc(1.2s + var(--row-index, 0) * 0.35s);
+}
+
+.screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg {
+  transform-origin: 50% 90%;
+  animation: score-crown-wiggle 4s ease-in-out 1.2s infinite;
+}
+
+@keyframes score-row-wave {
+  0%,
+  16%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  8% {
+    transform: translateY(-0.4rem) scale(1.015);
+  }
+}
+
+@keyframes score-crown-wiggle {
+  0%,
+  14%,
+  100% {
+    transform: rotate(0deg);
+  }
+  4% {
+    transform: rotate(-14deg);
+  }
+  9% {
+    transform: rotate(12deg);
+  }
 }
 
 @keyframes score-roll {
@@ -645,6 +683,7 @@ button.is-cursor {
   .caret,
   .screensaver-window.is-rolling .screensaver-track,
   .screensaver-window:not(.is-rolling) .score-row,
+  .screensaver-window:not(.is-rolling) .score-row.is-first .score-crown svg,
   .ready-copy h1,
   .ready-prompt {
     animation: none;
