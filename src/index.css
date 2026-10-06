@@ -783,3 +783,20 @@ button:disabled {
   background: var(--tiny-white);
   box-shadow: inset 0 0 0 2px var(--tiny-lavender);
 }
+
+.setup-update {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--tiny-mint) 30%, var(--tiny-white));
+  box-shadow: inset 0 0 0 2px var(--tiny-mint-strong);
+}
+
+.setup-update p {
+  margin: 0;
+}

@@ -1127,6 +1127,10 @@ If required offline assets are missing, the app should not falsely indicate that
 
 If an offline-readiness indicator is included, it must reflect real cache and service-worker readiness. Chips in the wireframe PNGs are decoration and are not that indicator.
 
+### App Updates
+
+A new deployment downloads in the background and waits. It never reloads the app on its own, so it cannot interrupt a contestant. While it waits, Event Setup shows “An update is ready.” with an UPDATE NOW button, first in the arrow-key order. UPDATE NOW installs it and restarts the app on Event Setup; saved scores are kept. Closing and reopening the Home Screen app also installs it. Contestant screens show no update message.
+
 ### PWA Installation Requirement
 
 Before relying on the app at an event, the target iPad should be prepared while internet access is available.
@@ -1969,6 +1973,7 @@ a tap on the logo badge returns to Ready from Typing without saving, from Result
 automatic reset passes
 giant keyboard input passes
 PWA launches offline
+after a deploy, Event Setup shows An update is ready., and UPDATE NOW restarts on the new version with scores kept
 the booth runs from the Home Screen app, not a Safari tab, so its saved scores are kept
 full airplane-mode flow passes
 saved scores survive offline relaunch

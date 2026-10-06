@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applySetupKey, type SetupSelection } from "./setupKeyboard";
+import { applySetupKey, setupChoices, type SetupSelection } from "./setupKeyboard";
 
 const ready: SetupSelection = {
   cursor: "start",
@@ -17,7 +17,7 @@ describe("applySetupKey", () => {
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
     const onLength = applySetupKey(ready, "ArrowDown", { shiftKey: false, canContinue: true });
     expect(onLength).toEqual({ ...ready, cursor: "30" });
-    if (onLength === "start" || onLength === null) {
+    if (onLength === null || typeof onLength === "string") {
       throw new Error("ArrowDown should land on 30 seconds");
     }
     expect(applySetupKey({ ...onLength, duration: 60 }, "Enter", { shiftKey: false, canContinue: true })).toEqual({
@@ -53,3 +53,26 @@ describe("applySetupKey", () => {
     });
   });
 });
+
+describe("update choice", () => {
+  it("puts UPDATE NOW first only while an update is ready", () => {
+    expect(setupChoices("famous-lines", true, true)[0]).toBe("update");
+    expect(setupChoices("famous-lines", true, false)).not.toContain("update");
+    expect(setupChoices("famous-lines", true)).not.toContain("update");
+  });
+
+  it("reaches UPDATE NOW by wrapping down from START EVENT, and Enter on it asks for the update", () => {
+    const options = { shiftKey: false, canContinue: true, updateReady: true };
+    const onUpdate = applySetupKey(ready, "ArrowDown", options);
+    expect(onUpdate).toEqual({ ...ready, cursor: "update" });
+    if (onUpdate === null || typeof onUpdate === "string") {
+      throw new Error("ArrowDown should land on UPDATE NOW");
+    }
+    expect(applySetupKey(onUpdate, "Enter", options)).toBe("update");
+  });
+
+  it("moves a cursor left on UPDATE NOW back to START EVENT once the update is gone", () => {
+    expect(applySetupKey({ ...ready, cursor: "update" }, "Enter", { shiftKey: false, canContinue: true })).toBe("start");
+  });
+});
+
