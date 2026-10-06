@@ -45,8 +45,12 @@ export function ScoreRow({
       <span className="score-crown" aria-hidden="true">
         {first ? <Crown /> : null}
       </span>
-      {/* An empty place shows only its outlined rank circle. */}
-      {empty ? null : (
+      {/* An empty place shows its outlined rank circle and one quiet dash. */}
+      {empty ? (
+        <span className="score-name-cell">
+          <span className="score-name">—</span>
+        </span>
+      ) : (
         <>
           <span className="score-name-cell">
             <span className={name ? "score-name has-name" : "score-name"}>{name ?? "—"}</span>
