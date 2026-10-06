@@ -341,7 +341,14 @@ button.is-cursor {
   background: var(--tiny-white);
 }
 
+.high-score-card .stat-label {
+  margin: 0;
+}
+
 .high-score-card .stat-value {
+  /* Baloo 2's tall default line height and the paragraph margin left a wide gap around the number. */
+  margin: 0.6rem 0 0.4rem;
+  line-height: 1;
   font-family: var(--font-number);
   font-size: 3rem;
   font-weight: 800;
