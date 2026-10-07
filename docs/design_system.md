@@ -324,7 +324,7 @@ Start behavior, including the opening keypress and the “above 50 WPM” compar
 | Bottom center | Countdown timer |
 | Bottom right | Live accuracy |
 
-The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do not show a bare number.
+The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do not show a bare number. Each typing stat puts its label under its number, the same way for all three: 73 over WPM, 24s over TIME, 96% over ACCURACY.
 
 ### Sentence layout
 

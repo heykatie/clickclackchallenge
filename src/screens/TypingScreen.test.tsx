@@ -100,11 +100,12 @@ describe("TypingScreen", () => {
     expect(onReturnToReady).not.toHaveBeenCalled();
   });
 
-  it("labels the accuracy stat under its percentage, like the WPM unit", () => {
+  it("labels the time and accuracy stats under their numbers, like WPM", () => {
     renderTyping();
     const labels = [...document.querySelectorAll(".stat-label")].map((label) => label.textContent);
     expect(labels).toEqual(["TIME", "ACCURACY"]);
-    const accuracy = screen.getByText("ACCURACY");
-    expect(accuracy.previousElementSibling?.className).toBe("stat-value");
+    for (const label of ["TIME", "ACCURACY"]) {
+      expect(screen.getByText(label).previousElementSibling?.className).toBe("stat-value");
+    }
   });
 });
