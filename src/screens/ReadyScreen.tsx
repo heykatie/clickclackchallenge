@@ -22,6 +22,9 @@ type ReadyScreenProps = {
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
+/** Matches the logo-wiggle animation in base.css. */
+const LOGO_WIGGLE_MS = 420;
+
 export function ReadyScreen({
   eventId,
   allTime,
@@ -44,16 +47,28 @@ export function ReadyScreen({
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
+  // With no score to roll, a tap only wiggles the logo, so it still answers.
+  const [wiggling, setWiggling] = useState(false);
   const logoHold = useLogoHold(onSetup, () => {
     if (readyLogoTap(rolling.length) === "roll") {
       asleepRef.current = true;
       setAsleep(true);
+    } else {
+      setWiggling(true);
     }
   });
 
   useEffect(() => {
     onStartRef.current = onStart;
   });
+
+  useEffect(() => {
+    if (!wiggling) {
+      return;
+    }
+    const id = window.setTimeout(() => setWiggling(false), LOGO_WIGGLE_MS);
+    return () => window.clearTimeout(id);
+  }, [wiggling]);
 
   useEffect(() => {
     let cancelled = false;
@@ -173,7 +188,7 @@ export function ReadyScreen({
       >
         <button
           type="button"
-          className="logo-badge"
+          className={wiggling ? "logo-badge is-wiggling" : "logo-badge"}
           aria-label="Show high scores"
           {...logoHold}
         />
