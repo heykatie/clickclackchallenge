@@ -1095,6 +1095,9 @@ It should not:
 
 ### NameForm
 
+Not built as its own file: the name field and its rules live in `src/screens/ResultsScreen.tsx` and `src/features/results/nameRules.ts`.
+
+
 Suggested file:
 
 ```text
@@ -1195,6 +1198,9 @@ It should not:
 
 ### EventService
 
+Not built: App and Event Setup call `src/db/persistence.ts` directly, as section 12 recommends for the first build.
+
+
 Suggested file:
 
 ```text
@@ -1253,6 +1259,9 @@ It should not:
 ---
 
 ### ScoreService
+
+Not built: scores are saved through `src/db/persistence.ts` and `src/state/resultSave.ts`.
+
 
 Suggested file:
 
@@ -1562,6 +1571,33 @@ src/
 ```
 
 Additional small shared files may be added when implementation requires them, but they should not be created merely to match an abstract architecture.
+
+### Current structure
+
+The app as built keeps the first-build shape: one persistence module, pure feature modules, and screens.
+
+```text
+src/
+├── App.tsx                 screen routing, saves, and wiring for sound and music
+├── main.tsx
+├── screens/                the five screens, the idle high-score list, and their small hooks
+├── state/                  the app reducer and pure keyboard, timing, and save rules
+├── features/
+│   ├── typing/             typing engine and scoring
+│   ├── results/            placement, result copy, name rules, count-up, name timeout
+│   ├── leaderboard/        ranking, board motion, the idle list's roll
+│   └── export/             the scores CSV download
+├── db/                     persistence.ts (events, scores, settings, migrations) and persistent storage
+├── data/                   word list, famous lines, and stories
+├── sound/
+│   ├── boothSound.ts       key clicks, chimes, and dings
+│   └── music/              band.ts (instruments), worlds/ (arcade, fantasy, storybook), themes.ts, musicPlayer.ts
+├── pwa/                    the landscape gate and booth viewport rules
+├── styles/                 tokens in base.css, one stylesheet per screen
+└── test/                   shared test setup
+```
+
+Every module except the screens and `App.tsx` is plain TypeScript with no React, and each has a test file beside it.
 
 ---
 
