@@ -357,15 +357,17 @@ export async function startFreshEvent(
   options: { clearScores?: boolean; name?: string | null } = {},
 ): Promise<EventRecord> {
   const database = await openDatabase();
-  const transaction = database.transaction(["events", "settings"], "readwrite");
+  const transaction = database.transaction(["events", "settings", "scores"], "readwrite");
   const events = transaction.objectStore("events");
   const settingsStore = transaction.objectStore("settings");
   const now = new Date().toISOString();
   const activeEvents = await events.index("status").getAll("active");
 
   // Clearing hides only the event being replaced; earlier events keep their scores on the all-time board.
+  // An event with no scores has nothing to hide, so clearing it leaves nothing for RESTORE to offer.
   for (const event of activeEvents) {
-    await events.put({ ...event, status: "archived", ...(options.clearScores ? { hiddenAt: now } : {}), updatedAt: now });
+    const hide = options.clearScores && (await transaction.objectStore("scores").index("eventId").count(event.id)) > 0;
+    await events.put({ ...event, status: "archived", ...(hide ? { hiddenAt: now } : {}), updatedAt: now });
   }
 
   const event: EventRecord = {
@@ -456,9 +458,20 @@ export function cleanEventName(name: string | null | undefined): string | null {
   return cleaned === "" ? null : cleaned;
 }
 
+/** Hidden events that still have scores: the only clears worth restoring. */
+async function clearedEventsWithScores(database: IDBPDatabase<ClickClackChallengeDB>, events: readonly EventRecord[]) {
+  const withScores: EventRecord[] = [];
+  for (const event of events) {
+    if (event.hiddenAt && (await database.countFromIndex("scores", "eventId", event.id)) > 0) {
+      withScores.push(event);
+    }
+  }
+  return withScores;
+}
+
 export async function hasClearedScores(): Promise<boolean> {
   const database = await openDatabase();
-  return (await database.getAll("events")).some((event) => Boolean(event.hiddenAt));
+  return (await clearedEventsWithScores(database, await database.getAll("events"))).length > 0;
 }
 
 /**
@@ -467,16 +480,17 @@ export async function hasClearedScores(): Promise<boolean> {
  */
 export async function restoreClearedScores(): Promise<boolean> {
   const database = await openDatabase();
-  const transaction = database.transaction("events", "readwrite");
-  const events = await transaction.store.getAll();
-  const latest = events.reduce<string | null>(
-    (newest, event) => (event.hiddenAt && (newest === null || event.hiddenAt > newest) ? event.hiddenAt : newest),
+  // A clear that hid no scores (saved before empty boards were left visible) is skipped, not restored.
+  const restorable = await clearedEventsWithScores(database, await database.getAll("events"));
+  const latest = restorable.reduce<string | null>(
+    (newest, event) => (newest === null || event.hiddenAt! > newest ? event.hiddenAt : newest),
     null,
   );
   if (latest === null) {
-    await transaction.done;
     return false;
   }
+  const transaction = database.transaction("events", "readwrite");
+  const events = await transaction.store.getAll();
   const now = new Date().toISOString();
   for (const event of events) {
     if (event.hiddenAt === latest) {

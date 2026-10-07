@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearCurrentEvent` (Clear board) sets it on the active event only and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt`, undoing one clear at a time, newest first; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearCurrentEvent` (Clear board) sets it on the active event only, and only when that event has scores, and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt` among hidden events that have scores, undoing one clear at a time, newest first; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it, counting only hidden events that have scores.
 
 ```ts
 interface EventRecord {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import "./test/domSetup";
 import "fake-indexeddb/auto";
-import { act, configure, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, configure, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeDatabase, DB_NAME, listAllScores, loadBooth } from "./db/persistence";
@@ -127,6 +127,36 @@ describe("App", () => {
     // The redraw that follows plays nothing more.
     expect(play).toHaveBeenCalledTimes(2);
   });
+
+  it("stays on Event Setup after CLEAR BOARD, with RESTORE only when the clear hid scores", async () => {
+    render(<App />);
+    await playStoryRound();
+    await screen.findByRole("button", { name: /VIEW LEADERBOARD/ });
+    // Staff hold the logo to open Event Setup; the attempt is saved first.
+    const logo = screen.getByRole("button", { name: "Back to start" });
+    fireEvent.pointerDown(logo);
+    await wait(700);
+    fireEvent.pointerUp(logo);
+    await screen.findByText("Set up today's typing test");
+
+    fireEvent.click(screen.getByRole("button", { name: "CLEAR BOARD" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "CLEAR BOARD" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await screen.findByRole("button", { name: "RESTORE CLEARED SCORES" });
+    expect(screen.getByText("Set up today's typing test")).toBeTruthy();
+    expect(screen.queryByText(/PRESS ANY KEY TO START/i)).toBeNull();
+
+    // The board that clear started is empty, so clearing it again offers nothing new to restore.
+    fireEvent.click(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "RESTORE" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: "CLEAR BOARD" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "CLEAR BOARD" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await wait(100);
+    expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull();
+    expect(screen.getByText("Set up today's typing test")).toBeTruthy();
+  }, 20_000);
 
   it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
     render(<App />);

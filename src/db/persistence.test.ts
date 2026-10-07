@@ -393,6 +393,23 @@ describe("persistence", () => {
     expect((await loadBooth()).hasClearedScores).toBe(true);
   });
 
+  it("offers no restore after clearing a board nobody played, and restores past it to the last clear that hid scores", async () => {
+    const played = await startFreshEvent(30);
+    const earned = await saveScore(scoreInput(played.id, 70));
+    await clearCurrentEvent(30, "famous-lines");
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    // Clearing the empty board that clear started hides nothing new.
+    await clearCurrentEvent(30, "famous-lines");
+    expect(await hasClearedScores()).toBe(true);
+    expect(await restoreClearedScores()).toBe(true);
+    expect(await listAllScores()).toEqual([earned]);
+    expect(await hasClearedScores()).toBe(false);
+
+    await clearCurrentEvent(30, "words");
+    expect(await hasClearedScores()).toBe(false);
+    expect((await loadBooth()).hasClearedScores).toBe(false);
+  });
+
   it("restores the scores hidden by the last clear and keeps the current event", async () => {
     const old = await startFreshEvent(30);
     const oldScore = await saveScore(scoreInput(old.id, 70));

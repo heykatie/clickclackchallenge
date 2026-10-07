@@ -11,10 +11,40 @@
   }
 }
 
+/* The confirmations float over Event Setup on a soft wash, so staff still see the page they came from. */
+.setup-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--tiny-charcoal) 28%, transparent);
+  animation: setup-modal-fade 140ms ease-out;
+}
+
+.setup-modal-backdrop .setup-confirm {
+  box-shadow: 0 1.25rem 3rem color-mix(in srgb, var(--tiny-charcoal) 22%, transparent);
+  animation: setup-modal-rise 160ms ease-out;
+}
+
+@keyframes setup-modal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes setup-modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+}
+
 .setup-confirm {
   box-sizing: border-box;
   width: min(100%, 36rem);
-  margin: 1rem auto 0;
+  margin: 0;
   padding: 1.5rem 1.75rem;
   border: 2px solid var(--tiny-lavender);
   border-radius: 1.75rem;
