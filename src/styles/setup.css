@@ -376,6 +376,19 @@ label.setup-option-big {
   text-decoration: none;
 }
 
+/* Both values share one grid cell; only the current one shows. */
+.setup-chip-value {
+  display: inline-grid;
+}
+
+.setup-chip-value > span {
+  grid-area: 1 / 1;
+}
+
+.setup-chip-value > [aria-hidden="true"] {
+  visibility: hidden;
+}
+
 .setup-tool.setup-chip.is-on {
   border-color: var(--tiny-mint-strong);
   background: color-mix(in srgb, var(--tiny-mint) 45%, var(--tiny-white));

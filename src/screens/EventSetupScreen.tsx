@@ -324,7 +324,7 @@ export function EventSetupScreen({
             aria-pressed={soundOn}
             onClick={onToggleSound}
           >
-            SOUND: {soundOn ? "ON" : "OFF"}
+            SOUND: <ChipValue value={soundOn ? "ON" : "OFF"} other={soundOn ? "OFF" : "ON"} />
           </button>
           <button
             type="button"
@@ -332,10 +332,10 @@ export function EventSetupScreen({
             aria-pressed={musicOn}
             onClick={onToggleMusic}
           >
-            MUSIC: {musicOn ? "ON" : "OFF"}
+            MUSIC: <ChipValue value={musicOn ? "ON" : "OFF"} other={musicOn ? "OFF" : "ON"} />
           </button>
           <button type="button" className={settingClass("palette", false)} onClick={onTogglePalette}>
-            PALETTE: {palette === "cool" ? "COOL" : "WARM"}
+            PALETTE: <ChipValue value={palette === "cool" ? "COOL" : "WARM"} other={palette === "cool" ? "WARM" : "COOL"} />
           </button>
         </div>
       </div>
@@ -405,18 +405,17 @@ export function EventSetupScreen({
                 description="Faster flow"
               />
               <SetupOption
-                className={choiceClass("60", storySelected)}
+                // Story's locked length shows as the plain selected tile; only 30s greys out.
+                className={choiceClass("60")}
                 name="duration"
                 value="60"
                 checked={visibleDuration === 60}
-                disabled={storySelected}
                 onSelect={() => remember({ ...selectionRef.current, cursor: "60", duration: 60 })}
                 title="60 seconds"
                 bigTitle="60s"
                 description="Bigger challenge"
               />
             </div>
-            {storySelected ? <p className="setup-note">Story is always 60s.</p> : null}
           </fieldset>
           <fieldset className="setup-group setup-group-mode">
             <legend>Game mode</legend>
@@ -578,6 +577,19 @@ type SetupOptionProps = {
   /** A short line under the title. Left out where the title says enough. */
   description?: string;
 };
+
+/**
+ * A setting chip's value, with its other value laid invisibly in the same spot,
+ * so the chip is always as wide as its widest value and switching it never shifts the chips beside it.
+ */
+function ChipValue({ value, other }: { value: string; other: string }) {
+  return (
+    <span className="setup-chip-value">
+      <span>{value}</span>
+      <span aria-hidden="true">{other}</span>
+    </span>
+  );
+}
 
 /** One choice as a tile. It stays a real radio button named by its title; the tint and ring show the selection. */
 function SetupOption({
