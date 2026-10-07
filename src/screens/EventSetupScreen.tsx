@@ -506,7 +506,7 @@ export function EventSetupScreen({
                     onClick={askToClear}
                     disabled={saving}
                     aria-label="CLEAR ALL SCORES"
-                    data-tooltip="Clear all scores"
+                    data-tooltip="Delete scores"
                   >
                     CLEAR ALL
                   </button>
