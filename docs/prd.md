@@ -334,7 +334,7 @@ Themes crossfade as the screen changes and loop until it changes again. The musi
 
 The third, PALETTE: WARM or PALETTE: COOL, switches the booth's colors between the original warm palette and a cool one after the shop's logo (`docs/design_system.md` §3). It is warm by default, a device setting shown before any event exists, kept through Start fresh and Clear all scores, and remembered after the app reopens. It changes colors only, never layout, text, scoring, or behavior.
 
-Once an event exists, a small line under the Event Setup title tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
+Once an event exists, a small line just above the event name field tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
 
 After a clear, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR ALL SCORES. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
 

@@ -102,7 +102,7 @@
   margin-top: 0.35rem;
 }
 
-/* A quiet count for staff, tucked under the title. */
+/* A quiet count for staff, above the event name, beside the other event details. */
 .setup-plinko-count {
   margin: 0;
   color: var(--tiny-muted);

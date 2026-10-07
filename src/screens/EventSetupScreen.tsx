@@ -315,11 +315,6 @@ export function EventSetupScreen({
       <div className="setup-heading">
         <div className="setup-heading-text">
           <h1 className="setup-title">Set up today's typing test</h1>
-          {storedDuration !== null && plinkoWins !== null ? (
-            <p className="setup-plinko-count">
-              Plinko drops won this event: {plinkoWins}
-            </p>
-          ) : null}
         </div>
         {/* Device settings, top right, as chips that show their state. Last in the arrow-key order. */}
         <div className="setup-settings" role="group" aria-label="Settings">
@@ -531,6 +526,9 @@ export function EventSetupScreen({
         </div>
         <footer className="setup-footer">
           <div className="setup-footer-side">
+            {storedDuration !== null && plinkoWins !== null ? (
+              <p className="setup-plinko-count">Plinko drops won this event: {plinkoWins}</p>
+            ) : null}
             <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
               <span>Event name (optional)</span>
               <input
