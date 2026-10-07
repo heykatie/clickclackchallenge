@@ -75,7 +75,7 @@ html[data-palette="cool"] .setup-name input {
   border-color: #f0c4d5;
 }
 
-/* The idle list and the Leaderboard: the top scorer's row, and the HIGH SCORES and TOP 5 labels. */
+/* The idle list and the Leaderboard: the top scorer's row, and the HIGH SCORES and TOP 5 TODAY labels. */
 html[data-palette="cool"] .score-row.is-first,
 html[data-palette="cool"] .score-row.is-first.is-current,
 html[data-palette="cool"] .score-kicker {

@@ -111,7 +111,7 @@ PALETTE: COOL in Event Setup switches every screen to a second palette after the
 | Page background | lavender #EEE9F8 | blush #FBEDEF |
 | Buttons | teal #8FD2CA | mint-strong #6CCFC7 |
 | Pills, soft teal, the ring doodle | teal #A6DBD5 | mint #9DDED8 |
-| Top-scorer rows, HIGH SCORES and TOP 5 labels | soft pink #FCE6EE | lavender-light |
+| Top-scorer rows, HIGH SCORES and TOP 5 TODAY labels | soft pink #FCE6EE | lavender-light |
 | The current word while typing | pink #F7CDDD, deep enough to spot from the keyboard | lavender #CBBFE6 |
 | Ready and Results titles | deep lavender over a soft pink highlighter stripe (#FBD9E6) | deep lavender |
 | Event Setup tiles | pale pink #FDF3F7; a picked Leaderboard choice turns pink #FBE1EA with a pink border | blush wash; a picked Leaderboard choice turns lavender |
@@ -260,7 +260,7 @@ Display three option groups and one main action:
 | Leaderboard | Start fresh; Continue previous; All-time leaderboard |
 | Primary action | START EVENT |
 | Update message | “An update is ready.” (bold), “The app restarts on Event Setup. Scores are kept.”; UPDATE NOW. A mint-tinted card with a mint ring under the hint, only while an update waits |
-| All-time board labels | “ALL-TIME TOP 5” on the Leaderboard pill, “ALL-TIME HIGH SCORE” on Ready, and “ALL-TIME HIGH SCORES” on the rolling list, in place of “TOP 5”, “CURRENT HIGH SCORE”, and “HIGH SCORES” |
+| All-time board labels | “ALL-TIME TOP 5” on the Leaderboard pill, “ALL-TIME HIGH SCORE” on Ready, and “ALL-TIME HIGH SCORES” on the rolling list, in place of “TOP 5 TODAY”, “CURRENT HIGH SCORE”, and “HIGH SCORES”. An event board’s Leaderboard pill reads “TOP 5 TODAY” |
 | All-time best line | “All-time best: {WPM} WPM · {name}”, or “All-time best: {WPM} WPM” without a name. Small bold deep-lavender text: inside the Ready high-score card under the name, and on the Leaderboard between the board and NEXT PLAYER |
 | Clear board | CLEAR BOARD (with a “Clear current event” tooltip above it on hover and on the keyboard cursor), a small warning-red ghost button under the Leaderboard choices, away from START EVENT, only when an event exists. On a board with no scores it is greyed out like other disabled controls, with “No scores to clear yet” as its tooltip. Its confirmation reads “Clear this board?”, “This event's scores are hidden from every leaderboard, the high-score list, and the all-time best, and an empty event starts. Earlier events stay. The scores stay saved on this device.”; CANCEL; CLEAR BOARD |
 | Restore cleared scores | RESTORE CLEARED SCORES, a small underlined link, next to CLEAR BOARD only after a clear. Its confirmation reads “Restore cleared scores?”, “The scores hidden by the last clear show again on every board and list. The current event and its scores stay.”; CANCEL; RESTORE |
@@ -406,7 +406,7 @@ Returning to ready screen in 5s
 ### Layout and emphasis
 
 - Place a small logo-only badge near the upper-left safe margin. Its tap and long-press behavior is in `docs/prd.md` §9.
-- Center the “TOP 5” pill and “Leaderboard” heading.
+- Center the “TOP 5 TODAY” pill (“ALL-TIME TOP 5” on an all-time board) and “Leaderboard” heading. The wireframe’s “TOP 5” pill is superseded.
 - Use one wide soft-white rounded panel with five consistent row positions.
 - Make rank 1 the strongest ranking emphasis: light-lavender row surface and clear charcoal text, with a small crown. The top three rank circles form a pastel podium: peach for 1, sky blue for 2, pink for 3, on the Leaderboard and the rolling list.
 - Keep the other rows quiet and easy to scan.

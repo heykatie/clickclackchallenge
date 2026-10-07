@@ -204,14 +204,15 @@ describe("LeaderboardScreen", () => {
     expect(screen.queryByText(/All-time best/)).toBeNull();
   });
 
-  it("labels an all-time board ALL-TIME TOP 5 and an event board TOP 5", () => {
+  it("labels an all-time board ALL-TIME TOP 5", () => {
     renderBoard([score("a", "Alex", 60, 1)], null, null, true);
     expect(screen.getByText("ALL-TIME TOP 5")).toBeTruthy();
   });
 
-  it("keeps TOP 5 on an event board", () => {
+  it("labels an event board TOP 5 TODAY", () => {
     renderBoard([score("a", "Alex", 60, 1)]);
-    expect(screen.getByText("TOP 5")).toBeTruthy();
+    expect(screen.getByText("TOP 5 TODAY")).toBeTruthy();
+    expect(screen.queryByText("TOP 5")).toBeNull();
     expect(screen.queryByText("ALL-TIME TOP 5")).toBeNull();
   });
 

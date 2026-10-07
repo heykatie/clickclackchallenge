@@ -117,7 +117,7 @@ export function LeaderboardScreen({
         aria-label="Back to start"
         {...logoHold}
       />
-      <p className="score-kicker">{allTime ? "ALL-TIME TOP 5" : "TOP 5"}</p>
+      <p className="score-kicker">{allTime ? "ALL-TIME TOP 5" : "TOP 5 TODAY"}</p>
       <h1>Leaderboard</h1>
       <ol className="score-card score-rows leaderboard-rows">
         {slots.map((slot) => (
