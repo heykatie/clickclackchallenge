@@ -53,11 +53,11 @@ describe("rankScores", () => {
     expect(ranked[0]?.score.createdAt).toBe("2026-09-22T00:01:00.000Z");
   });
 
-  it("excludes scores that show below 70 percent, and keeps 69.5, which shows as 70", () => {
+  it("excludes scores that show below 25 percent, and keeps 24.5, which shows as 25", () => {
     const ranked = rankScores([
-      score({ id: "low", displayedWpm: 99, accuracy: 69.4, createdAt: "2026-09-22T00:00:00.000Z" }),
-      score({ id: "rounds-up", displayedWpm: 60, accuracy: 69.5, createdAt: "2026-09-22T00:00:30.000Z" }),
-      score({ id: "eligible", displayedWpm: 40, accuracy: 70, createdAt: "2026-09-22T00:01:00.000Z" }),
+      score({ id: "low", displayedWpm: 99, accuracy: 24.4, createdAt: "2026-09-22T00:00:00.000Z" }),
+      score({ id: "rounds-up", displayedWpm: 60, accuracy: 24.5, createdAt: "2026-09-22T00:00:30.000Z" }),
+      score({ id: "eligible", displayedWpm: 40, accuracy: 25, createdAt: "2026-09-22T00:01:00.000Z" }),
     ]);
     expect(ranked.map((entry) => entry.score.id)).toEqual(["rounds-up", "eligible"]);
   });
@@ -165,7 +165,7 @@ describe("rollingListScores", () => {
         id: "low",
         eventId: "older",
         displayedWpm: 90,
-        accuracy: 69.4,
+        accuracy: 24.4,
         createdAt: "2026-09-22T00:00:00.000Z",
       }),
       score({
@@ -253,7 +253,7 @@ describe("boardEntries", () => {
 
   it("shows the house scores when every saved score is below the gates", () => {
     const entries = boardEntries(
-      rankScores([score({ displayedWpm: 80, accuracy: 40, createdAt: "2026-09-22T00:00:00.000Z" })]),
+      rankScores([score({ displayedWpm: 80, accuracy: 20, createdAt: "2026-09-22T00:00:00.000Z" })]),
     );
     expect(entries.map((entry) => entry.score.name)).toEqual(["Clicky", "Clacky"]);
   });

@@ -556,7 +556,7 @@ A score must meet a minimum accuracy threshold to participate in leaderboard ran
 Initial V1 development threshold:
 
 ```text
-70% accuracy
+25% accuracy
 ```
 
 This value is provisional and should be validated using the physical giant keyboard before being treated as final.
@@ -580,7 +580,7 @@ Leaderboard ranking uses:
 
 Displayed accuracy is the rounded whole number the contestant sees. It is not a second stored field. Two scores that round to the same whole percent are tied on accuracy, and the earlier submission ranks first. Hidden tenths do not order them.
 
-The accuracy gate goes by the accuracy the contestant sees, rounded to a whole percent, so Results never shows a qualifying number for a score that does not count. A score of 69.5% displays as 70% and is eligible; 69.4% displays as 69% and is not.
+The accuracy gate goes by the accuracy the contestant sees, rounded to a whole percent, so Results never shows a qualifying number for a score that does not count. A score of 24.5% displays as 25% and is eligible; 24.4% displays as 24% and is not.
 
 ### Held-Key Behavior
 
@@ -737,7 +737,7 @@ The 30% gate is deliberately the lowest useful minimum. It only stops key-mashin
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
-A Plinko drop also needs a plausible score: 200 WPM or less. The prize gate (30%) is lower than the leaderboard gate (70%). A score can win a Plinko drop without placing on the board.
+A Plinko drop also needs a plausible score: 200 WPM or less. The leaderboard gate (25%) is a little lower than the prize gate (30%), so a score can place on the board without winning a Plinko drop, and a score above 50 WPM can win a drop without placing. The gate was lowered from 70% so giant-keyboard players who make many mistakes still reach the board.
 
 ---
 
@@ -1506,11 +1506,11 @@ Separate physical presses of the same key must still work normally.
 
 **Given**
 
-- the current development minimum leaderboard accuracy is 70%
+- the current minimum leaderboard accuracy is 25%
 
 **When**
 
-- a contestant finishes below 70% accuracy
+- a contestant finishes below 25% accuracy
 
 **Then**
 
@@ -1521,17 +1521,17 @@ Separate physical presses of the same key must still work normally.
 - name entry is not shown
 - the score cannot appear in the Top 5
 
-A displayed 0 WPM score follows the same exclusion even when accuracy is 70% or higher. Results shows “Casper, is that you?” instead of a place.
+A displayed 0 WPM score follows the same exclusion even when accuracy is 25% or higher. Results shows “Casper, is that you?” instead of a place.
 
 Boundary cases:
 
 ```text
 70.00% → eligible
-69.50% → eligible (displays as 70%)
-69.40% → not eligible (displays as 69%)
+24.50% → eligible (displays as 25%)
+24.40% → not eligible (displays as 24%)
 ```
 
-The 70% threshold remains provisional until it is validated on the physical giant keyboard.
+The 25% threshold remains provisional until it is validated on the physical giant keyboard.
 
 ---
 

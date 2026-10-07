@@ -47,7 +47,7 @@ function expected(board: readonly ScoreRecord[], wpm: number, accuracy: number |
   if (wpm === 0) {
     return { headline: "Casper, is that you?", placed: null, plinko: null, nameEntry: false };
   }
-  const ranks = accuracy !== null && Math.round(accuracy) >= 70 && wpm <= 200;
+  const ranks = accuracy !== null && Math.round(accuracy) >= 25 && wpm <= 200;
   // A tie with an earlier score at the same displayed accuracy goes to the earlier one.
   const place = ranks
     ? board.filter((s) => s.displayedWpm > wpm || (s.displayedWpm === wpm && Math.round(s.accuracy) >= Math.round(accuracy))).length + 1
@@ -64,7 +64,7 @@ function expected(board: readonly ScoreRecord[], wpm: number, accuracy: number |
 describe("every Results outcome", () => {
   const BOARD_SIZES = [0, 1, 4, 5, 9, 10, 19, 20, 25];
   const WPMS = [0, 1, 25, 50, 51, 52, 75, 100, 105, 115, 120, 121, 150, 200, 201, 300];
-  const ACCURACIES = [null, 0, 29, 29.4, 29.5, 30, 31, 69, 69.4, 69.5, 70, 85, 95, 100];
+  const ACCURACIES = [null, 0, 24, 24.4, 24.5, 25, 29, 29.4, 29.5, 30, 31, 69.4, 70, 85, 95, 100];
 
   it(`matches the PRD for ${BOARD_SIZES.length * WPMS.length * ACCURACIES.length} combinations of board, speed, and accuracy`, () => {
     const mismatches: string[] = [];
