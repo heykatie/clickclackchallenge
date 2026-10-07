@@ -147,7 +147,7 @@ describe("sound and music choices", () => {
 });
 
 describe("restore choice", () => {
-  it("comes after CLEAR ALL SCORES, and only while a clear can be undone", () => {
+  it("comes after CLEAR BOARD, and only while a clear can be undone", () => {
     const choices = setupChoices("famous-lines", true, false, true);
     expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "name"]);
     expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");

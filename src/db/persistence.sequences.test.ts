@@ -3,7 +3,7 @@ import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { pick, seededRandom } from "../test/seededRandom";
 import {
-  clearAllScores,
+  clearCurrentEvent,
   closeDatabase,
   DB_NAME,
   hasClearedScores,
@@ -84,10 +84,11 @@ describe("storage, over 60 random runs of 40 operations", () => {
           model.board = board;
           log.push(`continue ${board}`);
         } else if (roll < 0.32) {
-          activeEvent = await clearAllScores(duration, mode);
+          activeEvent = await clearCurrentEvent(duration, mode);
           const clearId = model.clears.length + 1;
           model.clears.push(clearId);
-          for (const event of model.events.values()) if (event.hiddenBy === null) event.hiddenBy = clearId;
+          // Only the event that was current is hidden; earlier events keep their scores.
+          if (model.active !== null) model.events.get(model.active)!.hiddenBy = clearId;
           model.events.set(activeEvent.id, { scores: [], hiddenBy: null });
           model.active = activeEvent.id;
           model.board = "event";

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 import {
-  clearAllScores,
+  clearCurrentEvent,
   hasClearedScores,
   restoreClearedScores,
   closeDatabase,
@@ -251,19 +251,20 @@ describe("persistence", () => {
     expect(booth.activeEvent?.boardScope).toBe("event");
   });
 
-  it("clears every earlier score from view and starts an empty event, without deleting anything", async () => {
+  it("clears only the current event's scores and starts an empty event, keeping earlier events and deleting nothing", async () => {
     const first = await startFreshEvent(30);
-    await saveScore(scoreInput(first.id, 70));
+    const earlier = await saveScore(scoreInput(first.id, 70));
     const second = await startFreshEvent(30);
     await saveScore(scoreInput(second.id, 90));
 
-    const cleared = await clearAllScores(60, "words");
+    const cleared = await clearCurrentEvent(60, "words");
     expect(cleared.id).not.toBe(second.id);
     expect(cleared).toMatchObject({ durationSeconds: 60, testMode: "words", status: "active", boardScope: "event" });
     expect((await loadBooth()).activeEvent?.id).toBe(cleared.id);
 
-    expect(await listAllScores()).toEqual([]);
-    expect(await listScores(first.id)).toEqual([]);
+    expect(await listAllScores()).toEqual([earlier]);
+    expect(await listScores(first.id)).toEqual([earlier]);
+    expect(await listScores(second.id)).toEqual([]);
     expect(await listScores(cleared.id)).toEqual([]);
     const database = await openDatabase();
     expect(await database.count("scores")).toBe(2);
@@ -287,9 +288,9 @@ describe("persistence", () => {
     expect(kept.name).toBe("Fall pop-up");
   });
 
-  it("names the empty event that Clear all scores starts", async () => {
+  it("names the empty event that Clear board starts", async () => {
     await startFreshEvent(30, "words", { name: "Test day" });
-    expect((await clearAllScores(30, "words", "Real day")).name).toBe("Real day");
+    expect((await clearCurrentEvent(30, "words", "Real day")).name).toBe("Real day");
   });
 
   it("reads an event saved before names existed as unnamed", async () => {
@@ -307,11 +308,11 @@ describe("persistence", () => {
     expect((await loadBooth()).settings.soundOn).toBe(true);
   });
 
-  it("keeps the sound setting through Start fresh and Clear all scores", async () => {
+  it("keeps the sound setting through Start fresh and Clear board", async () => {
     await setSoundOn(true);
     await startFreshEvent(30);
     expect((await loadBooth()).settings.soundOn).toBe(true);
-    await clearAllScores(30, "words");
+    await clearCurrentEvent(30, "words");
     expect((await loadBooth()).settings.soundOn).toBe(true);
   });
 
@@ -340,7 +341,7 @@ describe("persistence", () => {
   it("lists every score and event for a backup, cleared ones included", async () => {
     const first = await startFreshEvent(30);
     await saveScore(scoreInput(first.id, 70));
-    await clearAllScores(30, "famous-lines");
+    await clearCurrentEvent(30, "famous-lines");
     const after = (await loadBooth()).activeEvent!;
     await saveScore(scoreInput(after.id, 80));
 
@@ -353,7 +354,7 @@ describe("persistence", () => {
   it("shows scores saved after the clear", async () => {
     const old = await startFreshEvent(30);
     await saveScore(scoreInput(old.id, 70));
-    const cleared = await clearAllScores(30, "famous-lines");
+    const cleared = await clearCurrentEvent(30, "famous-lines");
     const fresh = await saveScore(scoreInput(cleared.id, 40));
 
     expect(await listAllScores()).toEqual([fresh]);
@@ -363,7 +364,7 @@ describe("persistence", () => {
   it("keeps cleared scores hidden after a later Start fresh or board change", async () => {
     const old = await startFreshEvent(30);
     await saveScore(scoreInput(old.id, 70));
-    const cleared = await clearAllScores(30, "famous-lines");
+    const cleared = await clearCurrentEvent(30, "famous-lines");
     await updateActiveEvent(cleared.id, { durationSeconds: 60, testMode: "words", boardScope: "all-time" });
     await startFreshEvent(30);
 
@@ -373,7 +374,7 @@ describe("persistence", () => {
   it("brings cleared scores back when their event is unhidden", async () => {
     const old = await startFreshEvent(30);
     const earned = await saveScore(scoreInput(old.id, 70));
-    await clearAllScores(30, "famous-lines");
+    await clearCurrentEvent(30, "famous-lines");
 
     const database = await openDatabase();
     const hidden = await database.get("events", old.id);
@@ -387,7 +388,7 @@ describe("persistence", () => {
     await saveScore(scoreInput(event.id, 70));
     expect(await hasClearedScores()).toBe(false);
     expect((await loadBooth()).hasClearedScores).toBe(false);
-    await clearAllScores(30, "famous-lines");
+    await clearCurrentEvent(30, "famous-lines");
     expect(await hasClearedScores()).toBe(true);
     expect((await loadBooth()).hasClearedScores).toBe(true);
   });
@@ -395,7 +396,7 @@ describe("persistence", () => {
   it("restores the scores hidden by the last clear and keeps the current event", async () => {
     const old = await startFreshEvent(30);
     const oldScore = await saveScore(scoreInput(old.id, 70));
-    const cleared = await clearAllScores(30, "famous-lines");
+    const cleared = await clearCurrentEvent(30, "famous-lines");
     const newScore = await saveScore(scoreInput(cleared.id, 40));
 
     expect(await restoreClearedScores()).toBe(true);
@@ -408,11 +409,11 @@ describe("persistence", () => {
   it("restores one clear at a time, the most recent first", async () => {
     const first = await startFreshEvent(30);
     const firstScore = await saveScore(scoreInput(first.id, 70));
-    const second = await clearAllScores(30, "famous-lines");
+    const second = await clearCurrentEvent(30, "famous-lines");
     // Each clear is stamped with its own time.
     await new Promise((resolve) => setTimeout(resolve, 5));
     const secondScore = await saveScore(scoreInput(second.id, 60));
-    await clearAllScores(30, "famous-lines");
+    await clearCurrentEvent(30, "famous-lines");
 
     await restoreClearedScores();
     expect(await listAllScores()).toEqual([secondScore]);
