@@ -163,11 +163,14 @@ export function EventSetupScreen({
   }
 
   function confirm() {
+    // Clearing and restoring keep staff on Event Setup, so the modal closes itself.
     if (confirmKind === "clear") {
+      setConfirmCursor(null);
       onClearScores(visibleDuration, selectedTestMode, cleanEventName(eventName));
       return;
     }
     if (confirmKind === "restore") {
+      setConfirmCursor(null);
       onRestoreScores();
       return;
     }

@@ -257,8 +257,9 @@ function App() {
     setSaving(true);
     try {
       const event = await clearCurrentEvent(durationSeconds, testMode, name);
-      setCanRestore(true);
-      await openReady(event);
+      // Clearing is staff tidying up, not starting play: stay on Event Setup with the new empty board.
+      dispatch({ type: "SET_ACTIVE_EVENT", event });
+      setCanRestore(await hasClearedScores());
     } catch {
       setStatus("failed");
     } finally {
@@ -309,15 +310,12 @@ function App() {
     }
   }
 
+  /** Stays on Event Setup, like Clear board. */
   async function restoreScores() {
-    const event = state.activeEvent;
     setSaving(true);
     try {
       await restoreClearedScores();
       setCanRestore(await hasClearedScores());
-      if (event) {
-        await openReady(event);
-      }
     } catch {
       setStatus("failed");
     } finally {
