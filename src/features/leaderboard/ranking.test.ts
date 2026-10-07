@@ -53,12 +53,13 @@ describe("rankScores", () => {
     expect(ranked[0]?.score.createdAt).toBe("2026-09-22T00:01:00.000Z");
   });
 
-  it("excludes scores below 70 percent, including 69.99", () => {
+  it("excludes scores that show below 70 percent, and keeps 69.5, which shows as 70", () => {
     const ranked = rankScores([
-      score({ id: "low", displayedWpm: 99, accuracy: 69.99, createdAt: "2026-09-22T00:00:00.000Z" }),
+      score({ id: "low", displayedWpm: 99, accuracy: 69.4, createdAt: "2026-09-22T00:00:00.000Z" }),
+      score({ id: "rounds-up", displayedWpm: 60, accuracy: 69.5, createdAt: "2026-09-22T00:00:30.000Z" }),
       score({ id: "eligible", displayedWpm: 40, accuracy: 70, createdAt: "2026-09-22T00:01:00.000Z" }),
     ]);
-    expect(ranked.map((entry) => entry.score.id)).toEqual(["eligible"]);
+    expect(ranked.map((entry) => entry.score.id)).toEqual(["rounds-up", "eligible"]);
   });
 
   it("excludes a displayed 0 WPM score and keeps 1 WPM", () => {
@@ -164,7 +165,7 @@ describe("rollingListScores", () => {
         id: "low",
         eventId: "older",
         displayedWpm: 90,
-        accuracy: 69.99,
+        accuracy: 69.4,
         createdAt: "2026-09-22T00:00:00.000Z",
       }),
       score({

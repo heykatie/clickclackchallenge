@@ -137,8 +137,8 @@ describe("describeAttempt", () => {
     });
   });
 
-  it("hides the name when accuracy is below 70, including 69.99", () => {
-    expect(describeAttempt([], attempt({ accuracy: 69.99 }))).toEqual({
+  it("hides the name when accuracy shows below 70, as 69.4 does", () => {
+    expect(describeAttempt([], attempt({ accuracy: 69.4 }))).toEqual({
       isNewHighScore: false,
       isTop5: false,
       isTop10: false,
@@ -223,7 +223,7 @@ describe("resultCopy with the Plinko accuracy gate", () => {
   });
 
   it("gives no Plinko drop below 30% accuracy, even far above 50 WPM", () => {
-    expect(resultCopy(standing(), 380, 29.99)).toEqual({
+    expect(resultCopy(standing(), 380, 29.4)).toEqual({
       headline: "Thanks for playing!",
       kind: "thanks",
       placedLine: null,

@@ -28,7 +28,7 @@ function randomBoard(random: () => number): ScoreRecord[] {
   });
 }
 
-const eligible = (score: ScoreRecord) => score.accuracy >= 70 && score.displayedWpm > 0 && score.displayedWpm <= 200;
+const eligible = (score: ScoreRecord) => Math.round(score.accuracy) >= 70 && score.displayedWpm > 0 && score.displayedWpm <= 200;
 
 describe("ranking, on 1,500 random boards", () => {
   const SEEDS = Array.from({ length: 1_500 }, (_, index) => index + 1);

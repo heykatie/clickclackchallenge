@@ -1419,7 +1419,7 @@ Suggested ranking order:
 3. createdAt ascending
 ```
 
-Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gate still uses the stored percentage, so 69.99 stays below `MIN_LEADERBOARD_ACCURACY` even though it displays as 70. Ranking order is in `docs/prd.md`.
+Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gates use the displayed (rounded) accuracy, so 69.5 displays as 70 and meets `MIN_LEADERBOARD_ACCURACY`, matching what the contestant sees. Ranking order is in `docs/prd.md`.
 
 This should be a pure module.
 
@@ -1829,7 +1829,7 @@ correcting a removed position restores correct-character credit
 partial words count toward WPM
 incorrect characters do not block later correct input
 70% accuracy meets the development threshold
-69.99% accuracy does not meet the development threshold
+69.5% accuracy, displayed as 70%, meets the threshold; 69.4% does not
 late input after timeout is ignored
 held-key repeat events are ignored, including when KeyboardEvent.repeat is true
 separate physical presses of the same key still count
@@ -1913,7 +1913,7 @@ no Plinko line below 30% accuracy, even far above 50 WPM (winsPlinko)
 an unplaced score at 1 through 50 WPM is Thanks for playing! only
 a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10
-accuracy below 70, including 69.99, hides name entry
+accuracy that displays below 70, such as 69.4, hides name entry
 a tie keeps the earlier score as the high score
 sixth place is Top 10 and not Top 5
 twenty scores already ahead hide name entry

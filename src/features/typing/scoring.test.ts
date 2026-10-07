@@ -54,18 +54,21 @@ describe("calculateAccuracy", () => {
 });
 
 describe("meetsLeaderboardAccuracy", () => {
-  it("accepts 70% and rejects 69.99%", () => {
+  it("goes by the accuracy contestants see: 69.5% shows as 70% and counts, 69.4% shows as 69% and does not", () => {
     expect(meetsLeaderboardAccuracy(70)).toBe(true);
-    expect(meetsLeaderboardAccuracy(69.99)).toBe(false);
+    expect(meetsLeaderboardAccuracy(69.99)).toBe(true);
+    expect(meetsLeaderboardAccuracy(69.5)).toBe(true);
+    expect(meetsLeaderboardAccuracy(69.4)).toBe(false);
   });
 });
 
 describe("winsPlinko", () => {
-  it("needs displayed WPM above 50 and stored accuracy of at least 30%", () => {
+  it("needs displayed WPM above 50 and displayed accuracy of at least 30%", () => {
     expect(PLINKO_MIN_ACCURACY).toBe(30);
     expect(winsPlinko(51, 30)).toBe(true);
     expect(winsPlinko(50, 100)).toBe(false);
-    expect(winsPlinko(51, 29.99)).toBe(false);
+    expect(winsPlinko(51, 29.5)).toBe(true);
+    expect(winsPlinko(51, 29.4)).toBe(false);
     expect(winsPlinko(51, null)).toBe(false);
   });
 });
