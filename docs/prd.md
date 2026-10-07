@@ -317,10 +317,11 @@ Above the links, an “Event name (optional)” field holds the active event's n
 
 The last link, SOUND: OFF or SOUND: ON, turns booth sound on or off. It is off by default, because a booth is noisy and staff should choose it. It is a device setting: it shows before any event exists, and Start fresh and Clear all scores keep it. When on, a correct key makes a soft click, a wrong key a low blip, a new high score a short rising chime, and any other Plinko win a single ding. Backspace and ignored keys are silent. Turning it on plays the ding once as a sample. The sounds are generated, not audio files, so they work offline. If the device has no audio, the booth stays quiet and keeps working.
 
-After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from sound, so staff can have one without the other. It is also off by default, a device setting shown before any event exists, and kept through Start fresh and Clear all scores. The music is four lo-fi themes with fantasy touches, played by one shared band (soft electric piano, round bass, a music-box lead, dusty drums, and a faint vinyl hiss) so they sound like the same game:
+After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from sound, so staff can have one without the other. It is also off by default, a device setting shown before any event exists, and kept through Start fresh and Clear all scores. The music is five lo-fi themes with fantasy touches, played by one shared band (soft electric piano, round bass, a music-box lead, dusty drums, and one faint vinyl hiss, the same quiet level on every screen) so they sound like the same game:
 
-- Event Setup and Ready: a cute, mellow theme.
-- Typing: a faster, heart-racing adventure theme with racing harp runs.
+- Event Setup: a cute, mellow theme.
+- Ready: an inviting “adventure awaits” theme, a heroic horn call that ends each loop unresolved, livelier than Setup but calmer than Typing.
+- Typing: a dramatic boss-fight theme, the fastest of the five: E minor with a galloping bass, dark low chords, punchy stabs, a heroic melody doubled an octave down, and a snare-and-kick roll into each loop on a tense B major chord.
 - The idle high-score list and the Leaderboard: a slow, sweet, nostalgic theme.
 - Results: a happy, relieved, congratulatory theme.
 

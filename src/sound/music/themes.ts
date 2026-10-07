@@ -1,11 +1,11 @@
 import type { BoothScreen } from "../../pwa/boothViewport";
 
 /**
- * Four lo-fi themes with fantasy touches, written for one shared band so they sound like the same game:
+ * Five lo-fi themes with fantasy touches, written for one shared band so they sound like the same game:
  * soft electric piano ("keys"), a round bass, a music-box "bell" lead, and dusty drums. Notes are MIDI
  * numbers (60 is middle C). Each bar has 16 steps; steps are [start, length].
  */
-export type ThemeName = "cozy" | "adventure" | "nostalgic" | "victory";
+export type ThemeName = "cozy" | "invite" | "adventure" | "nostalgic" | "victory";
 export type Instrument = "keys" | "bass" | "bell" | "kick" | "snare" | "hat";
 
 type Steps = readonly (readonly [start: number, length: number])[];
@@ -19,8 +19,12 @@ interface Theme {
   chords: readonly { keys: readonly number[]; bass: number }[];
   keys: Steps;
   bass: Steps;
-  /** One melody per bar, or null to let the lead play a rising and falling arpeggio of the chord. */
-  melody: readonly Melody[] | null;
+  /** One melody per bar, on the music-box lead. */
+  melody: readonly Melody[];
+  /** Extra snare hits in the last bar of the loop, with kicks under them: a roll into the next time round. */
+  fill?: readonly number[];
+  /** Doubles the lead an octave down, for a heavier, heroic unison. */
+  unison?: boolean;
   drums: { kick: readonly number[]; snare: readonly number[]; hat: readonly number[] };
   mix: Record<Instrument, number>;
 }
@@ -73,28 +77,122 @@ export const THEMES: Record<ThemeName, Theme> = {
     mix: { keys: 0.45, bass: 0.6, bell: 0.4, kick: 0.7, snare: 0.3, hat: 0.14 },
   },
 
-  // Typing: heart-racing adventure, A minor, a pushing pulse and racing harp arpeggios.
-  adventure: {
-    bpm: 112,
-    swing: 0.08,
+  // Ready: "an adventure awaits". A heroic horn call climbing in fourths and fifths over D minor, ending each
+  // loop on A so it hangs unresolved, like a quest about to begin. Livelier than cozy, calmer than typing.
+  invite: {
+    bpm: 100,
+    swing: 0.12,
     chords: [
-      { keys: [57, 60, 64], bass: 45 }, // Am
-      { keys: [53, 57, 60], bass: 41 }, // F
-      { keys: [55, 60, 64], bass: 36 }, // C
-      { keys: [55, 59, 62], bass: 43 }, // G
+      { keys: [50, 53, 57, 62], bass: 38 }, // Dm
+      { keys: [50, 53, 58, 62], bass: 34 }, // Bb
+      { keys: [52, 55, 60, 64], bass: 36 }, // C
+      { keys: [52, 57, 61, 64], bass: 33 }, // A
     ],
     keys: [
-      [0, 2],
-      [3, 2],
+      [0, 3],
       [6, 2],
-      [8, 2],
-      [11, 2],
+      [8, 3],
       [14, 2],
     ],
-    bass: EIGHTHS.map((step) => [step, 1] as const),
-    melody: null,
-    drums: { kick: [0, 6, 8, 11], snare: [4, 12], hat: SIXTEENTHS },
-    mix: { keys: 0.32, bass: 0.55, bell: 0.22, kick: 0.75, snare: 0.32, hat: 0.1 },
+    bass: [
+      [0, 2],
+      [3, 1],
+      [6, 2],
+      [8, 2],
+      [11, 1],
+      [14, 2],
+    ],
+    melody: [
+      [
+        [0, 69, 2],
+        [2, 74, 2],
+        [4, 76, 2],
+        [6, 77, 6],
+        [12, 76, 2],
+        [14, 74, 2],
+      ],
+      [
+        [0, 77, 4],
+        [4, 74, 2],
+        [6, 70, 6],
+        [12, 74, 4],
+      ],
+      [
+        [0, 72, 2],
+        [2, 76, 2],
+        [4, 79, 4],
+        [8, 84, 6],
+        [14, 81, 2],
+      ],
+      [
+        [0, 81, 6],
+        [6, 79, 2],
+        [8, 76, 2],
+        [10, 73, 6],
+      ],
+    ],
+    drums: { kick: [0, 6, 8, 14], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14, 15] },
+    mix: { keys: 0.4, bass: 0.6, bell: 0.42, kick: 0.72, snare: 0.32, hat: 0.13 },
+  },
+
+  // Typing: a dramatic boss fight. E minor at a racing tempo, a galloping bass, punchy off-beat stabs, and a heroic,
+  // urgent melody. Each loop ends on B major, whose D# pulls hard back to E minor, with a snare roll into it.
+  adventure: {
+    bpm: 132,
+    swing: 0,
+    chords: [
+      { keys: [40, 47, 52, 55, 59, 64], bass: 40 }, // Em, with a low root and fifth
+      { keys: [36, 43, 52, 55, 60, 64], bass: 36 }, // C
+      { keys: [38, 45, 54, 57, 62, 66], bass: 38 }, // D
+      { keys: [35, 42, 51, 54, 59, 63], bass: 35 }, // B
+    ],
+    keys: [
+      [0, 1],
+      [3, 1],
+      [6, 1],
+      [10, 1],
+      [12, 2],
+    ],
+    // The gallop: an eighth and two sixteenths, four times a bar.
+    bass: [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15].map((step) => [step, step % 4 === 0 ? 2 : 1] as const),
+    melody: [
+      [
+        [0, 76, 3],
+        [3, 79, 1],
+        [4, 83, 4],
+        [8, 81, 2],
+        [10, 79, 2],
+        [12, 78, 4],
+      ],
+      [
+        [0, 79, 3],
+        [3, 76, 1],
+        [4, 72, 4],
+        [8, 76, 2],
+        [10, 79, 2],
+        [12, 84, 4],
+      ],
+      [
+        [0, 83, 2],
+        [2, 81, 2],
+        [4, 78, 4],
+        [8, 74, 2],
+        [10, 78, 2],
+        [12, 81, 4],
+      ],
+      [
+        [0, 83, 4],
+        [4, 78, 2],
+        [6, 75, 2],
+        [8, 71, 4],
+        [12, 75, 2],
+        [14, 78, 2],
+      ],
+    ],
+    drums: { kick: [0, 3, 6, 8, 10, 11, 14], snare: [4, 12], hat: SIXTEENTHS },
+    fill: [13, 14, 15],
+    unison: true,
+    mix: { keys: 0.36, bass: 0.55, bell: 0.4, kick: 0.75, snare: 0.34, hat: 0.09 },
   },
 
   // The idle list and the Leaderboard: nostalgic and sweet, C major, long chords and a slow melody.
@@ -192,8 +290,9 @@ export const THEMES: Record<ThemeName, Theme> = {
 export function themeForScreen(screen: BoothScreen): ThemeName {
   switch (screen) {
     case "setup":
-    case "ready":
       return "cozy";
+    case "ready":
+      return "invite";
     case "typing":
       return "adventure";
     case "results":
@@ -235,19 +334,20 @@ export function barEvents(name: ThemeName, bar: number): MusicEvent[] {
   for (const [start, length] of theme.bass) {
     add("bass", start, length, chord.bass);
   }
-  const melody = theme.melody?.[index];
-  if (melody) {
-    for (const [start, note, length] of melody) {
-      add("bell", start, length, note);
+  for (const [start, note, length] of theme.melody[index]!) {
+    add("bell", start, length, note);
+    if (theme.unison && note >= 70) {
+      add("bell", start, length, note - 12, 0.7);
     }
-  } else {
-    // A harp running up and back down the chord, an octave up, on every 16th.
-    const tones = chord.keys.map((note) => note + 12);
-    const run = [...tones, ...tones.slice(1, -1).reverse()];
-    SIXTEENTHS.forEach((start) => add("bell", start, 1, run[start % run.length]!, 0.8));
   }
   for (const start of theme.drums.kick) add("kick", start, 2, null);
   for (const start of theme.drums.snare) add("snare", start, 2, null);
+  if (index === theme.chords.length - 1) {
+    theme.fill?.forEach((start, hit) => {
+      add("snare", start, 1, null, 0.5 + hit * 0.12);
+      add("kick", start, 1, null, 0.6 + hit * 0.1);
+    });
+  }
   for (const start of theme.drums.hat) add("hat", start, 1, null, start % 4 === 0 ? 1 : 0.7);
 
   return events.sort((left, right) => left.at - right.at);

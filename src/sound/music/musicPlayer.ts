@@ -7,6 +7,8 @@ const WARMTH_HZ = 3000;
 const LOOKAHEAD_SECONDS = 0.5;
 const TICK_MS = 100;
 const FADE_SECONDS = 1.2;
+/** The vinyl hiss: one quiet layer on the master, so it is the same on every screen. */
+export const CRACKLE_VOLUME = 0.014;
 
 type Bus = { gain: GainNode; theme: ThemeName; bar: number; nextBarAt: number };
 
@@ -198,7 +200,7 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
     crackle.playbackRate.value = 0.5;
     filter.type = "bandpass";
     filter.frequency.value = 2500;
-    gain.gain.value = 0.025;
+    gain.gain.value = CRACKLE_VOLUME;
     crackle.connect(filter).connect(gain).connect(master);
     crackle.start();
   }

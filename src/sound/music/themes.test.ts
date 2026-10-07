@@ -4,9 +4,9 @@ import { barEvents, barSeconds, THEMES, themeForScreen, type ThemeName } from ".
 const names = Object.keys(THEMES) as ThemeName[];
 
 describe("themeForScreen", () => {
-  it("plays cozy on Event Setup and Ready, adventure while typing, nostalgic on the boards, and victory on Results", () => {
+  it("plays cozy on Event Setup, invite on Ready, adventure while typing, nostalgic on the boards, and victory on Results", () => {
     expect(themeForScreen("setup")).toBe("cozy");
-    expect(themeForScreen("ready")).toBe("cozy");
+    expect(themeForScreen("ready")).toBe("invite");
     expect(themeForScreen("typing")).toBe("adventure");
     expect(themeForScreen("rolling")).toBe("nostalgic");
     expect(themeForScreen("leaderboard")).toBe("nostalgic");
@@ -15,8 +15,8 @@ describe("themeForScreen", () => {
 });
 
 describe("themes", () => {
-  it("are the four planned moods, with the adventure fastest and the nostalgic slowest", () => {
-    expect(names.sort()).toEqual(["adventure", "cozy", "nostalgic", "victory"]);
+  it("are the five planned moods, with the adventure fastest and the nostalgic slowest", () => {
+    expect(names.sort()).toEqual(["adventure", "cozy", "invite", "nostalgic", "victory"]);
     const tempos = Object.fromEntries(names.map((name) => [name, THEMES[name].bpm]));
     expect(Math.max(...Object.values(tempos))).toBe(tempos.adventure);
     expect(Math.min(...Object.values(tempos))).toBe(tempos.nostalgic);
@@ -29,6 +29,44 @@ describe("themes", () => {
       expect(instruments.has("keys")).toBe(true);
       expect(instruments.has("bell")).toBe(true);
     }
+  });
+});
+
+describe("invite theme", () => {
+  it("is livelier than cozy but calmer than the adventure, so typing still feels like the rush", () => {
+    expect(THEMES.invite.bpm).toBeGreaterThan(THEMES.cozy.bpm);
+    expect(THEMES.invite.bpm).toBeLessThan(THEMES.adventure.bpm);
+  });
+});
+
+describe("adventure theme", () => {
+  it("is a boss fight: a galloping bass under a melody, ending each loop on a tense B major chord", () => {
+    const bass = barEvents("adventure", 0).filter((event) => event.instrument === "bass");
+    expect(bass.length).toBeGreaterThanOrEqual(12);
+    expect(barEvents("adventure", 0).some((event) => event.instrument === "bell")).toBe(true);
+    // D#, the major third of B: the leading tone that pulls back to E minor.
+    const lastBar = barEvents("adventure", THEMES.adventure.chords.length - 1);
+    expect(lastBar.some((event) => event.instrument === "keys" && event.note! % 12 === 3)).toBe(true);
+  });
+});
+
+describe("dramatic typing theme", () => {
+  it("doubles the melody an octave down and puts a low root under every chord", () => {
+    for (let bar = 0; bar < THEMES.adventure.chords.length; bar += 1) {
+      const lead = barEvents("adventure", bar).filter((event) => event.instrument === "bell");
+      const written = THEMES.adventure.melody[bar]!.filter(([, note]) => note >= 70);
+      expect(written.length).toBeGreaterThan(0);
+      for (const [, note] of written) {
+        expect(lead.some((low) => low.note === note - 12)).toBe(true);
+      }
+      expect(barEvents("adventure", bar).some((event) => event.instrument === "keys" && event.note! < 48)).toBe(true);
+    }
+  });
+
+  it("rolls kicks under the snare into each new loop", () => {
+    const last = barEvents("adventure", THEMES.adventure.chords.length - 1);
+    const kickSteps = last.filter((event) => event.instrument === "kick").length;
+    expect(kickSteps).toBeGreaterThan(barEvents("adventure", 0).filter((event) => event.instrument === "kick").length);
   });
 });
 

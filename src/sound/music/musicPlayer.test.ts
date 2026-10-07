@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createMusicPlayer } from "./musicPlayer";
+import { CRACKLE_VOLUME, createMusicPlayer } from "./musicPlayer";
 
 function fakeContext() {
   const param = () => ({
@@ -122,5 +122,18 @@ describe("createMusicPlayer", () => {
       music.setTheme("cozy");
       vi.advanceTimersByTime(500);
     }).not.toThrow();
+  });
+
+  it("keeps one quiet vinyl hiss, at one level, across every theme change", () => {
+    const { context } = fakeContext();
+    const music = createMusicPlayer(() => context as unknown as AudioContext);
+    music.setEnabled(true);
+    for (const theme of ["cozy", "invite", "adventure", "victory", "nostalgic"] as const) {
+      music.setTheme(theme);
+      vi.advanceTimersByTime(200);
+    }
+    const loops = context.createBufferSource.mock.results.filter((result) => result.value.loop);
+    expect(loops).toHaveLength(1);
+    expect(CRACKLE_VOLUME).toBeLessThanOrEqual(0.015);
   });
 });
