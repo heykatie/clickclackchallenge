@@ -38,6 +38,7 @@ async function renderReady(
   listAllScores.mockResolvedValue(allScores);
   const onStart = vi.fn();
   const onSetup = vi.fn();
+  const onRollingChange = vi.fn();
   let shortEscape: (() => void) | null = null;
   render(
     <ReadyScreen
@@ -46,6 +47,7 @@ async function renderReady(
       highScore={highScore}
       onStart={onStart}
       onSetup={onSetup}
+      onRollingChange={onRollingChange}
       claimShortEscape={(handler) => {
         shortEscape = handler;
       }}
@@ -53,7 +55,7 @@ async function renderReady(
   );
   // Let the scores load.
   await act(async () => {});
-  return { onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
+  return { onRollingChange, onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
 
 /** A tap lands its pointerup on whatever screen is showing once pointerdown has been handled. */
@@ -132,6 +134,15 @@ describe("ReadyScreen", () => {
     expect(screen.getByText("HIGH SCORES")).toBeTruthy();
     expect(onStart).not.toHaveBeenCalled();
     expect(onSetup).not.toHaveBeenCalled();
+  });
+
+  it("reports when the rolling list opens and closes, so the music can follow it", async () => {
+    const { onRollingChange, shortEscape } = await renderReady();
+    expect(onRollingChange).toHaveBeenLastCalledWith(false);
+    tapLogo();
+    expect(onRollingChange).toHaveBeenLastCalledWith(true);
+    shortEscape();
+    expect(onRollingChange).toHaveBeenLastCalledWith(false);
   });
 
   it("does nothing on a logo tap when there is no score to roll", async () => {
