@@ -4,9 +4,9 @@ import { barEvents, barSeconds, THEMES, themeForScreen, type ThemeName } from ".
 const names = Object.keys(THEMES) as ThemeName[];
 
 describe("themeForScreen", () => {
-  it("plays cozy on Event Setup and Ready, adventure while typing, nostalgic on the boards, and victory on Results", () => {
+  it("plays cozy on Event Setup, invite on Ready, adventure while typing, nostalgic on the boards, and victory on Results", () => {
     expect(themeForScreen("setup")).toBe("cozy");
-    expect(themeForScreen("ready")).toBe("cozy");
+    expect(themeForScreen("ready")).toBe("invite");
     expect(themeForScreen("typing")).toBe("adventure");
     expect(themeForScreen("rolling")).toBe("nostalgic");
     expect(themeForScreen("leaderboard")).toBe("nostalgic");
@@ -15,8 +15,8 @@ describe("themeForScreen", () => {
 });
 
 describe("themes", () => {
-  it("are the four planned moods, with the adventure fastest and the nostalgic slowest", () => {
-    expect(names.sort()).toEqual(["adventure", "cozy", "nostalgic", "victory"]);
+  it("are the five planned moods, with the adventure fastest and the nostalgic slowest", () => {
+    expect(names.sort()).toEqual(["adventure", "cozy", "invite", "nostalgic", "victory"]);
     const tempos = Object.fromEntries(names.map((name) => [name, THEMES[name].bpm]));
     expect(Math.max(...Object.values(tempos))).toBe(tempos.adventure);
     expect(Math.min(...Object.values(tempos))).toBe(tempos.nostalgic);
@@ -29,6 +29,13 @@ describe("themes", () => {
       expect(instruments.has("keys")).toBe(true);
       expect(instruments.has("bell")).toBe(true);
     }
+  });
+});
+
+describe("invite theme", () => {
+  it("is livelier than cozy but calmer than the adventure, so typing still feels like the rush", () => {
+    expect(THEMES.invite.bpm).toBeGreaterThan(THEMES.cozy.bpm);
+    expect(THEMES.invite.bpm).toBeLessThan(THEMES.adventure.bpm);
   });
 });
 

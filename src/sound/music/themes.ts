@@ -1,11 +1,11 @@
 import type { BoothScreen } from "../../pwa/boothViewport";
 
 /**
- * Four lo-fi themes with fantasy touches, written for one shared band so they sound like the same game:
+ * Five lo-fi themes with fantasy touches, written for one shared band so they sound like the same game:
  * soft electric piano ("keys"), a round bass, a music-box "bell" lead, and dusty drums. Notes are MIDI
  * numbers (60 is middle C). Each bar has 16 steps; steps are [start, length].
  */
-export type ThemeName = "cozy" | "adventure" | "nostalgic" | "victory";
+export type ThemeName = "cozy" | "invite" | "adventure" | "nostalgic" | "victory";
 export type Instrument = "keys" | "bass" | "bell" | "kick" | "snare" | "hat";
 
 type Steps = readonly (readonly [start: number, length: number])[];
@@ -71,6 +71,64 @@ export const THEMES: Record<ThemeName, Theme> = {
     ],
     drums: { kick: [0, 10], snare: [4, 12], hat: EIGHTHS },
     mix: { keys: 0.45, bass: 0.6, bell: 0.4, kick: 0.7, snare: 0.3, hat: 0.14 },
+  },
+
+  // Ready: "an adventure awaits". A heroic horn call climbing in fourths and fifths over D minor, ending each
+  // loop on A so it hangs unresolved, like a quest about to begin. Livelier than cozy, calmer than typing.
+  invite: {
+    bpm: 100,
+    swing: 0.12,
+    chords: [
+      { keys: [50, 53, 57, 62], bass: 38 }, // Dm
+      { keys: [50, 53, 58, 62], bass: 34 }, // Bb
+      { keys: [52, 55, 60, 64], bass: 36 }, // C
+      { keys: [52, 57, 61, 64], bass: 33 }, // A
+    ],
+    keys: [
+      [0, 3],
+      [6, 2],
+      [8, 3],
+      [14, 2],
+    ],
+    bass: [
+      [0, 2],
+      [3, 1],
+      [6, 2],
+      [8, 2],
+      [11, 1],
+      [14, 2],
+    ],
+    melody: [
+      [
+        [0, 69, 2],
+        [2, 74, 2],
+        [4, 76, 2],
+        [6, 77, 6],
+        [12, 76, 2],
+        [14, 74, 2],
+      ],
+      [
+        [0, 77, 4],
+        [4, 74, 2],
+        [6, 70, 6],
+        [12, 74, 4],
+      ],
+      [
+        [0, 72, 2],
+        [2, 76, 2],
+        [4, 79, 4],
+        [8, 84, 6],
+        [14, 81, 2],
+      ],
+      [
+        [0, 81, 6],
+        [6, 79, 2],
+        [8, 76, 2],
+        [10, 73, 6],
+      ],
+    ],
+    drums: { kick: [0, 6, 8, 14], snare: [4, 12], hat: [0, 2, 4, 6, 8, 10, 12, 14, 15] },
+    mix: { keys: 0.4, bass: 0.6, bell: 0.42, kick: 0.72, snare: 0.32, hat: 0.13 },
   },
 
   // Typing: heart-racing adventure, A minor, a pushing pulse and racing harp arpeggios.
@@ -192,8 +250,9 @@ export const THEMES: Record<ThemeName, Theme> = {
 export function themeForScreen(screen: BoothScreen): ThemeName {
   switch (screen) {
     case "setup":
-    case "ready":
       return "cozy";
+    case "ready":
+      return "invite";
     case "typing":
       return "adventure";
     case "results":
