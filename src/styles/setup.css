@@ -361,7 +361,7 @@ label.setup-option-big {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 1rem;
-  margin-top: 0.6rem;
+  margin-top: 0.9rem;
 }
 
 
@@ -442,6 +442,42 @@ button.setup-tool:active:not(:disabled) {
   border-radius: 999px;
   color: #b23a3a;
   text-decoration: none;
+}
+
+/*
+ * A short label with its full meaning in a tooltip above it, on hover and on the keyboard cursor.
+ * It floats over the card, so showing it moves nothing.
+ */
+.setup-tool[data-tooltip] {
+  position: relative;
+}
+
+.setup-tool[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 0.35rem);
+  left: 50%;
+  z-index: 3;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.6rem;
+  background: var(--tiny-charcoal);
+  color: var(--tiny-white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0.2rem);
+  transition: opacity 120ms ease-out, transform 120ms ease-out;
+}
+
+.setup-tool[data-tooltip]:hover::after,
+.setup-tool[data-tooltip]:focus-visible::after,
+.setup-tool[data-tooltip].is-cursor::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .setup-tool.is-danger:hover:not(:disabled),
@@ -541,7 +577,7 @@ button.setup-tool.is-danger:active:not(:disabled) {
   }
 
   .setup-score-actions {
-    margin-top: 0.3rem;
+    margin-top: 0.45rem;
   }
 
   /* The top padding stays: the logo badge sits just above the title. The gaps between sections give a little. */

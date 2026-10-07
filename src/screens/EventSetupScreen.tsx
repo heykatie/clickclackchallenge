@@ -505,8 +505,10 @@ export function EventSetupScreen({
                     className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
                     onClick={askToClear}
                     disabled={saving}
+                    aria-label="CLEAR ALL SCORES"
+                    data-tooltip="Delete scores"
                   >
-                    CLEAR ALL SCORES
+                    CLEAR ALL
                   </button>
                 ) : null}
                 {canRestore ? (

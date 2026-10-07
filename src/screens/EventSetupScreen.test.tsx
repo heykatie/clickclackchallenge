@@ -431,4 +431,12 @@ describe("EventSetupScreen", () => {
     const swatch = chip.querySelector(".palette-swatch");
     expect(swatch?.getAttribute("aria-hidden")).toBe("true");
   });
+
+  it("labels the clear button CLEAR ALL, with a Delete scores tooltip and a screen-reader name that says it clears the scores", () => {
+    cleanup();
+    renderSetup(existing);
+    const clear = screen.getByRole("button", { name: "CLEAR ALL SCORES" });
+    expect(clear.textContent).toBe("CLEAR ALL");
+    expect(clear.getAttribute("data-tooltip")).toBe("Delete scores");
+  });
 });
