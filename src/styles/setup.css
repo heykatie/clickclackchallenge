@@ -324,9 +324,39 @@ label.setup-option-big {
 }
 
 .setup-tools {
+  display: grid;
+  gap: 0.35rem;
+}
+
+/* One labelled row each for score actions and device settings. */
+.setup-tool-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  align-items: center;
+  gap: 0.25rem 0.9rem;
+}
+
+.setup-tool-label {
+  min-width: 4.25rem;
+  color: var(--tiny-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* A setting chip: a small outlined pill instead of an underlined link, tinted while the setting is on. */
+.setup-tool.setup-chip {
+  min-height: 34px;
+  padding: 0.2rem 0.75rem;
+  border: 1.5px solid var(--tiny-lavender-light);
+  border-radius: 999px;
+  background: var(--tiny-white);
+  text-decoration: none;
+}
+
+.setup-tool.setup-chip.is-on {
+  border-color: var(--tiny-mint-strong);
+  background: color-mix(in srgb, var(--tiny-mint) 45%, var(--tiny-white));
+  color: var(--tiny-charcoal);
 }
 
 /* Small text links: still buttons for the keyboard cursor, but quiet next to START EVENT. */

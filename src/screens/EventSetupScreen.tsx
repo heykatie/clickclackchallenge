@@ -117,7 +117,15 @@ export function EventSetupScreen({
     return names.length > 0 ? names.join(" ") : undefined;
   }
 
-  function remember(next: SetupSelection) {
+  /**
+   * A setting chip: tinted while an on/off setting is on, so staff see the booth's state at a glance.
+   * PALETTE is a choice between two, not on or off, so it is never tinted.
+   */
+  function settingClass(choice: SetupChoice, on: boolean) {
+    return ["setup-tool", "setup-chip", on ? "is-on" : "", cursor === choice ? "is-cursor" : ""].filter(Boolean).join(" ");
+  }
+
+    function remember(next: SetupSelection) {
     selectionRef.current = next;
     setCursor(next.cursor);
     setSelectedDuration(next.duration);
@@ -478,60 +486,72 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND, MUSIC, and PALETTE always show. */}
+            {/* Two quiet rows: one-time actions on the scores, then device settings that show their state. */}
             <div className="setup-tools">
-              {storedDuration !== null ? (
+              {storedDuration !== null || canRestore ? (
+                <div className="setup-tool-row" role="group" aria-labelledby="setup-scores-label">
+                  <span id="setup-scores-label" className="setup-tool-label">
+                    Scores
+                  </span>
+                  {storedDuration !== null ? (
+                    <button
+                      type="button"
+                      className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
+                      onClick={askToClear}
+                      disabled={saving}
+                    >
+                      CLEAR ALL SCORES
+                    </button>
+                  ) : null}
+                  {canRestore ? (
+                    <button
+                      type="button"
+                      className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                      onClick={askToRestore}
+                      disabled={saving}
+                    >
+                      RESTORE CLEARED SCORES
+                    </button>
+                  ) : null}
+                  {storedDuration !== null ? (
+                    <button
+                      type="button"
+                      className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
+                      onClick={onDownloadScores}
+                    >
+                      DOWNLOAD SCORES
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              <div className="setup-tool-row" role="group" aria-labelledby="setup-settings-label">
+                <span id="setup-settings-label" className="setup-tool-label">
+                  Settings
+                </span>
                 <button
                   type="button"
-                  className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToClear}
-                  disabled={saving}
+                  className={settingClass("sound", soundOn)}
+                  aria-pressed={soundOn}
+                  onClick={onToggleSound}
                 >
-                  CLEAR ALL SCORES
+                  SOUND: {soundOn ? "ON" : "OFF"}
                 </button>
-              ) : null}
-              {canRestore ? (
                 <button
                   type="button"
-                  className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToRestore}
-                  disabled={saving}
+                  className={settingClass("music", musicOn)}
+                  aria-pressed={musicOn}
+                  onClick={onToggleMusic}
                 >
-                  RESTORE CLEARED SCORES
+                  MUSIC: {musicOn ? "ON" : "OFF"}
                 </button>
-              ) : null}
-              {storedDuration !== null ? (
                 <button
                   type="button"
-                  className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={onDownloadScores}
+                  className={settingClass("palette", false)}
+                  onClick={onTogglePalette}
                 >
-                  DOWNLOAD SCORES
+                  PALETTE: {palette === "cool" ? "COOL" : "WARM"}
                 </button>
-              ) : null}
-              <button
-                type="button"
-                className={cursor === "sound" ? "setup-tool is-cursor" : "setup-tool"}
-                aria-pressed={soundOn}
-                onClick={onToggleSound}
-              >
-                SOUND: {soundOn ? "ON" : "OFF"}
-              </button>
-              <button
-                type="button"
-                className={cursor === "music" ? "setup-tool is-cursor" : "setup-tool"}
-                aria-pressed={musicOn}
-                onClick={onToggleMusic}
-              >
-                MUSIC: {musicOn ? "ON" : "OFF"}
-              </button>
-              <button
-                type="button"
-                className={cursor === "palette" ? "setup-tool is-cursor" : "setup-tool"}
-                onClick={onTogglePalette}
-              >
-                PALETTE: {palette === "cool" ? "COOL" : "WARM"}
-              </button>
+              </div>
             </div>
           </div>
           <div className="setup-start-group">
