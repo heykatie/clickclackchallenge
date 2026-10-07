@@ -54,13 +54,17 @@ const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
 /** From START EVENT, the steps up are All-time leaderboard, Continue, then Start fresh. */
-// START EVENT → event name → All-time → Continue → Start fresh, then back down to START EVENT.
+// START EVENT → event name → CLEAR → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
 function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
   press("ArrowUp");
   press("ArrowUp");
+  press("ArrowUp");
+  press("ArrowUp");
   press("Enter");
+  press("ArrowDown");
+  press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
@@ -144,9 +148,7 @@ describe("EventSetupScreen", () => {
 
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
-    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → MUSIC → PALETTE → wraps to UPDATE NOW.
-    press("ArrowDown");
-    press("ArrowDown");
+    // START EVENT → SOUND → MUSIC → PALETTE → wraps to UPDATE NOW.
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -164,10 +166,15 @@ describe("EventSetupScreen", () => {
 
   it("keeps the event and switches its board to all-time", () => {
     const { onContinue, onStartFresh } = renderSetup(existing);
+    // START EVENT → event name → CLEAR → DOWNLOAD → All-time.
+    press("ArrowUp");
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("Enter");
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
+    press("ArrowDown");
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("Enter");
@@ -207,7 +214,9 @@ describe("EventSetupScreen", () => {
 
   it("clears with the selected length and mode once CLEAR SCORES is picked", () => {
     const { onClearScores } = renderSetup(existing);
-    press("ArrowDown");
+    // START EVENT → event name → CLEAR ALL SCORES.
+    press("ArrowUp");
+    press("ArrowUp");
     expect(screen.getByRole("button", { name: "CLEAR ALL SCORES" }).className).toContain("is-cursor");
     press("Enter");
     press("ArrowRight");
@@ -233,8 +242,9 @@ describe("EventSetupScreen", () => {
 
   it("restores from the keyboard once RESTORE is picked", () => {
     const { onRestoreScores, onClearScores } = renderSetup(existing, false, true);
-    press("ArrowDown");
-    press("ArrowDown");
+    // START EVENT → event name → RESTORE CLEARED SCORES.
+    press("ArrowUp");
+    press("ArrowUp");
     expect(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }).className).toContain("is-cursor");
     press("Enter");
     press("ArrowRight");
@@ -251,10 +261,12 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
-  it("reaches DOWNLOAD SCORES after CLEAR ALL SCORES in the arrow-key order, and Enter downloads", () => {
+  it("reaches DOWNLOAD SCORES before CLEAR ALL SCORES in the arrow-key order, and Enter downloads", () => {
     const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
-    press("ArrowDown");
-    press("ArrowDown");
+    // START EVENT → event name → CLEAR ALL SCORES → DOWNLOAD SCORES.
+    press("ArrowUp");
+    press("ArrowUp");
+    press("ArrowUp");
     expect(screen.getByRole("button", { name: "DOWNLOAD SCORES" }).className).toContain("is-cursor");
     press("Enter");
     expect(onDownloadScores).toHaveBeenCalledOnce();
@@ -274,9 +286,7 @@ describe("EventSetupScreen", () => {
   it("says SOUND: ON when sound is on, and toggles with Enter from the keyboard", () => {
     const { onToggleSound } = renderSetup(existing, false, false, true);
     expect(screen.getByRole("button", { name: "SOUND: ON" }).getAttribute("aria-pressed")).toBe("true");
-    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND.
-    press("ArrowDown");
-    press("ArrowDown");
+    // START EVENT → SOUND.
     press("ArrowDown");
     expect(screen.getByRole("button", { name: "SOUND: ON" }).className).toContain("is-cursor");
     press("Enter");
@@ -357,8 +367,7 @@ describe("EventSetupScreen", () => {
 
   it("toggles music with Enter from the keyboard, one step after SOUND", () => {
     const { onToggleMusic } = renderSetup(existing);
-    press("ArrowDown");
-    press("ArrowDown");
+    // START EVENT → SOUND → MUSIC.
     press("ArrowDown");
     press("ArrowDown");
     expect(screen.getByRole("button", { name: "MUSIC: OFF" }).className).toContain("is-cursor");

@@ -343,6 +343,20 @@ label.setup-option-big {
   font-weight: 700;
 }
 
+/* The score actions, under the Leaderboard choices they act on: DOWNLOAD as a safe chip, CLEAR in warning red. */
+.setup-score-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  margin-top: 0.6rem;
+}
+
+/* Clearing hides every score on every board, so it reads as a warning, not like the safe download beside it. */
+.setup-tool.is-danger {
+  color: #b23a3a;
+}
+
 /* A setting chip: a small outlined pill instead of an underlined link, tinted while the setting is on. */
 .setup-tool.setup-chip {
   min-height: 34px;
@@ -464,5 +478,23 @@ button.setup-tool:active:not(:disabled) {
 
   .setup-tools {
     row-gap: 0;
+  }
+
+  .setup-tool.setup-chip {
+    min-height: 28px;
+    padding-block: 0.1rem;
+  }
+
+  .setup-score-actions {
+    margin-top: 0.3rem;
+  }
+
+  /* The top padding stays: the logo badge sits just above the title. The gaps between sections give a little. */
+  .setup-screen {
+    gap: 0.5rem;
+  }
+
+  .setup-groups {
+    gap: 0.45rem;
   }
 }

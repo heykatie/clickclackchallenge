@@ -467,6 +467,39 @@ export function EventSetupScreen({
                 description="Every score ever"
               />
             </div>
+            {storedDuration !== null || canRestore ? (
+              <div className="setup-score-actions">
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
+                    className={cursor === "download" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={onDownloadScores}
+                  >
+                    DOWNLOAD SCORES
+                  </button>
+                ) : null}
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
+                    className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
+                    onClick={askToClear}
+                    disabled={saving}
+                  >
+                    CLEAR ALL SCORES
+                  </button>
+                ) : null}
+                {canRestore ? (
+                  <button
+                    type="button"
+                    className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                    onClick={askToRestore}
+                    disabled={saving}
+                  >
+                    RESTORE CLEARED SCORES
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
             {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
           </fieldset>
         </div>
@@ -486,44 +519,8 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Two quiet rows: one-time actions on the scores, then device settings that show their state. */}
+            {/* Device settings, as chips that show their state. The score actions live with the Leaderboard choices. */}
             <div className="setup-tools">
-              {storedDuration !== null || canRestore ? (
-                <div className="setup-tool-row" role="group" aria-labelledby="setup-scores-label">
-                  <span id="setup-scores-label" className="setup-tool-label">
-                    Scores
-                  </span>
-                  {storedDuration !== null ? (
-                    <button
-                      type="button"
-                      className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-                      onClick={askToClear}
-                      disabled={saving}
-                    >
-                      CLEAR ALL SCORES
-                    </button>
-                  ) : null}
-                  {canRestore ? (
-                    <button
-                      type="button"
-                      className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-                      onClick={askToRestore}
-                      disabled={saving}
-                    >
-                      RESTORE CLEARED SCORES
-                    </button>
-                  ) : null}
-                  {storedDuration !== null ? (
-                    <button
-                      type="button"
-                      className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
-                      onClick={onDownloadScores}
-                    >
-                      DOWNLOAD SCORES
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
               <div className="setup-tool-row" role="group" aria-labelledby="setup-settings-label">
                 <span id="setup-settings-label" className="setup-tool-label">
                   Settings

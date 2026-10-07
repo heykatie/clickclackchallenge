@@ -61,6 +61,8 @@ describe("all-time choice", () => {
     expect(choices.slice(choices.indexOf("continue"), choices.indexOf("start") + 1)).toEqual([
       "continue",
       "all-time",
+      "download",
+      "clear",
       "name",
       "start",
     ]);
@@ -75,11 +77,14 @@ describe("all-time choice", () => {
 });
 
 describe("clear choice", () => {
-  it("comes right after START EVENT, and only while an event exists", () => {
+  it("comes right after DOWNLOAD SCORES in the Leaderboard group, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("start") + 1]).toBe("clear");
+    expect(choices[choices.indexOf("download") + 1]).toBe("clear");
     expect(setupChoices("famous-lines", false)).not.toContain("clear");
-    expect(applySetupKey(ready, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "clear" });
+    expect(applySetupKey({ ...ready, cursor: "download" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({
+      ...ready,
+      cursor: "clear",
+    });
   });
 
   it("asks to clear on Enter", () => {
@@ -88,16 +93,9 @@ describe("clear choice", () => {
 });
 
 describe("download choice", () => {
-  it("comes after the clear and restore links, and only while an event exists", () => {
-    expect(setupChoices("famous-lines", true).slice(-4)).toEqual(["download", "sound", "music", "palette"]);
-    expect(setupChoices("famous-lines", true, false, true).slice(-6)).toEqual([
-      "clear",
-      "restore",
-      "download",
-      "sound",
-      "music",
-      "palette",
-    ]);
+  it("comes first of the score actions, right after the Leaderboard choices, and only while an event exists", () => {
+    const choices = setupChoices("famous-lines", true);
+    expect(choices[choices.indexOf("all-time") + 1]).toBe("download");
     expect(setupChoices("famous-lines", false)).not.toContain("download");
   });
 
@@ -118,6 +116,14 @@ describe("event name choice", () => {
 
   it("asks to edit the name on Enter", () => {
     expect(applySetupKey({ ...ready, cursor: "name" }, "Enter", { shiftKey: false, canContinue: true })).toBe("name");
+  });
+});
+
+describe("score actions", () => {
+  it("sit with the Leaderboard choices: DOWNLOAD, then CLEAR, then RESTORE, before the event name", () => {
+    const choices = setupChoices("famous-lines", true, false, true);
+    const from = choices.indexOf("all-time");
+    expect(choices.slice(from, from + 6)).toEqual(["all-time", "download", "clear", "restore", "name", "start"]);
   });
 });
 
@@ -142,15 +148,8 @@ describe("sound and music choices", () => {
 
 describe("restore choice", () => {
   it("comes after CLEAR ALL SCORES, and only while a clear can be undone", () => {
-    expect(setupChoices("famous-lines", true, false, true).slice(-7)).toEqual([
-      "start",
-      "clear",
-      "restore",
-      "download",
-      "sound",
-      "music",
-      "palette",
-    ]);
+    const choices = setupChoices("famous-lines", true, false, true);
+    expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "name"]);
     expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");
   });
 
