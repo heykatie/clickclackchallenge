@@ -402,4 +402,25 @@ describe("EventSetupScreen", () => {
     renderSetup(existing);
     expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("From last board");
   });
+
+  it("locks Story to 60s with 30s greyed out, and adds no note, so nothing below moves", () => {
+    cleanup();
+    renderSetup(existing);
+    fireEvent.click(screen.getByLabelText("Story"));
+    expect((screen.getByLabelText(/60 seconds/) as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText(/30 seconds/) as HTMLInputElement).disabled).toBe(true);
+    expect(screen.getByLabelText(/30 seconds/).closest("label")!.className).toContain("is-disabled");
+    expect(screen.queryByText("Story is always 60s.")).toBeNull();
+    const sixty = screen.getByLabelText(/60 seconds/).closest("label")!.className;
+    expect(sixty).not.toContain("is-disabled");
+    expect(sixty).not.toContain("is-fixed");
+  });
+
+  it("keeps each setting chip as wide as its widest value, so switching it does not shift the others", () => {
+    cleanup();
+    renderSetup(existing);
+    const music = screen.getByRole("button", { name: "MUSIC: OFF" });
+    const reserved = music.querySelector('[aria-hidden="true"]');
+    expect(reserved?.textContent).toBe("ON");
+  });
 });

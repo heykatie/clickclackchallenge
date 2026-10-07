@@ -364,10 +364,7 @@ label.setup-option-big {
   margin-top: 0.6rem;
 }
 
-/* Clearing hides every score on every board, so it reads as a warning, not like the safe download beside it. */
-.setup-tool.is-danger {
-  color: #b23a3a;
-}
+
 
 /* A setting chip: a small outlined pill instead of an underlined link, tinted while the setting is on. */
 .setup-tool.setup-chip {
@@ -377,6 +374,19 @@ label.setup-option-big {
   border-radius: 999px;
   background: var(--tiny-white);
   text-decoration: none;
+}
+
+/* Both values share one grid cell; only the current one shows. */
+.setup-chip-value {
+  display: inline-grid;
+}
+
+.setup-chip-value > span {
+  grid-area: 1 / 1;
+}
+
+.setup-chip-value > [aria-hidden="true"] {
+  visibility: hidden;
 }
 
 .setup-tool.setup-chip.is-on {
@@ -403,6 +413,25 @@ button.setup-tool:active:not(:disabled) {
   transform: translateY(1px);
   box-shadow: none;
   filter: none;
+}
+
+/*
+ * Clearing hides every score on every board, so it is a warning-red ghost button: no fill or border at rest,
+ * the same pill shape as DOWNLOAD beside it, and a faint red wash on hover and press.
+ */
+.setup-tool.is-danger {
+  min-height: 34px;
+  padding: 0.2rem 0.75rem;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  color: #b23a3a;
+  text-decoration: none;
+}
+
+.setup-tool.is-danger:hover:not(:disabled),
+button.setup-tool.is-danger:active:not(:disabled) {
+  background: color-mix(in srgb, #b23a3a 10%, transparent);
+  color: #b23a3a;
 }
 
 .setup-start-group {
@@ -489,7 +518,8 @@ button.setup-tool:active:not(:disabled) {
   }
 
 
-  .setup-tool.setup-chip {
+  .setup-tool.setup-chip,
+  .setup-tool.is-danger {
     min-height: 28px;
     padding-block: 0.1rem;
   }
