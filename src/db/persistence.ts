@@ -7,6 +7,8 @@ export type TestDuration = 30 | 60;
 export type TestMode = "words" | "famous-lines" | "story";
 /** Which scores the board ranks: this event's own, or every event's ever saved. Scores always save to the event. */
 export type BoardScope = "event" | "all-time";
+/** The booth's colors: warm (blush, the original) or cool (lavender, after the shop's logo). */
+export type Palette = "warm" | "cool";
 
 export function passageSetIdFor(testMode: TestMode): string {
   if (testMode === "words") {
@@ -60,6 +62,8 @@ export interface AppSettings {
   soundOn?: boolean;
   /** Background music, separate from sound. Off until the operator turns it on. Missing on older records. */
   musicOn?: boolean;
+  /** Warm until the operator picks cool in Event Setup. Missing on older records. */
+  palette?: Palette;
 }
 
 export interface BoothState {
@@ -116,6 +120,7 @@ function defaultSettings(): AppSettings {
     schemaVersion: SCHEMA_VERSION,
     soundOn: false,
     musicOn: false,
+    palette: "warm",
   };
 }
 
@@ -325,7 +330,7 @@ export async function closeDatabase(): Promise<void> {
 export async function loadBooth(): Promise<BoothState> {
   const database = await openDatabase();
   const stored = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
-  const settings = { ...stored, soundOn: stored.soundOn ?? false, musicOn: stored.musicOn ?? false };
+  const settings = { ...stored, soundOn: stored.soundOn ?? false, musicOn: stored.musicOn ?? false, palette: stored.palette ?? "warm" };
   if (!settings.activeEventId) {
     return { settings, activeEvent: null, hasClearedScores: await hasClearedScores() };
   }
@@ -510,6 +515,12 @@ export async function setMusicOn(musicOn: boolean): Promise<void> {
   const database = await openDatabase();
   const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
   await database.put("settings", { ...settings, musicOn }, SETTINGS_KEY);
+}
+
+export async function setPalette(palette: Palette): Promise<void> {
+  const database = await openDatabase();
+  const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
+  await database.put("settings", { ...settings, palette }, SETTINGS_KEY);
 }
 
 /** Every score and event on the device, cleared ones included, for the scores download. */

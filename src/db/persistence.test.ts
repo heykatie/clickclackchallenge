@@ -19,6 +19,7 @@ import {
   saveScore,
   setSoundOn,
   setMusicOn,
+  setPalette,
   SETTINGS_KEY,
   startFreshEvent,
   updateActiveEvent,
@@ -325,6 +326,15 @@ describe("persistence", () => {
     expect((await loadBooth()).settings.musicOn).toBe(true);
     await startFreshEvent(30);
     expect((await loadBooth()).settings.musicOn).toBe(true);
+  });
+
+  it("keeps the warm palette until the operator picks cool, and remembers it after the app reopens", async () => {
+    expect((await loadBooth()).settings.palette).toBe("warm");
+    await setPalette("cool");
+    await closeDatabase();
+    expect((await loadBooth()).settings.palette).toBe("cool");
+    await startFreshEvent(30);
+    expect((await loadBooth()).settings.palette).toBe("cool");
   });
 
   it("lists every score and event for a backup, cleared ones included", async () => {

@@ -1,5 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { cleanEventName, MAX_EVENT_NAME_LENGTH, type BoardScope, type TestDuration, type TestMode } from "../db/persistence";
+import {
+  cleanEventName,
+  MAX_EVENT_NAME_LENGTH,
+  type BoardScope,
+  type Palette,
+  type TestDuration,
+  type TestMode,
+} from "../db/persistence";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
   applyFreshConfirmKey,
@@ -36,6 +43,9 @@ type EventSetupScreenProps = {
   /** Background music, a device setting apart from sound. */
   musicOn: boolean;
   onToggleMusic: () => void;
+  /** The booth's colors, a device setting: warm (the original) or cool (lavender). */
+  palette: Palette;
+  onTogglePalette: () => void;
   /** Told the highlighted game mode, so the music can preview that mode's world. */
   onTestModeChange?: (mode: TestMode) => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
@@ -61,6 +71,8 @@ export function EventSetupScreen({
   musicOn,
   onToggleMusic,
   onTestModeChange,
+  palette,
+  onTogglePalette,
   plinkoWins,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
@@ -90,6 +102,7 @@ export function EventSetupScreen({
   const onDownloadRef = useRef(onDownloadScores);
   const onToggleSoundRef = useRef(onToggleSound);
   const onToggleMusicRef = useRef(onToggleMusic);
+  const onTogglePaletteRef = useRef(onTogglePalette);
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
@@ -172,6 +185,7 @@ export function EventSetupScreen({
     onDownloadRef.current = onDownloadScores;
     onToggleSoundRef.current = onToggleSound;
     onToggleMusicRef.current = onToggleMusic;
+    onTogglePaletteRef.current = onTogglePalette;
     confirmCursorRef.current = confirmCursor;
     selectionRef.current = {
       cursor,
@@ -242,6 +256,10 @@ export function EventSetupScreen({
       }
       if (result === "music") {
         onToggleMusicRef.current();
+        return;
+      }
+      if (result === "palette") {
+        onTogglePaletteRef.current();
         return;
       }
       if (result === "name") {
@@ -460,7 +478,7 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND and MUSIC always show. */}
+            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND, MUSIC, and PALETTE always show. */}
             <div className="setup-tools">
               {storedDuration !== null ? (
                 <button
@@ -506,6 +524,13 @@ export function EventSetupScreen({
                 onClick={onToggleMusic}
               >
                 MUSIC: {musicOn ? "ON" : "OFF"}
+              </button>
+              <button
+                type="button"
+                className={cursor === "palette" ? "setup-tool is-cursor" : "setup-tool"}
+                onClick={onTogglePalette}
+              >
+                PALETTE: {palette === "cool" ? "COOL" : "WARM"}
               </button>
             </div>
           </div>

@@ -4,7 +4,7 @@ import "fake-indexeddb/auto";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeDatabase, DB_NAME, listAllScores } from "./db/persistence";
+import { closeDatabase, DB_NAME, listAllScores, loadBooth } from "./db/persistence";
 import App from "./App";
 
 // The service worker only exists in a real build.
@@ -84,6 +84,14 @@ describe("App", () => {
     expect(scores).toHaveLength(1);
     expect(scores[0]!.name).toBeNull();
   }, 15_000);
+
+  it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "PALETTE: WARM" }));
+    expect(screen.getByRole("button", { name: "PALETTE: COOL" })).toBeTruthy();
+    expect(document.documentElement.dataset.palette).toBe("cool");
+    await waitFor(async () => expect((await loadBooth()).settings.palette).toBe("cool"));
+  });
 
   it("shows that scores can't be saved when storage does not work", async () => {
     const working = globalThis.indexedDB;

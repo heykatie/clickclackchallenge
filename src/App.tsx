@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, setPalette as savePalette, type Palette, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
@@ -45,6 +45,7 @@ function App() {
   const [canRestore, setCanRestore] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
   const [musicOn, setMusicOn] = useState(false);
+  const [palette, setPalette] = useState<Palette>("warm");
   // The idle high-score list sits on top of Ready, so it is tracked apart from the screen for the music.
   const [rolling, setRolling] = useState(false);
   // Event Setup previews the highlighted mode's music before the event starts.
@@ -131,6 +132,7 @@ function App() {
         setSoundOn(booth.settings.soundOn ?? false);
         boothSound.setEnabled(booth.settings.soundOn ?? false);
         setMusicOn(booth.settings.musicOn ?? false);
+        setPalette(booth.settings.palette ?? "warm");
         setStatus("ready");
         // Storage works without this; it only asks the browser not to evict the scores.
         void requestPersistentStorage();
@@ -291,6 +293,16 @@ function App() {
     }
   }
 
+  async function togglePalette() {
+    const next = palette === "cool" ? "warm" : "cool";
+    setPalette(next);
+    try {
+      await savePalette(next);
+    } catch (error) {
+      console.error("Could not save the palette", error);
+    }
+  }
+
   async function downloadScores() {
     try {
       const { scores, events } = await listEverything();
@@ -400,6 +412,11 @@ function App() {
     boothMusic.setEnabled(musicOn);
   }, [musicOn]);
 
+  // The cool palette's colors live in styles/palette-cool.css, keyed off this attribute.
+  useEffect(() => {
+    document.documentElement.dataset.palette = palette;
+  }, [palette]);
+
   useEffect(() => {
     boothMusic.setTheme(musicTheme);
   }, [musicTheme]);
@@ -471,6 +488,10 @@ function App() {
           }}
           musicOn={musicOn}
           onTestModeChange={setSetupMode}
+          palette={palette}
+          onTogglePalette={() => {
+            void togglePalette();
+          }}
           onToggleMusic={() => {
             void toggleMusic();
           }}
