@@ -42,6 +42,11 @@ export interface ScoreRecord {
   id: string;
   eventId: string;
   name: string | null;
+  /**
+   * The event's name when this score was played, so a board continued over several days keeps each day's name
+   * in the scores download. Missing on scores saved before scores kept their own name.
+   */
+  eventName?: string | null;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;
@@ -76,6 +81,7 @@ export interface BoothState {
 export interface NewScore {
   eventId: string;
   name: string | null;
+  eventName?: string | null;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;

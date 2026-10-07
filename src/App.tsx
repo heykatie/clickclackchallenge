@@ -590,6 +590,7 @@ function attemptRow(
   return {
     eventId: event.id,
     name: null,
+    eventName: event.name,
     rawWpm: result.rawWpm,
     displayedWpm: result.displayedWpm,
     accuracy: result.accuracy ?? 0,

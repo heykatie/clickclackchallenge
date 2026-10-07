@@ -62,7 +62,9 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
       format.time(score.createdAt),
       (eventInfo.get(score.eventId) ?? unknownEvent).number,
       (eventInfo.get(score.eventId) ?? unknownEvent).started,
-      (eventInfo.get(score.eventId) ?? unknownEvent).name,
+      // The name set when the score was played, blank if there was none. Scores saved before scores kept their
+      // own name have no such field, so they fall back to the event's name.
+      score.eventName === undefined ? (eventInfo.get(score.eventId) ?? unknownEvent).name : (score.eventName ?? ""),
       score.name ?? "",
       String(score.displayedWpm),
       String(Math.round(score.accuracy)),
