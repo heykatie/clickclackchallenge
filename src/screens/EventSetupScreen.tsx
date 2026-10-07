@@ -312,12 +312,38 @@ export function EventSetupScreen({
   return (
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
-      <h1 className="setup-title">Set up today's typing test</h1>
-      {storedDuration !== null && plinkoWins !== null ? (
-        <p className="setup-plinko-count">
-          Plinko drops won this event: {plinkoWins}
-        </p>
-      ) : null}
+      <div className="setup-heading">
+        <div className="setup-heading-text">
+          <h1 className="setup-title">Set up today's typing test</h1>
+          {storedDuration !== null && plinkoWins !== null ? (
+            <p className="setup-plinko-count">
+              Plinko drops won this event: {plinkoWins}
+            </p>
+          ) : null}
+        </div>
+        {/* Device settings, top right, as chips that show their state. Last in the arrow-key order. */}
+        <div className="setup-settings" role="group" aria-label="Settings">
+          <button
+            type="button"
+            className={settingClass("sound", soundOn)}
+            aria-pressed={soundOn}
+            onClick={onToggleSound}
+          >
+            SOUND: {soundOn ? "ON" : "OFF"}
+          </button>
+          <button
+            type="button"
+            className={settingClass("music", musicOn)}
+            aria-pressed={musicOn}
+            onClick={onToggleMusic}
+          >
+            MUSIC: {musicOn ? "ON" : "OFF"}
+          </button>
+          <button type="button" className={settingClass("palette", false)} onClick={onTogglePalette}>
+            PALETTE: {palette === "cool" ? "COOL" : "WARM"}
+          </button>
+        </div>
+      </div>
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
           <p id="setup-update-title">
@@ -519,37 +545,6 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Device settings, as chips that show their state. The score actions live with the Leaderboard choices. */}
-            <div className="setup-tools">
-              <div className="setup-tool-row" role="group" aria-labelledby="setup-settings-label">
-                <span id="setup-settings-label" className="setup-tool-label">
-                  Settings
-                </span>
-                <button
-                  type="button"
-                  className={settingClass("sound", soundOn)}
-                  aria-pressed={soundOn}
-                  onClick={onToggleSound}
-                >
-                  SOUND: {soundOn ? "ON" : "OFF"}
-                </button>
-                <button
-                  type="button"
-                  className={settingClass("music", musicOn)}
-                  aria-pressed={musicOn}
-                  onClick={onToggleMusic}
-                >
-                  MUSIC: {musicOn ? "ON" : "OFF"}
-                </button>
-                <button
-                  type="button"
-                  className={settingClass("palette", false)}
-                  onClick={onTogglePalette}
-                >
-                  PALETTE: {palette === "cool" ? "COOL" : "WARM"}
-                </button>
-              </div>
-            </div>
           </div>
           <div className="setup-start-group">
             <button

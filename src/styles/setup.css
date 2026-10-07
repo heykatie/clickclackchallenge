@@ -76,13 +76,35 @@
 }
 
 /* Auto margins center the block vertically but, unlike justify-content, never push the title off a short screen. */
-.setup-screen > .setup-title {
+.setup-screen > .setup-heading {
   margin-top: auto;
+}
+
+/* The title and Plinko count on the left; the device settings on the right, out of the way of the event choices. */
+.setup-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+.setup-heading-text {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.setup-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
 }
 
 /* A quiet count for staff, tucked under the title. */
 .setup-plinko-count {
-  margin: -0.5rem 0 0;
+  margin: 0;
   color: var(--tiny-muted);
   font-size: 0.95rem;
   font-weight: 700;
@@ -323,26 +345,6 @@ label.setup-option-big {
   outline-offset: 3px;
 }
 
-.setup-tools {
-  display: grid;
-  gap: 0.35rem;
-}
-
-/* One labelled row each for score actions and device settings. */
-.setup-tool-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.9rem;
-}
-
-.setup-tool-label {
-  min-width: 4.25rem;
-  color: var(--tiny-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
 /* The score actions, under the Leaderboard choices they act on: DOWNLOAD as a safe chip, CLEAR in warning red. */
 .setup-score-actions {
   display: flex;
@@ -476,9 +478,6 @@ button.setup-tool:active:not(:disabled) {
     padding-block: 0.15rem;
   }
 
-  .setup-tools {
-    row-gap: 0;
-  }
 
   .setup-tool.setup-chip {
     min-height: 28px;
