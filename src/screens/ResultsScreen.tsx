@@ -340,12 +340,25 @@ const HEADLINE_LETTER_CLASS: Record<ResultKind, string> = {
   "new-high-score": "stamp-letter",
 };
 
-/** Splits the headline into letters the CSS animates in turn: typed in, or waving hello. */
+/** How often the headline replays its letter animation while Results stays up. */
+const HEADLINE_REPLAY_MS = 8_000;
+
+/**
+ * Splits the headline into letters the CSS animates in turn: typed in, or waving hello. Every 8 seconds the
+ * letters are redrawn, which replays their animation from the start.
+ */
 function LetterHeadline({ text, letterClass }: { text: string; letterClass: string }) {
+  const [replay, setReplay] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setReplay((count) => count + 1), HEADLINE_REPLAY_MS);
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <>
       <span className="visually-hidden">{text}</span>
-      <span aria-hidden="true">
+      <span key={replay} aria-hidden="true">
         {headlineWords(text).map(({ word, start }) => {
           const letters = [...word].map((letter, offset) => (
             <span

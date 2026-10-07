@@ -443,3 +443,30 @@ describe("ResultsScreen celebration", () => {
   });
 });
 
+
+describe("ResultsScreen headline animation", () => {
+  beforeEach(fakeBoothClock);
+
+  const firstLetter = () => document.querySelector("h1 [aria-hidden='true'] span span, h1 [aria-hidden='true'] > span");
+
+  it("replays the headline's letters every 8 seconds, so the animation repeats", () => {
+    renderResults(ranked);
+    const before = firstLetter();
+    expect(before).toBeTruthy();
+    act(() => vi.advanceTimersByTime(7_900));
+    expect(firstLetter()).toBe(before);
+    act(() => vi.advanceTimersByTime(200));
+    const replayed = firstLetter();
+    expect(replayed).toBeTruthy();
+    expect(replayed).not.toBe(before);
+    act(() => vi.advanceTimersByTime(8_000));
+    expect(firstLetter()).not.toBe(replayed);
+  });
+
+  it("keeps the readable headline text the same through each replay", () => {
+    renderResults(unranked);
+    const heading = screen.getByRole("heading", { level: 1 }).textContent;
+    act(() => vi.advanceTimersByTime(8_100));
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(heading);
+  });
+});
