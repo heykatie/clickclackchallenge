@@ -168,6 +168,21 @@ describe("ResultsScreen with name entry", () => {
     expect(screen.getByText("Pick a different name.")).toBeTruthy();
   });
 
+  it("keeps a line for the name hint and the countdown message from the start, so nothing moves when they appear", () => {
+    renderResults(ranked);
+    const container = document;
+    const hint = container.querySelector(".name-hint");
+    const countdown = container.querySelector(".result-name-countdown");
+    expect(hint?.textContent).toBe("");
+    expect(countdown?.textContent).toBe("");
+    fireEvent.change(nameField(), { target: { value: "f u c k" } });
+    expect(container.querySelector(".name-hint")).toBe(hint);
+    expect(hint?.textContent).toBe("Pick a different name.");
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(container.querySelector(".result-name-countdown")).toBe(countdown);
+    expect(countdown?.textContent).toBe("Opening the leaderboard in 5s");
+  });
+
   it("opens the leaderboard with no name after 15 seconds of an empty name", () => {
     const { onViewLeaderboard, onSave } = renderResults(ranked);
     act(() => vi.advanceTimersByTime(10_000));

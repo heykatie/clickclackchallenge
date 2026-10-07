@@ -148,6 +148,7 @@
 
 .result-name-countdown {
   margin: 0;
+  min-height: 1lh;
   font-size: 1.125rem;
   font-weight: 700;
 }
@@ -163,6 +164,7 @@
 
 .name-hint {
   margin: 0;
+  min-height: 1lh;
   color: var(--tiny-charcoal);
   font-size: 1.125rem;
   font-weight: 700;
