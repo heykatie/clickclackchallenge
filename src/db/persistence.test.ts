@@ -18,6 +18,7 @@ import {
   openDatabase,
   saveScore,
   setSoundOn,
+  setMusicOn,
   SETTINGS_KEY,
   startFreshEvent,
   updateActiveEvent,
@@ -311,6 +312,19 @@ describe("persistence", () => {
     expect((await loadBooth()).settings.soundOn).toBe(true);
     await clearAllScores(30, "words");
     expect((await loadBooth()).settings.soundOn).toBe(true);
+  });
+
+  it("keeps music off until the operator turns it on, apart from sound, and remembers it after the app reopens", async () => {
+    expect((await loadBooth()).settings.musicOn).toBe(false);
+    await setMusicOn(true);
+    await closeDatabase();
+    const { settings } = await loadBooth();
+    expect(settings.musicOn).toBe(true);
+    expect(settings.soundOn).toBe(false);
+    await setSoundOn(true);
+    expect((await loadBooth()).settings.musicOn).toBe(true);
+    await startFreshEvent(30);
+    expect((await loadBooth()).settings.musicOn).toBe(true);
   });
 
   it("lists every score and event for a backup, cleared ones included", async () => {

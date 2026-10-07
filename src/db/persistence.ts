@@ -58,6 +58,8 @@ export interface AppSettings {
   schemaVersion: number;
   /** Key clicks and result chimes. Off until the operator turns it on in Event Setup. Missing on older records. */
   soundOn?: boolean;
+  /** Background music, separate from sound. Off until the operator turns it on. Missing on older records. */
+  musicOn?: boolean;
 }
 
 export interface BoothState {
@@ -113,6 +115,7 @@ function defaultSettings(): AppSettings {
     lastSelectedDuration: 30,
     schemaVersion: SCHEMA_VERSION,
     soundOn: false,
+    musicOn: false,
   };
 }
 
@@ -322,7 +325,7 @@ export async function closeDatabase(): Promise<void> {
 export async function loadBooth(): Promise<BoothState> {
   const database = await openDatabase();
   const stored = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
-  const settings = { ...stored, soundOn: stored.soundOn ?? false };
+  const settings = { ...stored, soundOn: stored.soundOn ?? false, musicOn: stored.musicOn ?? false };
   if (!settings.activeEventId) {
     return { settings, activeEvent: null, hasClearedScores: await hasClearedScores() };
   }
@@ -501,6 +504,12 @@ export async function setSoundOn(soundOn: boolean): Promise<void> {
   const database = await openDatabase();
   const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
   await database.put("settings", { ...settings, soundOn }, SETTINGS_KEY);
+}
+
+export async function setMusicOn(musicOn: boolean): Promise<void> {
+  const database = await openDatabase();
+  const settings = (await database.get("settings", SETTINGS_KEY)) ?? defaultSettings();
+  await database.put("settings", { ...settings, musicOn }, SETTINGS_KEY);
 }
 
 /** Every score and event on the device, cleared ones included, for the scores download. */

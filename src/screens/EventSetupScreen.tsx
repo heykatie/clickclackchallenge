@@ -33,6 +33,9 @@ type EventSetupScreenProps = {
   /** Key clicks and result chimes, off by default for a noisy booth. */
   soundOn: boolean;
   onToggleSound: () => void;
+  /** Background music, a device setting apart from sound. */
+  musicOn: boolean;
+  onToggleMusic: () => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
   plinkoWins: number | null;
 };
@@ -53,6 +56,8 @@ export function EventSetupScreen({
   onDownloadScores,
   soundOn,
   onToggleSound,
+  musicOn,
+  onToggleMusic,
   plinkoWins,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
@@ -77,6 +82,7 @@ export function EventSetupScreen({
   const onApplyUpdateRef = useRef(onApplyUpdate);
   const onDownloadRef = useRef(onDownloadScores);
   const onToggleSoundRef = useRef(onToggleSound);
+  const onToggleMusicRef = useRef(onToggleMusic);
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
@@ -158,6 +164,7 @@ export function EventSetupScreen({
     onApplyUpdateRef.current = onApplyUpdate;
     onDownloadRef.current = onDownloadScores;
     onToggleSoundRef.current = onToggleSound;
+    onToggleMusicRef.current = onToggleMusic;
     confirmCursorRef.current = confirmCursor;
     selectionRef.current = {
       cursor,
@@ -224,6 +231,10 @@ export function EventSetupScreen({
       }
       if (result === "sound") {
         onToggleSoundRef.current();
+        return;
+      }
+      if (result === "music") {
+        onToggleMusicRef.current();
         return;
       }
       if (result === "name") {
@@ -442,7 +453,7 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND always shows. */}
+            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND and MUSIC always show. */}
             <div className="setup-tools">
               {storedDuration !== null ? (
                 <button
@@ -480,6 +491,14 @@ export function EventSetupScreen({
                 onClick={onToggleSound}
               >
                 SOUND: {soundOn ? "ON" : "OFF"}
+              </button>
+              <button
+                type="button"
+                className={cursor === "music" ? "setup-tool is-cursor" : "setup-tool"}
+                aria-pressed={musicOn}
+                onClick={onToggleMusic}
+              >
+                MUSIC: {musicOn ? "ON" : "OFF"}
               </button>
             </div>
           </div>
