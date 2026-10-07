@@ -115,7 +115,7 @@ PALETTE: COOL in Event Setup switches every screen to a second palette after the
 | Ready and Results titles | deep lavender over a soft pink highlighter stripe (#FBD9E6) | deep lavender |
 | Event Setup tiles | pale pink #FDF3F7; a picked Leaderboard choice turns pink #FBE1EA with a pink border | blush wash; a picked Leaderboard choice turns lavender |
 | The idle list | names charcoal, WPM deep lavender | names deep lavender, WPM charcoal |
-| Results name field outline | pink #F0C4D5 | lavender |
+| Name field outlines (Results, and the event name on Event Setup) | pink #F0C4D5 | lavender |
 | "You made the Top 5!" pill | soft pink #FBD9E6 | lavender-light |
 | Pink corner blob | soft pink #F9D6E3 | light pink #F6CBDB |
 
