@@ -273,6 +273,25 @@ main.screen:not(.typing-screen) {
 
 button:disabled {
   opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/*
+ * Cursors say what a press does: a pointer on anything that acts, "not allowed" on what cannot,
+ * and a text cursor on fields and their labels. Ready and the rolling high-score list start or return
+ * on a tap anywhere, so the whole screen shows a pointer. Typing listens only to the keyboard and keeps the arrow.
+ */
+button:not(:disabled),
+.ready-screen,
+.screensaver {
+  cursor: pointer;
+}
+
+input[type="text"],
+input:not([type]),
+.name-field,
+.setup-name {
+  cursor: text;
 }
 
 /* Read by screen readers, not shown. */
