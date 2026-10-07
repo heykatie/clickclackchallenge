@@ -51,6 +51,8 @@ function App() {
   // Event Setup previews the highlighted mode's music before the event starts.
   const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
+  // How many scores the active event's board holds, so CLEAR BOARD is greyed out when there is nothing to clear.
+  const [boardScoreCount, setBoardScoreCount] = useState(0);
   // The latest state, for working out a key's sound the moment the key goes down.
   const stateRef = useRef(state);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
@@ -163,6 +165,7 @@ function App() {
       (scores) => {
         if (!cancelled) {
           setPlinkoWins(countPlinkoWins(scores));
+          setBoardScoreCount(scores.length);
         }
       },
       // The count is a convenience: if it cannot be read, Event Setup simply leaves it out.
@@ -472,6 +475,7 @@ function App() {
             void clearScores(durationSeconds, testMode, name);
           }}
           canRestore={canRestore}
+          canClear={boardScoreCount > 0}
           onRestoreScores={() => {
             void restoreScores();
           }}

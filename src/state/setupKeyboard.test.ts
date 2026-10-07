@@ -180,5 +180,15 @@ describe("update choice", () => {
   it("moves a cursor left on UPDATE NOW back to START EVENT once the update is gone", () => {
     expect(applySetupKey({ ...ready, cursor: "update" }, "Enter", { shiftKey: false, canContinue: true })).toBe("start");
   });
-});
 
+  it("skips CLEAR BOARD when the board has no scores to clear", () => {
+    expect(setupChoices("words", true, false, false, false)).not.toContain("clear");
+    expect(setupChoices("words", true, false, false, true)).toContain("clear");
+    const fromDownload = applySetupKey(
+      { cursor: "download", duration: 30, testMode: "words", leaderboard: "continue" },
+      "ArrowDown",
+      { shiftKey: false, canContinue: true, canClear: false },
+    );
+    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("name");
+  });
+});
