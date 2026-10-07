@@ -85,10 +85,13 @@ describe("storage, over 60 random runs of 40 operations", () => {
           log.push(`continue ${board}`);
         } else if (roll < 0.32) {
           activeEvent = await clearCurrentEvent(duration, mode);
-          const clearId = model.clears.length + 1;
-          model.clears.push(clearId);
-          // Only the event that was current is hidden; earlier events keep their scores.
-          if (model.active !== null) model.events.get(model.active)!.hiddenBy = clearId;
+          // Only the event that was current is hidden, and only when it has scores; earlier events keep theirs.
+          const current = model.active === null ? null : model.events.get(model.active)!;
+          if (current && current.scores.length > 0) {
+            const clearId = model.clears.length + 1;
+            model.clears.push(clearId);
+            current.hiddenBy = clearId;
+          }
           model.events.set(activeEvent.id, { scores: [], hiddenBy: null });
           model.active = activeEvent.id;
           model.board = "event";

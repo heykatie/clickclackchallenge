@@ -336,7 +336,7 @@ The third, PALETTE: WARM or PALETTE: COOL, switches the booth's colors between t
 
 Once an event exists, a small line just above the event name field tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
 
-After a clear, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR BOARD. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
+After a clear that hid scores, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR BOARD. Clearing a board nobody has played hides nothing, so it never offers RESTORE. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
 
 ### Returning to Event Setup
 
