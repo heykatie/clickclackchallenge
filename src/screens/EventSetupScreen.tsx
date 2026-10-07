@@ -552,7 +552,7 @@ export function EventSetupScreen({
           ) : (
             <>
               <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
-              <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
+              <p>The current scores stay saved, but they will not show on current leaderboard again.</p>
             </>
           )}
           <div className="setup-confirm-actions">
