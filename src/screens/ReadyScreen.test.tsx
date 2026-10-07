@@ -145,11 +145,18 @@ describe("ReadyScreen", () => {
     expect(onRollingChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("does nothing on a logo tap when there is no score to roll", async () => {
+  it("only wiggles the logo on a tap when there is no score to roll, and wiggles again on the next tap", async () => {
     const { onStart } = await renderReady([]);
+    const logo = screen.getByRole("button", { name: "Show high scores" });
+    expect(logo.classList.contains("is-wiggling")).toBe(false);
     tapLogo();
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     expect(onStart).not.toHaveBeenCalled();
+    expect(logo.classList.contains("is-wiggling")).toBe(true);
+    act(() => vi.advanceTimersByTime(500));
+    expect(logo.classList.contains("is-wiggling")).toBe(false);
+    tapLogo();
+    expect(logo.classList.contains("is-wiggling")).toBe(true);
   });
 
   it("opens the rolling list on a short Escape, like a logo tap, and closes it on the next", async () => {
