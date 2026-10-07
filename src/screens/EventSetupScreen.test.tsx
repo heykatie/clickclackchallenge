@@ -20,6 +20,7 @@ function renderSetup(
   const onDownloadScores = vi.fn();
   const onToggleSound = vi.fn();
   const onToggleMusic = vi.fn();
+  const onTestModeChange = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -38,11 +39,12 @@ function renderSetup(
       onToggleSound={onToggleSound}
       musicOn={false}
       onToggleMusic={onToggleMusic}
+      onTestModeChange={onTestModeChange}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic, onTestModeChange };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -358,5 +360,12 @@ describe("EventSetupScreen", () => {
     expect(screen.getByRole("button", { name: "MUSIC: OFF" }).className).toContain("is-cursor");
     press("Enter");
     expect(onToggleMusic).toHaveBeenCalledOnce();
+  });
+
+  it("reports the highlighted game mode, so the music can preview that mode's world", () => {
+    const { onTestModeChange } = renderSetup({ duration: 30, mode: "story" });
+    expect(onTestModeChange).toHaveBeenLastCalledWith("story");
+    fireEvent.click(screen.getByLabelText("Standard"));
+    expect(onTestModeChange).toHaveBeenLastCalledWith("words");
   });
 });

@@ -47,6 +47,8 @@ function App() {
   const [musicOn, setMusicOn] = useState(false);
   // The idle high-score list sits on top of Ready, so it is tracked apart from the screen for the music.
   const [rolling, setRolling] = useState(false);
+  // Event Setup previews the highlighted mode's music before the event starts.
+  const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
   const previousTest = useRef(state.currentTest);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
@@ -367,7 +369,12 @@ function App() {
   }
 
   const musicTheme =
-    status !== "ready" ? null : themeForScreen(state.screen === "ready" && rolling ? "rolling" : state.screen);
+    status !== "ready"
+      ? null
+      : themeForScreen(
+          state.screen === "ready" && rolling ? "rolling" : state.screen,
+          state.screen === "setup" ? setupMode : (state.activeEvent?.testMode ?? "famous-lines"),
+        );
 
   useEffect(() => {
     boothMusic.setEnabled(musicOn);
@@ -443,6 +450,7 @@ function App() {
             void toggleSound();
           }}
           musicOn={musicOn}
+          onTestModeChange={setSetupMode}
           onToggleMusic={() => {
             void toggleMusic();
           }}

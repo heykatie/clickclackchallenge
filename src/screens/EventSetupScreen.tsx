@@ -36,6 +36,8 @@ type EventSetupScreenProps = {
   /** Background music, a device setting apart from sound. */
   musicOn: boolean;
   onToggleMusic: () => void;
+  /** Told the highlighted game mode, so the music can preview that mode's world. */
+  onTestModeChange?: (mode: TestMode) => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
   plinkoWins: number | null;
 };
@@ -58,6 +60,7 @@ export function EventSetupScreen({
   onToggleSound,
   musicOn,
   onToggleMusic,
+  onTestModeChange,
   plinkoWins,
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
@@ -66,6 +69,10 @@ export function EventSetupScreen({
   const [selectedDuration, setSelectedDuration] = useState<TestDuration>(storedDuration ?? 30);
   const [selectedTestMode, setSelectedTestMode] = useState<TestMode>(storedTestMode ?? "famous-lines");
   const [cursor, setCursor] = useState<SetupChoice>("start");
+
+  useEffect(() => {
+    onTestModeChange?.(selectedTestMode);
+  }, [selectedTestMode, onTestModeChange]);
   const [eventName, setEventName] = useState(storedEventName ?? "");
   const nameInputRef = useRef<HTMLInputElement>(null);
   const storySelected = selectedTestMode === "story";
