@@ -2,11 +2,12 @@ import type { BoothScreen } from "../../pwa/boothViewport";
 
 /**
  * Five lo-fi themes with fantasy touches, written for one shared band so they sound like the same game:
- * soft electric piano ("keys"), a round bass, a music-box "bell" lead, and dusty drums. Notes are MIDI
+ * soft electric piano ("keys"), a round bass, a music-box "bell" lead, and dusty drums. The battle swaps the
+ * music box for a low orchestra: brass, strings, and timpani. Notes are MIDI
  * numbers (60 is middle C). Each bar has 16 steps; steps are [start, length].
  */
 export type ThemeName = "cozy" | "invite" | "adventure" | "nostalgic" | "victory";
-export type Instrument = "keys" | "bass" | "bell" | "kick" | "snare" | "hat";
+export type Instrument = "keys" | "bass" | "bell" | "brass" | "strings" | "timpani" | "kick" | "snare" | "hat";
 
 type Steps = readonly (readonly [start: number, length: number])[];
 type Melody = readonly (readonly [start: number, note: number, length: number])[];
@@ -21,12 +22,16 @@ interface Theme {
   bass: Steps;
   /** One melody per bar, on the music-box lead. */
   melody: readonly Melody[];
-  /** Extra snare hits in the last bar of the loop, with kicks under them: a roll into the next time round. */
-  fill?: readonly number[];
-  /** Doubles the lead an octave down, for a heavier, heroic unison. */
-  unison?: boolean;
+  /** The instrument that plays the melody: the music box, or brass for the battle. Defaults to the music box. */
+  lead?: "bell" | "brass";
+  /** A string figure on every 16th: semitones above the bar's bass note. */
+  ostinato?: readonly number[];
+  /** Timpani hits in every bar, and a timpani roll in the last bar of the loop. */
+  timpani?: readonly number[];
+  roll?: readonly number[];
   drums: { kick: readonly number[]; snare: readonly number[]; hat: readonly number[] };
-  mix: Record<Instrument, number>;
+  /** Volume per instrument. Instruments a theme does not use are left out. */
+  mix: Partial<Record<Instrument, number>>;
 }
 
 const EIGHTHS = [0, 2, 4, 6, 8, 10, 12, 14];
@@ -135,64 +140,62 @@ export const THEMES: Record<ThemeName, Theme> = {
     mix: { keys: 0.4, bass: 0.6, bell: 0.42, kick: 0.72, snare: 0.32, hat: 0.13 },
   },
 
-  // Typing: a dramatic boss fight. E minor at a racing tempo, a galloping bass, punchy off-beat stabs, and a heroic,
-  // urgent melody. Each loop ends on B major, whose D# pulls hard back to E minor, with a snare roll into it.
+  // Typing: a game battle, after the recipe of classic boss themes: a low string ostinato on every 16th,
+  // pounding timpani, and a brass lead. It holds on D minor for two bars, then lifts through B-flat to C for a
+  // brass fanfare cadence, and the timpani roll it back round. The brass stays at C5 or below, never shrill.
   adventure: {
-    bpm: 132,
+    bpm: 150,
     swing: 0,
+    lead: "brass",
     chords: [
-      { keys: [40, 47, 52, 55, 59, 64], bass: 40 }, // Em, with a low root and fifth
-      { keys: [36, 43, 52, 55, 60, 64], bass: 36 }, // C
-      { keys: [38, 45, 54, 57, 62, 66], bass: 38 }, // D
-      { keys: [35, 42, 51, 54, 59, 63], bass: 35 }, // B
+      { keys: [50, 53, 57], bass: 38 }, // Dm
+      { keys: [50, 53, 57], bass: 38 }, // Dm
+      { keys: [50, 53, 58], bass: 34 }, // Bb
+      { keys: [52, 55, 60], bass: 36 }, // C
     ],
     keys: [
-      [0, 1],
-      [3, 1],
-      [6, 1],
-      [10, 1],
-      [12, 2],
+      [0, 2],
+      [8, 2],
     ],
-    // The gallop: an eighth and two sixteenths, four times a bar.
-    bass: [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15].map((step) => [step, step % 4 === 0 ? 2 : 1] as const),
+    bass: EIGHTHS.map((step) => [step, 1] as const),
+    // Semitones above the bass, an octave up: root, root, fifth, root, up to the sixth and back.
+    ostinato: [12, 12, 19, 12, 12, 12, 20, 12, 12, 12, 19, 12, 22, 20, 19, 17],
     melody: [
       [
-        [0, 76, 3],
-        [3, 79, 1],
-        [4, 83, 4],
-        [8, 81, 2],
-        [10, 79, 2],
-        [12, 78, 4],
+        [0, 62, 3],
+        [3, 65, 1],
+        [4, 69, 4],
+        [8, 67, 2],
+        [10, 65, 2],
+        [12, 64, 4],
       ],
       [
-        [0, 79, 3],
-        [3, 76, 1],
-        [4, 72, 4],
-        [8, 76, 2],
-        [10, 79, 2],
-        [12, 84, 4],
+        [0, 62, 6],
+        [6, 60, 2],
+        [8, 62, 2],
+        [10, 65, 2],
+        [12, 69, 4],
       ],
       [
-        [0, 83, 2],
-        [2, 81, 2],
-        [4, 78, 4],
-        [8, 74, 2],
-        [10, 78, 2],
-        [12, 81, 4],
+        [0, 70, 3],
+        [3, 69, 1],
+        [4, 67, 4],
+        [8, 65, 2],
+        [10, 67, 2],
+        [12, 69, 4],
       ],
       [
-        [0, 83, 4],
-        [4, 78, 2],
-        [6, 75, 2],
-        [8, 71, 4],
-        [12, 75, 2],
-        [14, 78, 2],
+        [0, 72, 3],
+        [3, 72, 1],
+        [4, 72, 2],
+        [6, 70, 2],
+        [8, 69, 8],
       ],
     ],
-    drums: { kick: [0, 3, 6, 8, 10, 11, 14], snare: [4, 12], hat: SIXTEENTHS },
-    fill: [13, 14, 15],
-    unison: true,
-    mix: { keys: 0.36, bass: 0.55, bell: 0.4, kick: 0.75, snare: 0.34, hat: 0.09 },
+    drums: { kick: [0, 6, 8, 14], snare: [4, 12], hat: SIXTEENTHS },
+    timpani: [0, 8],
+    roll: [12, 13, 14, 15],
+    mix: { keys: 0.55, bass: 1, brass: 1.15, strings: 0.75, timpani: 1, kick: 0.85, snare: 0.35, hat: 0.03 },
   },
 
   // The idle list and the Leaderboard: nostalgic and sweet, C major, long chords and a slow melody.
@@ -326,7 +329,7 @@ export function barEvents(name: ThemeName, bar: number): MusicEvent[] {
   const at = (start: number) => (start + (start % 2 === 1 ? theme.swing : 0)) * step;
   const events: MusicEvent[] = [];
   const add = (instrument: Instrument, start: number, length: number, note: number | null, volume = 1) =>
-    events.push({ at: at(start), seconds: length * step, instrument, note, volume: volume * theme.mix[instrument] });
+    events.push({ at: at(start), seconds: length * step, instrument, note, volume: volume * (theme.mix[instrument] ?? 0) });
 
   for (const [start, length] of theme.keys) {
     chord.keys.forEach((note) => add("keys", start, length, note, 0.6));
@@ -335,19 +338,16 @@ export function barEvents(name: ThemeName, bar: number): MusicEvent[] {
     add("bass", start, length, chord.bass);
   }
   for (const [start, note, length] of theme.melody[index]!) {
-    add("bell", start, length, note);
-    if (theme.unison && note >= 70) {
-      add("bell", start, length, note - 12, 0.7);
-    }
+    add(theme.lead ?? "bell", start, length, note);
+  }
+  theme.ostinato?.forEach((offset, start) => add("strings", start, 1, chord.bass + offset, start % 4 === 0 ? 1 : 0.75));
+  const last = index === theme.chords.length - 1;
+  for (const start of theme.timpani ?? []) add("timpani", start, 4, chord.bass);
+  if (last) {
+    theme.roll?.forEach((start, hit) => add("timpani", start, 1, chord.bass, 0.5 + hit * 0.15));
   }
   for (const start of theme.drums.kick) add("kick", start, 2, null);
   for (const start of theme.drums.snare) add("snare", start, 2, null);
-  if (index === theme.chords.length - 1) {
-    theme.fill?.forEach((start, hit) => {
-      add("snare", start, 1, null, 0.5 + hit * 0.12);
-      add("kick", start, 1, null, 0.6 + hit * 0.1);
-    });
-  }
   for (const start of theme.drums.hat) add("hat", start, 1, null, start % 4 === 0 ? 1 : 0.7);
 
   return events.sort((left, right) => left.at - right.at);
