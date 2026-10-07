@@ -309,10 +309,13 @@ export function EventSetupScreen({
     }
   }, [confirmCursor]);
 
+  // While a confirmation is up, the page behind it cannot be pressed, tabbed to, or read out.
+  const shutWhileAsking = confirmCursor !== null ? { inert: true, "aria-hidden": true } : {};
+
   return (
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
-      <div className="setup-heading">
+      <div className="setup-heading" {...shutWhileAsking}>
         <div className="setup-heading-text">
           <h1 className="setup-title">Set up today's typing test</h1>
         </div>
@@ -350,47 +353,7 @@ export function EventSetupScreen({
           </button>
         </section>
       ) : null}
-      {confirmCursor !== null ? (
-        <section className="setup-confirm" role="alertdialog" aria-labelledby="setup-confirm-title">
-          {confirmKind === "restore" ? (
-            <>
-              <h2 id="setup-confirm-title">Restore cleared scores?</h2>
-              <p>
-                The scores hidden by the last clear show again on every board and list. The current event and its
-                scores stay.
-              </p>
-            </>
-          ) : confirmKind === "clear" ? (
-            <>
-              <h2 id="setup-confirm-title">Clear this board?</h2>
-              <p>
-                This event's scores are hidden from every leaderboard, the high-score list, and the all-time best,
-                and an empty event starts. Earlier events stay. The scores stay saved on this device.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
-              <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
-            </>
-          )}
-          <div className="setup-confirm-actions">
-            <button
-              type="button"
-              ref={cancelButtonRef}
-              className="setup-confirm-cancel"
-              onClick={() => setConfirmCursor(null)}
-            >
-              CANCEL
-            </button>
-            <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
-              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
-            </button>
-          </div>
-        </section>
-      ) : (
-        <>
-        <div className="setup-groups">
+        <div className="setup-groups" {...shutWhileAsking}>
           <fieldset className="setup-group setup-group-length">
             <legend>Test length</legend>
             <div className="setup-options setup-options-two">
@@ -525,7 +488,7 @@ export function EventSetupScreen({
             {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
           </fieldset>
         </div>
-        <footer className="setup-footer">
+        <footer className="setup-footer" {...shutWhileAsking}>
           <div className="setup-footer-side">
             {storedDuration !== null && plinkoWins !== null ? (
               <p className="setup-plinko-count">Plinko drops won this event: {plinkoWins}</p>
@@ -557,8 +520,48 @@ export function EventSetupScreen({
             <p className="setup-hint">Arrow keys move. Enter selects.</p>
           </div>
         </footer>
-        </>
-      )}
+      {confirmCursor !== null ? (
+        // A modal over the page: Event Setup stays where it was behind it, shut off until CANCEL or a choice.
+        <div className="setup-modal-backdrop">
+        <section className="setup-confirm" role="alertdialog" aria-modal="true" aria-labelledby="setup-confirm-title">
+          {confirmKind === "restore" ? (
+            <>
+              <h2 id="setup-confirm-title">Restore cleared scores?</h2>
+              <p>
+                The scores hidden by the last clear show again on every board and list. The current event and its
+                scores stay.
+              </p>
+            </>
+          ) : confirmKind === "clear" ? (
+            <>
+              <h2 id="setup-confirm-title">Clear this board?</h2>
+              <p>
+                This event's scores are hidden from every leaderboard, the high-score list, and the all-time best,
+                and an empty event starts. Earlier events stay. The scores stay saved on this device.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
+              <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
+            </>
+          )}
+          <div className="setup-confirm-actions">
+            <button
+              type="button"
+              ref={cancelButtonRef}
+              className="setup-confirm-cancel"
+              onClick={() => setConfirmCursor(null)}
+            >
+              CANCEL
+            </button>
+            <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
+              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
+            </button>
+          </div>
+        </section>
+        </div>
+      ) : null}
     </main>
   );
 }

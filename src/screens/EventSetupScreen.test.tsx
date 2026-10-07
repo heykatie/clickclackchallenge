@@ -439,4 +439,26 @@ describe("EventSetupScreen", () => {
     expect(clear.textContent).toBe("CLEAR BOARD");
     expect(clear.getAttribute("data-tooltip")).toBe("Clear current event");
   });
+
+  it("asks Clear board, Restore, and Start fresh in a modal over Event Setup, with the page behind it shut off", () => {
+    cleanup();
+    renderSetup(existing, false, true);
+    const ask = (button: string, title: string) => {
+      fireEvent.click(screen.getByRole("button", { name: button }));
+      const dialog = screen.getByRole("alertdialog", { name: title });
+      expect(dialog.getAttribute("aria-modal")).toBe("true");
+      // The page stays in place behind the modal, but cannot be pressed, tabbed to, or read out.
+      const behind = document.querySelector(".setup-groups")!;
+      expect(behind).toBeTruthy();
+      expect(behind.closest("[inert]")).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "START EVENT" })).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "CANCEL" }));
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      expect(document.querySelector("[inert]")).toBeNull();
+    };
+    ask("CLEAR BOARD", "Clear this board?");
+    ask("RESTORE CLEARED SCORES", "Restore cleared scores?");
+    fireEvent.click(screen.getByLabelText(/Start fresh/));
+    ask("START EVENT", "Start a fresh leaderboard?");
+  });
 });
