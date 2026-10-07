@@ -177,3 +177,46 @@
   background-position: 150% 0;
   animation: board-row-glow 6s ease-in-out 600ms infinite;
 }
+
+/*
+ * A phone held upright: the rank, crown, and WPM leave a name almost no room, and the YOU pill, which never
+ * shrinks, spills over the score. Everything tightens so the name keeps most of the row. iPads never reach this.
+ */
+@media (max-width: 560px) {
+  .score-row {
+    grid-template-columns: 2.25rem 1.5rem minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem 0.35rem 0.5rem;
+  }
+
+  .score-rank {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .score-name-cell {
+    gap: 0.4rem;
+  }
+
+  .score-name {
+    font-size: 1.15rem;
+  }
+
+  .score-wpm {
+    gap: 0.25rem;
+  }
+
+  .score-wpm-value {
+    font-size: 1.5rem;
+  }
+
+  .score-wpm-unit {
+    font-size: 0.75rem;
+  }
+
+  .you-pill {
+    padding: 0.1rem 0.45rem;
+    font-size: 0.75rem;
+  }
+}

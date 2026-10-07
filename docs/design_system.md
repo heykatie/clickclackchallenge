@@ -391,6 +391,7 @@ Returning to ready screen in 5s
 - If the current player is first, combine both treatments in that row. If they are outside the Top 5, do not add a sixth row.
 - Place a large mint NEXT PLAYER button below the panel, with a decorative arrow and the automatic-return message beneath it.
 - Keep peripheral motifs sparse and separate from the rows and button: a pink blob low left and a mint arc high right, the same as the rolling list. In portrait the Leaderboard stage ends mid-screen, so it drops them there.
+- Below 560px wide (a phone held upright), score rows on the Leaderboard and the idle list tighten their rank circle, gaps, fonts, and YOU pill, so a name keeps most of the row and the YOU pill never covers the score. iPads never reach this width.
 - On short screens the Leaderboard tightens so NEXT PLAYER stays on screen: below 760px of height (an iPad mini, an iPad in Safari with its toolbar) the rows, gaps, title, and button shrink a little; below 640px (a small laptop window) the kicker, rank circles, and WPM shrink too. Results does the same below 640px, so SAVE SCORE and VIEW LEADERBOARD stay on screen. The 820px-tall booth iPad keeps the full layout.
 - The Leaderboard and the rolling list share one row style: a rank circle, a crown slot, the name, and a large WPM with a small muted unit. Quiet rows are separated by straight hairlines; only highlighted rows are rounded.
 
