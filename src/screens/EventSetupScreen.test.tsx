@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import "../test/domSetup";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import { EventSetupScreen } from "./EventSetupScreen";
@@ -393,5 +393,13 @@ describe("EventSetupScreen", () => {
     expect(screen.getByRole("button", { name: "PALETTE: WARM" }).className).toContain("is-cursor");
     press("Enter");
     expect(onTogglePalette).toHaveBeenCalledTimes(2);
+  });
+
+  it("names the board that Continue previous picks up from, and says last board when it has no name", () => {
+    renderSetup({ ...existing, name: "Fanime Sat" });
+    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("Pick up from “Fanime Sat”");
+    cleanup();
+    renderSetup(existing);
+    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("Pick up from last board");
   });
 });
