@@ -1419,7 +1419,7 @@ Suggested ranking order:
 3. createdAt ascending
 ```
 
-Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gate still uses the stored percentage, so 69.99 stays below `MIN_LEADERBOARD_ACCURACY` even though it displays as 70. Ranking order is in `docs/prd.md`.
+Do not sort the accuracy tie on the stored tenths. Do not store a second accuracy field. The gates use the displayed (rounded) accuracy, so 69.5 displays as 70 and meets `MIN_LEADERBOARD_ACCURACY`, matching what the contestant sees. Ranking order is in `docs/prd.md`.
 
 This should be a pure module.
 
@@ -1829,7 +1829,7 @@ correcting a removed position restores correct-character credit
 partial words count toward WPM
 incorrect characters do not block later correct input
 70% accuracy meets the development threshold
-69.99% accuracy does not meet the development threshold
+69.5% accuracy, displayed as 70%, meets the threshold; 69.4% does not
 late input after timeout is ignored
 held-key repeat events are ignored, including when KeyboardEvent.repeat is true
 separate physical presses of the same key still count
@@ -1884,6 +1884,7 @@ the visible board keeps five row positions, leaves unoccupied places empty, and 
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 a score above 200 WPM is saved but never ranks, never becomes the high score, and never wins a Plinko drop (isPlausibleWpm, MAX_PLAUSIBLE_WPM)
 sound plays a click for a right key, a blip for a wrong one, a chime for a new high score, and a ding for another Plinko win, and stays silent for Backspace (keyCue, resultCue); it never opens audio while off and survives a device with no audio (createBoothSound); the setting defaults off and survives a reopen, Start fresh, and Clear all scores (setSoundOn)
+randomized and exhaustive scenario tests with fixed seeds: 2,000 random rounds keep every count sound and end on a believable result (appState.fuzz.test.ts); every combination of board size, speed, and accuracy gets the Results the PRD describes (resultScenarios.test.ts); 1,500 random boards rank by the rules and Results previews each place exactly (ranking.fuzz.test.ts); every Setup situation, cursor, and key keeps the cursor on a choice on screen (setupKeyboard.sweep.test.ts); random runs of fresh, continue, all-time, save, clear, restore, and reopen show every board exactly what it should (persistence.sequences.test.ts); real names pass the name filter and disguised abuse does not (blockedNames.test.ts)
 the whole app, on a fake database: a first-run Story round ends on Results, Enter saves the typed name, and it shows on the Leaderboard; a staff long-press on Results opens Event Setup and keeps the attempt exactly once; a storage failure shows the can't-be-saved screen; a board continued under a new name keeps each day's name on its own scores (App.test.tsx). CI runs lint, the type check, every test, and the build on each pull request and push to main (.github/workflows/checks.yml)
 music gives each game mode its own world with a tune for every page, 18 in all and none shared, keeping Famous Lines' fantasy themes (themeForScreen); in every world the race is fastest and opens with a one-time intro (firstBar); every tune shares keys, bass, and kick, and plays its world's lead, with the square, flute, and harp at D5 or below; Event Setup reports the highlighted mode so the music previews its world (onTestModeChange); the fantasy battle is a battle at 140 to 170 BPM with brass at C5 or below, strings on every 16th, an 8-bar loop from D minor to a tense A major, a hook that returns higher, a syncopated octave bass riff, rising B-section arpeggios, and a timpani roll; every theme uses the same instruments, keeps its notes in their bar, and loops (barEvents); the player never opens audio while off, keeps scheduling bars as time passes, stops on off, crossfades between themes without restarting the same one, keeps one vinyl hiss at one quiet level across theme changes (CRACKLE_VOLUME), and plays the battle's brass and strings as filtered sawtooth tones and the arcade's square, the storybook's flute, and its harp, and survives a device with no audio (createMusicPlayer); Ready reports the idle list opening and closing (onRollingChange); the music setting defaults off, apart from sound, and survives a reopen and Start fresh (setMusicOn); MUSIC follows SOUND in the Setup keyboard order; the palette defaults warm and survives a reopen and Start fresh (setPalette), PALETTE follows MUSIC in the Setup keyboard order, and switching it sets data-palette on the page, which styles/palette-cool.css keys off (App.test.tsx)
 Event Setup counts the active event's Plinko wins under the same rule as Results, and an impossible score never counts (countPlinkoWins)
@@ -1912,7 +1913,7 @@ no Plinko line below 30% accuracy, even far above 50 WPM (winsPlinko)
 an unplaced score at 1 through 50 WPM is Thanks for playing! only
 a displayed 0 WPM result is Casper, is that you? and does not place
 the first eligible score is the high score and a Top 10
-accuracy below 70, including 69.99, hides name entry
+accuracy that displays below 70, such as 69.4, hides name entry
 a tie keeps the earlier score as the high score
 sixth place is Top 10 and not Top 5
 twenty scores already ahead hide name entry

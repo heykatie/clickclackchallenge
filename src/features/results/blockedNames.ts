@@ -12,6 +12,7 @@ const LETTER_SWAPS: Record<string, string> = {
 
 const INCLUDED = [
   "fuck",
+  "fvck",
   "fuk",
   "fuq",
   "phuck",
@@ -44,6 +45,7 @@ const INCLUDED = [
   "jackass",
   "dumbass",
   "badass",
+  "fatass",
   "smartass",
   "shithead",
   "fucker",
@@ -54,7 +56,6 @@ const INCLUDED = [
   "penis",
   "vagina",
   "dildo",
-  "anal",
   "boob",
   "boobie",
   "boobies",
@@ -71,7 +72,7 @@ const INCLUDED = [
   "gook",
 ];
 
-const EXACT = new Set(["ass", "hell", "sex", "fag", "cum", "tit", "tits", "pee", "poop", "dick", "cock", "anus", "spic"]);
+const EXACT = new Set(["ass", "anal", "hell", "sex", "fag", "cum", "tit", "tits", "pee", "poop", "dick", "cock", "anus", "spic"]);
 
 const SAFE = new Set([
   "hello",
@@ -102,11 +103,36 @@ function squashRepeats(value: string): string {
   return value.replace(/(.)\1+/g, "$1");
 }
 
+/**
+ * Real names and places that contain a blocked word: set aside before checking, so Michelle, Annalise,
+ * or Scunthorpe is never turned away. Compared after letters are folded and spaces removed.
+ */
+const SAFE_PARTS = [
+  "michel",
+  "rochel",
+  "mitchel",
+  "hellen",
+  "hellman",
+  "othello",
+  "hello",
+  "shell",
+  "annalis",
+  "analia",
+  "analy",
+  "scunthorpe",
+  "penistone",
+  "pissarro",
+  "shiitake",
+  "shitake",
+  "shitaki",
+];
+
 export function isBlockedName(input: string): boolean {
-  const compact = compactName(input);
-  if (compact.length === 0 || SAFE.has(compact)) {
+  const folded = compactName(input);
+  if (folded.length === 0 || SAFE.has(folded)) {
     return false;
   }
+  const compact = SAFE_PARTS.reduce((rest, part) => rest.replaceAll(part, ""), folded);
   const squashed = squashRepeats(compact);
   if (
     INCLUDED.some((term) => {
@@ -119,11 +145,7 @@ export function isBlockedName(input: string): boolean {
   ) {
     return true;
   }
-  if (compact === "ass" || compact.endsWith("ass")) {
-    return true;
-  }
-  if (compact.includes("hell") || EXACT.has(compact)) {
-    return true;
-  }
-  return false;
+  // Short words like "ass", "anal", and "hell" sit inside many real names (Douglass, Annalise, Michelle), so
+  // they block only as the whole name; the real compounds (jackass, asshole) are in INCLUDED.
+  return EXACT.has(compact);
 }

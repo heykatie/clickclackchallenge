@@ -580,7 +580,7 @@ Leaderboard ranking uses:
 
 Displayed accuracy is the rounded whole number the contestant sees. It is not a second stored field. Two scores that round to the same whole percent are tied on accuracy, and the earlier submission ranks first. Hidden tenths do not order them.
 
-The accuracy gate still uses the stored percentage. A score of 69.99% is not eligible, even though it displays as 70%.
+The accuracy gate goes by the accuracy the contestant sees, rounded to a whole percent, so Results never shows a qualifying number for a score that does not count. A score of 69.5% displays as 70% and is eligible; 69.4% displays as 69% and is not.
 
 ### Held-Key Behavior
 
@@ -733,7 +733,7 @@ A contestant qualifies when their displayed WPM is greater than 50 and their acc
 any WPM below 30% accuracy               → does not qualify
 ```
 
-The 30% gate is deliberately the lowest useful minimum. It only stops key-mashing: random keys land around 5–20% accuracy, mostly from lucky spaces, while a real typist above 50 WPM clears it easily. Like the leaderboard gate, it uses the stored accuracy, so 29.99% does not qualify even though it displays as 30%.
+The 30% gate is deliberately the lowest useful minimum. It only stops key-mashing: random keys land around 5–20% accuracy, mostly from lucky spaces, while a real typist above 50 WPM clears it easily. Like the leaderboard gate, it goes by the displayed accuracy: 29.5% shows as 30% and qualifies; 29.4% shows as 29% and does not.
 
 If the intended business rule is actually **50 WPM or higher**, the rule and UI copy should be changed together before the event.
 
@@ -910,6 +910,7 @@ Name input should:
 
 - allow ordinary names
 - reject profanity and slurs, including when spaces, punctuation, or numbers stand in for letters
+- never turn away a real name that merely contains a blocked word, such as Michelle, Mitchell, Annalise, Douglass, or Bass: short words like “hell”, “anal”, and “ass” block only as the whole name, while their real compounds (jackass, asshole) stay blocked. “Dick” stays blocked: it is a real nickname, but also slang
 - trim leading/trailing whitespace
 - reject empty values
 - use a reasonable maximum length for layout safety
@@ -1525,7 +1526,8 @@ Boundary cases:
 
 ```text
 70.00% → eligible
-69.99% → not eligible
+69.50% → eligible (displays as 70%)
+69.40% → not eligible (displays as 69%)
 ```
 
 The 70% threshold remains provisional until it is validated on the physical giant keyboard.
@@ -1912,7 +1914,8 @@ The following must remain unchanged:
 ```text
 51 WPM or higher, 30% accuracy or higher → qualifies
 50 WPM                                   → does not qualify
-51 WPM or higher, 29.99% accuracy        → does not qualify
+51 WPM or higher, 29.5% accuracy         → qualifies (displays as 30%)
+51 WPM or higher, 29.4% accuracy         → does not qualify (displays as 29%)
 ```
 
 If the intended business rule changes to `50 WPM or higher`, both the qualification rule and visible copy must be updated together.

@@ -54,14 +54,18 @@ export function displayedAccuracy(accuracy: number): number {
   return Math.round(accuracy);
 }
 
+/** Goes by the accuracy contestants see: a score that shows 70% counts, even when the exact figure is 69.5%. */
 export function meetsLeaderboardAccuracy(accuracy: number): boolean {
-  return accuracy >= MIN_LEADERBOARD_ACCURACY;
+  return displayedAccuracy(accuracy) >= MIN_LEADERBOARD_ACCURACY;
 }
 
-/** A Plinko drop needs a plausible displayed WPM above 50 and stored accuracy of at least PLINKO_MIN_ACCURACY. */
+/** A Plinko drop needs a plausible displayed WPM above 50 and displayed accuracy of at least PLINKO_MIN_ACCURACY. */
 export function winsPlinko(displayedWpm: number, accuracy: number | null): boolean {
   return (
-    displayedWpm > 50 && isPlausibleWpm(displayedWpm) && accuracy !== null && accuracy >= PLINKO_MIN_ACCURACY
+    displayedWpm > 50 &&
+    isPlausibleWpm(displayedWpm) &&
+    accuracy !== null &&
+    displayedAccuracy(accuracy) >= PLINKO_MIN_ACCURACY
   );
 }
 
