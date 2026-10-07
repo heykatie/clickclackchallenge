@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barEvents, barSeconds, THEMES, themeForScreen, type ThemeName } from "./themes";
+import { barEvents, barSeconds, firstBar, THEMES, themeForScreen, type ThemeName } from "./themes";
 
 const names = Object.keys(THEMES) as ThemeName[];
 
@@ -22,12 +22,16 @@ describe("themes", () => {
     expect(Math.min(...Object.values(tempos))).toBe(tempos.nostalgic);
   });
 
-  it("share one instrument set, so they sound like the same game", () => {
+  it("share one band, so they sound like the same game: the battle adds an orchestra in place of the music box", () => {
     for (const name of names) {
       const instruments = new Set(Array.from({ length: 8 }, (_, bar) => barEvents(name, bar).map((event) => event.instrument)).flat());
-      expect([...instruments].every((instrument) => ["keys", "bass", "bell", "kick", "snare", "hat"].includes(instrument))).toBe(true);
       expect(instruments.has("keys")).toBe(true);
-      expect(instruments.has("bell")).toBe(true);
+      expect(instruments.has("bass")).toBe(true);
+      expect(instruments.has("kick")).toBe(true);
+      const lead = name === "adventure" ? ["brass", "strings", "timpani"] : ["bell"];
+      lead.forEach((instrument) => expect(instruments.has(instrument as never)).toBe(true));
+      const other = name === "adventure" ? ["bell"] : ["brass", "strings", "timpani"];
+      other.forEach((instrument) => expect(instruments.has(instrument as never)).toBe(false));
     }
   });
 });
@@ -39,34 +43,63 @@ describe("invite theme", () => {
   });
 });
 
-describe("adventure theme", () => {
-  it("is a boss fight: a galloping bass under a melody, ending each loop on a tense B major chord", () => {
-    const bass = barEvents("adventure", 0).filter((event) => event.instrument === "bass");
-    expect(bass.length).toBeGreaterThanOrEqual(12);
-    expect(barEvents("adventure", 0).some((event) => event.instrument === "bell")).toBe(true);
-    // D#, the major third of B: the leading tone that pulls back to E minor.
-    const lastBar = barEvents("adventure", THEMES.adventure.chords.length - 1);
-    expect(lastBar.some((event) => event.instrument === "keys" && event.note! % 12 === 3)).toBe(true);
-  });
-});
+describe("battle theme", () => {
+  const bars = Array.from({ length: THEMES.adventure.chords.length }, (_, bar) => barEvents("adventure", bar));
 
-describe("dramatic typing theme", () => {
-  it("doubles the melody an octave down and puts a low root under every chord", () => {
-    for (let bar = 0; bar < THEMES.adventure.chords.length; bar += 1) {
-      const lead = barEvents("adventure", bar).filter((event) => event.instrument === "bell");
-      const written = THEMES.adventure.melody[bar]!.filter(([, note]) => note >= 70);
-      expect(written.length).toBeGreaterThan(0);
-      for (const [, note] of written) {
-        expect(lead.some((low) => low.note === note - 12)).toBe(true);
-      }
-      expect(barEvents("adventure", bar).some((event) => event.instrument === "keys" && event.note! < 48)).toBe(true);
+  it("races at a game-battle tempo, 140 to 170 BPM", () => {
+    expect(THEMES.adventure.bpm).toBeGreaterThanOrEqual(140);
+    expect(THEMES.adventure.bpm).toBeLessThanOrEqual(170);
+  });
+
+  it("keeps the brass lead low enough never to sound shrill: nothing above C5", () => {
+    const lead = bars.flat().filter((event) => event.instrument === "brass");
+    expect(lead.length).toBeGreaterThan(0);
+    expect(Math.max(...lead.map((event) => event.note!))).toBeLessThanOrEqual(72);
+  });
+
+  it("drives a low string ostinato on every 16th", () => {
+    for (const bar of bars) {
+      const strings = bar.filter((event) => event.instrument === "strings");
+      expect(strings).toHaveLength(16);
+      expect(Math.max(...strings.map((event) => event.note!))).toBeLessThan(62);
     }
   });
 
-  it("rolls kicks under the snare into each new loop", () => {
-    const last = barEvents("adventure", THEMES.adventure.chords.length - 1);
-    const kickSteps = last.filter((event) => event.instrument === "kick").length;
-    expect(kickSteps).toBeGreaterThan(barEvents("adventure", 0).filter((event) => event.instrument === "kick").length);
+  it("loops 8 bars: an A section on D minor, then a B section that climbs to a tense A major, and rolls back", () => {
+    expect(THEMES.adventure.chords.map((chord) => chord.bass % 12)).toEqual([2, 2, 10, 0, 10, 0, 2, 9]);
+    // C#, A major's third: the leading tone that pulls back to D minor.
+    expect(bars[7]!.some((event) => event.note !== null && event.note % 12 === 1)).toBe(true);
+    const timpani = (bar: number) => bars[bar]!.filter((event) => event.instrument === "timpani").length;
+    expect(timpani(7)).toBeGreaterThan(timpani(0));
+  });
+
+  it("has a hook: the opening motif comes back in sequence two bars later, with the same rhythm", () => {
+    const rhythm = (bar: number) => THEMES.adventure.melody[bar]!.map(([start, , length]) => [start, length]);
+    expect(rhythm(2)).toEqual(rhythm(0));
+    expect(THEMES.adventure.melody[2]![2]![1]).toBeGreaterThan(THEMES.adventure.melody[0]![2]![1]);
+  });
+
+  it("rocks a syncopated bass riff that jumps octaves", () => {
+    const bass = bars[0]!.filter((event) => event.instrument === "bass");
+    const step = barSeconds("adventure") / 16;
+    expect(bass.some((event) => Math.round(event.at / step) % 2 === 1)).toBe(true);
+    expect(new Set(bass.map((event) => event.note)).size).toBeGreaterThan(1);
+    expect(Math.max(...bass.map((event) => event.note!)) - Math.min(...bass.map((event) => event.note!))).toBe(12);
+  });
+
+  it("rushes rising string arpeggios in the B section", () => {
+    const strings = bars[4]!.filter((event) => event.instrument === "strings").map((event) => event.note!);
+    const rises = strings.slice(1).filter((note, index) => note > strings[index]!).length;
+    expect(rises).toBeGreaterThanOrEqual(9);
+  });
+
+  it("opens with a one-time intro: a timpani roll and a brass hit, before bar 0", () => {
+    expect(firstBar("adventure")).toBe(-1);
+    expect(firstBar("cozy")).toBe(0);
+    const intro = barEvents("adventure", -1);
+    expect(intro.filter((event) => event.instrument === "timpani").length).toBeGreaterThanOrEqual(6);
+    expect(intro.some((event) => event.instrument === "brass")).toBe(true);
+    expect(barEvents("adventure", 8)).toEqual(barEvents("adventure", 0));
   });
 });
 

@@ -1,4 +1,4 @@
-import { barEvents, barSeconds, type MusicEvent, type ThemeName } from "./themes";
+import { barEvents, barSeconds, firstBar, type MusicEvent, type ThemeName } from "./themes";
 
 /** Quiet enough to sit under the key clicks and chimes. */
 const MASTER_VOLUME = 0.2;
@@ -76,7 +76,7 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(1, now + FADE_SECONDS);
       gain.connect(master);
-      bus = { gain, theme, bar: 0, nextBarAt: now + 0.05 };
+      bus = { gain, theme, bar: firstBar(theme), nextBarAt: now + 0.05 };
     }
     if (timer === null) {
       timer = setInterval(schedule, TICK_MS);
@@ -114,6 +114,17 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
         tone(output, destination, "sine", event.note! + 24, at, ring * 0.4, event.volume * 0.12, 0.003, 0.2);
         return;
       }
+      case "brass":
+        // Two slightly detuned saws through a filter that opens as the note swells: a warm, low horn.
+        warmSaw(output, destination, event.note!, at, event.seconds, event.volume, 0.05, [-6, 6], 700, 2000);
+        return;
+      case "strings":
+        // Short bowed notes: a single saw, filtered dark, quick to start and stop.
+        warmSaw(output, destination, event.note!, at, event.seconds, event.volume, 0.008, [0], 900, 1400);
+        return;
+      case "timpani":
+        timpani(output, destination, event.note!, at, event.volume);
+        return;
       case "kick":
         kick(output, destination, at, event.volume);
         return;
@@ -148,6 +159,52 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
     oscillator.connect(gain).connect(destination);
     oscillator.start(at);
     oscillator.stop(at + seconds * 1.6 + 0.1);
+  }
+
+  function warmSaw(
+    output: AudioContext,
+    destination: AudioNode,
+    note: number,
+    at: number,
+    seconds: number,
+    volume: number,
+    attack: number,
+    detuneCents: readonly number[],
+    closedHz: number,
+    openHz: number,
+  ) {
+    const filter = output.createBiquadFilter();
+    const gain = output.createGain();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(closedHz, at);
+    filter.frequency.exponentialRampToValueAtTime(openHz, at + attack + 0.06);
+    filter.frequency.setTargetAtTime(closedHz, at + attack + 0.06, seconds * 0.5);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002) / detuneCents.length, at + attack);
+    gain.gain.setTargetAtTime(0.0001, at + seconds * 0.85, 0.05);
+    filter.connect(gain).connect(destination);
+    for (const cents of detuneCents) {
+      const oscillator = output.createOscillator();
+      oscillator.type = "sawtooth";
+      oscillator.frequency.value = 440 * 2 ** ((note - 69) / 12 + cents / 1200);
+      oscillator.connect(filter);
+      oscillator.start(at);
+      oscillator.stop(at + seconds + 0.3);
+    }
+  }
+
+  /** A low drum: a tone that drops slightly in pitch as it is struck, then rings and fades. */
+  function timpani(output: AudioContext, destination: AudioNode, note: number, at: number, volume: number) {
+    const oscillator = output.createOscillator();
+    const gain = output.createGain();
+    const pitch = 440 * 2 ** ((note - 69) / 12);
+    oscillator.frequency.setValueAtTime(pitch * 1.06, at);
+    oscillator.frequency.exponentialRampToValueAtTime(pitch, at + 0.08);
+    gain.gain.setValueAtTime(volume, at);
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.9);
+    oscillator.connect(gain).connect(destination);
+    oscillator.start(at);
+    oscillator.stop(at + 0.95);
   }
 
   function kick(output: AudioContext, destination: AudioNode, at: number, volume: number) {

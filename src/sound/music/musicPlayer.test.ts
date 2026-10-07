@@ -136,4 +136,18 @@ describe("createMusicPlayer", () => {
     expect(loops).toHaveLength(1);
     expect(CRACKLE_VOLUME).toBeLessThanOrEqual(0.015);
   });
+
+  it("plays the battle's brass and strings as warm sawtooth tones, and its timpani", () => {
+    const { context } = fakeContext();
+    const music = createMusicPlayer(() => context as unknown as AudioContext);
+    music.setEnabled(true);
+    music.setTheme("adventure");
+    // Past the one-bar intro, into the loop.
+    context.currentTime = 2;
+    vi.advanceTimersByTime(200);
+    const oscillators = context.createOscillator.mock.results.map((result) => result.value);
+    expect(oscillators.filter((oscillator) => oscillator.type === "sawtooth").length).toBeGreaterThan(16);
+    // Every sawtooth goes through its own filter, so none of it reaches the speaker raw and buzzy.
+    expect(context.createBiquadFilter.mock.calls.length).toBeGreaterThan(16);
+  });
 });
