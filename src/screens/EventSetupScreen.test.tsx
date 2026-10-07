@@ -424,7 +424,7 @@ describe("EventSetupScreen", () => {
     expect(reserved?.textContent).toBe("ON");
   });
 
-  it("shows a small swatch of the current palette inside PALETTE, without changing what screen readers hear", () => {
+  it("shows a dot of the current palette inside PALETTE, without changing what screen readers hear", () => {
     cleanup();
     renderSetup(existing);
     const chip = screen.getByRole("button", { name: "PALETTE: WARM" });

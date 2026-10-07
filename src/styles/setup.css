@@ -376,32 +376,19 @@ label.setup-option-big {
   text-decoration: none;
 }
 
-/*
- * Two dots before PALETTE preview the palette in use: its button teal and its page tone (peach for warm,
- * lavender for cool). They follow the palette's own tokens, so they change with it.
- */
+/* A dot before PALETTE previews the palette in use by its page tone: peach for warm, lavender for cool. */
 .palette-swatch {
-  display: inline-flex;
-  gap: 2px;
-  margin-right: 0.35rem;
-  vertical-align: -0.1em;
-}
-
-.palette-swatch::before,
-.palette-swatch::after {
-  content: "";
+  display: inline-block;
   width: 0.6rem;
   height: 0.6rem;
+  margin-right: 0.35rem;
   border-radius: 50%;
-  background: var(--tiny-mint-strong);
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
-}
-
-.palette-swatch::after {
   background: var(--tiny-peach);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  vertical-align: -0.05em;
 }
 
-html[data-palette="cool"] .palette-swatch::after {
+html[data-palette="cool"] .palette-swatch {
   background: var(--tiny-lavender);
 }
 
