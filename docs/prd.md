@@ -385,7 +385,7 @@ If that key has not been pressed within 8 seconds, Ready appears again. No score
 
 The Typing screen should be visually restrained so the contestant can focus on the sentence.
 
-A long-press on the logo badge opens Event Setup and does not save a score. A tap on the logo badge returns to Ready and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded.
+A long-press on the logo badge opens Event Setup and does not save a score. A tap on the logo badge returns to Ready and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded. The badge stays on the turn-sideways instruction, so both still work while the iPad is in portrait.
 
 A short Escape press returns to Ready and does not save a score, including while the portrait instruction is covering the passage. Holding Escape opens Event Setup and does not save a score. Both work while the sentence is waiting and after the timer has started. The attempt in progress is discarded. Escape does not start the timer and does not count as a typed character.
 
