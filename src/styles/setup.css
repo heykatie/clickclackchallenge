@@ -424,3 +424,15 @@ button.setup-tool:active:not(:disabled) {
     font-size: 2.1rem;
   }
 }
+
+/* A very short window is a laptop with a mouse: the operator links get shorter so the footer still fits. */
+@media (max-height: 640px) {
+  .setup-tool {
+    min-height: 30px;
+    padding-block: 0.15rem;
+  }
+
+  .setup-tools {
+    row-gap: 0;
+  }
+}

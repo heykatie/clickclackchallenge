@@ -21,6 +21,7 @@ function renderSetup(
   const onToggleSound = vi.fn();
   const onToggleMusic = vi.fn();
   const onTestModeChange = vi.fn();
+  const onTogglePalette = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -40,11 +41,13 @@ function renderSetup(
       musicOn={false}
       onToggleMusic={onToggleMusic}
       onTestModeChange={onTestModeChange}
+      palette="warm"
+      onTogglePalette={onTogglePalette}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic, onTestModeChange };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic, onTestModeChange, onTogglePalette };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -141,7 +144,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
-    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → MUSIC → wraps to UPDATE NOW.
+    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → MUSIC → PALETTE → wraps to UPDATE NOW.
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -367,5 +371,18 @@ describe("EventSetupScreen", () => {
     expect(onTestModeChange).toHaveBeenLastCalledWith("story");
     fireEvent.click(screen.getByLabelText("Standard"));
     expect(onTestModeChange).toHaveBeenLastCalledWith("words");
+  });
+
+  it("shows PALETTE: WARM after MUSIC, even before any event exists, and switches it on click or Enter", () => {
+    const { onTogglePalette } = renderSetup(null);
+    fireEvent.click(screen.getByRole("button", { name: "PALETTE: WARM" }));
+    expect(onTogglePalette).toHaveBeenCalledOnce();
+    // START EVENT → SOUND → MUSIC → PALETTE.
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "PALETTE: WARM" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(onTogglePalette).toHaveBeenCalledTimes(2);
   });
 });
