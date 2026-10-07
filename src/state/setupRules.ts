@@ -28,9 +28,12 @@ export function planEventStart(
   return { mode: "fresh", durationSeconds, testMode: selectedTestMode, boardScope: "event" };
 }
 
-/** Start fresh archives the current leaderboard and there is no screen to bring it back, so it asks first. */
-export function needsFreshConfirm(plan: EventStart, hasActiveEvent: boolean): boolean {
-  return plan.mode === "fresh" && hasActiveEvent;
+/**
+ * Start fresh sets the current board's scores aside and there is no screen to bring them back, so it asks first,
+ * but only when that board has scores: with none (or no event yet), there is nothing to lose.
+ */
+export function needsFreshConfirm(plan: EventStart, boardHasScores: boolean): boolean {
+  return plan.mode === "fresh" && boardHasScores;
 }
 
 export type FreshConfirmChoice = "cancel" | "confirm";

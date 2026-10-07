@@ -286,7 +286,7 @@ Starting fresh should:
 
 Starting fresh must **not** permanently delete prior scores or events.
 
-When an event already exists, START EVENT with Start fresh asks first: “Start a fresh leaderboard?” with CANCEL and START FRESH. There is no screen that brings an archived leaderboard back, so the cursor starts on CANCEL. Arrow keys and Tab switch between the two, Enter or Space picks one, and Escape cancels. Touch works too. CANCEL returns to the setup choices without changing anything. Starting fresh when no event exists, and Continue, do not ask.
+When the current board has scores, START EVENT with Start fresh asks first: “Start a fresh leaderboard?” with CANCEL and START FRESH. There is no screen that brings an archived leaderboard back, so the cursor starts on CANCEL. Arrow keys and Tab switch between the two, Enter or Space picks one, and Escape cancels. Touch works too. CANCEL returns to the setup choices without changing anything. Starting fresh when no event exists or its board has no scores, and Continue, do not ask: there is nothing to set aside.
 
 ### Continue Previous Event
 
@@ -2022,7 +2022,7 @@ an event with no eligible score shows Clicky 54 WPM and Clacky 47 WPM on the Lea
 after Start fresh, Ready and the Leaderboard show All-time best with the earlier event's top score, and the rolling list shows only the new event
 All-time leaderboard ranks every event's scores on the Leaderboard, Results, Ready, and the rolling list with ALL-TIME labels, and Continue switches the same event back
 the operator can change Event Setup with the arrow keys and Enter
-Start fresh over an existing event asks first, starts on CANCEL, and CANCEL or Escape changes nothing
+Start fresh over a board with scores asks first (an empty board starts at once), starts on CANCEL, and CANCEL or Escape changes nothing
 before a real event, CLEAR BOARD hides the current event's test scores from every board and list without deleting them, and earlier events stay
 RESTORE CLEARED SCORES appears after a clear, asks first, and brings back the last clear's scores
 the first letter on Results goes into the name

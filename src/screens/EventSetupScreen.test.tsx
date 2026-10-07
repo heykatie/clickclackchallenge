@@ -474,4 +474,13 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(onClearScores).not.toHaveBeenCalled();
   });
+
+  it("starts fresh at once, without asking, when the current board has no scores", () => {
+    cleanup();
+    const { onStartFresh } = renderSetup(existing, false, false, false, null, false);
+    fireEvent.click(screen.getByLabelText("Start fresh"));
+    fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+  });
 });

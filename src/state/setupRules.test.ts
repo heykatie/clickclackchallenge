@@ -66,12 +66,14 @@ describe("planEventStart with the all-time leaderboard", () => {
 });
 
 describe("needsFreshConfirm", () => {
-  it("asks before Start fresh replaces an existing event's leaderboard", () => {
+  it("asks before Start fresh sets aside a board that has scores", () => {
     expect(needsFreshConfirm(planEventStart("fresh", true, 30, "words"), true)).toBe(true);
   });
 
-  it("does not ask when there is no event yet, or when continuing", () => {
+  it("does not ask when there is no event yet, the board has no scores, or when continuing", () => {
     expect(needsFreshConfirm(planEventStart("fresh", false, 30, "words"), false)).toBe(false);
+    // An event whose board has no scores has nothing to set aside, so Start fresh starts at once.
+    expect(needsFreshConfirm(planEventStart("fresh", true, 30, "words"), false)).toBe(false);
     expect(needsFreshConfirm(planEventStart("continue", true, 30, "words"), true)).toBe(false);
   });
 });

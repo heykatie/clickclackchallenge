@@ -2041,7 +2041,7 @@ App loads every board through listBoardScores(activeEvent): Results placement, t
 an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
 EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"
 EventSetup shows "An update is ready." and UPDATE NOW only while an update waits; UPDATE NOW is first in the arrow-key order and installs it from Enter or a tap
-Start fresh over an existing event asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
+Start fresh over a board with scores asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event, an empty board, or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores

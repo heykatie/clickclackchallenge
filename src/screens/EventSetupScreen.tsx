@@ -33,7 +33,7 @@ type EventSetupScreenProps = {
   onClearScores: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   /** An earlier clear can be undone. */
   canRestore: boolean;
-  /** The current board has scores, so CLEAR BOARD has something to clear. */
+  /** The current board has scores: CLEAR BOARD has something to clear, and Start fresh asks before setting them aside. */
   canClear: boolean;
   /** Shows the scores hidden by the most recent clear again. */
   onRestoreScores: () => void;
@@ -148,7 +148,7 @@ export function EventSetupScreen({
       onContinue(plan.durationSeconds, plan.testMode, plan.boardScope, cleanEventName(eventName));
       return;
     }
-    if (!confirmed && needsFreshConfirm(plan, storedDuration !== null)) {
+    if (!confirmed && needsFreshConfirm(plan, storedDuration !== null && canClear)) {
       setConfirmKind("fresh");
       setConfirmCursor("cancel");
       return;
