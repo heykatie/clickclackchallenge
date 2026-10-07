@@ -103,11 +103,22 @@
   gap: 0.75rem;
 }
 
+/*
+ * The number face carries a lot of built-in space above and below its digits, which left the WPM crowding the
+ * headline and floating far above ACCURACY. A line as tall as the text, with room added above, sits the score
+ * clear of the headline and close to the accuracy that belongs with it.
+ */
 .results-screen .stat-value {
-  margin: 0;
+  margin: 2rem 0 0;
   font-family: var(--font-number);
   font-size: 4.5rem;
   font-weight: 800;
+  line-height: 1;
+}
+
+/* ACCURACY sits snug under the WPM it goes with. */
+.results-screen .stat-value + p {
+  margin-top: -0.75rem;
 }
 
 /* Chewy is narrow, so it runs larger than the other headlines to read as the big moment. */
@@ -308,6 +319,11 @@
   }
 
   .results-screen .stat-value {
+    margin-top: 1.25rem;
     font-size: 3.5rem;
+  }
+
+  .results-screen .stat-value + p {
+    margin-top: -0.25rem;
   }
 }
