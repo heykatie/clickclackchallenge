@@ -395,11 +395,11 @@ describe("EventSetupScreen", () => {
     expect(onTogglePalette).toHaveBeenCalledTimes(2);
   });
 
-  it("names the board that Continue previous picks up from, and says last board when it has no name", () => {
+  it("says which board Continue previous picks up: From “Fanime Sat”, or From last board when it has no name", () => {
     renderSetup({ ...existing, name: "Fanime Sat" });
-    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("Pick up from “Fanime Sat”");
+    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("From “Fanime Sat”");
     cleanup();
     renderSetup(existing);
-    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("Pick up from last board");
+    expect(screen.getByLabelText(/Continue previous/).closest("label")!.textContent).toContain("From last board");
   });
 });
