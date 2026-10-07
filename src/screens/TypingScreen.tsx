@@ -145,11 +145,12 @@ export function TypingScreen({
         <p>
           <span className="stat-value">{shownWpm}</span> WPM
         </p>
+        {/* Every label sits under its number: WPM, TIME, ACCURACY. */}
         <p>
-          <span className="stat-label">TIME</span>
           <span className="stat-value">
             {remainingSeconds(session, displayNow)}s
           </span>
+          <span className="stat-label">TIME</span>
         </p>
         <p>
           <span className="stat-value">

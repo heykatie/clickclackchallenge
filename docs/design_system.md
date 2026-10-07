@@ -166,7 +166,7 @@ Use rounded rectangles, pill labels, circles, organic blobs, arcs, and loose han
 | Element | Corner radius |
 | --- | --- |
 | Small controls | 12–16 px |
-| Buttons | 18–26 px |
+| Buttons | 18–26 px. The main action on each screen shares one style: the rounded display face (Fredoka), START EVENT and Results' SAVE SCORE and VIEW LEADERBOARD at 22.4 px and 60 px tall, and NEXT PLAYER, the biggest, at 26 px |
 | Cards | 24–32 px |
 | Large panels | 28–36 px |
 
@@ -324,7 +324,7 @@ Start behavior, including the opening keypress and the “above 50 WPM” compar
 | Bottom center | Countdown timer |
 | Bottom right | Live accuracy |
 
-The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do not show a bare number.
+The countdown unit sits on the number, as in `24s`. `TIME` is only the label. Do not show a bare number. Each typing stat puts its label under its number, the same way for all three: 73 over WPM, 24s over TIME, 96% over ACCURACY.
 
 ### Sentence layout
 
