@@ -261,13 +261,22 @@ label.setup-option {
 /* A pressed tile gives a tiny squeeze. Disabled tiles do not react. */
 label.setup-option:not(.is-disabled):active {
   transform: scale(0.98);
-  filter: brightness(0.95);
 }
 
-/* Hover only with a mouse or trackpad: a tile shades a touch, and a small text link darkens like a press. */
+/*
+ * Hover only with a mouse or trackpad. An unpicked tile previews being picked: a pale version of the colour it turns
+ * when selected, mixed with white rather than darkened or laid over its pink, so it stays pastel instead of going
+ * grey. A picked tile stays as it is. A small text link darkens like a press.
+ */
 @media (hover: hover) and (pointer: fine) {
-  label.setup-option:not(.is-disabled):hover {
-    filter: brightness(0.97);
+  label.setup-option.setup-option-mint:not(.is-disabled):not(.is-selected):hover {
+    border-color: color-mix(in srgb, var(--tiny-mint-strong) 45%, transparent);
+    background: color-mix(in srgb, var(--tiny-mint) 14%, var(--tiny-white));
+  }
+
+  label.setup-option.setup-option-lavender:not(.is-disabled):not(.is-selected):hover {
+    border-color: color-mix(in srgb, var(--tiny-lavender) 40%, transparent);
+    background: color-mix(in srgb, var(--tiny-lavender-light) 30%, var(--tiny-white));
   }
 
   button.setup-tool:not(.setup-chip):not(.is-danger):hover:not(:disabled) {
