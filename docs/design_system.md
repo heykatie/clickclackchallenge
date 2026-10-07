@@ -104,7 +104,7 @@ Use fewer colors during Typing. Do not assign a different bright color to every 
 
 ### Cool palette
 
-PALETTE: COOL in Event Setup switches every screen to a second palette after the shop's logo; warm, above, stays the default. The cool palette lives in `src/styles/palette-cool.css` and changes colors and doodles only, never layout or text.
+PALETTE: COOL in Event Setup switches every screen to a second palette after the shop's logo; warm, above, stays the default. The cool palette lives in `src/styles/palette-cool.css` and changes colors only, never layout or text. Both palettes share the doodles in §6, including the outlined flowers.
 
 | Role | Cool | Warm |
 | --- | --- | --- |
@@ -117,7 +117,7 @@ PALETTE: COOL in Event Setup switches every screen to a second palette after the
 | The idle list | names charcoal, WPM deep lavender | names deep lavender, WPM charcoal |
 | Results name field outline | pink #F0C4D5 | lavender |
 | "You made the Top 5!" pill | soft pink #FBD9E6 | lavender-light |
-| Corner doodles | soft pink blob #F9D6E3, plus outlined flowers in pale yellow and lavender (none while typing) | pink blob |
+| Pink corner blob | soft pink #F9D6E3 | pink #F4C1D4 |
 
 Pink is never text: pastel pink is too faint to read, and a pink dark enough to read turns muddy. Text stays deep lavender or charcoal, at 4.5:1 or better on every cool surface.
 
@@ -183,6 +183,8 @@ Group related information with whitespace, soft surfaces, and fine borders. Avoi
 Allowed motifs include organic pastel blobs, swirls, arcs, dots, stars, sparkles, hearts, confetti, and simple keycap-inspired forms.
 
 Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge; essential content may not.
+
+Every screen except Typing shows three outlined flowers, after the shop's workshop flyers: a large pale-yellow one bleeding off the bottom-right corner, and small pale-yellow and lavender ones near the top. Both palettes show them.
 
 During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and name field clear.
 
