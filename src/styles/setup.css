@@ -253,12 +253,27 @@ label.setup-option {
   border-radius: 1.25rem;
   background: color-mix(in srgb, var(--tiny-blush) 70%, var(--tiny-white));
   cursor: pointer;
-  transition: transform 80ms ease-out;
+  transition:
+    transform 80ms ease-out,
+    filter 120ms ease-out;
 }
 
 /* A pressed tile gives a tiny squeeze. Disabled tiles do not react. */
 label.setup-option:not(.is-disabled):active {
   transform: scale(0.98);
+  filter: brightness(0.95);
+}
+
+/* Hover only with a mouse or trackpad: a tile shades a touch, and a small text link darkens like a press. */
+@media (hover: hover) and (pointer: fine) {
+  label.setup-option:not(.is-disabled):hover {
+    filter: brightness(0.97);
+  }
+
+  button.setup-tool:not(.setup-chip):not(.is-danger):hover:not(:disabled) {
+    color: var(--tiny-charcoal);
+    filter: none;
+  }
 }
 
 /* The radio stays real for keyboard and screen readers; the tile shows its state. */
@@ -510,7 +525,15 @@ button.setup-tool:active:not(:disabled) {
   transform: translate(-50%, 0);
 }
 
-.setup-tool.is-danger:hover:not(:disabled),
+/* The red wash shows on press everywhere, and on hover only with a mouse or trackpad. */
+@media (hover: hover) and (pointer: fine) {
+  .setup-tool.is-danger:hover:not(:disabled) {
+    background: color-mix(in srgb, #b23a3a 10%, transparent);
+    color: #b23a3a;
+    filter: none;
+  }
+}
+
 button.setup-tool.is-danger:active:not(:disabled) {
   background: color-mix(in srgb, #b23a3a 10%, transparent);
   color: #b23a3a;
