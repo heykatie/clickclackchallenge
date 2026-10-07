@@ -39,6 +39,17 @@ describe("invite theme", () => {
   });
 });
 
+describe("adventure theme", () => {
+  it("is a boss fight: a galloping bass under a melody, ending each loop on a tense B major chord", () => {
+    const bass = barEvents("adventure", 0).filter((event) => event.instrument === "bass");
+    expect(bass.length).toBeGreaterThanOrEqual(12);
+    expect(barEvents("adventure", 0).some((event) => event.instrument === "bell")).toBe(true);
+    // D#, the major third of B: the leading tone that pulls back to E minor.
+    const lastBar = barEvents("adventure", THEMES.adventure.chords.length - 1);
+    expect(lastBar.some((event) => event.instrument === "keys" && event.note! % 12 === 3)).toBe(true);
+  });
+});
+
 describe("barEvents", () => {
   it("keeps every note inside its bar, in time order, and loops after its chord cycle", () => {
     for (const name of names) {

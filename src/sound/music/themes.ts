@@ -19,8 +19,10 @@ interface Theme {
   chords: readonly { keys: readonly number[]; bass: number }[];
   keys: Steps;
   bass: Steps;
-  /** One melody per bar, or null to let the lead play a rising and falling arpeggio of the chord. */
-  melody: readonly Melody[] | null;
+  /** One melody per bar, on the music-box lead. */
+  melody: readonly Melody[];
+  /** Extra snare hits in the last bar of the loop: a roll into the next time round. */
+  fill?: readonly number[];
   drums: { kick: readonly number[]; snare: readonly number[]; hat: readonly number[] };
   mix: Record<Instrument, number>;
 }
@@ -131,28 +133,63 @@ export const THEMES: Record<ThemeName, Theme> = {
     mix: { keys: 0.4, bass: 0.6, bell: 0.42, kick: 0.72, snare: 0.32, hat: 0.13 },
   },
 
-  // Typing: heart-racing adventure, A minor, a pushing pulse and racing harp arpeggios.
+  // Typing: a boss fight. E minor at a racing tempo, a galloping bass, punchy off-beat stabs, and a heroic,
+  // urgent melody. Each loop ends on B major, whose D# pulls hard back to E minor, with a snare roll into it.
   adventure: {
-    bpm: 112,
-    swing: 0.08,
+    bpm: 132,
+    swing: 0,
     chords: [
-      { keys: [57, 60, 64], bass: 45 }, // Am
-      { keys: [53, 57, 60], bass: 41 }, // F
-      { keys: [55, 60, 64], bass: 36 }, // C
-      { keys: [55, 59, 62], bass: 43 }, // G
+      { keys: [52, 55, 59, 64], bass: 40 }, // Em
+      { keys: [52, 55, 60, 64], bass: 36 }, // C
+      { keys: [54, 57, 62, 66], bass: 38 }, // D
+      { keys: [51, 54, 59, 63], bass: 35 }, // B
     ],
     keys: [
-      [0, 2],
-      [3, 2],
-      [6, 2],
-      [8, 2],
-      [11, 2],
-      [14, 2],
+      [0, 1],
+      [3, 1],
+      [6, 1],
+      [10, 1],
+      [12, 2],
     ],
-    bass: EIGHTHS.map((step) => [step, 1] as const),
-    melody: null,
-    drums: { kick: [0, 6, 8, 11], snare: [4, 12], hat: SIXTEENTHS },
-    mix: { keys: 0.32, bass: 0.55, bell: 0.22, kick: 0.75, snare: 0.32, hat: 0.1 },
+    // The gallop: an eighth and two sixteenths, four times a bar.
+    bass: [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15].map((step) => [step, step % 4 === 0 ? 2 : 1] as const),
+    melody: [
+      [
+        [0, 76, 3],
+        [3, 79, 1],
+        [4, 83, 4],
+        [8, 81, 2],
+        [10, 79, 2],
+        [12, 78, 4],
+      ],
+      [
+        [0, 79, 3],
+        [3, 76, 1],
+        [4, 72, 4],
+        [8, 76, 2],
+        [10, 79, 2],
+        [12, 84, 4],
+      ],
+      [
+        [0, 83, 2],
+        [2, 81, 2],
+        [4, 78, 4],
+        [8, 74, 2],
+        [10, 78, 2],
+        [12, 81, 4],
+      ],
+      [
+        [0, 83, 4],
+        [4, 78, 2],
+        [6, 75, 2],
+        [8, 71, 4],
+        [12, 75, 2],
+        [14, 78, 2],
+      ],
+    ],
+    drums: { kick: [0, 3, 6, 8, 10, 11, 14], snare: [4, 12], hat: SIXTEENTHS },
+    fill: [13, 14, 15],
+    mix: { keys: 0.36, bass: 0.55, bell: 0.4, kick: 0.75, snare: 0.34, hat: 0.09 },
   },
 
   // The idle list and the Leaderboard: nostalgic and sweet, C major, long chords and a slow melody.
@@ -294,19 +331,14 @@ export function barEvents(name: ThemeName, bar: number): MusicEvent[] {
   for (const [start, length] of theme.bass) {
     add("bass", start, length, chord.bass);
   }
-  const melody = theme.melody?.[index];
-  if (melody) {
-    for (const [start, note, length] of melody) {
-      add("bell", start, length, note);
-    }
-  } else {
-    // A harp running up and back down the chord, an octave up, on every 16th.
-    const tones = chord.keys.map((note) => note + 12);
-    const run = [...tones, ...tones.slice(1, -1).reverse()];
-    SIXTEENTHS.forEach((start) => add("bell", start, 1, run[start % run.length]!, 0.8));
+  for (const [start, note, length] of theme.melody[index]!) {
+    add("bell", start, length, note);
   }
   for (const start of theme.drums.kick) add("kick", start, 2, null);
   for (const start of theme.drums.snare) add("snare", start, 2, null);
+  if (index === theme.chords.length - 1) {
+    theme.fill?.forEach((start, hit) => add("snare", start, 1, null, 0.5 + hit * 0.12));
+  }
   for (const start of theme.drums.hat) add("hat", start, 1, null, start % 4 === 0 ? 1 : 0.7);
 
   return events.sort((left, right) => left.at - right.at);

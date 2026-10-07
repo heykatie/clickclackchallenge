@@ -321,7 +321,7 @@ After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from s
 
 - Event Setup: a cute, mellow theme.
 - Ready: an inviting “adventure awaits” theme, a heroic horn call that ends each loop unresolved, livelier than Setup but calmer than Typing.
-- Typing: a faster, heart-racing adventure theme with racing harp runs.
+- Typing: a boss-fight theme, the fastest of the five: E minor with a galloping bass, punchy stabs, a heroic urgent melody, and a snare roll into each loop on a tense B major chord.
 - The idle high-score list and the Leaderboard: a slow, sweet, nostalgic theme.
 - Results: a happy, relieved, congratulatory theme.
 
