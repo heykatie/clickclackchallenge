@@ -27,4 +27,18 @@ describe("isBlockedName", () => {
     ];
     expect(ABUSE.filter((name) => !isBlockedName(name))).toEqual([]);
   });
+
+  it("blocks rude symbol drawings, which have no letters to catch", () => {
+    const DRAWINGS = [
+      "(.)(.)", "( . )( . )", "(o)(o)", "(O)(O)", "(0)(0)", "(*)(*)", "(.Y.)", "( . Y . )", "(oYo)",
+      "8=D", "8==D", "8===D", "8=====>", "B==D", "c==3", "╭∩╮", "凸", "Jo (.)(.)", "8==D Kai",
+    ];
+    expect(DRAWINGS.filter((name) => !isBlockedName(name))).toEqual([]);
+  });
+
+  it("lets names with ordinary punctuation through", () => {
+    const NAMES = ["Jo (OG)", "Ana :)", "K.O.", "Bo (8)", "R2-D2", "Mr. T", "(Kai)", "Lee :D", "B=D?"];
+    // B=D? is a single equals: too close to ordinary typing to block.
+    expect(NAMES.filter((name) => isBlockedName(name))).toEqual([]);
+  });
 });
