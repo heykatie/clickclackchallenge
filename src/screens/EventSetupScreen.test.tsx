@@ -19,6 +19,7 @@ function renderSetup(
   const onRestoreScores = vi.fn();
   const onDownloadScores = vi.fn();
   const onToggleSound = vi.fn();
+  const onToggleMusic = vi.fn();
   render(
     <EventSetupScreen
       storedDuration={stored?.duration ?? null}
@@ -35,11 +36,13 @@ function renderSetup(
       soundOn={soundOn}
       plinkoWins={plinkoWins}
       onToggleSound={onToggleSound}
+      musicOn={false}
+      onToggleMusic={onToggleMusic}
       onStartFresh={onStartFresh}
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
@@ -136,7 +139,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches UPDATE NOW with the keyboard and installs it with Enter", () => {
     const { onApplyUpdate, onContinue } = renderSetup(existing, true);
-    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → wraps to UPDATE NOW.
+    // START EVENT → CLEAR ALL SCORES → DOWNLOAD SCORES → SOUND → MUSIC → wraps to UPDATE NOW.
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -336,5 +340,23 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
     fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
     expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "Night market");
+  });
+
+  it("shows MUSIC: OFF beside SOUND, even before any event exists, and toggles music on click", () => {
+    const { onToggleMusic, onToggleSound } = renderSetup(null);
+    fireEvent.click(screen.getByRole("button", { name: "MUSIC: OFF" }));
+    expect(onToggleMusic).toHaveBeenCalledOnce();
+    expect(onToggleSound).not.toHaveBeenCalled();
+  });
+
+  it("toggles music with Enter from the keyboard, one step after SOUND", () => {
+    const { onToggleMusic } = renderSetup(existing);
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(screen.getByRole("button", { name: "MUSIC: OFF" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(onToggleMusic).toHaveBeenCalledOnce();
   });
 });

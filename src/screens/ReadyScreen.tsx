@@ -17,15 +17,29 @@ type ReadyScreenProps = {
   highScore: HighScoreSummary | null;
   onStart: (key: string) => void;
   onSetup: () => void;
+  /** Told whenever the rolling high-score list opens or closes, so the music can follow it. */
+  onRollingChange?: (rolling: boolean) => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
-export function ReadyScreen({ eventId, allTime, highScore, onStart, onSetup, claimShortEscape }: ReadyScreenProps) {
+export function ReadyScreen({
+  eventId,
+  allTime,
+  highScore,
+  onStart,
+  onSetup,
+  onRollingChange,
+  claimShortEscape,
+}: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
   const asleepRef = useRef(false);
   const onStartRef = useRef(onStart);
   const [asleep, setAsleep] = useState(false);
   const [activity, setActivity] = useState(0);
+
+  useEffect(() => {
+    onRollingChange?.(asleep);
+  }, [asleep, onRollingChange]);
   const [rolling, setRolling] = useState<RankedScore[]>([]);
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);

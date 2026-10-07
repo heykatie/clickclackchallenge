@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
-import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { clearAllScores, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
@@ -16,6 +16,8 @@ import { ResultsScreen } from "./screens/ResultsScreen";
 import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState, type AppState } from "./state/appState";
 import { createEscapeHold, escapeHoldMs } from "./state/escapeHold";
+import { boothMusic } from "./sound/music/musicPlayer";
+import { themeForScreen } from "./sound/music/themes";
 import { boothSound } from "./sound/boothSound";
 import { keyCue, resultCue } from "./sound/soundCues";
 import { createResultSaver } from "./state/resultSave";
@@ -42,6 +44,9 @@ function App() {
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const [canRestore, setCanRestore] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
+  const [musicOn, setMusicOn] = useState(false);
+  // The idle high-score list sits on top of Ready, so it is tracked apart from the screen for the music.
+  const [rolling, setRolling] = useState(false);
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
   const previousTest = useRef(state.currentTest);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
@@ -121,6 +126,7 @@ function App() {
         setCanRestore(booth.hasClearedScores);
         setSoundOn(booth.settings.soundOn ?? false);
         boothSound.setEnabled(booth.settings.soundOn ?? false);
+        setMusicOn(booth.settings.musicOn ?? false);
         setStatus("ready");
         // Storage works without this; it only asks the browser not to evict the scores.
         void requestPersistentStorage();
@@ -271,6 +277,16 @@ function App() {
     }
   }
 
+  async function toggleMusic() {
+    const next = !musicOn;
+    setMusicOn(next);
+    try {
+      await saveMusicSetting(next);
+    } catch (error) {
+      console.error("Could not save the music setting", error);
+    }
+  }
+
   async function downloadScores() {
     try {
       const { scores, events } = await listEverything();
@@ -350,6 +366,31 @@ function App() {
     }
   }
 
+  const musicTheme =
+    status !== "ready" ? null : themeForScreen(state.screen === "ready" && rolling ? "rolling" : state.screen);
+
+  useEffect(() => {
+    boothMusic.setEnabled(musicOn);
+  }, [musicOn]);
+
+  useEffect(() => {
+    boothMusic.setTheme(musicTheme);
+  }, [musicTheme]);
+
+  useEffect(() => {
+    // Browsers only start audio after a tap or key, so an app reopened with music on starts on the first one.
+    const wake = () => boothMusic.wake();
+    const onVisibility = () => boothMusic.setHidden(document.hidden);
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
   return boothScreen();
 
   function boothScreen(): ReactNode {
@@ -401,6 +442,10 @@ function App() {
           onToggleSound={() => {
             void toggleSound();
           }}
+          musicOn={musicOn}
+          onToggleMusic={() => {
+            void toggleMusic();
+          }}
         />,
       );
     case "ready":
@@ -416,6 +461,7 @@ function App() {
             dispatch({ type: "ENTER_TYPING" });
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          onRollingChange={setRolling}
           claimShortEscape={claimShortEscape}
         />
       );

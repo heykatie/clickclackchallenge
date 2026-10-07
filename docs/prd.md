@@ -317,6 +317,15 @@ Above the links, an “Event name (optional)” field holds the active event's n
 
 The last link, SOUND: OFF or SOUND: ON, turns booth sound on or off. It is off by default, because a booth is noisy and staff should choose it. It is a device setting: it shows before any event exists, and Start fresh and Clear all scores keep it. When on, a correct key makes a soft click, a wrong key a low blip, a new high score a short rising chime, and any other Plinko win a single ding. Backspace and ignored keys are silent. Turning it on plays the ding once as a sample. The sounds are generated, not audio files, so they work offline. If the device has no audio, the booth stays quiet and keeps working.
 
+After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from sound, so staff can have one without the other. It is also off by default, a device setting shown before any event exists, and kept through Start fresh and Clear all scores. The music is four lo-fi themes with fantasy touches, played by one shared band (soft electric piano, round bass, a music-box lead, dusty drums, and a faint vinyl hiss) so they sound like the same game:
+
+- Event Setup and Ready: a cute, mellow theme.
+- Typing: a faster, heart-racing adventure theme with racing harp runs.
+- The idle high-score list and the Leaderboard: a slow, sweet, nostalgic theme.
+- Results: a happy, relieved, congratulatory theme.
+
+Themes crossfade as the screen changes and loop until it changes again. The music sits under the key clicks and chimes, pauses while the app is hidden, and is generated rather than played from audio files, so it works offline. Browsers start audio only after a tap or key, so an app reopened with music on starts on the first one.
+
 Once an event exists, a small line under the Event Setup title tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
 
 After a clear, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR ALL SCORES. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list, and the current event stays active with its scores. Each restore undoes one clear, newest first, and the button disappears once nothing is hidden. It does not apply other changes made on Event Setup.
