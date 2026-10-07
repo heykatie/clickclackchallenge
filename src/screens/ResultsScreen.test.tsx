@@ -11,7 +11,7 @@ const result: TestResult = { rawWpm: 42, displayedWpm: 42, accuracy: 96, display
 const ranked: ResultStanding = { isNewHighScore: false, isTop5: true, isTop10: true, showNameEntry: true };
 const unranked: ResultStanding = { isNewHighScore: false, isTop5: false, isTop10: false, showNameEntry: false };
 
-function renderResults(standing: ResultStanding, shown: TestResult = result) {
+function renderResults(standing: ResultStanding | null, shown: TestResult = result) {
   const handlers = {
     onSave: vi.fn(),
     onViewLeaderboard: vi.fn(),
@@ -31,6 +31,26 @@ function renderResults(standing: ResultStanding, shown: TestResult = result) {
     />,
   );
   return { ...handlers, shortEscape: () => act(() => shortEscape?.()) };
+}
+
+/** Results before its standing loads: the round's last letters land as a pending name, then the field appears. */
+function renderLeftovers() {
+  const onSave = vi.fn();
+  const props = {
+    result,
+    saving: false,
+    onSave,
+    onViewLeaderboard: vi.fn(),
+    onSaveAndReady: vi.fn(),
+    onSetup: vi.fn(),
+    claimShortEscape: () => {},
+  };
+  const { rerender } = render(<ResultsScreen {...props} standing={null} />);
+  for (const key of ["i", "n", "g"]) {
+    fireEvent.keyDown(window, { key });
+  }
+  rerender(<ResultsScreen {...props} standing={ranked} />);
+  return { onSave };
 }
 
 function nameField() {
@@ -104,21 +124,34 @@ describe("ResultsScreen with name entry", () => {
     expect(document.activeElement).toBe(nameField());
   });
 
-  it("saves the typed name on Enter after the first second", () => {
+  it("saves a name typed on Results on Enter right away, even in the first second, because fast typists are quick", () => {
     const { onSave } = renderResults(ranked);
     fireEvent.change(nameField(), { target: { value: "  Zed  " } });
-    fireEvent.keyDown(window, { key: "Enter" });
-    expect(onSave).not.toHaveBeenCalled();
-
-    pastGrace();
     fireEvent.keyDown(window, { key: "Enter" });
     expect(onSave).toHaveBeenCalledExactlyOnceWith("Zed");
   });
 
-  it("does not save from a held Enter, even after the first second", () => {
+  it("saves a name typed with the keyboard before the field had focus, on Enter in the first second", () => {
     const { onSave } = renderResults(ranked);
-    fireEvent.change(nameField(), { target: { value: "Zed" } });
+    nameField().blur();
+    fireEvent.keyDown(window, { key: "J" });
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith("J");
+  });
+
+  it("still ignores a stray Enter in the first second when the only letters were left over from the round", () => {
+    const { onSave } = renderLeftovers();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).not.toHaveBeenCalled();
+    pastGrace();
+    fireEvent.keyDown(window, { key: "Enter" });
+    expect(onSave).toHaveBeenCalledExactlyOnceWith("ing");
+  });
+
+  it("does not save from an Enter held over from the round, even once a name is typed", () => {
+    const { onSave } = renderResults(ranked);
     fireEvent.keyDown(nameField(), { key: "Enter" });
+    fireEvent.change(nameField(), { target: { value: "Zed" } });
     pastGrace();
     fireEvent.keyDown(nameField(), { key: "Enter", repeat: true });
     fireEvent.keyDown(nameField(), { key: "Enter", repeat: true });

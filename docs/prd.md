@@ -1002,7 +1002,7 @@ Selecting Next Player should immediately return to the Ready screen. Space, Ente
 
 Arrow keys choose an action on Results and the Leaderboard, the same way they move the cursor on Event Setup. On Results, Up and Down move between the name field, SAVE SCORE (only while the name can be saved), and VIEW LEADERBOARD; Left and Right move between the buttons, and inside the name field they move the text cursor. On the Leaderboard an arrow chooses NEXT PLAYER. Tab and Shift+Tab work the same as Down and Up on both screens, as on Event Setup, so they never stop on the logo badge. Enter or Space on a chosen button does what that button does, so Enter on VIEW LEADERBOARD leaves without a name even when one is typed.
 
-For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Taps and buttons work at once. Holding Escape still opens Event Setup.
+For the first second after Results or the Leaderboard appears, Space, Enter, and Escape do not leave it. A contestant still typing when the test ends would otherwise skip both screens. Letters still go into the name. Once the contestant types a name on Results, Enter saves it at once, even in that first second, because a fast typist can type a short name and press Enter that quickly; letters left over from the round do not count, so a stray Enter still cannot skip the screen. Taps and buttons work at once. Holding Escape still opens Event Setup.
 
 The app should also automatically return to Ready after a short delay.
 
@@ -2022,7 +2022,7 @@ RESTORE CLEARED SCORES appears after a clear, asks first, and brings back the la
 the first letter on Results goes into the name
 Enter on Results saves the score with the typed name
 Enter or Space on Results without name entry opens the leaderboard
-Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it
+Space, Enter, or Escape in the first second of Results or the Leaderboard does not leave it, except Enter after a name typed on Results, which saves it
 a tap on the rolling high-score list returns to Ready and does not start the test
 a tap on the logo badge on Ready does not start the test and opens the rolling high-score list when a qualifying score exists
 a tap on the logo badge returns to Ready from Typing without saving, from Results after saving, and from the Leaderboard

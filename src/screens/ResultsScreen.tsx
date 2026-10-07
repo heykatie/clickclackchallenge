@@ -56,6 +56,9 @@ export function ResultsScreen({
   const viewButtonRef = useRef<HTMLButtonElement>(null);
   const nameStateRef = useRef("");
   const pendingName = useRef("");
+  // True once the contestant types a name on this screen. Then Enter means "save", even in the first second;
+  // letters left over from the round do not count, so a stray Enter still cannot skip the screen.
+  const typedName = useRef(false);
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
   const copy = standing ? resultCopy(standing, result.displayedWpm, result.accuracy) : null;
@@ -145,7 +148,7 @@ export function ResultsScreen({
         if (event.repeat || savingRef.current || left.current) {
           return;
         }
-        if (!acceptsLeaveKey(shownAt, performance.now())) {
+        if (!typedName.current && !acceptsLeaveKey(shownAt, performance.now())) {
           return;
         }
         const nameToSave = nameToSaveOnEnter(nameField.value, nameStateRef.current, pendingName.current);
@@ -207,6 +210,7 @@ export function ResultsScreen({
         pendingName.current = (pendingName.current + character).slice(0, MAX_NAME_LENGTH);
         return;
       }
+      typedName.current = true;
       setName((current) => {
         const next = (current + character).slice(0, MAX_NAME_LENGTH);
         nameStateRef.current = next;
@@ -305,6 +309,7 @@ export function ResultsScreen({
             maxLength={MAX_NAME_LENGTH}
             autoComplete="off"
             onChange={(event) => {
+              typedName.current = true;
               nameStateRef.current = event.target.value;
               setName(event.target.value);
             }}
