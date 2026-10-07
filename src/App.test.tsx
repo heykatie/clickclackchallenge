@@ -1,11 +1,15 @@
 // @vitest-environment jsdom
 import "./test/domSetup";
 import "fake-indexeddb/auto";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, configure, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeDatabase, DB_NAME, listAllScores, loadBooth } from "./db/persistence";
 import App from "./App";
+
+// These tests drive the whole app, so a screen change can take longer than the 1-second default when the
+// machine is busy running every test file at once. A passing wait returns as soon as it passes.
+configure({ asyncUtilTimeout: 5_000 });
 
 // The service worker only exists in a real build.
 vi.mock("virtual:pwa-register/react", () => ({
