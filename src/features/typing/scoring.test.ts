@@ -54,11 +54,12 @@ describe("calculateAccuracy", () => {
 });
 
 describe("meetsLeaderboardAccuracy", () => {
-  it("goes by the accuracy contestants see: 69.5% shows as 70% and counts, 69.4% shows as 69% and does not", () => {
-    expect(meetsLeaderboardAccuracy(70)).toBe(true);
-    expect(meetsLeaderboardAccuracy(69.99)).toBe(true);
-    expect(meetsLeaderboardAccuracy(69.5)).toBe(true);
-    expect(meetsLeaderboardAccuracy(69.4)).toBe(false);
+  it("goes by the accuracy contestants see: 24.5% shows as 25% and counts, 24.4% shows as 24% and does not", () => {
+    expect(meetsLeaderboardAccuracy(25)).toBe(true);
+    expect(meetsLeaderboardAccuracy(24.99)).toBe(true);
+    expect(meetsLeaderboardAccuracy(24.5)).toBe(true);
+    expect(meetsLeaderboardAccuracy(24.4)).toBe(false);
+    expect(meetsLeaderboardAccuracy(69.4)).toBe(true);
   });
 });
 

@@ -91,8 +91,8 @@ describe("scoresCsv", () => {
   });
 
   it("leaves both ranks blank for a score that is not ranked", () => {
-    const csv = csvAt([score("1", "a", "Low", 40, 50)], [event("a", "2026-10-06T09:00:00.000Z")]);
-    expect(lines(csv)[1]).toBe('"Tue, Oct 6, 2026",10:01 AM,Event 1,"Oct 6, 9:00 AM",,Low,40,50,30,Standard,,,no,no');
+    const csv = csvAt([score("1", "a", "Low", 40, 20)], [event("a", "2026-10-06T09:00:00.000Z")]);
+    expect(lines(csv)[1]).toBe('"Tue, Oct 6, 2026",10:01 AM,Event 1,"Oct 6, 9:00 AM",,Low,40,20,30,Standard,,,no,no');
   });
 
   it("quotes commas and quotes, and defuses names a spreadsheet would run as a formula", () => {

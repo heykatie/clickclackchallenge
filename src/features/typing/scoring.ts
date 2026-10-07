@@ -1,4 +1,4 @@
-export const MIN_LEADERBOARD_ACCURACY = 70;
+export const MIN_LEADERBOARD_ACCURACY = 25;
 /** Low on purpose: it only stops key-mashing. Random keys land around 5–20%, mostly from lucky spaces. */
 export const PLINKO_MIN_ACCURACY = 30;
 /**
@@ -54,7 +54,7 @@ export function displayedAccuracy(accuracy: number): number {
   return Math.round(accuracy);
 }
 
-/** Goes by the accuracy contestants see: a score that shows 70% counts, even when the exact figure is 69.5%. */
+/** Goes by the accuracy contestants see: a score that shows 25% counts, even when the exact figure is 24.5%. */
 export function meetsLeaderboardAccuracy(accuracy: number): boolean {
   return displayedAccuracy(accuracy) >= MIN_LEADERBOARD_ACCURACY;
 }

@@ -15,7 +15,7 @@ function randomBoard(random: () => number): ScoreRecord[] {
       name: random() < 0.5 ? `P${index}` : null,
       rawWpm: wpm,
       displayedWpm: wpm,
-      accuracy: pick(random, [10, 69.4, 69.99, 70, 70.4, 70.6, 88, 95, 95.2, 100]),
+      accuracy: pick(random, [10, 24.4, 24.99, 25, 25.4, 25.6, 69.4, 88, 95, 95.2, 100]),
       correctCharacters: 0,
       correctAttempts: 0,
       incorrectAttempts: 0,
@@ -28,7 +28,7 @@ function randomBoard(random: () => number): ScoreRecord[] {
   });
 }
 
-const eligible = (score: ScoreRecord) => Math.round(score.accuracy) >= 70 && score.displayedWpm > 0 && score.displayedWpm <= 200;
+const eligible = (score: ScoreRecord) => Math.round(score.accuracy) >= 25 && score.displayedWpm > 0 && score.displayedWpm <= 200;
 
 describe("ranking, on 1,500 random boards", () => {
   const SEEDS = Array.from({ length: 1_500 }, (_, index) => index + 1);
@@ -61,7 +61,7 @@ describe("ranking, on 1,500 random boards", () => {
       const random = seededRandom(seed * 7919);
       const board = randomBoard(random);
       const wpm = pick(random, [0, 1, 50, 60, 75, 150, 200, 201]);
-      const accuracy = pick(random, [null, 20, 69.99, 70, 95]);
+      const accuracy = pick(random, [null, 20, 24.4, 24.99, 25, 95]);
       const standing = describeAttempt(board, {
         eventId: "e",
         rawWpm: wpm,
