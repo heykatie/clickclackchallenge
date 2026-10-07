@@ -1597,7 +1597,7 @@ src/
 └── test/                   shared test setup
 ```
 
-Every module except the screens and `App.tsx` is plain TypeScript with no React, and each has a test file beside it.
+Every module except the screens, their hooks, and `App.tsx` is plain TypeScript with no React. Most have a test file beside them; the rest are tested through their callers (the music worlds through `themes.test.ts`, blocked names through `nameRules.test.ts`, the hooks through their screens' tests) or are plain data.
 
 ---
 
