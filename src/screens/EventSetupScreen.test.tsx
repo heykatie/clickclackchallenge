@@ -191,36 +191,36 @@ describe("EventSetupScreen", () => {
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
   });
 
-  it("offers CLEAR ALL SCORES only when an event exists", () => {
+  it("offers CLEAR BOARD only when an event exists", () => {
     renderSetup(null);
-    expect(screen.queryByRole("button", { name: "CLEAR ALL SCORES" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "CLEAR BOARD" })).toBeNull();
   });
 
   it("asks before clearing, with CANCEL chosen, and CANCEL or Escape changes nothing", () => {
     const { onClearScores, onContinue } = renderSetup(existing);
-    fireEvent.click(screen.getByRole("button", { name: "CLEAR ALL SCORES" }));
-    expect(screen.getByText("Clear all scores?")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "CLEAR BOARD" }));
+    expect(screen.getByText("Clear this board?")).toBeTruthy();
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "CANCEL" }));
     press("Enter");
-    expect(screen.queryByText("Clear all scores?")).toBeNull();
+    expect(screen.queryByText("Clear this board?")).toBeNull();
     press("ArrowDown");
     press("Enter");
     press("ArrowRight");
     press("Escape");
-    expect(screen.queryByText("Clear all scores?")).toBeNull();
+    expect(screen.queryByText("Clear this board?")).toBeNull();
     expect(onClearScores).not.toHaveBeenCalled();
     expect(onContinue).not.toHaveBeenCalled();
   });
 
-  it("clears with the selected length and mode once CLEAR SCORES is picked", () => {
+  it("clears with the selected length and mode once CLEAR BOARD is confirmed", () => {
     const { onClearScores } = renderSetup(existing);
-    // START EVENT → event name → CLEAR ALL SCORES.
+    // START EVENT → event name → CLEAR BOARD.
     press("ArrowUp");
     press("ArrowUp");
-    expect(screen.getByRole("button", { name: "CLEAR ALL SCORES" }).className).toContain("is-cursor");
+    expect(screen.getByRole("button", { name: "CLEAR BOARD" }).className).toContain("is-cursor");
     press("Enter");
     press("ArrowRight");
-    expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR SCORES" }));
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR BOARD" }));
     press("Enter");
     expect(onClearScores).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
@@ -261,9 +261,9 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
-  it("reaches DOWNLOAD SCORES before CLEAR ALL SCORES in the arrow-key order, and Enter downloads", () => {
+  it("reaches DOWNLOAD SCORES before CLEAR BOARD in the arrow-key order, and Enter downloads", () => {
     const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
-    // START EVENT → event name → CLEAR ALL SCORES → DOWNLOAD SCORES.
+    // START EVENT → event name → CLEAR BOARD → DOWNLOAD SCORES.
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
@@ -432,11 +432,11 @@ describe("EventSetupScreen", () => {
     expect(swatch?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("labels the clear button CLEAR ALL, with a Delete scores tooltip and a screen-reader name that says it clears the scores", () => {
+  it("labels the clear button CLEAR BOARD, with a Clear current event tooltip", () => {
     cleanup();
     renderSetup(existing);
-    const clear = screen.getByRole("button", { name: "CLEAR ALL SCORES" });
-    expect(clear.textContent).toBe("CLEAR ALL");
-    expect(clear.getAttribute("data-tooltip")).toBe("Delete scores");
+    const clear = screen.getByRole("button", { name: "CLEAR BOARD" });
+    expect(clear.textContent).toBe("CLEAR BOARD");
+    expect(clear.getAttribute("data-tooltip")).toBe("Clear current event");
   });
 });

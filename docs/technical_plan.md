@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearAllScores` sets it on every existing event and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt`, undoing one clear at a time, newest first; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearCurrentEvent` (Clear board) sets it on the active event only and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt`, undoing one clear at a time, newest first; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it.
 
 ```ts
 interface EventRecord {
@@ -397,7 +397,7 @@ interface EventRecord {
   /** Which scores the board ranks. Scores always save to this event. */
   boardScope: "event" | "all-time";
 
-  /** Set by Clear all scores. Hides the event's scores everywhere without deleting them. */
+  /** Set by Clear board. Hides the event's scores everywhere without deleting them. */
   hiddenAt: string | null;
 
   status: "active" | "archived";
@@ -1883,12 +1883,12 @@ high score is the first eligible ranked score
 the visible board keeps five row positions, leaves unoccupied places empty, and never adds a sixth (topFiveSlots)
 an empty board shows the two house scores, and the first eligible score replaces them (boardEntries)
 a score above 200 WPM is saved but never ranks, never becomes the high score, and never wins a Plinko drop (isPlausibleWpm, MAX_PLAUSIBLE_WPM)
-sound plays a click for a right key, a blip for a wrong one, a chime for a new high score, and a ding for another Plinko win, and stays silent for Backspace (keyCue, resultCue); it never opens audio while off and survives a device with no audio (createBoothSound); the setting defaults off and survives a reopen, Start fresh, and Clear all scores (setSoundOn)
+sound plays a click for a right key, a blip for a wrong one, a chime for a new high score, and a ding for another Plinko win, and stays silent for Backspace (keyCue, resultCue); it never opens audio while off and survives a device with no audio (createBoothSound); the setting defaults off and survives a reopen, Start fresh, and Clear board (setSoundOn)
 randomized and exhaustive scenario tests with fixed seeds: 2,000 random rounds keep every count sound and end on a believable result (appState.fuzz.test.ts); every combination of board size, speed, and accuracy gets the Results the PRD describes (resultScenarios.test.ts); 1,500 random boards rank by the rules and Results previews each place exactly (ranking.fuzz.test.ts); every Setup situation, cursor, and key keeps the cursor on a choice on screen (setupKeyboard.sweep.test.ts); random runs of fresh, continue, all-time, save, clear, restore, and reopen show every board exactly what it should (persistence.sequences.test.ts); real names pass the name filter and disguised abuse does not (blockedNames.test.ts)
 the whole app, on a fake database: a first-run Story round ends on Results, Enter saves the typed name, and it shows on the Leaderboard; a staff long-press on Results opens Event Setup and keeps the attempt exactly once; a storage failure shows the can't-be-saved screen; a board continued under a new name keeps each day's name on its own scores (App.test.tsx). CI runs lint, the type check, every test, and the build on each pull request and push to main (.github/workflows/checks.yml)
 music gives each game mode its own world with a tune for every page, 18 in all and none shared, keeping Famous Lines' fantasy themes (themeForScreen); in every world the race is fastest and opens with a one-time intro (firstBar); every tune shares keys, bass, and kick, and plays its world's lead, with the square, flute, and harp at D5 or below; Event Setup reports the highlighted mode so the music previews its world (onTestModeChange); the fantasy battle is a battle at 140 to 170 BPM with brass at C5 or below, strings on every 16th, an 8-bar loop from D minor to a tense A major, a hook that returns higher, a syncopated octave bass riff, rising B-section arpeggios, and a timpani roll; every theme uses the same instruments, keeps its notes in their bar, and loops (barEvents); the player never opens audio while off, keeps scheduling bars as time passes, stops on off, crossfades between themes without restarting the same one, keeps one vinyl hiss at one quiet level across theme changes (CRACKLE_VOLUME), and plays the battle's brass and strings as filtered sawtooth tones and the arcade's square, the storybook's flute, and its harp, and survives a device with no audio (createMusicPlayer); Ready reports the idle list opening and closing (onRollingChange); the music setting defaults off, apart from sound, and survives a reopen and Start fresh (setMusicOn); MUSIC follows SOUND in the Setup keyboard order; the palette defaults warm and survives a reopen and Start fresh (setPalette), PALETTE follows MUSIC in the Setup keyboard order, and switching it sets data-palette on the page, which styles/palette-cool.css keys off (App.test.tsx)
 Event Setup counts the active event's Plinko wins under the same rule as Results, and an impossible score never counts (countPlinkoWins)
-an event name is optional, trimmed, capped at 40 characters, kept through Continue and Clear all scores, and read as none on older events (cleanEventName, startFreshEvent, updateActiveEvent); while the Setup name field has focus, keys type into it and Enter leaves it without starting
+an event name is optional, trimmed, capped at 40 characters, kept through Continue and Clear board, and read as none on older events (cleanEventName, startFreshEvent, updateActiveEvent); while the Setup name field has focus, keys type into it and Enter leaves it without starting
 the scores download lists every score newest first with a readable local date and time, the event number, start time, and the event name set when the score was played (falling back to the event's name for older scores) in separate columns, its event and all-time ranks (cleared scores have no all-time rank), Plinko win, and cleared state, quotes commas, and defuses spreadsheet formulas in names (scoresCsv); it reads cleared events too (listEverything)
 the all-time line names the best eligible score from every event, drops a missing name, and hides when it is the event's own first place or nothing was saved (allTimeBestLine)
 the rolling list holds still when every score fits, and rolls only when it is taller than its window (rollPlan)
@@ -1998,7 +1998,7 @@ Required cases:
 
 ```text
 restoreClearedScores shows the last clear's scores again, keeps the current event and its scores, undoes one clear at a time newest first, and reports when nothing is hidden (hasClearedScores)
-Clear all scores hides every earlier event and score, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearAllScores)
+Clear board hides only the current event and its scores, keeps earlier events visible, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearCurrentEvent)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
 launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
 event can be written and read
@@ -2035,8 +2035,8 @@ Required cases:
 
 ```text
 EventSetup disables Continue when no event exists
-EventSetup shows RESTORE CLEARED SCORES only after a clear, after CLEAR ALL in the arrow-key order; it asks with CANCEL chosen and RESTORE calls onRestoreScores
-EventSetup shows CLEAR ALL only with an event, right after START EVENT in the arrow-key order; it asks with CANCEL chosen, CANCEL or Escape changes nothing, and CLEAR SCORES clears with the selected length and mode
+EventSetup shows RESTORE CLEARED SCORES only after a clear, after CLEAR BOARD in the arrow-key order; it asks with CANCEL chosen and RESTORE calls onRestoreScores
+EventSetup shows CLEAR BOARD only with an event, right after START EVENT in the arrow-key order; it asks with CANCEL chosen, CANCEL or Escape changes nothing, and CLEAR BOARD clears with the selected length and mode
 App loads every board through listBoardScores(activeEvent): Results placement, the Ready high score, and the Leaderboard. Ready loads its rolling list the same way.
 an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
 EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"

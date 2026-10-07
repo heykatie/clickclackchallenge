@@ -73,7 +73,7 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", on CLEAR ALL SCORES "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
+ * "update", on CLEAR BOARD "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
  */
 export function applySetupKey(
   selection: SetupSelection,

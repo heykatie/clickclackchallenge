@@ -29,7 +29,7 @@ type EventSetupScreenProps = {
   onApplyUpdate: () => void;
   onStartFresh: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope, name: string | null) => void;
-  /** Hides every score so far and starts an empty event with these choices. */
+  /** Hides the current event's scores and starts an empty event with these choices. */
   onClearScores: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   /** An earlier clear can be undone. */
   canRestore: boolean;
@@ -106,7 +106,7 @@ export function EventSetupScreen({
   /** Null while the setup choices show. Otherwise a confirmation is up, with this button chosen. */
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
-  /** Which confirmation is up: Start fresh, Clear all scores, or Restore cleared scores. */
+  /** Which confirmation is up: Start fresh, Clear board, or Restore cleared scores. */
   const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
   const canRestoreRef = useRef(canRestore);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -362,10 +362,10 @@ export function EventSetupScreen({
             </>
           ) : confirmKind === "clear" ? (
             <>
-              <h2 id="setup-confirm-title">Clear all scores?</h2>
+              <h2 id="setup-confirm-title">Clear this board?</h2>
               <p>
-                Every score so far is hidden from all leaderboards, the high-score list, and the all-time best, and
-                an empty event starts. The scores stay saved on this device.
+                This event's scores are hidden from every leaderboard, the high-score list, and the all-time best,
+                and an empty event starts. Earlier events stay. The scores stay saved on this device.
               </p>
             </>
           ) : (
@@ -384,7 +384,7 @@ export function EventSetupScreen({
               CANCEL
             </button>
             <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
-              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR SCORES" : "START FRESH"}
+              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
             </button>
           </div>
         </section>
@@ -505,10 +505,9 @@ export function EventSetupScreen({
                     className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
                     onClick={askToClear}
                     disabled={saving}
-                    aria-label="CLEAR ALL SCORES"
-                    data-tooltip="Delete scores"
+                    data-tooltip="Clear current event"
                   >
-                    CLEAR ALL
+                    CLEAR BOARD
                   </button>
                 ) : null}
                 {canRestore ? (

@@ -27,7 +27,7 @@ export interface EventRecord {
   passageSetId: string;
   boardScope: BoardScope;
   /**
-   * Set by Clear all scores. A hidden event's scores are kept on the device but left out of every
+   * Set by Clear board. A hidden event's scores are kept on the device but left out of every
    * board, the rolling list, and the all-time best. Setting it back to null shows them again.
    */
   hiddenAt: string | null;
@@ -363,15 +363,9 @@ export async function startFreshEvent(
   const now = new Date().toISOString();
   const activeEvents = await events.index("status").getAll("active");
 
+  // Clearing hides only the event being replaced; earlier events keep their scores on the all-time board.
   for (const event of activeEvents) {
-    await events.put({ ...event, status: "archived", updatedAt: now });
-  }
-  if (options.clearScores) {
-    for (const event of await events.getAll()) {
-      if (!event.hiddenAt) {
-        await events.put({ ...event, status: "archived", hiddenAt: now, updatedAt: now });
-      }
-    }
+    await events.put({ ...event, status: "archived", ...(options.clearScores ? { hiddenAt: now } : {}), updatedAt: now });
   }
 
   const event: EventRecord = {
@@ -447,10 +441,10 @@ export async function updateActiveEvent(
 }
 
 /**
- * Hides every event, and so every score, from view and starts an empty event with the given choices.
- * Nothing is deleted: setting an event's hiddenAt back to null brings its scores back.
+ * Clear board: hides the current event, and so its scores, from view and starts an empty event with the given
+ * choices. Earlier events are untouched. Nothing is deleted: setting the event's hiddenAt back to null brings its scores back.
  */
-export function clearAllScores(durationSeconds: TestDuration, testMode: TestMode, name?: string | null): Promise<EventRecord> {
+export function clearCurrentEvent(durationSeconds: TestDuration, testMode: TestMode, name?: string | null): Promise<EventRecord> {
   return startFreshEvent(durationSeconds, testMode, { clearScores: true, name });
 }
 
