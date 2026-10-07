@@ -315,7 +315,10 @@ export function ResultsScreen({
             }}
             aria-invalid={problem === "blocked"}
           />
-          {problem === "blocked" ? <p className="name-hint">Pick a different name.</p> : null}
+          {/* The hint's line is always there, empty until needed, so the buttons below never move. */}
+          <p className="name-hint" aria-live="polite">
+            {problem === "blocked" ? "Pick a different name." : ""}
+          </p>
         </label>
       ) : null}
       {standing ? (
@@ -332,7 +335,8 @@ export function ResultsScreen({
           </button>
         </div>
       ) : null}
-      {timeoutMessage ? <p className="result-name-countdown">{timeoutMessage}</p> : null}
+      {/* Kept while Results has a timer, empty until the last seconds, so the screen never moves when it appears. */}
+      {phase !== "off" ? <p className="result-name-countdown">{timeoutMessage ?? ""}</p> : null}
     </main>
   );
 }
