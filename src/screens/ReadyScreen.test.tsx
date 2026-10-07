@@ -145,18 +145,51 @@ describe("ReadyScreen", () => {
     expect(onRollingChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("only wiggles the logo on a tap when there is no score to roll, and wiggles again on the next tap", async () => {
+  it("opens Keycap Hop on a logo tap when there is no score to roll, and a key there jumps instead of starting", async () => {
     const { onStart } = await renderReady([]);
-    const logo = screen.getByRole("button", { name: "Show high scores" });
-    expect(logo.classList.contains("is-wiggling")).toBe(false);
     tapLogo();
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
+    const game = screen.getByRole("dialog", { name: "Keycap Hop" });
+    expect(game).toBeTruthy();
+    fireEvent.keyDown(window, { key: " " });
+    fireEvent.keyDown(window, { key: "a" });
+    fireEvent.pointerUp(game, { button: 0 });
     expect(onStart).not.toHaveBeenCalled();
-    expect(logo.classList.contains("is-wiggling")).toBe(true);
-    act(() => vi.advanceTimersByTime(500));
-    expect(logo.classList.contains("is-wiggling")).toBe(false);
+    expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
+  });
+
+  it("opens Keycap Hop on a short Escape with nothing to roll, and closes it on the next", async () => {
+    const { onStart, shortEscape } = await renderReady([]);
+    shortEscape();
+    expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
+    shortEscape();
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+    expect(screen.getByText(/PRESS ANY KEY TO START/i)).toBeTruthy();
+    expect(onStart).not.toHaveBeenCalled();
+  });
+
+  it("closes Keycap Hop on its logo tap, and on its own after 30 seconds with no input", async () => {
+    await renderReady([]);
     tapLogo();
-    expect(logo.classList.contains("is-wiggling")).toBe(true);
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Close Keycap Hop" }), { button: 0 });
+    fireEvent.pointerUp(screen.getByRole("button", { name: "Close Keycap Hop" }), { button: 0 });
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+
+    tapLogo();
+    act(() => vi.advanceTimersByTime(20_000));
+    fireEvent.keyDown(window, { key: " " });
+    act(() => vi.advanceTimersByTime(20_000));
+    // Input reset the 30 seconds, so it is still open.
+    expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
+    act(() => vi.advanceTimersByTime(11_000));
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+  });
+
+  it("never opens Keycap Hop when there are scores to roll", async () => {
+    await renderReady();
+    tapLogo();
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+    expect(screen.getByText("HIGH SCORES")).toBeTruthy();
   });
 
   it("opens the rolling list on a short Escape, like a logo tap, and closes it on the next", async () => {

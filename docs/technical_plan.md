@@ -1586,6 +1586,7 @@ src/
 │   ├── typing/             typing engine and scoring
 │   ├── results/            placement, result copy, name rules, count-up, name timeout
 │   ├── leaderboard/        ranking, board motion, the idle list's roll
+│   ├── hop/                Keycap Hop, the secret runner: physics, obstacle spacing, collisions, score
 │   └── export/             the scores CSV download
 ├── db/                     persistence.ts (events, scores, settings, migrations) and persistent storage
 ├── data/                   word list, famous lines, and stories
@@ -2093,6 +2094,23 @@ Leaderboard renders no more than five rows
 Do not over-test static decorative styling through component tests.
 
 ---
+
+### Unit Tests — Keycap Hop
+
+Required cases:
+
+```text
+a new game is on the ground, not running, with no obstacles and a score of 0
+the first hop starts the run; the keycap rises and lands back on the ground
+hops only from the ground, so mashing does not fly
+the top of a hop clears the tallest obstacle
+the run speeds up to a cap, and the score counts distance
+gaps between obstacles always leave room to land and hop again, at any speed (200 seeded runs)
+hitting an obstacle crashes and freezes the run; passing high enough does not
+a hop after a crash starts a fresh run
+Ready opens it on a logo tap or short Escape only when there is no score to roll; keys and taps there never start a round
+its logo tap or a short Escape closes it; 30 seconds with no input closes it
+```
 
 ### Unit Tests — Landscape gate
 
