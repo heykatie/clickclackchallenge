@@ -376,6 +376,22 @@ label.setup-option-big {
   text-decoration: none;
 }
 
+/* A dot before PALETTE previews the palette in use by its page tone: peach for warm, lavender for cool. */
+.palette-swatch {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  background: var(--tiny-peach);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  vertical-align: -0.05em;
+}
+
+html[data-palette="cool"] .palette-swatch {
+  background: var(--tiny-lavender);
+}
+
 /* Both values share one grid cell; only the current one shows. */
 .setup-chip-value {
   display: inline-grid;

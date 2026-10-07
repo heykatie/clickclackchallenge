@@ -423,4 +423,12 @@ describe("EventSetupScreen", () => {
     const reserved = music.querySelector('[aria-hidden="true"]');
     expect(reserved?.textContent).toBe("ON");
   });
+
+  it("shows a dot of the current palette inside PALETTE, without changing what screen readers hear", () => {
+    cleanup();
+    renderSetup(existing);
+    const chip = screen.getByRole("button", { name: "PALETTE: WARM" });
+    const swatch = chip.querySelector(".palette-swatch");
+    expect(swatch?.getAttribute("aria-hidden")).toBe("true");
+  });
 });

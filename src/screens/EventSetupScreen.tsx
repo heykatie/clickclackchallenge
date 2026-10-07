@@ -335,6 +335,7 @@ export function EventSetupScreen({
             MUSIC: <ChipValue value={musicOn ? "ON" : "OFF"} other={musicOn ? "OFF" : "ON"} />
           </button>
           <button type="button" className={settingClass("palette", false)} onClick={onTogglePalette}>
+            <span className="palette-swatch" aria-hidden="true" />
             PALETTE: <ChipValue value={palette === "cool" ? "COOL" : "WARM"} other={palette === "cool" ? "WARM" : "COOL"} />
           </button>
         </div>
