@@ -76,13 +76,35 @@
 }
 
 /* Auto margins center the block vertically but, unlike justify-content, never push the title off a short screen. */
-.setup-screen > .setup-title {
+.setup-screen > .setup-heading {
   margin-top: auto;
 }
 
-/* A quiet count for staff, tucked under the title. */
+/* The title and Plinko count on the left; the device settings on the right, out of the way of the event choices. */
+.setup-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+.setup-heading-text {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.setup-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+/* A quiet count for staff, above the event name, beside the other event details. */
 .setup-plinko-count {
-  margin: -0.5rem 0 0;
+  margin: 0;
   color: var(--tiny-muted);
   font-size: 0.95rem;
   font-weight: 700;
@@ -323,10 +345,34 @@ label.setup-option-big {
   outline-offset: 3px;
 }
 
-.setup-tools {
+/* The score actions, under the Leaderboard choices they act on: DOWNLOAD as a safe chip, CLEAR in warning red. */
+.setup-score-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.25rem 1rem;
+  margin-top: 0.6rem;
+}
+
+/* Clearing hides every score on every board, so it reads as a warning, not like the safe download beside it. */
+.setup-tool.is-danger {
+  color: #b23a3a;
+}
+
+/* A setting chip: a small outlined pill instead of an underlined link, tinted while the setting is on. */
+.setup-tool.setup-chip {
+  min-height: 34px;
+  padding: 0.2rem 0.75rem;
+  border: 1.5px solid var(--tiny-lavender-light);
+  border-radius: 999px;
+  background: var(--tiny-white);
+  text-decoration: none;
+}
+
+.setup-tool.setup-chip.is-on {
+  border-color: var(--tiny-mint-strong);
+  background: color-mix(in srgb, var(--tiny-mint) 45%, var(--tiny-white));
+  color: var(--tiny-charcoal);
 }
 
 /* Small text links: still buttons for the keyboard cursor, but quiet next to START EVENT. */
@@ -432,7 +478,22 @@ button.setup-tool:active:not(:disabled) {
     padding-block: 0.15rem;
   }
 
-  .setup-tools {
-    row-gap: 0;
+
+  .setup-tool.setup-chip {
+    min-height: 28px;
+    padding-block: 0.1rem;
+  }
+
+  .setup-score-actions {
+    margin-top: 0.3rem;
+  }
+
+  /* The top padding stays: the logo badge sits just above the title. The gaps between sections give a little. */
+  .setup-screen {
+    gap: 0.5rem;
+  }
+
+  .setup-groups {
+    gap: 0.45rem;
   }
 }

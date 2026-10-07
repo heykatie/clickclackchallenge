@@ -117,7 +117,15 @@ export function EventSetupScreen({
     return names.length > 0 ? names.join(" ") : undefined;
   }
 
-  function remember(next: SetupSelection) {
+  /**
+   * A setting chip: tinted while an on/off setting is on, so staff see the booth's state at a glance.
+   * PALETTE is a choice between two, not on or off, so it is never tinted.
+   */
+  function settingClass(choice: SetupChoice, on: boolean) {
+    return ["setup-tool", "setup-chip", on ? "is-on" : "", cursor === choice ? "is-cursor" : ""].filter(Boolean).join(" ");
+  }
+
+    function remember(next: SetupSelection) {
     selectionRef.current = next;
     setCursor(next.cursor);
     setSelectedDuration(next.duration);
@@ -304,12 +312,33 @@ export function EventSetupScreen({
   return (
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
-      <h1 className="setup-title">Set up today's typing test</h1>
-      {storedDuration !== null && plinkoWins !== null ? (
-        <p className="setup-plinko-count">
-          Plinko drops won this event: {plinkoWins}
-        </p>
-      ) : null}
+      <div className="setup-heading">
+        <div className="setup-heading-text">
+          <h1 className="setup-title">Set up today's typing test</h1>
+        </div>
+        {/* Device settings, top right, as chips that show their state. Last in the arrow-key order. */}
+        <div className="setup-settings" role="group" aria-label="Settings">
+          <button
+            type="button"
+            className={settingClass("sound", soundOn)}
+            aria-pressed={soundOn}
+            onClick={onToggleSound}
+          >
+            SOUND: {soundOn ? "ON" : "OFF"}
+          </button>
+          <button
+            type="button"
+            className={settingClass("music", musicOn)}
+            aria-pressed={musicOn}
+            onClick={onToggleMusic}
+          >
+            MUSIC: {musicOn ? "ON" : "OFF"}
+          </button>
+          <button type="button" className={settingClass("palette", false)} onClick={onTogglePalette}>
+            PALETTE: {palette === "cool" ? "COOL" : "WARM"}
+          </button>
+        </div>
+      </div>
       {updateReady && confirmCursor === null ? (
         <section className="setup-update" aria-labelledby="setup-update-title">
           <p id="setup-update-title">
@@ -459,11 +488,47 @@ export function EventSetupScreen({
                 description="Every score ever"
               />
             </div>
+            {storedDuration !== null || canRestore ? (
+              <div className="setup-score-actions">
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
+                    className={cursor === "download" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={onDownloadScores}
+                  >
+                    DOWNLOAD SCORES
+                  </button>
+                ) : null}
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
+                    className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
+                    onClick={askToClear}
+                    disabled={saving}
+                  >
+                    CLEAR ALL SCORES
+                  </button>
+                ) : null}
+                {canRestore ? (
+                  <button
+                    type="button"
+                    className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
+                    onClick={askToRestore}
+                    disabled={saving}
+                  >
+                    RESTORE CLEARED SCORES
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
             {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
           </fieldset>
         </div>
         <footer className="setup-footer">
           <div className="setup-footer-side">
+            {storedDuration !== null && plinkoWins !== null ? (
+              <p className="setup-plinko-count">Plinko drops won this event: {plinkoWins}</p>
+            ) : null}
             <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
               <span>Event name (optional)</span>
               <input
@@ -478,61 +543,6 @@ export function EventSetupScreen({
                 onChange={(event) => setEventName(event.target.value)}
               />
             </label>
-            {/* Operator tools are rare, so they sit as small links away from START EVENT. SOUND, MUSIC, and PALETTE always show. */}
-            <div className="setup-tools">
-              {storedDuration !== null ? (
-                <button
-                  type="button"
-                  className={cursor === "clear" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToClear}
-                  disabled={saving}
-                >
-                  CLEAR ALL SCORES
-                </button>
-              ) : null}
-              {canRestore ? (
-                <button
-                  type="button"
-                  className={cursor === "restore" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={askToRestore}
-                  disabled={saving}
-                >
-                  RESTORE CLEARED SCORES
-                </button>
-              ) : null}
-              {storedDuration !== null ? (
-                <button
-                  type="button"
-                  className={cursor === "download" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={onDownloadScores}
-                >
-                  DOWNLOAD SCORES
-                </button>
-              ) : null}
-              <button
-                type="button"
-                className={cursor === "sound" ? "setup-tool is-cursor" : "setup-tool"}
-                aria-pressed={soundOn}
-                onClick={onToggleSound}
-              >
-                SOUND: {soundOn ? "ON" : "OFF"}
-              </button>
-              <button
-                type="button"
-                className={cursor === "music" ? "setup-tool is-cursor" : "setup-tool"}
-                aria-pressed={musicOn}
-                onClick={onToggleMusic}
-              >
-                MUSIC: {musicOn ? "ON" : "OFF"}
-              </button>
-              <button
-                type="button"
-                className={cursor === "palette" ? "setup-tool is-cursor" : "setup-tool"}
-                onClick={onTogglePalette}
-              >
-                PALETTE: {palette === "cool" ? "COOL" : "WARM"}
-              </button>
-            </div>
           </div>
           <div className="setup-start-group">
             <button

@@ -1,11 +1,15 @@
 // @vitest-environment jsdom
 import "./test/domSetup";
 import "fake-indexeddb/auto";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, configure, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeDatabase, DB_NAME, listAllScores, loadBooth } from "./db/persistence";
 import App from "./App";
+
+// These tests drive the whole app, so a screen change can take longer than the 1-second default when the
+// machine is busy running every test file at once. A passing wait returns as soon as it passes.
+configure({ asyncUtilTimeout: 5_000 });
 
 // The service worker only exists in a real build.
 vi.mock("virtual:pwa-register/react", () => ({
@@ -23,10 +27,13 @@ function press(key: string) {
   fireEvent.keyUp(window, { key });
 }
 
-/** From a first run: a Story event, started, then one Story round typed perfectly, ending on Results. */
-async function playStoryRound() {
+/** From Event Setup: a Story event, started, then one Story round typed perfectly, ending on Results. */
+async function playStoryRound(eventName?: string) {
   await screen.findByText("Set up today's typing test");
   fireEvent.click(screen.getByLabelText("Story"));
+  if (eventName !== undefined) {
+    fireEvent.change(screen.getByLabelText("Event name (optional)"), { target: { value: eventName } });
+  }
   fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
   await screen.findByText(/PRESS ANY KEY TO START/i);
   // The key that starts the round is not typed.
@@ -84,6 +91,21 @@ describe("App", () => {
     expect(scores).toHaveLength(1);
     expect(scores[0]!.name).toBeNull();
   }, 15_000);
+
+  it("keeps each day's event name on its own scores when the same board is continued under a new name", async () => {
+    render(<App />);
+    await playStoryRound("Fanime Sat");
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(1));
+    // Staff go back to Event Setup and continue the same board on the next day.
+    fireEvent.pointerDown(document.querySelector(".logo-badge")!, { button: 0 });
+    await wait(700);
+    fireEvent.pointerUp(document.querySelector("main")!, { button: 0 });
+    await playStoryRound("Fanime Sun");
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(2));
+    const scores = await listAllScores();
+    expect(new Set(scores.map((score) => score.eventId)).size).toBe(1);
+    expect(scores.map((score) => score.eventName).sort()).toEqual(["Fanime Sat", "Fanime Sun"]);
+  }, 20_000);
 
   it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
     render(<App />);

@@ -39,19 +39,13 @@ export function setupChoices(
   }
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
-    choices.push("continue", "all-time");
-  }
-  choices.push("name", "start");
-  if (canContinue) {
-    choices.push("clear");
+    // The score actions sit in the Leaderboard group, under its choices.
+    choices.push("continue", "all-time", "download", "clear");
   }
   if (canRestore) {
     choices.push("restore");
   }
-  if (canContinue) {
-    choices.push("download");
-  }
-  choices.push("sound", "music", "palette");
+  choices.push("name", "start", "sound", "music", "palette");
   return choices;
 }
 
