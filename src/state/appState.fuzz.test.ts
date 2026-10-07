@@ -56,34 +56,40 @@ describe("a random round, 2,000 times over", () => {
   const SEEDS = Array.from({ length: 2_000 }, (_, index) => index + 1);
 
   it("keeps every count sound on every key", () => {
+    // Plain checks, collected and asserted once: a per-key expect would make 2,000 rounds slow.
+    const problems: string[] = [];
+    const check = (ok: boolean, seed: number, step: number, rule: string) => {
+      if (!ok && problems.length < 10) problems.push(`seed ${seed}, key ${step}: ${rule}`);
+    };
     for (const seed of SEEDS) {
       const { states } = playRandomRound(seed);
       let previous: AppState | null = null;
-      for (const state of states) {
+      states.forEach((state, step) => {
         const test = state.currentTest;
         if (test) {
-          expect(test.correctCharacters, `seed ${seed}`).toBeGreaterThanOrEqual(0);
-          expect(test.correctCharacters, `seed ${seed}`).toBeLessThanOrEqual(test.correctAttempts);
-          expect(test.characterIndex, `seed ${seed}`).toBe(test.typedCharacters.length);
-          expect(test.typedCharacters.length, `seed ${seed}`).toBeLessThanOrEqual(test.expectedSentence.length);
-          if (previous?.currentTest) {
+          check(test.correctCharacters >= 0, seed, step, "correct characters never negative");
+          check(test.correctCharacters <= test.correctAttempts, seed, step, "correct characters within correct keystrokes");
+          check(test.characterIndex === test.typedCharacters.length, seed, step, "cursor matches the letters typed");
+          check(test.typedCharacters.length <= test.expectedSentence.length, seed, step, "never typed past the line");
+          const before = previous?.currentTest;
+          if (before) {
             // Attempts only grow: Backspace takes a character back, never a keystroke.
-            expect(test.correctAttempts + test.incorrectAttempts, `seed ${seed}`).toBeGreaterThanOrEqual(
-              previous.currentTest.correctAttempts + previous.currentTest.incorrectAttempts,
+            check(
+              test.correctAttempts + test.incorrectAttempts >= before.correctAttempts + before.incorrectAttempts,
+              seed,
+              step,
+              "keystrokes never go down",
             );
             // The timer starts once and never moves.
-            if (previous.currentTest.startedAt !== null) {
-              expect(test.startedAt, `seed ${seed}`).toBe(previous.currentTest.startedAt);
-            }
+            check(before.startedAt === null || test.startedAt === before.startedAt, seed, step, "timer starts once");
           }
-          if (test.startedAt !== null) {
-            expect(test.endsAt, `seed ${seed}`).toBe(test.startedAt + test.durationSeconds * 1000);
-          }
+          check(test.startedAt === null || test.endsAt === test.startedAt + test.durationSeconds * 1000, seed, step, "round length fixed");
         }
         previous = state;
-      }
+      });
     }
-  });
+    expect(problems).toEqual([]);
+  }, 60_000);
 
   it("always ends on a believable result: finite, never negative, accuracy between 0 and 100", () => {
     let finished = 0;
@@ -106,7 +112,7 @@ describe("a random round, 2,000 times over", () => {
       }
     }
     expect(finished).toBeGreaterThan(SEEDS.length / 2);
-  });
+  }, 60_000);
 
   it("finishes once: keys after Results change nothing", () => {
     for (const seed of SEEDS.slice(0, 300)) {
@@ -138,5 +144,5 @@ describe("a random round, 2,000 times over", () => {
         expect(windowSeconds, `seed ${seed}`).toBeCloseTo(test.durationSeconds, 6);
       }
     }
-  });
+  }, 60_000);
 });

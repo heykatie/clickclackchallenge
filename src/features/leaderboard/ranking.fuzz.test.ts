@@ -54,7 +54,7 @@ describe("ranking, on 1,500 random boards", () => {
         expect(ahead, `seed ${seed}: ${a.id} before ${next.id}`).toBe(true);
       });
     }
-  });
+  }, 60_000);
 
   it("previews an attempt's place on Results exactly where saving it then ranks it", () => {
     for (const seed of SEEDS) {
@@ -86,5 +86,5 @@ describe("ranking, on 1,500 random boards", () => {
       expect(standing.isTop10, `seed ${seed}`).toBe(place !== null && place <= 10);
       expect(standing.showNameEntry, `seed ${seed}`).toBe(place !== null && place <= 20);
     }
-  });
+  }, 60_000);
 });

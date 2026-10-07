@@ -126,6 +126,8 @@ describe("storage, over 60 random runs of 40 operations", () => {
         }
 
         const where = `seed ${seed} after ${log.join(", ")}`;
+        // Every operation leaves an active event; reopening reads it back from storage.
+        if (activeEvent === null) throw new Error(`${where}: no active event`);
         const board = (await listBoardScores(activeEvent)).map((score) => score.id).sort();
         const wantBoard = (model.board === "all-time" ? visible(model) : model.events.get(model.active!)!.scores).slice().sort();
         expect(board, where).toEqual(wantBoard);

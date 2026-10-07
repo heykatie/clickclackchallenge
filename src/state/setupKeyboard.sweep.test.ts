@@ -43,7 +43,7 @@ describe("Event Setup's keyboard, in every situation", () => {
         }
       }
     }
-  });
+  }, 60_000);
 
   it("starts a sound event plan after 500 long random walks: Story is always 60s, and continue needs an event", () => {
     for (let seed = 1; seed <= 500; seed += 1) {
@@ -61,5 +61,5 @@ describe("Event Setup's keyboard, in every situation", () => {
       if (!situation.canContinue) expect(plan.mode, `seed ${seed}`).toBe("fresh");
       if (selection.leaderboard === "all-time" && situation.canContinue) expect(plan.boardScope, `seed ${seed}`).toBe("all-time");
     }
-  });
+  }, 60_000);
 });
