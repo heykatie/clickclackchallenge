@@ -51,6 +51,19 @@ describe("createBoothSound", () => {
     expect(context.resume).toHaveBeenCalled();
   });
 
+  it("readies audio ahead of the first sound when woken while on, so the first key is not late, and stays shut while off", () => {
+    const { context } = fakeContext();
+    const factory = vi.fn(() => context as unknown as AudioContext);
+    const sound = createBoothSound(factory);
+    sound.wake();
+    expect(factory).not.toHaveBeenCalled();
+    sound.setEnabled(true);
+    sound.wake();
+    expect(factory).toHaveBeenCalledOnce();
+    expect(context.resume).toHaveBeenCalled();
+    expect(context.createOscillator).not.toHaveBeenCalled();
+  });
+
   it("plays one short tone for a key and a rising run of four for a new high score", () => {
     const { context, oscillators } = fakeContext();
     const sound = createBoothSound(() => context as unknown as AudioContext);

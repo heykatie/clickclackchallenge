@@ -6,6 +6,7 @@ import { deleteDB } from "idb";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeDatabase, DB_NAME, listAllScores, loadBooth } from "./db/persistence";
 import App from "./App";
+import { boothSound } from "./sound/boothSound";
 
 // These tests drive the whole app, so a screen change can take longer than the 1-second default when the
 // machine is busy running every test file at once. A passing wait returns as soon as it passes.
@@ -106,6 +107,26 @@ describe("App", () => {
     expect(new Set(scores.map((score) => score.eventId)).size).toBe(1);
     expect(scores.map((score) => score.eventName).sort()).toEqual(["Fanime Sat", "Fanime Sun"]);
   }, 20_000);
+
+  it("plays a key's sound during the key press itself, before the screen redraws", async () => {
+    const play = vi.spyOn(boothSound, "play").mockImplementation(() => {});
+    render(<App />);
+    await screen.findByText("Set up today's typing test");
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    await screen.findByText(/PRESS ANY KEY TO START/i);
+    press("Shift");
+    await waitFor(() => expect(document.querySelector(".caret")).toBeTruthy());
+    const glyph = document.querySelector(".caret")!.closest(".passage-char")!.querySelector(".passage-char-glyph")!;
+    play.mockClear();
+    // A plain browser event, outside React's test helpers, so nothing flushes React's work early.
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: glyph.textContent! }));
+    expect(play).toHaveBeenCalledExactlyOnceWith("key");
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "~" }));
+    expect(play).toHaveBeenLastCalledWith("miss");
+    await wait(0);
+    // The redraw that follows plays nothing more.
+    expect(play).toHaveBeenCalledTimes(2);
+  });
 
   it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
     render(<App />);

@@ -42,20 +42,34 @@ export function createBoothSound(createContext: () => AudioContext = () => new A
     return context;
   }
 
+  function ready(): AudioContext | null {
+    const output = audio();
+    if (output?.state === "suspended") {
+      void output.resume();
+    }
+    return output;
+  }
+
   return {
     setEnabled(on: boolean) {
       enabled = on;
+    },
+    /**
+     * Opens and resumes audio ahead of time, on any key or tap while sound is on. Opening it takes a few
+     * frames, so doing it on the first sound would make the first typed key's click late.
+     */
+    wake() {
+      if (enabled) {
+        ready();
+      }
     },
     play(cue: SoundCue) {
       if (!enabled) {
         return;
       }
-      const output = audio();
+      const output = ready();
       if (!output) {
         return;
-      }
-      if (output.state === "suspended") {
-        void output.resume();
       }
       for (const tone of TONES[cue]) {
         const start = output.currentTime + (tone.delay ?? 0);
