@@ -76,6 +76,8 @@ h1,
 }
 
 .logo-badge {
+  /* The border sits inside the 3rem, so the badge is the same size as a button or as Event Setup's plain mark. */
+  box-sizing: border-box;
   position: absolute;
   z-index: 2;
   top: calc(1.25rem + env(safe-area-inset-top));
