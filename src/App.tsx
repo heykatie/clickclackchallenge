@@ -8,7 +8,7 @@ import { highScore } from "./features/leaderboard/ranking";
 import { countPlinkoWins } from "./features/typing/scoring";
 import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
-import { LandscapeGate } from "./pwa/LandscapeGate";
+import { LandscapeGate, type LogoActions } from "./pwa/LandscapeGate";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -23,11 +23,11 @@ import { keyCue, resultCue } from "./sound/soundCues";
 import { createResultSaver } from "./state/resultSave";
 import { createStartKeyGate } from "./state/startKey";
 
-function landscapeOnly(screen: BoothScreen, screenNode: ReactNode): ReactNode {
+function landscapeOnly(screen: BoothScreen, screenNode: ReactNode, logo?: LogoActions): ReactNode {
   if (showsInPortrait(screen)) {
     return screenNode;
   }
-  return <LandscapeGate>{screenNode}</LandscapeGate>;
+  return <LandscapeGate logo={logo}>{screenNode}</LandscapeGate>;
 }
 
 function App() {
@@ -531,6 +531,8 @@ function App() {
           onReturnToReady={() => dispatch({ type: "ENTER_READY" })}
           claimShortEscape={claimShortEscape}
         />,
+        // The gate covers Typing's logo badge, so it keeps one that does the same: tap for Ready, hold for Setup.
+        { onTap: () => dispatch({ type: "ENTER_READY" }), onHold: () => dispatch({ type: "ENTER_SETUP" }) },
       );
     case "results":
       if (state.latestResult === null) {

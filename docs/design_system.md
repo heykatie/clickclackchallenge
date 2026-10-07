@@ -54,7 +54,7 @@ Ready, Results, and Leaderboard can carry the strongest decorative personality. 
 | Export sizing | PNG pixels are not CSS layout dimensions |
 | Orientation | Landscape full screen for typing. Every other screen also shows in portrait. |
 
-Typing is landscape and full screen. Portrait and Split View show “Turn sideways and use the full screen.” Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. That gate is in `docs/technical_plan.md`.
+Typing is landscape and full screen. Portrait and Split View show “Turn sideways and use the full screen.”, with Typing's logo badge still in its corner. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. That gate is in `docs/technical_plan.md`.
 
 Respect the actual device's safe areas and browser/app viewport. Validate the final layout on the target iPad, including name entry with the physical keyboard connected.
 
