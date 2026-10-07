@@ -1,0 +1,106 @@
+/*
+ * The cool palette, chosen with PALETTE: COOL in Event Setup (App sets data-palette on <html>). Warm, the original,
+ * needs no rules. Cool follows the shop's logo: a lavender page, soft logo teals, soft pinks, and outlined flowers.
+ */
+
+/* Teals between the shop logo's (#B9E2DE) and the warm palette's: #A6DBD5 for pills and soft touches, #8FD2CA for buttons. */
+html[data-palette="cool"] {
+  --tiny-mint: #a6dbd5;
+  --tiny-mint-strong: #8fd2ca;
+}
+
+/* Outlined flowers like the shop's workshop flyers, pale yellow and lavender, at the edges. Typing has none. */
+html[data-palette="cool"] main.screen:not(.typing-screen) {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23e9c44f' stroke-width='4' stroke-linejoin='round'%3E%3Cpath id='p' d='M50 50C34 36 36 8 50 8S66 36 50 50Z'/%3E%3Cuse href='%23p' transform='rotate(72 50 50)'/%3E%3Cuse href='%23p' transform='rotate(144 50 50)'/%3E%3Cuse href='%23p' transform='rotate(216 50 50)'/%3E%3Cuse href='%23p' transform='rotate(288 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='7' fill='%23e9c44f'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23aa9ad4' stroke-width='4' stroke-linejoin='round'%3E%3Cpath id='p' d='M50 50C34 36 36 8 50 8S66 36 50 50Z'/%3E%3Cuse href='%23p' transform='rotate(72 50 50)'/%3E%3Cuse href='%23p' transform='rotate(144 50 50)'/%3E%3Cuse href='%23p' transform='rotate(216 50 50)'/%3E%3Cuse href='%23p' transform='rotate(288 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='7' fill='%23aa9ad4'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23e9c44f' stroke-width='5' stroke-linejoin='round'%3E%3Cpath id='p' d='M50 50C34 36 36 8 50 8S66 36 50 50Z'/%3E%3Cuse href='%23p' transform='rotate(72 50 50)'/%3E%3Cuse href='%23p' transform='rotate(144 50 50)'/%3E%3Cuse href='%23p' transform='rotate(216 50 50)'/%3E%3Cuse href='%23p' transform='rotate(288 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='7' fill='%23e9c44f'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  /* Like the other doodles, the big flower bleeds off its corner, clear of every control and line of text. */
+  background-size:
+    7rem,
+    3rem,
+    3rem;
+  background-position:
+    right -1.75rem bottom -1.75rem,
+    right 9rem top 1.5rem,
+    left 6rem top 1.25rem;
+}
+
+/* A lavender page, like the flyers, in place of the warm blush. */
+html[data-palette="cool"] {
+  --tiny-blush: #eee9f8;
+}
+
+/*
+ * Warm pinks where light lavender would blend into the lavender page.
+ */
+html[data-palette="cool"] .result-place {
+  background: #fbd9e6;
+}
+
+html[data-palette="cool"] label.setup-option {
+  background: #fdf3f7;
+}
+
+/*
+ * The shop logo's pink (#F9D0E1), softened toward white for large areas.
+ * Text stays deep lavender for reading, and pink sits behind it: 4.5:1 or better on every pink here.
+ */
+
+/* Event Setup: Start fresh is the pink choice. */
+html[data-palette="cool"] label.setup-option:has(input[value="fresh"]) {
+  background: #fdecf2;
+}
+
+html[data-palette="cool"] label.setup-option.is-selected:has(input[value="fresh"]) {
+  border-color: #efbfd1;
+  background: #fbe1ea;
+}
+
+/*
+ * Ready and Results titles: deep lavender, like the logo's outline, over a soft pink highlighter stripe,
+ * so the pink shows without pink letters that are either too faint to read or too muddy.
+ */
+html[data-palette="cool"] .ready-copy h1,
+html[data-palette="cool"] .results-screen h1 {
+  color: var(--tiny-lavender-deep);
+  /* The heading hugs its words, so the stripe sits only behind the letters. */
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  background: linear-gradient(transparent 55%, #fbd9e6 55%, #fbd9e6 90%, transparent 90%);
+  border-radius: 0.2em;
+}
+
+/* The idle list's WPM: deep lavender. */
+html[data-palette="cool"] .screensaver .score-wpm-value {
+  color: var(--tiny-lavender-deep);
+}
+
+/* Typing: the current word's highlight. */
+html[data-palette="cool"] .passage-char.current-word {
+  background: #fce6ee;
+}
+
+/* Results: the name field's outline, a touch deeper than the soft pink so it shows on white. */
+html[data-palette="cool"] .name-field input {
+  border-color: #f0c4d5;
+}
+
+/* The idle list and the Leaderboard: the top scorer's row, and the HIGH SCORES and TOP 5 labels. */
+html[data-palette="cool"] .score-row.is-first,
+html[data-palette="cool"] .score-row.is-first.is-current,
+html[data-palette="cool"] .score-kicker {
+  background: #fce6ee;
+}
+
+/* The idle list: names in charcoal, set apart from the deep lavender WPM. */
+html[data-palette="cool"] .screensaver .score-name.has-name {
+  color: var(--tiny-charcoal);
+}
+
+/* The pink doodle in the corner: the same soft pink as the rest. */
+html[data-palette="cool"] .edge-motifs::before {
+  background: #f9d6e3;
+}

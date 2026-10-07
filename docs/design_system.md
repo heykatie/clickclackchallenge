@@ -102,6 +102,25 @@ Use fewer colors during Typing. Do not assign a different bright color to every 
 - Where an accent foreground is too faint, keep the accent in a border or tinted background and use darker text.
 - Pair errors with an underline or another non-color indicator. Pair selection with a radio/check indicator, and current-player emphasis with a “YOU” label.
 
+### Cool palette
+
+PALETTE: COOL in Event Setup switches every screen to a second palette after the shop's logo; warm, above, stays the default. The cool palette lives in `src/styles/palette-cool.css` and changes colors and doodles only, never layout or text.
+
+| Role | Cool | Warm |
+| --- | --- | --- |
+| Page background | lavender #EEE9F8 | blush #FBEDEF |
+| Buttons | teal #8FD2CA | mint-strong #6CCFC7 |
+| Pills, soft teal, the ring doodle | teal #A6DBD5 | mint #9DDED8 |
+| Top-scorer rows, HIGH SCORES and TOP 5 labels, the current word while typing | soft pink #FCE6EE | lavender-light |
+| Ready and Results titles | deep lavender over a soft pink highlighter stripe (#FBD9E6) | deep lavender |
+| Event Setup tiles | pale pink #FDF3F7; Start fresh is the pink choice | blush wash |
+| The idle list | names charcoal, WPM deep lavender | names deep lavender, WPM charcoal |
+| Results name field outline | pink #F0C4D5 | lavender |
+| "You made the Top 5!" pill | soft pink #FBD9E6 | lavender-light |
+| Corner doodles | soft pink blob #F9D6E3, plus outlined flowers in pale yellow and lavender (none while typing) | pink blob |
+
+Pink is never text: pastel pink is too faint to read, and a pink dark enough to read turns muddy. Text stays deep lavender or charcoal, at 4.5:1 or better on every cool surface.
+
 ## 4. Typography
 
 Use three primary font families. Required font files must be packaged or cached locally so the app does not depend on a font CDN during events.
@@ -254,7 +273,7 @@ Layout, after `01-setup.png` but pared back so the choices stand out:
 - Only the selected tile gets a ring and tint: mint for Test length and Game mode, lavender for Leaderboard. The keyboard cursor is the charcoal outline. Unavailable tiles fade. While Story is selected, “Story is always 60s.” sits under Test length; with no event, “No previous event yet.” sits under Leaderboard.
 - Under the title, once an event exists, a small bold muted line reads “Plinko drops won this event: {n}” (“drops” at any count), so staff can track prize stock.
 - The footer's left side holds an “Event name (optional)” field, its small muted label beside a short rounded input, above the small links. The footer stays on one row, so START EVENT never drops below it. In the compact layout, Event Setup may widen to 60rem when a short window would otherwise squeeze the 4:3 stage.
-- The small links under the groups read CLEAR ALL SCORES, RESTORE CLEARED SCORES, DOWNLOAD SCORES, SOUND: OFF or SOUND: ON, and MUSIC: OFF or MUSIC: ON, in that order. They share the small underlined link style, so operator tools stay quiet next to START EVENT.
+- The small links under the groups read CLEAR ALL SCORES, RESTORE CLEARED SCORES, DOWNLOAD SCORES, SOUND: OFF or SOUND: ON, MUSIC: OFF or MUSIC: ON, and PALETTE: WARM or PALETTE: COOL, in that order. On a window shorter than 640px (a laptop with a mouse) the links shrink to 30px tall so the footer fits; the iPad keeps 40px. They share the small underlined link style, so operator tools stay quiet next to START EVENT.
 - Event Setup works in landscape and portrait, on the booth iPad and on a laptop used to test or show the app. The block is centered vertically with room under the logo badge. Below 760px of height (a laptop window, an iPad in Safari with its toolbar) it switches to a compact layout: tighter padding and gaps, a 2rem title, and shorter tiles. The 820px-tall booth iPad keeps the full layout. In portrait the top padding grows to 7rem so the title clears the logo. If even the compact layout does not fit, the page scrolls instead of cutting off START EVENT.
 - START EVENT → stands on its own at the bottom right, with “Arrow keys move. Enter selects.” in small muted text centered under it, with a little space between. No footer box.
 - CLEAR ALL SCORES and RESTORE CLEARED SCORES are small underlined muted links at the bottom left.
