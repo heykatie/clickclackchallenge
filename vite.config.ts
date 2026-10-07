@@ -45,7 +45,6 @@ export default defineConfig({
         navigateFallback: "index.html",
         // Only woff2: every browser the booth runs on uses it, so the older .woff copies are never fetched.
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2,webmanifest}"],
-        globIgnores: ["**/icons.svg"],
       },
     }),
   ],
