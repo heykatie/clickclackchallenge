@@ -43,8 +43,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: "index.html",
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2,webmanifest}"],
-        globIgnores: ["**/icons.svg"],
+        // Only woff2: every browser the booth runs on uses it, so the older .woff copies are never fetched.
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2,webmanifest}"],
       },
     }),
   ],

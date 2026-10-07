@@ -2033,6 +2033,10 @@ after a deploy, Event Setup shows An update is ready., and UPDATE NOW restarts o
 the booth runs from the Home Screen app, not a Safari tab, so its saved scores are kept
 full airplane-mode flow passes
 saved scores survive offline relaunch
+SOUND and MUSIC each turn on and off from Event Setup, and stay set after a relaunch
+with MUSIC on, Event Setup plays the highlighted mode's world, and each page plays the event's mode's tune at a level that sits under the key clicks
+an event name typed in Event Setup appears in the downloaded scores, and never on a contestant screen
+DOWNLOAD SCORES saves a CSV with every score, and staff download one at the end of each event day as a backup
 ```
 
 If any core item fails, V1 should not be considered event-ready.
