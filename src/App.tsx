@@ -60,6 +60,8 @@ function App() {
   }, []);
   const screenRef = useRef(state.screen);
   const statusRef = useRef(status);
+  // Set each render after enterSetup below, so the Escape hold always opens Setup with the latest state.
+  const enterSetupRef = useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
     screenRef.current = state.screen;
     statusRef.current = status;
@@ -76,7 +78,7 @@ function App() {
       if (screenRef.current === "setup" || statusRef.current !== "ready") {
         return;
       }
-      dispatch({ type: "ENTER_SETUP" });
+      void enterSetupRef.current();
     }, () => (screenRef.current === "setup" ? escapeHoldMs("ready") : escapeHoldMs(screenRef.current)));
     const onKeyDown = (event: KeyboardEvent) => {
       if (screenRef.current === "setup" || statusRef.current !== "ready") {
@@ -352,6 +354,24 @@ function App() {
     }
   }
 
+  /**
+   * Opens Event Setup. From Results the attempt is saved first, with no name, so a staff hold in the instant
+   * before Results' early save cannot lose it. A failed save is logged, and Setup still opens.
+   */
+  async function enterSetup() {
+    if (state.screen === "results" && state.latestResult?.accuracy != null) {
+      try {
+        await recordScore(null);
+      } catch (error) {
+        console.error("Could not save the score before Event Setup", error);
+      }
+    }
+    dispatch({ type: "ENTER_SETUP" });
+  }
+  useEffect(() => {
+    enterSetupRef.current = enterSetup;
+  });
+
   async function leaveResultsForReady(name: string | null) {
     const event = state.activeEvent;
     if (!event) {
@@ -510,7 +530,9 @@ function App() {
           onSaveAndReady={(name) => {
             void leaveResultsForReady(name);
           }}
-          onSetup={() => dispatch({ type: "ENTER_SETUP" })}
+          onSetup={() => {
+            void enterSetup();
+          }}
           claimShortEscape={claimShortEscape}
         />,
       );
