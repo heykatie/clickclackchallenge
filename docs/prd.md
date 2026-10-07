@@ -321,7 +321,7 @@ After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from s
 
 - Event Setup: a cute, mellow theme.
 - Ready: an inviting “adventure awaits” theme, a heroic horn call that ends each loop unresolved, livelier than Setup but calmer than Typing.
-- Typing: a game-battle theme in the style of classic boss fights, the fastest of the five at 150 BPM. It swaps the music box for a low orchestra: a string ostinato on every 16th, pounding timpani, and a warm brass lead kept at C5 or below so it never sounds shrill. It holds on D minor, lifts through B-flat to C for a brass fanfare, and the timpani roll it back round. The melody is original.
+- Typing: a game-battle theme after classic JRPG, arcade, and Zelda boss themes, the fastest of the five at 150 BPM. It swaps the music box for a low orchestra: strings, timpani, and a warm brass lead kept at C5 or below so it never sounds shrill. A one-time intro hits the timpani and brass, then an 8-bar loop: an A section on D minor with a brass hook that returns a step higher, and a B section that climbs B-flat, C, D minor to a tense A major over rushing string arpeggios, under a syncopated bass riff that jumps octaves. The timpani roll it back round. The music is original.
 - The idle high-score list and the Leaderboard: a slow, sweet, nostalgic theme.
 - Results: a happy, relieved, congratulatory theme.
 

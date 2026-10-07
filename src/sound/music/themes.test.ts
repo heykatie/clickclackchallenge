@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barEvents, barSeconds, THEMES, themeForScreen, type ThemeName } from "./themes";
+import { barEvents, barSeconds, firstBar, THEMES, themeForScreen, type ThemeName } from "./themes";
 
 const names = Object.keys(THEMES) as ThemeName[];
 
@@ -65,10 +65,41 @@ describe("battle theme", () => {
     }
   });
 
-  it("holds on D minor, then lifts through B-flat to C, and rolls the timpani back into the loop", () => {
-    expect(THEMES.adventure.chords.map((chord) => chord.bass % 12)).toEqual([2, 2, 10, 0]);
+  it("loops 8 bars: an A section on D minor, then a B section that climbs to a tense A major, and rolls back", () => {
+    expect(THEMES.adventure.chords.map((chord) => chord.bass % 12)).toEqual([2, 2, 10, 0, 10, 0, 2, 9]);
+    // C#, A major's third: the leading tone that pulls back to D minor.
+    expect(bars[7]!.some((event) => event.note !== null && event.note % 12 === 1)).toBe(true);
     const timpani = (bar: number) => bars[bar]!.filter((event) => event.instrument === "timpani").length;
-    expect(timpani(3)).toBeGreaterThan(timpani(0));
+    expect(timpani(7)).toBeGreaterThan(timpani(0));
+  });
+
+  it("has a hook: the opening motif comes back in sequence two bars later, with the same rhythm", () => {
+    const rhythm = (bar: number) => THEMES.adventure.melody[bar]!.map(([start, , length]) => [start, length]);
+    expect(rhythm(2)).toEqual(rhythm(0));
+    expect(THEMES.adventure.melody[2]![2]![1]).toBeGreaterThan(THEMES.adventure.melody[0]![2]![1]);
+  });
+
+  it("rocks a syncopated bass riff that jumps octaves", () => {
+    const bass = bars[0]!.filter((event) => event.instrument === "bass");
+    const step = barSeconds("adventure") / 16;
+    expect(bass.some((event) => Math.round(event.at / step) % 2 === 1)).toBe(true);
+    expect(new Set(bass.map((event) => event.note)).size).toBeGreaterThan(1);
+    expect(Math.max(...bass.map((event) => event.note!)) - Math.min(...bass.map((event) => event.note!))).toBe(12);
+  });
+
+  it("rushes rising string arpeggios in the B section", () => {
+    const strings = bars[4]!.filter((event) => event.instrument === "strings").map((event) => event.note!);
+    const rises = strings.slice(1).filter((note, index) => note > strings[index]!).length;
+    expect(rises).toBeGreaterThanOrEqual(9);
+  });
+
+  it("opens with a one-time intro: a timpani roll and a brass hit, before bar 0", () => {
+    expect(firstBar("adventure")).toBe(-1);
+    expect(firstBar("cozy")).toBe(0);
+    const intro = barEvents("adventure", -1);
+    expect(intro.filter((event) => event.instrument === "timpani").length).toBeGreaterThanOrEqual(6);
+    expect(intro.some((event) => event.instrument === "brass")).toBe(true);
+    expect(barEvents("adventure", 8)).toEqual(barEvents("adventure", 0));
   });
 });
 

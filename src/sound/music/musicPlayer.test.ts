@@ -142,6 +142,8 @@ describe("createMusicPlayer", () => {
     const music = createMusicPlayer(() => context as unknown as AudioContext);
     music.setEnabled(true);
     music.setTheme("adventure");
+    // Past the one-bar intro, into the loop.
+    context.currentTime = 2;
     vi.advanceTimersByTime(200);
     const oscillators = context.createOscillator.mock.results.map((result) => result.value);
     expect(oscillators.filter((oscillator) => oscillator.type === "sawtooth").length).toBeGreaterThan(16);

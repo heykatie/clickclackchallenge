@@ -1,4 +1,4 @@
-import { barEvents, barSeconds, type MusicEvent, type ThemeName } from "./themes";
+import { barEvents, barSeconds, firstBar, type MusicEvent, type ThemeName } from "./themes";
 
 /** Quiet enough to sit under the key clicks and chimes. */
 const MASTER_VOLUME = 0.2;
@@ -76,7 +76,7 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(1, now + FADE_SECONDS);
       gain.connect(master);
-      bus = { gain, theme, bar: 0, nextBarAt: now + 0.05 };
+      bus = { gain, theme, bar: firstBar(theme), nextBarAt: now + 0.05 };
     }
     if (timer === null) {
       timer = setInterval(schedule, TICK_MS);
