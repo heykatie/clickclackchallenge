@@ -441,7 +441,7 @@ describe("persistence", () => {
     expect(await hasClearedScores()).toBe(false);
   });
 
-  it("restores one clear at a time, the most recent first", async () => {
+  it("restores only the most recent clear, never stepping back to older ones", async () => {
     const first = await startFreshEvent(30);
     const firstScore = await saveScore(scoreInput(first.id, 70));
     const second = await clearCurrentEvent(30, "famous-lines");
@@ -450,11 +450,20 @@ describe("persistence", () => {
     const secondScore = await saveScore(scoreInput(second.id, 60));
     await clearCurrentEvent(30, "famous-lines");
 
-    await restoreClearedScores();
+    expect(await restoreClearedScores()).toBe(true);
     expect(await listAllScores()).toEqual([secondScore]);
-    await restoreClearedScores();
-    expect((await listAllScores()).map((score) => score.id).sort()).toEqual([firstScore.id, secondScore.id].sort());
+    // The older clear stays cleared: nothing more to restore, and still nothing after the app reopens.
+    expect(await hasClearedScores()).toBe(false);
     expect(await restoreClearedScores()).toBe(false);
+    await closeDatabase();
+    expect((await loadBooth()).hasClearedScores).toBe(false);
+    expect(await listAllScores()).toEqual([secondScore]);
+    expect((await listEverything()).scores.map((score) => score.id)).toContain(firstScore.id);
+
+    // A new clear can be restored again.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await clearCurrentEvent(30, "words");
+    expect(await hasClearedScores()).toBe(true);
   });
 
   it("reads an event saved before text modes as Famous Lines and keeps its WPM", async () => {

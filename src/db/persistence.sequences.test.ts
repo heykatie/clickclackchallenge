@@ -65,6 +65,7 @@ describe("storage, over 60 random runs of 40 operations", () => {
       const model: Model = { active: null, board: "event", events: new Map(), clears: [] };
       let activeEvent: EventRecord | null = null;
       let saved = 0;
+      let clearCount = 0;
       const log: string[] = [];
 
       for (let step = 0; step < 40; step += 1) {
@@ -89,8 +90,10 @@ describe("storage, over 60 random runs of 40 operations", () => {
           // Only the event that was current is hidden, and only when it has scores; earlier events keep theirs.
           const current = model.active === null ? null : model.events.get(model.active)!;
           if (current && current.scores.length > 0) {
-            const clearId = model.clears.length + 1;
-            model.clears.push(clearId);
+            clearCount += 1;
+            const clearId = clearCount;
+            // Only the newest clear can be restored, so it replaces any older one.
+            model.clears = [clearId];
             current.hiddenBy = clearId;
           }
           model.events.set(activeEvent.id, { scores: [], hiddenBy: null, board: "event" });
@@ -147,7 +150,7 @@ describe("storage, over 60 random runs of 40 operations", () => {
         const wantBoard = (model.board === "all-time" ? visible(model) : model.events.get(model.active!)!.scores).slice().sort();
         expect(board, where).toEqual(wantBoard);
         expect((await listAllScores()).map((score) => score.id).sort(), where).toEqual(visible(model).slice().sort());
-        expect(await hasClearedScores(), where).toBe([...model.events.values()].some((event) => event.hiddenBy !== null));
+        expect(await hasClearedScores(), where).toBe(model.clears.length > 0);
       }
     }
   }, 120_000);

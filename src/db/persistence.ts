@@ -69,6 +69,11 @@ export interface AppSettings {
   musicOn?: boolean;
   /** Warm until the operator picks cool in Event Setup. Missing on older records. */
   palette?: Palette;
+  /**
+   * The hiddenAt of the clear RESTORE last undid. Only a clear newer than this can be restored, so RESTORE undoes
+   * the most recent clear once and never steps back to older ones. Missing on older records.
+   */
+  restoredClearAt?: string | null;
 }
 
 export interface BoothState {
@@ -469,24 +474,31 @@ async function clearedEventsWithScores(database: IDBPDatabase<ClickClackChalleng
   return withScores;
 }
 
+/** The hiddenAt of the most recent clear that hid scores and has not been restored yet, if any. */
+async function restorableClear(database: IDBPDatabase<ClickClackChallengeDB>): Promise<string | null> {
+  const hidden = await clearedEventsWithScores(database, await database.getAll("events"));
+  const latest = hidden.reduce<string | null>(
+    (newest, event) => (newest === null || event.hiddenAt! > newest ? event.hiddenAt : newest),
+    null,
+  );
+  const restoredUpTo = (await database.get("settings", SETTINGS_KEY))?.restoredClearAt ?? null;
+  return latest !== null && (restoredUpTo === null || latest > restoredUpTo) ? latest : null;
+}
+
 export async function hasClearedScores(): Promise<boolean> {
-  const database = await openDatabase();
-  return (await clearedEventsWithScores(database, await database.getAll("events"))).length > 0;
+  return (await restorableClear(await openDatabase())) !== null;
 }
 
 /**
  * Undoes the most recent clear: shows again the events it hid, which share its hiddenAt time. If the current event
  * has no scores yet, the cleared board becomes the current event again; otherwise the current event stays active.
- * Returns false when nothing is hidden. Earlier clears are restored by later calls.
+ * Returns false when there is no unrestored clear. Only the most recent clear can be restored, and only once.
  */
 export async function restoreClearedScores(): Promise<boolean> {
   const database = await openDatabase();
-  // A clear that hid no scores (saved before empty boards were left visible) is skipped, not restored.
-  const restorable = await clearedEventsWithScores(database, await database.getAll("events"));
-  const latest = restorable.reduce<string | null>(
-    (newest, event) => (newest === null || event.hiddenAt! > newest ? event.hiddenAt : newest),
-    null,
-  );
+  // A clear that hid no scores (saved before empty boards were left visible) is skipped, and once the most recent
+  // clear has been restored, older ones are not offered.
+  const latest = await restorableClear(database);
   if (latest === null) {
     return false;
   }
@@ -509,11 +521,18 @@ export async function restoreClearedScores(): Promise<boolean> {
   }
   if (reopen && active) {
     await eventStore.put({ ...active, status: "archived", updatedAt: now });
-    const settingsStore = transaction.objectStore("settings");
-    const settings = await settingsStore.get(SETTINGS_KEY);
-    if (settings) {
-      await settingsStore.put({ ...settings, activeEventId: reopen.id, lastSelectedDuration: reopen.durationSeconds }, SETTINGS_KEY);
-    }
+  }
+  const settingsStore = transaction.objectStore("settings");
+  const settings = await settingsStore.get(SETTINGS_KEY);
+  if (settings) {
+    await settingsStore.put(
+      {
+        ...settings,
+        restoredClearAt: latest,
+        ...(reopen && active ? { activeEventId: reopen.id, lastSelectedDuration: reopen.durationSeconds } : {}),
+      },
+      SETTINGS_KEY,
+    );
   }
   await transaction.done;
   return true;
