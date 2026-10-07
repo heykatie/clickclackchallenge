@@ -48,8 +48,9 @@
   text-decoration: underline;
 }
 
+/* The word being typed: a lavender a step deeper than the light tint, so it reads at a glance from the keyboard. */
 .passage-char.current-word {
-  background: var(--tiny-lavender-light);
+  background: #cbbfe6;
 }
 
 .caret {

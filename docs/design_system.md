@@ -111,7 +111,8 @@ PALETTE: COOL in Event Setup switches every screen to a second palette after the
 | Page background | lavender #EEE9F8 | blush #FBEDEF |
 | Buttons | teal #8FD2CA | mint-strong #6CCFC7 |
 | Pills, soft teal, the ring doodle | teal #A6DBD5 | mint #9DDED8 |
-| Top-scorer rows, HIGH SCORES and TOP 5 labels, the current word while typing | soft pink #FCE6EE | lavender-light |
+| Top-scorer rows, HIGH SCORES and TOP 5 labels | soft pink #FCE6EE | lavender-light |
+| The current word while typing | pink #F7CDDD, deep enough to spot from the keyboard | lavender #CBBFE6 |
 | Ready and Results titles | deep lavender over a soft pink highlighter stripe (#FBD9E6) | deep lavender |
 | Event Setup tiles | pale pink #FDF3F7; a picked Leaderboard choice turns pink #FBE1EA with a pink border | blush wash; a picked Leaderboard choice turns lavender |
 | The idle list | names charcoal, WPM deep lavender | names deep lavender, WPM charcoal |
@@ -229,7 +230,7 @@ Use aligned rank, name, and WPM columns. Names are left-aligned; WPM values are 
 | State | Visual treatment |
 | --- | --- |
 | Completed text | Charcoal, in the bold passage weight, on each correct character already typed, including characters before an error in the same word |
-| Current word | Charcoal text on a light-lavender surface across the active word |
+| Current word | Charcoal text on a lavender surface (#CBBFE6; pink #F7CDDD in the cool palette) across the active word, deep enough to spot at a glance |
 | Caret | Strong mint at the exact current character position inside the active word |
 | Upcoming words | Charcoal, in the regular passage weight. Not muted gray. |
 | Incorrect characters | Error red plus underline or another non-color cue |

@@ -58,7 +58,7 @@ html[data-palette="cool"] .screensaver .score-wpm-value {
 
 /* Typing: the current word's highlight. */
 html[data-palette="cool"] .passage-char.current-word {
-  background: #fce6ee;
+  background: #f7cddd;
 }
 
 /* Name fields, on Results and Event Setup: an outline a touch deeper than the soft pink so it shows on white. */

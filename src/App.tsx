@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage } from "./db/persistentStorage";
 import { clearCurrentEvent, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, setPalette as savePalette, type Palette, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
@@ -51,7 +51,8 @@ function App() {
   // Event Setup previews the highlighted mode's music before the event starts.
   const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
-  const previousTest = useRef(state.currentTest);
+  // The latest state, for working out a key's sound the moment the key goes down.
+  const stateRef = useRef(state);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
   const startKeyGate = useRef(createStartKeyGate(window));
   const resultSaver = useRef(createResultSaver(saveScore, updateScoreName));
@@ -63,6 +64,9 @@ function App() {
   const statusRef = useRef(status);
   // Set each render after enterSetup below, so the Escape hold always opens Setup with the latest state.
   const enterSetupRef = useRef<() => Promise<void>>(async () => {});
+  useLayoutEffect(() => {
+    stateRef.current = state;
+  });
   useEffect(() => {
     screenRef.current = state.screen;
     statusRef.current = status;
@@ -169,14 +173,6 @@ function App() {
     };
   }, [state.screen, activeEventId]);
 
-  // A click for each right key and a blip for each wrong one, compared with the session before the key.
-  useEffect(() => {
-    const cue = keyCue(previousTest.current, state.currentTest);
-    previousTest.current = state.currentTest;
-    if (cue) {
-      boothSound.play(cue);
-    }
-  }, [state.currentTest]);
 
   // One chime or ding when Results knows where the attempt stands.
   useEffect(() => {
@@ -423,7 +419,10 @@ function App() {
 
   useEffect(() => {
     // Browsers only start audio after a tap or key, so an app reopened with music on starts on the first one.
-    const wake = () => boothMusic.wake();
+    const wake = () => {
+      boothMusic.wake();
+      boothSound.wake();
+    };
     const onVisibility = () => boothMusic.setHidden(document.hidden);
     window.addEventListener("pointerdown", wake);
     window.addEventListener("keydown", wake);
@@ -524,7 +523,16 @@ function App() {
           session={state.currentTest}
           ignoreHeldKey={(key) => startKeyGate.current.isBlocked(key)}
           onType={(key) => {
-            dispatch({ type: "TYPE_KEY", ...key });
+            const action = { type: "TYPE_KEY", ...key } as const;
+            // A click for a right key and a blip for a wrong one, played now rather than after the screen
+            // redraws, so the sound lands with the key. The reducer is pure, so working out the next state
+            // here gives the same answer the dispatch will.
+            const before = stateRef.current;
+            const cue = keyCue(before.currentTest, appReducer(before, action).currentTest);
+            if (cue) {
+              boothSound.play(cue);
+            }
+            dispatch(action);
           }}
           onExpire={() => dispatch({ type: "FINISH_TEST" })}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
