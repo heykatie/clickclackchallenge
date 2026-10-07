@@ -150,4 +150,19 @@ describe("createMusicPlayer", () => {
     // Every sawtooth goes through its own filter, so none of it reaches the speaker raw and buzzy.
     expect(context.createBiquadFilter.mock.calls.length).toBeGreaterThan(16);
   });
+
+  it("plays the arcade's square lead and the storybook's flute and harp, all filtered soft", () => {
+    for (const [theme, wave] of [
+      ["arcade-lounge", "square"],
+      ["story-fireside", "triangle"],
+    ] as const) {
+      const { context } = fakeContext();
+      const music = createMusicPlayer(() => context as unknown as AudioContext);
+      music.setEnabled(true);
+      music.setTheme(theme);
+      vi.advanceTimersByTime(200);
+      const waves = context.createOscillator.mock.results.map((result) => result.value.type);
+      expect(waves).toContain(wave);
+    }
+  });
 });

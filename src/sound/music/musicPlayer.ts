@@ -116,11 +116,22 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
       }
       case "brass":
         // Two slightly detuned saws through a filter that opens as the note swells: a warm, low horn.
-        warmSaw(output, destination, event.note!, at, event.seconds, event.volume, 0.05, [-6, 6], 700, 2000);
+        warmWave(output, destination, "sawtooth", event.note!, at, event.seconds, event.volume, 0.05, [-6, 6], 700, 2000);
         return;
       case "strings":
         // Short bowed notes: a single saw, filtered dark, quick to start and stop.
-        warmSaw(output, destination, event.note!, at, event.seconds, event.volume, 0.008, [0], 900, 1400);
+        warmWave(output, destination, "sawtooth", event.note!, at, event.seconds, event.volume, 0.008, [0], 900, 1400);
+        return;
+      case "square":
+        // The arcade lead: a square wave filtered well down, so it is mellow, not a buzzy beep.
+        warmWave(output, destination, "square", event.note!, at, event.seconds, event.volume, 0.01, [-4, 4], 900, 1800);
+        return;
+      case "flute":
+        flute(output, destination, event.note!, at, event.seconds, event.volume);
+        return;
+      case "pluck":
+        // A harp or lute: a soft triangle that sounds at once and dies away.
+        tone(output, destination, "triangle", event.note!, at, Math.max(event.seconds, 0.35), event.volume, 0.004, 0.15);
         return;
       case "timpani":
         timpani(output, destination, event.note!, at, event.volume);
@@ -161,9 +172,10 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
     oscillator.stop(at + seconds * 1.6 + 0.1);
   }
 
-  function warmSaw(
+  function warmWave(
     output: AudioContext,
     destination: AudioNode,
+    wave: OscillatorType,
     note: number,
     at: number,
     seconds: number,
@@ -185,11 +197,33 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
     filter.connect(gain).connect(destination);
     for (const cents of detuneCents) {
       const oscillator = output.createOscillator();
-      oscillator.type = "sawtooth";
+      oscillator.type = wave;
       oscillator.frequency.value = 440 * 2 ** ((note - 69) / 12 + cents / 1200);
       oscillator.connect(filter);
       oscillator.start(at);
       oscillator.stop(at + seconds + 0.3);
+    }
+  }
+
+  /** A soft flute: a sine that breathes in, with a gentle vibrato once the note has settled. */
+  function flute(output: AudioContext, destination: AudioNode, note: number, at: number, seconds: number, volume: number) {
+    const oscillator = output.createOscillator();
+    const vibrato = output.createOscillator();
+    const depth = output.createGain();
+    const gain = output.createGain();
+    const pitch = 440 * 2 ** ((note - 69) / 12);
+    oscillator.frequency.value = pitch;
+    vibrato.frequency.value = 5;
+    depth.gain.setValueAtTime(0, at);
+    depth.gain.linearRampToValueAtTime(pitch * 0.006, at + 0.25);
+    vibrato.connect(depth).connect(oscillator.frequency);
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), at + 0.06);
+    gain.gain.setTargetAtTime(0.0001, at + seconds * 0.85, 0.06);
+    oscillator.connect(gain).connect(destination);
+    for (const source of [oscillator, vibrato]) {
+      source.start(at);
+      source.stop(at + seconds + 0.4);
     }
   }
 

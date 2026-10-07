@@ -3,35 +3,68 @@ import { barEvents, barSeconds, firstBar, THEMES, themeForScreen, type ThemeName
 
 const names = Object.keys(THEMES) as ThemeName[];
 
+const MODES = ["words", "famous-lines", "story"] as const;
+const PAGES = ["setup", "ready", "typing", "results", "leaderboard", "rolling"] as const;
+const WORLD_LEADS = { words: "square", "famous-lines": "bell", story: "flute" } as const;
+
 describe("themeForScreen", () => {
-  it("plays cozy on Event Setup, invite on Ready, adventure while typing, nostalgic on the boards, and victory on Results", () => {
-    expect(themeForScreen("setup")).toBe("cozy");
-    expect(themeForScreen("ready")).toBe("invite");
-    expect(themeForScreen("typing")).toBe("adventure");
-    expect(themeForScreen("rolling")).toBe("nostalgic");
-    expect(themeForScreen("leaderboard")).toBe("nostalgic");
-    expect(themeForScreen("results")).toBe("victory");
+  it("keeps Famous Lines' fantasy themes: cozy, invite, adventure, victory, nostalgic, and starlight", () => {
+    expect(PAGES.map((page) => themeForScreen(page, "famous-lines"))).toEqual([
+      "cozy",
+      "invite",
+      "adventure",
+      "victory",
+      "nostalgic",
+      "starlight",
+    ]);
+  });
+
+  it("gives every mode its own tune on every page: 18 tunes, none shared", () => {
+    const all = MODES.flatMap((mode) => PAGES.map((page) => themeForScreen(page, mode)));
+    expect(new Set(all).size).toBe(18);
+    expect(names.sort()).toEqual([...all].sort());
   });
 });
 
-describe("themes", () => {
-  it("are the five planned moods, with the adventure fastest and the nostalgic slowest", () => {
-    expect(names.sort()).toEqual(["adventure", "cozy", "invite", "nostalgic", "victory"]);
-    const tempos = Object.fromEntries(names.map((name) => [name, THEMES[name].bpm]));
-    expect(Math.max(...Object.values(tempos))).toBe(tempos.adventure);
-    expect(Math.min(...Object.values(tempos))).toBe(tempos.nostalgic);
+describe("worlds", () => {
+  it("play the race fastest in every world, so typing always feels like the rush", () => {
+    for (const mode of MODES) {
+      const typing = THEMES[themeForScreen("typing", mode)].bpm;
+      for (const page of PAGES.filter((page) => page !== "typing")) {
+        expect(THEMES[themeForScreen(page, mode)].bpm).toBeLessThan(typing);
+      }
+    }
   });
 
-  it("share one band, so they sound like the same game: the battle adds an orchestra in place of the music box", () => {
+  it("share one band, keys, bass, and kick, while each world has its own lead", () => {
+    for (const mode of MODES) {
+      for (const page of PAGES) {
+        const name = themeForScreen(page, mode);
+        const instruments = new Set(
+          Array.from({ length: 8 }, (_, bar) => barEvents(name, bar).map((event) => event.instrument)).flat(),
+        );
+        expect(instruments.has("keys")).toBe(true);
+        expect(instruments.has("bass")).toBe(true);
+        expect(instruments.has("kick")).toBe(true);
+        // The fantasy battle swaps its music box for brass; every other tune plays its world's lead.
+        const lead = name === "adventure" ? "brass" : WORLD_LEADS[mode];
+        expect(instruments.has(lead)).toBe(true);
+      }
+    }
+  });
+
+  it("keep the new arcade and storybook leads low enough never to sound shrill: nothing above D5", () => {
     for (const name of names) {
-      const instruments = new Set(Array.from({ length: 8 }, (_, bar) => barEvents(name, bar).map((event) => event.instrument)).flat());
-      expect(instruments.has("keys")).toBe(true);
-      expect(instruments.has("bass")).toBe(true);
-      expect(instruments.has("kick")).toBe(true);
-      const lead = name === "adventure" ? ["brass", "strings", "timpani"] : ["bell"];
-      lead.forEach((instrument) => expect(instruments.has(instrument as never)).toBe(true));
-      const other = name === "adventure" ? ["bell"] : ["brass", "strings", "timpani"];
-      other.forEach((instrument) => expect(instruments.has(instrument as never)).toBe(false));
+      const lead = Array.from({ length: 8 }, (_, bar) => barEvents(name, bar))
+        .flat()
+        .filter((event) => ["square", "flute", "pluck"].includes(event.instrument));
+      lead.forEach((event) => expect(event.note).toBeLessThanOrEqual(74));
+    }
+  });
+
+  it("open each world's race with a one-time intro", () => {
+    for (const mode of MODES) {
+      expect(firstBar(themeForScreen("typing", mode))).toBe(-1);
     }
   });
 });

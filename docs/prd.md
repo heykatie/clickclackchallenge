@@ -317,13 +317,18 @@ Above the links, an “Event name (optional)” field holds the active event's n
 
 The last link, SOUND: OFF or SOUND: ON, turns booth sound on or off. It is off by default, because a booth is noisy and staff should choose it. It is a device setting: it shows before any event exists, and Start fresh and Clear all scores keep it. When on, a correct key makes a soft click, a wrong key a low blip, a new high score a short rising chime, and any other Plinko win a single ding. Backspace and ignored keys are silent. Turning it on plays the ding once as a sample. The sounds are generated, not audio files, so they work offline. If the device has no audio, the booth stays quiet and keeps working.
 
-After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from sound, so staff can have one without the other. It is also off by default, a device setting shown before any event exists, and kept through Start fresh and Clear all scores. The music is five lo-fi themes with fantasy touches, played by one shared band (soft electric piano, round bass, a music-box lead (brass and strings in the battle), dusty drums, and one faint vinyl hiss, the same quiet level on every screen) so they sound like the same game:
+After it, MUSIC: OFF or MUSIC: ON turns background music on or off, apart from sound, so staff can have one without the other. It is also off by default, a device setting shown before any event exists, and kept through Start fresh and Clear all scores. Each game mode has its own musical world, like the zones of a classic game, with its own tune for every page: 18 original tunes in all. Every tune is played by one shared band (soft electric piano, round bass, dusty drums, and one faint vinyl hiss, the same quiet level on every screen) so they all sound like the same game; each world adds its own lead. Every lead stays low enough never to sound shrill, and the tunes are balanced to the same loudness, the races a touch louder.
 
-- Event Setup: a cute, mellow theme.
-- Ready: an inviting “adventure awaits” theme, a heroic horn call that ends each loop unresolved, livelier than Setup but calmer than Typing.
-- Typing: a game-battle theme after classic JRPG, arcade, and Zelda boss themes, the fastest of the five at 150 BPM. It swaps the music box for a low orchestra: strings, timpani, and a warm brass lead kept at C5 or below so it never sounds shrill. A one-time intro hits the timpani and brass, then an 8-bar loop: an A section on D minor with a brass hook that returns a step higher, and a B section that climbs B-flat, C, D minor to a tense A major over rushing string arpeggios, under a syncopated bass riff that jumps octaves. The timpani roll it back round. The music is original.
-- The idle high-score list and the Leaderboard: a slow, sweet, nostalgic theme.
-- Results: a happy, relieved, congratulatory theme.
+| Page | Standard: an arcade cabinet (a mellow square-wave lead) | Famous Lines: a fantasy RPG (a music box) | Story: a storybook (a soft flute over a plucked harp) |
+| --- | --- | --- | --- |
+| Event Setup | Arcade lounge: C major, bouncy | Cozy: F major, mellow | Fireside tale: D major, lilting |
+| Ready | Attract mode: F major fanfare, four on the floor | “Adventure awaits”: a heroic horn call left unresolved | “Once upon a time”: G Mixolydian, a wandering hero |
+| Typing | High-score chase: A minor at 160 BPM, octave-bouncing bass, plucked arpeggios, a snare-roll intro | Battle: D minor at 150 BPM, brass, strings, and timpani, a timpani intro | Chase through the woods: E Dorian at 144 BPM, flute and driving harp, a timpani intro |
+| Results | Level clear: C major, bright | Victory: D major fanfare | “Happily ever after”: F major with a sweet minor-four |
+| Leaderboard | High-score table: G major, sweet | Nostalgic: C major, slow | Memories: A minor, slow |
+| Idle high-score list | Demo loop: E-flat major, glowing | Starlight: A-flat music box | Lullaby: E major, the slowest |
+
+In every world the race is the fastest tune. Each race opens with a one-time intro, then loops 8 bars: a hook that returns higher, and a second section that climbs to a tense major chord before rolling back round, after classic JRPG, arcade, and Zelda battle themes. Event Setup plays the world of the highlighted mode, so staff can hear each one before starting; every other page plays the event's mode.
 
 Themes crossfade as the screen changes and loop until it changes again. The music sits under the key clicks and chimes, pauses while the app is hidden, and is generated rather than played from audio files, so it works offline. Browsers start audio only after a tap or key, so an app reopened with music on starts on the first one.
 
