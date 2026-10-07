@@ -50,6 +50,26 @@ describe("adventure theme", () => {
   });
 });
 
+describe("dramatic typing theme", () => {
+  it("doubles the melody an octave down and puts a low root under every chord", () => {
+    for (let bar = 0; bar < THEMES.adventure.chords.length; bar += 1) {
+      const lead = barEvents("adventure", bar).filter((event) => event.instrument === "bell");
+      const written = THEMES.adventure.melody[bar]!.filter(([, note]) => note >= 70);
+      expect(written.length).toBeGreaterThan(0);
+      for (const [, note] of written) {
+        expect(lead.some((low) => low.note === note - 12)).toBe(true);
+      }
+      expect(barEvents("adventure", bar).some((event) => event.instrument === "keys" && event.note! < 48)).toBe(true);
+    }
+  });
+
+  it("rolls kicks under the snare into each new loop", () => {
+    const last = barEvents("adventure", THEMES.adventure.chords.length - 1);
+    const kickSteps = last.filter((event) => event.instrument === "kick").length;
+    expect(kickSteps).toBeGreaterThan(barEvents("adventure", 0).filter((event) => event.instrument === "kick").length);
+  });
+});
+
 describe("barEvents", () => {
   it("keeps every note inside its bar, in time order, and loops after its chord cycle", () => {
     for (const name of names) {

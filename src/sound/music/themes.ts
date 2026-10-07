@@ -21,8 +21,10 @@ interface Theme {
   bass: Steps;
   /** One melody per bar, on the music-box lead. */
   melody: readonly Melody[];
-  /** Extra snare hits in the last bar of the loop: a roll into the next time round. */
+  /** Extra snare hits in the last bar of the loop, with kicks under them: a roll into the next time round. */
   fill?: readonly number[];
+  /** Doubles the lead an octave down, for a heavier, heroic unison. */
+  unison?: boolean;
   drums: { kick: readonly number[]; snare: readonly number[]; hat: readonly number[] };
   mix: Record<Instrument, number>;
 }
@@ -133,16 +135,16 @@ export const THEMES: Record<ThemeName, Theme> = {
     mix: { keys: 0.4, bass: 0.6, bell: 0.42, kick: 0.72, snare: 0.32, hat: 0.13 },
   },
 
-  // Typing: a boss fight. E minor at a racing tempo, a galloping bass, punchy off-beat stabs, and a heroic,
+  // Typing: a dramatic boss fight. E minor at a racing tempo, a galloping bass, punchy off-beat stabs, and a heroic,
   // urgent melody. Each loop ends on B major, whose D# pulls hard back to E minor, with a snare roll into it.
   adventure: {
     bpm: 132,
     swing: 0,
     chords: [
-      { keys: [52, 55, 59, 64], bass: 40 }, // Em
-      { keys: [52, 55, 60, 64], bass: 36 }, // C
-      { keys: [54, 57, 62, 66], bass: 38 }, // D
-      { keys: [51, 54, 59, 63], bass: 35 }, // B
+      { keys: [40, 47, 52, 55, 59, 64], bass: 40 }, // Em, with a low root and fifth
+      { keys: [36, 43, 52, 55, 60, 64], bass: 36 }, // C
+      { keys: [38, 45, 54, 57, 62, 66], bass: 38 }, // D
+      { keys: [35, 42, 51, 54, 59, 63], bass: 35 }, // B
     ],
     keys: [
       [0, 1],
@@ -189,6 +191,7 @@ export const THEMES: Record<ThemeName, Theme> = {
     ],
     drums: { kick: [0, 3, 6, 8, 10, 11, 14], snare: [4, 12], hat: SIXTEENTHS },
     fill: [13, 14, 15],
+    unison: true,
     mix: { keys: 0.36, bass: 0.55, bell: 0.4, kick: 0.75, snare: 0.34, hat: 0.09 },
   },
 
@@ -333,11 +336,17 @@ export function barEvents(name: ThemeName, bar: number): MusicEvent[] {
   }
   for (const [start, note, length] of theme.melody[index]!) {
     add("bell", start, length, note);
+    if (theme.unison && note >= 70) {
+      add("bell", start, length, note - 12, 0.7);
+    }
   }
   for (const start of theme.drums.kick) add("kick", start, 2, null);
   for (const start of theme.drums.snare) add("snare", start, 2, null);
   if (index === theme.chords.length - 1) {
-    theme.fill?.forEach((start, hit) => add("snare", start, 1, null, 0.5 + hit * 0.12));
+    theme.fill?.forEach((start, hit) => {
+      add("snare", start, 1, null, 0.5 + hit * 0.12);
+      add("kick", start, 1, null, 0.6 + hit * 0.1);
+    });
   }
   for (const start of theme.drums.hat) add("hat", start, 1, null, start % 4 === 0 ? 1 : 0.7);
 
