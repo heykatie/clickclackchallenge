@@ -117,7 +117,7 @@ PALETTE: COOL in Event Setup switches every screen to a second palette after the
 | The idle list | names charcoal, WPM deep lavender | names deep lavender, WPM charcoal |
 | Results name field outline | pink #F0C4D5 | lavender |
 | "You made the Top 5!" pill | soft pink #FBD9E6 | lavender-light |
-| Pink corner blob | soft pink #F9D6E3 | pink #F4C1D4 |
+| Pink corner blob | soft pink #F9D6E3 | light pink #F6CBDB |
 
 Pink is never text: pastel pink is too faint to read, and a pink dark enough to read turns muddy. Text stays deep lavender or charcoal, at 4.5:1 or better on every cool surface.
 

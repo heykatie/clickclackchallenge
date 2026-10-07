@@ -224,7 +224,8 @@ button.is-cursor {
   width: 18rem;
   height: 16rem;
   border-radius: 58% 42% 50% 50% / 52% 48% 52% 48%;
-  background: var(--tiny-pink);
+  /* A little lighter than the pink token (#F4C1D4); the cool palette goes lighter still. */
+  background: #f6cbdb;
   opacity: 0.7;
 }
 
