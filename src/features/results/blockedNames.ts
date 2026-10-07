@@ -127,7 +127,27 @@ const SAFE_PARTS = [
   "shitaki",
 ];
 
+/**
+ * Rude drawings made of symbols, which have no letters for the word checks to catch. They are matched on the
+ * name as typed, before punctuation is removed.
+ */
+const DRAWINGS = [
+  // Boobs: (.)(.), (o)(o), ( * )( * )
+  /\(\s*[.o0*•°]\s*\)\s*\(\s*[.o0*•°]\s*\)/i,
+  // Boobs: (.Y.), (oYo)
+  /\(\s*[.o0*]\s*y\s*[.o0*]\s*\)/i,
+  // 8=D, 8===>, and B==D; with a B it takes two or more, so "B=D" stays ordinary typing.
+  /8\s*=+\s*[d>]/i,
+  /b\s*={2,}\s*[d>]/i,
+  /c\s*={2,}\s*3/i,
+  // The middle finger.
+  /╭∩╮|凸/,
+];
+
 export function isBlockedName(input: string): boolean {
+  if (DRAWINGS.some((drawing) => drawing.test(input))) {
+    return true;
+  }
   const folded = compactName(input);
   if (folded.length === 0 || SAFE.has(folded)) {
     return false;

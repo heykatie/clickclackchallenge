@@ -910,6 +910,7 @@ Name input should:
 
 - allow ordinary names
 - reject profanity and slurs, including when spaces, punctuation, or numbers stand in for letters
+- reject rude drawings made of symbols, such as (.)(.), (o)(o), (.Y.), 8==D, and the middle-finger symbol, while ordinary punctuation such as “Jo (OG)” or “Ana :)” stays allowed
 - never turn away a real name that merely contains a blocked word, such as Michelle, Mitchell, Annalise, Douglass, or Bass: short words like “hell”, “anal”, and “ass” block only as the whole name, while their real compounds (jackass, asshole) stay blocked. “Dick” stays blocked: it is a real nickname, but also slang
 - trim leading/trailing whitespace
 - reject empty values
