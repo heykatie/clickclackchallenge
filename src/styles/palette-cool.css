@@ -48,12 +48,8 @@ html[data-palette="cool"] label.setup-option {
  * Text stays deep lavender for reading, and pink sits behind it: 4.5:1 or better on every pink here.
  */
 
-/* Event Setup: Start fresh is the pink choice. */
-html[data-palette="cool"] label.setup-option:has(input[value="fresh"]) {
-  background: #fdecf2;
-}
-
-html[data-palette="cool"] label.setup-option.is-selected:has(input[value="fresh"]) {
+/* Event Setup: every tile looks the same until it is picked; a picked Leaderboard choice turns pink, not lavender. */
+html[data-palette="cool"] .setup-option.is-selected.setup-option-lavender {
   border-color: #efbfd1;
   background: #fbe1ea;
 }
