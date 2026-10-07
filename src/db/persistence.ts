@@ -475,8 +475,9 @@ export async function hasClearedScores(): Promise<boolean> {
 }
 
 /**
- * Undoes the most recent clear: shows again the events it hid, which share its hiddenAt time. The current
- * event stays active. Returns false when nothing is hidden. Earlier clears are restored by later calls.
+ * Undoes the most recent clear: shows again the events it hid, which share its hiddenAt time. If the current event
+ * has no scores yet, the cleared board becomes the current event again; otherwise the current event stays active.
+ * Returns false when nothing is hidden. Earlier clears are restored by later calls.
  */
 export async function restoreClearedScores(): Promise<boolean> {
   const database = await openDatabase();
@@ -489,12 +490,29 @@ export async function restoreClearedScores(): Promise<boolean> {
   if (latest === null) {
     return false;
   }
-  const transaction = database.transaction("events", "readwrite");
-  const events = await transaction.store.getAll();
+  const transaction = database.transaction(["events", "settings", "scores"], "readwrite");
+  const eventStore = transaction.objectStore("events");
+  const events = await eventStore.getAll();
   const now = new Date().toISOString();
-  for (const event of events) {
-    if (event.hiddenAt === latest) {
-      await transaction.store.put({ ...event, hiddenAt: null, updatedAt: now });
+  const restored = events.filter((event) => event.hiddenAt === latest);
+  const active = events.find((event) => event.status === "active");
+  const activeIsEmpty =
+    active !== undefined && (await transaction.objectStore("scores").index("eventId").count(active.id)) === 0;
+  // Undo the clear fully when nothing has been played since: the cleared board becomes the current event again.
+  // Once the new board has scores, it stays current and the restored scores return to the all-time board.
+  const reopen = activeIsEmpty
+    ? restored.reduce((newest, event) => (event.createdAt > newest.createdAt ? event : newest))
+    : null;
+  for (const event of restored) {
+    const status = event === reopen ? "active" : event.status;
+    await eventStore.put({ ...event, hiddenAt: null, status, updatedAt: now });
+  }
+  if (reopen && active) {
+    await eventStore.put({ ...active, status: "archived", updatedAt: now });
+    const settingsStore = transaction.objectStore("settings");
+    const settings = await settingsStore.get(SETTINGS_KEY);
+    if (settings) {
+      await settingsStore.put({ ...settings, activeEventId: reopen.id, lastSelectedDuration: reopen.durationSeconds }, SETTINGS_KEY);
     }
   }
   await transaction.done;

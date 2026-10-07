@@ -319,6 +319,11 @@ function App() {
     try {
       await restoreClearedScores();
       setCanRestore(await hasClearedScores());
+      // Restoring onto an empty board puts the cleared board back as the current event.
+      const { activeEvent } = await loadBooth();
+      if (activeEvent && activeEvent.id !== state.activeEvent?.id) {
+        dispatch({ type: "SET_ACTIVE_EVENT", event: activeEvent });
+      }
     } catch {
       setStatus("failed");
     } finally {
@@ -456,6 +461,8 @@ function App() {
       return landscapeOnly(
         "setup",
         <EventSetupScreen
+          // A different current event (after Clear board or Restore) reloads Setup's choices from that event.
+          key={state.activeEvent?.id ?? "no-event"}
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
           storedEventName={state.activeEvent?.name ?? null}

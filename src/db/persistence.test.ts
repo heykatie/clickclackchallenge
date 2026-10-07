@@ -404,13 +404,31 @@ describe("persistence", () => {
     expect(await restoreClearedScores()).toBe(true);
     expect(await listAllScores()).toEqual([earned]);
     expect(await hasClearedScores()).toBe(false);
+    // Nothing was played on the empty board, so the played board is current again.
+    expect((await loadBooth()).activeEvent?.id).toBe(played.id);
 
+    await startFreshEvent(30, "words");
     await clearCurrentEvent(30, "words");
     expect(await hasClearedScores()).toBe(false);
     expect((await loadBooth()).hasClearedScores).toBe(false);
   });
 
-  it("restores the scores hidden by the last clear and keeps the current event", async () => {
+  it("puts the cleared board back as the current event when restoring while the new board is still empty", async () => {
+    const real = await startFreshEvent(30, "words", { name: "Fanime Sat" });
+    const earned = await saveScore(scoreInput(real.id, 70));
+    const empty = await clearCurrentEvent(60, "story");
+
+    expect(await restoreClearedScores()).toBe(true);
+    const booth = await loadBooth();
+    expect(booth.activeEvent?.id).toBe(real.id);
+    expect(booth.activeEvent).toMatchObject({ status: "active", name: "Fanime Sat", durationSeconds: 30, testMode: "words" });
+    expect(await listScores(real.id)).toEqual([earned]);
+    const database = await openDatabase();
+    expect((await database.get("events", empty.id))?.status).toBe("archived");
+    expect(await hasClearedScores()).toBe(false);
+  });
+
+  it("restores the scores hidden by the last clear and keeps the current event once it has scores of its own", async () => {
     const old = await startFreshEvent(30);
     const oldScore = await saveScore(scoreInput(old.id, 70));
     const cleared = await clearCurrentEvent(30, "famous-lines");

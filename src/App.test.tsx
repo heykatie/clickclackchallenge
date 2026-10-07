@@ -128,7 +128,7 @@ describe("App", () => {
     expect(play).toHaveBeenCalledTimes(2);
   });
 
-  it("stays on Event Setup after CLEAR BOARD, offers RESTORE, and greys out CLEAR BOARD on the new empty board", async () => {
+  it("stays on Event Setup after CLEAR BOARD, greys it out on the new empty board, and RESTORE brings the played board back", async () => {
     render(<App />);
     await playStoryRound();
     await screen.findByRole("button", { name: /VIEW LEADERBOARD/ });
@@ -141,6 +141,8 @@ describe("App", () => {
     // CLEAR BOARD turns on once the board's scores are counted.
     await waitFor(() => expect((screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement).disabled).toBe(false));
 
+    // The empty board the clear starts uses whatever is picked now: Standard instead of the played board's Story.
+    fireEvent.click(screen.getByLabelText("Standard"));
     fireEvent.click(screen.getByRole("button", { name: "CLEAR BOARD" }));
     fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "CLEAR BOARD" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
@@ -154,6 +156,11 @@ describe("App", () => {
     fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "RESTORE" }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull());
     expect(screen.getByText("Set up today's typing test")).toBeTruthy();
+    // Nothing was played on the empty board, so RESTORE put the played board back as the current event.
+    await waitFor(() => expect((screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement).disabled).toBe(false));
+    expect((await loadBooth()).activeEvent?.testMode).toBe("story");
+    // Setup shows the restored board's own choices, so continuing it does not quietly change its mode.
+    await waitFor(() => expect((screen.getByLabelText("Story") as HTMLInputElement).checked).toBe(true));
   }, 20_000);
 
   it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
