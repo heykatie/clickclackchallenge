@@ -191,19 +191,6 @@ button.logo-badge:active {
   box-shadow: none;
 }
 
-/* Ready's logo on an empty board: a small wiggle, so a tap still feels answered. */
-.logo-badge.is-wiggling {
-  animation: logo-wiggle 420ms ease-in-out;
-}
-
-@keyframes logo-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-10deg) scale(1.05); }
-  45% { transform: rotate(8deg) scale(1.05); }
-  70% { transform: rotate(-5deg); }
-  85% { transform: rotate(2deg); }
-}
-
 button:focus-visible,
 input:focus-visible {
   outline: 3px solid var(--tiny-charcoal);

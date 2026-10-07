@@ -4,6 +4,7 @@ import { allTimeBestLine, highScore as bestOf, rollingListScores, type RankedSco
 import type { HighScoreSummary } from "../state/appState";
 import { readyKeyDown, readyLogoTap, readyPointerUp } from "./readyKeys";
 import { Screensaver } from "./Screensaver";
+import { KeycapHop } from "./KeycapHop";
 import { useLogoHold } from "./useLogoHold";
 import { Crown } from "./ScoreRow";
 
@@ -21,9 +22,6 @@ type ReadyScreenProps = {
   onRollingChange?: (rolling: boolean) => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
-
-/** Matches the logo-wiggle animation in base.css. */
-const LOGO_WIGGLE_MS = 420;
 
 export function ReadyScreen({
   eventId,
@@ -47,28 +45,25 @@ export function ReadyScreen({
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
-  // With no score to roll, a tap only wiggles the logo, so it still answers.
-  const [wiggling, setWiggling] = useState(false);
+  // With no score to roll, the logo (or a short Escape) opens Keycap Hop, the booth's secret runner, instead.
+  const [hopping, setHopping] = useState(false);
+  const hoppingRef = useRef(false);
+  function setHop(open: boolean) {
+    hoppingRef.current = open;
+    setHopping(open);
+  }
   const logoHold = useLogoHold(onSetup, () => {
     if (readyLogoTap(rolling.length) === "roll") {
       asleepRef.current = true;
       setAsleep(true);
     } else {
-      setWiggling(true);
+      setHop(true);
     }
   });
 
   useEffect(() => {
     onStartRef.current = onStart;
   });
-
-  useEffect(() => {
-    if (!wiggling) {
-      return;
-    }
-    const id = window.setTimeout(() => setWiggling(false), LOGO_WIGGLE_MS);
-    return () => window.clearTimeout(id);
-  }, [wiggling]);
 
   useEffect(() => {
     let cancelled = false;
@@ -113,9 +108,13 @@ export function ReadyScreen({
     return () => window.clearTimeout(id);
   }, [asleep, activity, rolling.length]);
 
-  // A short Escape does what a logo tap does: open the rolling list, or close it when it is up.
+  // A short Escape does what a logo tap does: open the rolling list or Keycap Hop, or close whichever is up.
   useEffect(() => {
     claimShortEscape(() => {
+      if (hoppingRef.current) {
+        setHop(false);
+        return;
+      }
       if (asleepRef.current) {
         asleepRef.current = false;
         setAsleep(false);
@@ -124,6 +123,8 @@ export function ReadyScreen({
       if (readyLogoTap(rolling.length) === "roll") {
         asleepRef.current = true;
         setAsleep(true);
+      } else {
+        setHop(true);
       }
     });
     return () => claimShortEscape(null);
@@ -132,6 +133,10 @@ export function ReadyScreen({
   useEffect(() => {
     screenRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
+      // Keycap Hop takes the keys while it is open, so a hop never starts a typing round.
+      if (hoppingRef.current) {
+        return;
+      }
       const rolling =
         asleepRef.current ||
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
@@ -165,6 +170,10 @@ export function ReadyScreen({
     }
   }
 
+  if (hopping) {
+    return <KeycapHop onClose={() => setHop(false)} onSetup={onSetup} />;
+  }
+
   if (asleep) {
     return (
       <Screensaver
@@ -188,7 +197,7 @@ export function ReadyScreen({
       >
         <button
           type="button"
-          className={wiggling ? "logo-badge is-wiggling" : "logo-badge"}
+          className="logo-badge"
           aria-label="Show high scores"
           {...logoHold}
         />
