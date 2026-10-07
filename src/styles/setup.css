@@ -198,6 +198,16 @@ fieldset.setup-group {
   .setup-options-three {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  /* A phone is too narrow for one footer row: the event details stack above START EVENT, which takes the full width. */
+  .setup-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .setup-footer .setup-start-group {
+    margin-left: 0;
+  }
 }
 
 /* A soft fill shows each tile; only the selected one gets a ring. The border stays transparent so nothing shifts. */
