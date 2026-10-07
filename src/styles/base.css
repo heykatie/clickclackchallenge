@@ -165,13 +165,24 @@ button {
   box-shadow: 0 0.3rem 0 var(--tiny-mint-deep);
   transition:
     transform 80ms ease-out,
-    box-shadow 80ms ease-out;
+    box-shadow 80ms ease-out,
+    filter 120ms ease-out;
+}
+
+/*
+ * Hover: a slight shade shift, like the 8% state layer most design systems use. Only for a mouse or trackpad, so an
+ * iPad never keeps a "stuck" hover tint after a tap. Pressing goes a step further, so the two stay distinct.
+ */
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
 }
 
 button:active:not(:disabled) {
   transform: translateY(0.3rem);
   box-shadow: 0 0 0 var(--tiny-mint-deep);
-  filter: brightness(0.96);
+  filter: brightness(0.93);
 }
 
 /* The logo badge has no edge to sink onto, so it gives a small squeeze instead. */

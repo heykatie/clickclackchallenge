@@ -11,6 +11,7 @@ function renderSetup(
   canRestore = false,
   soundOn = false,
   plinkoWins: number | null = null,
+  canClear = true,
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
@@ -37,6 +38,7 @@ function renderSetup(
       onDownloadScores={onDownloadScores}
       soundOn={soundOn}
       plinkoWins={plinkoWins}
+      canClear={canClear}
       onToggleSound={onToggleSound}
       musicOn={false}
       onToggleMusic={onToggleMusic}
@@ -460,5 +462,25 @@ describe("EventSetupScreen", () => {
     ask("RESTORE CLEARED SCORES", "Restore cleared scores?");
     fireEvent.click(screen.getByLabelText(/Start fresh/));
     ask("START EVENT", "Start a fresh leaderboard?");
+  });
+
+  it("greys out CLEAR BOARD with a No scores to clear yet tooltip when the board is empty", () => {
+    cleanup();
+    const { onClearScores } = renderSetup(existing, false, false, false, null, false);
+    const clear = screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement;
+    expect(clear.disabled).toBe(true);
+    expect(clear.getAttribute("data-tooltip")).toBe("No scores to clear yet");
+    fireEvent.click(clear);
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(onClearScores).not.toHaveBeenCalled();
+  });
+
+  it("starts fresh at once, without asking, when the current board has no scores", () => {
+    cleanup();
+    const { onStartFresh } = renderSetup(existing, false, false, false, null, false);
+    fireEvent.click(screen.getByLabelText("Start fresh"));
+    fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
   });
 });

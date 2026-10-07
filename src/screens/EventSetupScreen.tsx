@@ -33,6 +33,8 @@ type EventSetupScreenProps = {
   onClearScores: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   /** An earlier clear can be undone. */
   canRestore: boolean;
+  /** The current board has scores: CLEAR BOARD has something to clear, and Start fresh asks before setting them aside. */
+  canClear: boolean;
   /** Shows the scores hidden by the most recent clear again. */
   onRestoreScores: () => void;
   /** Saves every score on the device as a CSV file, for a backup or to look up winners later. */
@@ -64,6 +66,7 @@ export function EventSetupScreen({
   onContinue,
   onClearScores,
   canRestore,
+  canClear,
   onRestoreScores,
   onDownloadScores,
   soundOn,
@@ -109,6 +112,7 @@ export function EventSetupScreen({
   /** Which confirmation is up: Start fresh, Clear board, or Restore cleared scores. */
   const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
   const canRestoreRef = useRef(canRestore);
+  const canClearRef = useRef(canClear);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -144,7 +148,7 @@ export function EventSetupScreen({
       onContinue(plan.durationSeconds, plan.testMode, plan.boardScope, cleanEventName(eventName));
       return;
     }
-    if (!confirmed && needsFreshConfirm(plan, storedDuration !== null)) {
+    if (!confirmed && needsFreshConfirm(plan, storedDuration !== null && canClear)) {
       setConfirmKind("fresh");
       setConfirmCursor("cancel");
       return;
@@ -189,6 +193,7 @@ export function EventSetupScreen({
     askToClearRef.current = askToClear;
     askToRestoreRef.current = askToRestore;
     canRestoreRef.current = canRestore;
+    canClearRef.current = canClear;
     rememberRef.current = remember;
     savingRef.current = saving;
     updateReadyRef.current = updateReady;
@@ -248,6 +253,7 @@ export function EventSetupScreen({
         canContinue: storedDuration !== null,
         updateReady: updateReadyRef.current,
         canRestore: canRestoreRef.current,
+        canClear: canClearRef.current,
       });
       if (result === null) {
         return;
@@ -470,8 +476,8 @@ export function EventSetupScreen({
                     type="button"
                     className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
                     onClick={askToClear}
-                    disabled={saving}
-                    data-tooltip="Clear current event"
+                    disabled={saving || !canClear}
+                    data-tooltip={canClear ? "Clear current event" : "No scores to clear yet"}
                   >
                     CLEAR BOARD
                   </button>
@@ -546,7 +552,7 @@ export function EventSetupScreen({
           ) : (
             <>
               <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
-              <p>The current scores stay saved, but they will not show on the leaderboard again.</p>
+              <p>The recent scores stay saved, but they will not show on current leaderboard again.</p>
             </>
           )}
           <div className="setup-confirm-actions">

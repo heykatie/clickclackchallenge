@@ -36,6 +36,14 @@ html[data-palette="cool"] .setup-option.is-selected.setup-option-lavender {
   background: #fbe1ea;
 }
 
+/* Hovering an unpicked Leaderboard tile previews the cool palette's pink selection. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-palette="cool"] label.setup-option.setup-option-lavender:not(.is-disabled):not(.is-selected):hover {
+    border-color: color-mix(in srgb, #efbfd1 70%, transparent);
+    background: color-mix(in srgb, #fbe1ea 60%, var(--tiny-white));
+  }
+}
+
 /*
  * Ready and Results titles: deep lavender, like the logo's outline, over a soft pink highlighter stripe,
  * so the pink shows without pink letters that are either too faint to read or too muddy.

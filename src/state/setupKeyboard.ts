@@ -32,6 +32,7 @@ export function setupChoices(
   canContinue: boolean,
   updateReady = false,
   canRestore = false,
+  canClear = true,
 ): SetupChoice[] {
   const choices: SetupChoice[] = updateReady ? ["update"] : [];
   if (testMode !== "story") {
@@ -40,7 +41,11 @@ export function setupChoices(
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
     // The score actions sit in the Leaderboard group, under its choices.
-    choices.push("continue", "all-time", "download", "clear");
+    choices.push("continue", "all-time", "download");
+    // CLEAR BOARD is greyed out on a board with no scores, so the cursor skips it.
+    if (canClear) {
+      choices.push("clear");
+    }
   }
   if (canRestore) {
     choices.push("restore");
@@ -78,9 +83,9 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
-  options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean },
+  options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean; canClear?: boolean },
 ): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "sound" | "music" | "palette" | "name" | null {
-  const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore);
+  const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore, options.canClear);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
   if (key === "ArrowDown" || key === "ArrowRight" || (key === "Tab" && !options.shiftKey)) {

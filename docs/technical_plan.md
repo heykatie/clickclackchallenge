@@ -384,7 +384,7 @@ type TestMode = "words" | "famous-lines" | "story";
 
 ### Event Record
 
-Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearCurrentEvent` (Clear board) sets it on the active event only, and only when that event has scores, and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt` among hidden events that have scores, undoing one clear at a time, newest first; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it, counting only hidden events that have scores.
+Each booth event is stored as its own record. `boardScope` was added without a schema version bump: `normalizeEvent` reads a record without it as `"event"`, and `listBoardScores(event)` loads the event's own scores or, for `"all-time"`, every saved score. `hiddenAt` was added the same way and reads as `null`. `clearCurrentEvent` (Clear board) sets it on the active event only, and only when that event has scores, and starts a new event; `listScores` and `listAllScores` leave out scores of hidden events. Setting an event's `hiddenAt` back to `null` restores its scores. `restoreClearedScores` does that for the events sharing the latest `hiddenAt` among hidden events that have scores, and, when the active event has no scores, makes the newest restored event active again (archiving the empty one), undoing only the most recent clear: it records that clear's time in `settings.restoredClearAt`, and only a newer clear is offered after that; `hasClearedScores`, also returned by `loadBooth`, tells Event Setup whether to offer it, counting only hidden events that have scores.
 
 ```ts
 interface EventRecord {
@@ -2041,7 +2041,7 @@ App loads every board through listBoardScores(activeEvent): Results placement, t
 an all-time board shows ALL-TIME TOP 5, ALL-TIME HIGH SCORE, and ALL-TIME HIGH SCORES, rolls every event's scores, and hides the all-time best line
 EventSetup disables All-time leaderboard when no event exists; choosing it keeps the event and continues with boardScope "all-time"; an all-time event opens with it selected, and Continue switches it back to "event"
 EventSetup shows "An update is ready." and UPDATE NOW only while an update waits; UPDATE NOW is first in the arrow-key order and installs it from Enter or a tap
-Start fresh over an existing event asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
+Start fresh over a board with scores asks first with CANCEL chosen; CANCEL or Escape changes nothing; START FRESH starts it; no event, an empty board, or Continue does not ask (needsFreshConfirm, applyFreshConfirmKey)
 EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores

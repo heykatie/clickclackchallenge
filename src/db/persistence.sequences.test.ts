@@ -26,8 +26,8 @@ import {
 interface Model {
   active: string | null;
   board: "event" | "all-time";
-  /** Each event's scores, and which clear (if any) hid it. */
-  events: Map<string, { scores: string[]; hiddenBy: number | null }>;
+  /** Each event's scores, which clear (if any) hid it, and its own board setting. */
+  events: Map<string, { scores: string[]; hiddenBy: number | null; board: "event" | "all-time" }>;
   clears: number[];
 }
 
@@ -65,6 +65,7 @@ describe("storage, over 60 random runs of 40 operations", () => {
       const model: Model = { active: null, board: "event", events: new Map(), clears: [] };
       let activeEvent: EventRecord | null = null;
       let saved = 0;
+      let clearCount = 0;
       const log: string[] = [];
 
       for (let step = 0; step < 40; step += 1) {
@@ -74,7 +75,7 @@ describe("storage, over 60 random runs of 40 operations", () => {
         const roll = random();
         if (roll < 0.15 || activeEvent === null) {
           activeEvent = await startFreshEvent(duration, mode, { name: random() < 0.5 ? "Fair" : null });
-          model.events.set(activeEvent.id, { scores: [], hiddenBy: null });
+          model.events.set(activeEvent.id, { scores: [], hiddenBy: null, board: "event" });
           model.active = activeEvent.id;
           model.board = "event";
           log.push("fresh");
@@ -82,17 +83,20 @@ describe("storage, over 60 random runs of 40 operations", () => {
           const board = random() < 0.5 ? "all-time" : "event";
           activeEvent = await updateActiveEvent(activeEvent.id, { durationSeconds: duration, testMode: mode, boardScope: board });
           model.board = board;
+          model.events.get(model.active!)!.board = board;
           log.push(`continue ${board}`);
         } else if (roll < 0.32) {
           activeEvent = await clearCurrentEvent(duration, mode);
           // Only the event that was current is hidden, and only when it has scores; earlier events keep theirs.
           const current = model.active === null ? null : model.events.get(model.active)!;
           if (current && current.scores.length > 0) {
-            const clearId = model.clears.length + 1;
-            model.clears.push(clearId);
+            clearCount += 1;
+            const clearId = clearCount;
+            // Only the newest clear can be restored, so it replaces any older one.
+            model.clears = [clearId];
             current.hiddenBy = clearId;
           }
-          model.events.set(activeEvent.id, { scores: [], hiddenBy: null });
+          model.events.set(activeEvent.id, { scores: [], hiddenBy: null, board: "event" });
           model.active = activeEvent.id;
           model.board = "event";
           log.push("clear");
@@ -100,7 +104,17 @@ describe("storage, over 60 random runs of 40 operations", () => {
           const restored = await restoreClearedScores();
           const last = model.clears.pop();
           expect(restored, `seed ${seed} after ${log.join(", ")}`).toBe(last !== undefined);
-          if (last !== undefined) for (const event of model.events.values()) if (event.hiddenBy === last) event.hiddenBy = null;
+          if (last !== undefined) {
+            const restoredIds = [...model.events].filter(([, event]) => event.hiddenBy === last).map(([id]) => id);
+            for (const id of restoredIds) model.events.get(id)!.hiddenBy = null;
+            // While the current board is still empty, the restored board becomes the current event again.
+            if (model.events.get(model.active!)!.scores.length === 0) {
+              model.active = restoredIds[0]!;
+              model.board = model.events.get(model.active)!.board;
+            }
+          }
+          activeEvent = (await loadBooth()).activeEvent;
+          expect(activeEvent?.id, `seed ${seed}: restore`).toBe(model.active);
           log.push("restore");
         } else if (roll < 0.42) {
           await closeDatabase();
@@ -136,7 +150,7 @@ describe("storage, over 60 random runs of 40 operations", () => {
         const wantBoard = (model.board === "all-time" ? visible(model) : model.events.get(model.active!)!.scores).slice().sort();
         expect(board, where).toEqual(wantBoard);
         expect((await listAllScores()).map((score) => score.id).sort(), where).toEqual(visible(model).slice().sort());
-        expect(await hasClearedScores(), where).toBe([...model.events.values()].some((event) => event.hiddenBy !== null));
+        expect(await hasClearedScores(), where).toBe(model.clears.length > 0);
       }
     }
   }, 120_000);
