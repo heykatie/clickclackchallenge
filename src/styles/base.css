@@ -45,6 +45,9 @@
 }
 
 html {
+  /* Keep Safari from inflating text when the phone rotates; the layouts adapt to the new viewport themselves. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   /* Pressed styles below replace Safari's gray tap flash. */
   -webkit-tap-highlight-color: transparent;
 }
@@ -329,4 +332,12 @@ button:has(> .button-countdown) {
   opacity: 0.45;
   transform-origin: left center;
   animation: board-countdown linear both;
+}
+
+/* Phone landscape has little vertical room. Compact every screen except operator Setup, which has its own layout. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .screen:not(.setup-screen) {
+    padding-top: calc(3.5rem + env(safe-area-inset-top));
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
 }

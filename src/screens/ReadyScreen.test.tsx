@@ -160,6 +160,17 @@ describe("ReadyScreen", () => {
     expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
   });
 
+  it("starts a hop from a tap on the HUD, not only the canvas", async () => {
+    await renderReady([]);
+    tapLogo();
+    const game = screen.getByRole("dialog", { name: "Keycap Hop" });
+    expect(screen.getByText("Press Space or tap to hop.")).toBeTruthy();
+
+    fireEvent.pointerDown(game.querySelector(".hop-title")!, { button: 0 });
+    expect(screen.queryByText("Press Space or tap to hop.")).toBeNull();
+    fireEvent.pointerUp(game.querySelector(".hop-title")!, { button: 0 });
+  });
+
   it("reports when Keycap Hop opens and closes, so the music can follow it", async () => {
     const { onHoppingChange, shortEscape } = await renderReady([]);
     expect(onHoppingChange).toHaveBeenLastCalledWith(false);

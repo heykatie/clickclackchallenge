@@ -2582,3 +2582,11 @@ recoverable
 ```
 
 over unnecessary infrastructure or feature complexity.
+
+### Small Landscape Layout and Mobile Palette
+
+- Below 500 CSS pixels high in landscape, every screen except Event Setup uses compact spacing and type so its key content and actions fit without page scrolling.
+- Portrait layouts may scroll when their content needs more height; Event Setup keeps its dedicated layout.
+- The viewport uses `viewport-fit=cover`, safe-area padding, and fixed text-size adjustment so iOS does not inflate the layout when the device rotates.
+- The browser theme color follows the persisted palette so Safari and installed-app chrome match the page background.
+- Keycap Hop accepts a tap anywhere on its game surface except the logo badge, which keeps its close and long-press-to-Setup behavior.
