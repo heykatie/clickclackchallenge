@@ -2047,6 +2047,7 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
+when Ready has a qualifying board score, T, K, and L held together open Keycap Hop after five seconds; releasing one first starts typing with the first key and does not leave a stale held-key gate
 a short Escape press on Ready does not start the test and opens the rolling list when it has a score
 holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard; an earlier release is a short press (escapeHoldMs)
 after 90 idle seconds, Ready shows a rolling list of at most 20 of the active event's scores that meet the accuracy gate and display at least 1 WPM; other events' scores are not on it
@@ -2589,4 +2590,4 @@ over unnecessary infrastructure or feature complexity.
 - Portrait layouts may scroll when their content needs more height; Event Setup keeps its dedicated layout.
 - The viewport uses `viewport-fit=cover`, safe-area padding, and fixed text-size adjustment so iOS does not inflate the layout when the device rotates.
 - The browser theme color follows the persisted palette so Safari and installed-app chrome match the page background.
-- Keycap Hop accepts a tap anywhere on its game surface except the logo badge, which keeps its close and long-press-to-Setup behavior.
+- Keycap Hop accepts a tap anywhere on the visible viewport except the logo badge, including space outside the centered game stage; the badge keeps its close and long-press-to-Setup behavior.

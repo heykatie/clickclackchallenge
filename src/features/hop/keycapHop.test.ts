@@ -365,14 +365,16 @@ describe("Keycap Hop", () => {
 
   it("hands out more walk-in orbs early, and asks for higher hops as difficulty rises", () => {
     const collect = (score: number) => {
-      const random = seededRandom(score + 90);
-      let hop: HopState = { ...jumpHop(createHop()), distance: score * 25, speed: HOP.startSpeed };
       const heights: number[] = [];
-      for (let t = 0; t < 35; t += FRAME) {
-        const before = hop.powerUps.length;
-        hop = { ...stepHop(hop, FRAME, random), crashed: false, running: true, height: 0, velocity: 0 };
-        if (hop.powerUps.length > before) {
-          heights.push(hop.powerUps.at(-1)!.y);
+      for (let seed = 1; seed <= 30; seed += 1) {
+        const random = seededRandom(score + seed * 90);
+        let hop: HopState = { ...jumpHop(createHop(random)), distance: score * 25, speed: HOP.startSpeed };
+        for (let t = 0; t < 35; t += FRAME) {
+          const before = hop.powerUps.length;
+          hop = { ...stepHop(hop, FRAME, random), crashed: false, running: true, height: 0, velocity: 0 };
+          if (hop.powerUps.length > before) {
+            heights.push(hop.powerUps.at(-1)!.y);
+          }
         }
       }
       return heights;
@@ -438,4 +440,3 @@ describe("Keycap Hop", () => {
     }
   }, 60_000);
 });
-

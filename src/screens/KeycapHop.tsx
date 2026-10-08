@@ -136,6 +136,31 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) {
+        return;
+      }
+      const target = event.target;
+      if (target instanceof Element && target.closest(".logo-badge")) {
+        return;
+      }
+      hopRef.current();
+    };
+    const onPointerUp = () => endHopHoldRef.current();
+    const onPointerCancel = () => endHopHoldRef.current();
+
+    // The landscape stage is narrower than the phone viewport; capture taps on the surrounding screen too.
+    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("pointerup", onPointerUp, true);
+    window.addEventListener("pointercancel", onPointerCancel, true);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointerup", onPointerUp, true);
+      window.removeEventListener("pointercancel", onPointerCancel, true);
+    };
+  }, []);
+
   // The game loop: step the world each frame and draw it. A tab in the background pauses it with the frames.
   useEffect(() => {
     let frame = 0;
@@ -185,18 +210,6 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
       aria-modal="true"
       aria-label="Keycap Hop"
       tabIndex={-1}
-      onPointerDown={(event) => {
-        if (!(event.target instanceof Element && event.target.closest(".logo-badge"))) {
-          hop();
-        }
-      }}
-      onPointerUp={(event) => {
-        if (!(event.target instanceof Element && event.target.closest(".logo-badge"))) {
-          endHopHold();
-        }
-      }}
-      onPointerCancel={endHopHold}
-      onPointerLeave={endHopHold}
     >
       <button ref={closeButtonRef} type="button" className="logo-badge" aria-label="Close Keycap Hop" {...logoHold} />
       <div className="hop-hud" aria-live="polite">

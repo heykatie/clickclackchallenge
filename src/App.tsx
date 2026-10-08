@@ -535,8 +535,8 @@ function App() {
           eventId={state.activeEvent?.id ?? null}
           allTime={state.activeEvent?.boardScope === "all-time"}
           highScore={state.highScore}
-          onStart={(key) => {
-            if (key !== "") {
+          onStart={(key, keyAlreadyReleased = false) => {
+            if (key !== "" && !keyAlreadyReleased) {
               startKeyGate.current.arm(key);
             }
             dispatch({ type: "ENTER_TYPING" });
