@@ -179,7 +179,7 @@ describe("ReadyScreen", () => {
     expect(onStart).not.toHaveBeenCalled();
   });
 
-  it("closes Keycap Hop on its logo tap, and on its own after 30 seconds with no input", async () => {
+  it("closes Keycap Hop on its logo tap, and on its own after 20 seconds with no input", async () => {
     await renderReady([]);
     tapLogo();
     fireEvent.pointerDown(screen.getByRole("button", { name: "Close Keycap Hop" }), { button: 0 });
@@ -187,12 +187,12 @@ describe("ReadyScreen", () => {
     expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
 
     tapLogo();
-    act(() => vi.advanceTimersByTime(20_000));
+    act(() => vi.advanceTimersByTime(15_000));
     fireEvent.keyDown(window, { key: " " });
-    act(() => vi.advanceTimersByTime(20_000));
-    // Input reset the 30 seconds, so it is still open.
+    act(() => vi.advanceTimersByTime(19_999));
+    // Input reset the 20 seconds, so it is still open.
     expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
-    act(() => vi.advanceTimersByTime(11_000));
+    act(() => vi.advanceTimersByTime(1));
     expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
   });
 
@@ -236,9 +236,9 @@ describe("ReadyScreen", () => {
     expect(onStart).not.toHaveBeenCalled();
   });
 
-  it("shows the rolling list after 2 idle minutes when a qualifying score exists", async () => {
+  it("shows the rolling list after 90 idle seconds when a qualifying score exists", async () => {
     await renderReady();
-    act(() => vi.advanceTimersByTime(119_999));
+    act(() => vi.advanceTimersByTime(89_999));
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByText("HIGH SCORES")).toBeTruthy();
@@ -246,7 +246,7 @@ describe("ReadyScreen", () => {
 
   it("shimmers only the top score on the rolling list", async () => {
     await renderReady();
-    act(() => vi.advanceTimersByTime(120_000));
+    act(() => vi.advanceTimersByTime(90_000));
     const rows = [...document.querySelectorAll(".screensaver-rows:not([aria-hidden='true']) .score-row")];
     expect(rows[0]?.className).toContain("is-shining");
     expect(rows.slice(1).some((row) => row.className.includes("is-shining"))).toBe(false);

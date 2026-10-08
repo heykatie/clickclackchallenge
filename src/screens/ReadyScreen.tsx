@@ -8,7 +8,7 @@ import { KeycapHop } from "./KeycapHop";
 import { useLogoHold } from "./useLogoHold";
 import { Crown } from "./ScoreRow";
 
-const READY_IDLE_MS = 120_000;
+const READY_IDLE_MS = 90_000;
 
 type ReadyScreenProps = {
   /** The active event. The rolling list shows its board. */

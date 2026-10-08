@@ -19,7 +19,7 @@ import { hopPowerCue } from "../sound/soundCues";
 import { useLogoHold } from "./useLogoHold";
 
 /** Like the rest of the booth, the game goes back to Ready when nobody is playing. */
-const HOP_IDLE_MS = 30_000;
+const HOP_IDLE_MS = 20_000;
 /** Space, Up, Enter, and W hop; other keys do nothing here, so a mash never starts a typing round. */
 const JUMP_KEYS = new Set([" ", "ArrowUp", "Enter", "NumpadEnter", "w", "W"]);
 /** Pixel size for the chunky trees (world pixels per “pixel”). */

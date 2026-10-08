@@ -2049,7 +2049,7 @@ while Continue is selected, choosing the other duration updates the next contest
 Ready screen responds to a key press through a window-level keydown listener
 a short Escape press on Ready does not start the test and opens the rolling list when it has a score
 holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard; an earlier release is a short press (escapeHoldMs)
-after 2 idle minutes, Ready shows a rolling list of at most 20 of the active event's scores that meet the accuracy gate and display at least 1 WPM; other events' scores are not on it
+after 90 idle seconds, Ready shows a rolling list of at most 20 of the active event's scores that meet the accuracy gate and display at least 1 WPM; other events' scores are not on it
 each score on that list appears once, with no repeated rows
 any key or a tap on that list returns to Ready and does not start the test
 a tap on the logo badge on Ready opens that list at once when it has a score, and does nothing otherwise
@@ -2115,7 +2115,7 @@ obstacle gaps pick uneven extra bands so consecutive spaces are not the same len
 slow, big, and small power-ups change scroll or size for a few seconds when collected; placement keeps prior clearance/slow rules, with more walk-in orbs early and higher trickier hops as difficulty rises, and they keep appearing after difficulty tops out
 it stays fair at its hardest: a well-timed hopper clears 60 seconds of every seeded run
 Ready opens it on a logo tap or short Escape only when there is no score to roll; keys and taps there never start a round
-its logo tap or a short Escape closes it; 30 seconds with no input closes it
+its logo tap or a short Escape closes it; 20 seconds with no input closes it
 ```
 
 ### Unit Tests — Landscape gate
