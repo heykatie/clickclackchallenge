@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { applyTypingKey, createTestSession } from "../features/typing/typingEngine";
 import type { ResultCopy } from "../features/results/resultPlacement";
-import { keyCue, resultCue } from "./soundCues";
+import { hopPowerCue, keyCue, resultCue } from "./soundCues";
 
 const start = createTestSession(["Hi there."], 30);
 
@@ -33,5 +33,19 @@ describe("resultCue", () => {
     expect(resultCue(copy("thanks", false))).toBeNull();
     expect(resultCue(copy("casper", false))).toBeNull();
     expect(resultCue(null)).toBeNull();
+  });
+});
+
+describe("hopPowerCue", () => {
+  it("gives each Keycap Hop power-up its own cue", () => {
+    expect(hopPowerCue("slow")).toBe("hop-slow");
+    expect(hopPowerCue("big")).toBe("hop-big");
+    expect(hopPowerCue("small")).toBe("hop-small");
+  });
+});
+
+describe("hop-bonk", () => {
+  it("is a distinct cue name for a Keycap Hop crash", () => {
+    expect("hop-bonk" satisfies import("./soundCues").SoundCue).toBe("hop-bonk");
   });
 });

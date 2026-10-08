@@ -34,6 +34,34 @@ const TONES: Record<Exclude<SoundCue, "key">, Tone[]> = {
     seconds: 0.5,
     delay: index * 0.09,
   })),
+  // Keycap Hop: slow — a soft descending whoosh, like time easing up.
+  "hop-slow": [
+    { frequency: 660, wave: "sine", volume: 0.1, seconds: 0.18, delay: 0 },
+    { frequency: 440, wave: "sine", volume: 0.09, seconds: 0.22, delay: 0.08 },
+    { frequency: 294, wave: "triangle", volume: 0.07, seconds: 0.28, delay: 0.16 },
+  ],
+  // Keycap Hop: big — a bright rising sparkle that feels like growing.
+  "hop-big": [
+    { frequency: 523, wave: "triangle", volume: 0.09, seconds: 0.12, delay: 0 },
+    { frequency: 659, wave: "triangle", volume: 0.1, seconds: 0.14, delay: 0.07 },
+    { frequency: 784, wave: "sine", volume: 0.11, seconds: 0.22, delay: 0.14 },
+    { frequency: 1047, wave: "sine", volume: 0.08, seconds: 0.18, delay: 0.22 },
+  ],
+  // Keycap Hop: small — a quick cheeky zip, high then tuck.
+  "hop-small": [
+    { frequency: 988, wave: "square", volume: 0.05, seconds: 0.06, delay: 0 },
+    { frequency: 1319, wave: "square", volume: 0.055, seconds: 0.06, delay: 0.05 },
+    { frequency: 784, wave: "triangle", volume: 0.07, seconds: 0.14, delay: 0.1 },
+  ],
+  // Keycap Hop: bonk — a cartoon dying fall (not the typing miss blip): thud, then a sad descending zip.
+  "hop-bonk": [
+    { frequency: 90, wave: "triangle", volume: 0.2, seconds: 0.07, delay: 0 },
+    { frequency: 320, wave: "square", volume: 0.065, seconds: 0.05, delay: 0.05 },
+    { frequency: 392, wave: "sine", volume: 0.14, seconds: 0.12, delay: 0.09 },
+    { frequency: 294, wave: "sine", volume: 0.13, seconds: 0.14, delay: 0.18 },
+    { frequency: 196, wave: "triangle", volume: 0.11, seconds: 0.2, delay: 0.28 },
+    { frequency: 130, wave: "triangle", volume: 0.09, seconds: 0.28, delay: 0.4 },
+  ],
 };
 
 /**

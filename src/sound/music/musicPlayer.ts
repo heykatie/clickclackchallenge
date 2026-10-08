@@ -1,7 +1,9 @@
 import { barEvents, barSeconds, firstBar, type MusicEvent, type ThemeName } from "./themes";
 
-/** Quiet enough to sit under the key clicks and chimes. */
-const MASTER_VOLUME = 0.2;
+/** Quiet enough to sit under key clicks, hop cues, and chimes. */
+const MASTER_VOLUME = 0.085;
+/** Keycap Hop ducks music further so hop SFX read clearly over the bed. */
+const HOP_DUCK = 0.55;
 /** A soft treble roll-off: the warm, slightly muffled lo-fi sound. */
 const WARMTH_HZ = 3000;
 const LOOKAHEAD_SECONDS = 0.5;
@@ -20,6 +22,8 @@ type Bus = { gain: GainNode; theme: ThemeName; bar: number; nextBarAt: number };
 export function createMusicPlayer(createContext: () => AudioContext = () => new AudioContext()) {
   let enabled = false;
   let theme: ThemeName | null = null;
+  /** Multiplier on MASTER_VOLUME; Keycap Hop sets this below 1 so cues sit on top. */
+  let duck = 1;
   let context: AudioContext | null = null;
   let unavailable = false;
   let master: GainNode | null = null;
@@ -68,7 +72,7 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
       resumeQuietly(output);
     }
     master.gain.cancelScheduledValues(now);
-    master.gain.setTargetAtTime(MASTER_VOLUME, now, 0.2);
+    master.gain.setTargetAtTime(MASTER_VOLUME * duck, now, 0.2);
     startCrackle(output);
     if (bus?.theme !== theme) {
       fadeOut(bus, now);
@@ -326,6 +330,13 @@ export function createMusicPlayer(createContext: () => AudioContext = () => new 
     /** The theme for the current screen, or null for silence. Setting the playing theme again changes nothing. */
     setTheme(name: ThemeName | null) {
       theme = name;
+      update();
+    },
+    /**
+     * Softens the bed while Keycap Hop is open so bonks and power cues cut through. Pass true on open, false on close.
+     */
+    setHopQuiet(quiet: boolean) {
+      duck = quiet ? HOP_DUCK : 1;
       update();
     },
     /** Pauses while the app is hidden, so a backgrounded iPad does not hum or stutter. */
