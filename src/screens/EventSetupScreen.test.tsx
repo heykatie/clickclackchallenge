@@ -449,6 +449,7 @@ describe("EventSetupScreen", () => {
       fireEvent.click(screen.getByRole("button", { name: button }));
       const dialog = screen.getByRole("alertdialog", { name: title });
       expect(dialog.getAttribute("aria-modal")).toBe("true");
+      expect(dialog.closest("main")).toBeNull();
       // The page stays in place behind the modal, but cannot be pressed, tabbed to, or read out.
       const behind = document.querySelector(".setup-groups")!;
       expect(behind).toBeTruthy();
