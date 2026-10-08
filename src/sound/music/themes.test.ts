@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { barEvents, barSeconds, firstBar, THEMES, themeForScreen, type ThemeName } from "./themes";
+import { barEvents, barSeconds, firstBar, HOP_THEME, THEMES, themeForScreen, type ThemeName } from "./themes";
 
 const names = Object.keys(THEMES) as ThemeName[];
+const pageNames = names.filter((name) => name !== HOP_THEME);
 
 const MODES = ["words", "famous-lines", "story"] as const;
 const PAGES = ["setup", "ready", "typing", "results", "leaderboard", "rolling"] as const;
@@ -22,7 +23,27 @@ describe("themeForScreen", () => {
   it("gives every mode its own tune on every page: 18 tunes, none shared", () => {
     const all = MODES.flatMap((mode) => PAGES.map((page) => themeForScreen(page, mode)));
     expect(new Set(all).size).toBe(18);
-    expect(names.sort()).toEqual([...all].sort());
+    expect(pageNames.sort()).toEqual([...all].sort());
+  });
+});
+
+describe("Keycap Hop tune", () => {
+  it("has its own hop-bounce loop, apart from every event world's pages", () => {
+    expect(HOP_THEME).toBe("hop-bounce");
+    expect(THEMES[HOP_THEME]).toBeTruthy();
+    expect(pageNames.includes(HOP_THEME)).toBe(false);
+  });
+
+  it("bounces near Ready's tempo with a soft square lead and tiny bell sparkles", () => {
+    const hop = THEMES[HOP_THEME];
+    expect(hop.bpm).toBeGreaterThanOrEqual(100);
+    expect(hop.bpm).toBeLessThanOrEqual(120);
+    expect(hop.lead).toBe("square");
+    const bar0 = barEvents(HOP_THEME, 0);
+    expect(bar0.some((event) => event.instrument === "square")).toBe(true);
+    expect(bar0.some((event) => event.instrument === "bell")).toBe(true);
+    const square = bar0.filter((event) => event.instrument === "square");
+    square.forEach((event) => expect(event.note).toBeLessThanOrEqual(74));
   });
 });
 

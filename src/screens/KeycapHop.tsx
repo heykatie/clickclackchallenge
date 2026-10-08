@@ -2,20 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import {
   HOP,
   createHop,
+  hopKeycapLeft,
+  hopKeycapSize,
   hopLevel,
   hopScore,
   jumpHop,
+  releaseJump,
   stepHop,
   type HopObstacle,
+  type HopPowerUp,
   type HopState,
 } from "../features/hop/keycapHop";
 import { boothSound } from "../sound/boothSound";
+import { boothMusic } from "../sound/music/musicPlayer";
+import { hopPowerCue } from "../sound/soundCues";
 import { useLogoHold } from "./useLogoHold";
 
 /** Like the rest of the booth, the game goes back to Ready when nobody is playing. */
 const HOP_IDLE_MS = 30_000;
 /** Space, Up, Enter, and W hop; other keys do nothing here, so a mash never starts a typing round. */
 const JUMP_KEYS = new Set([" ", "ArrowUp", "Enter", "NumpadEnter", "w", "W"]);
+/** Pixel size for the chunky trees (world pixels per “pixel”). */
+const TREE_PX = 4;
 
 /** The best run since the app opened. Kept nowhere else: the game never touches scores or leaderboards. */
 let sessionBest = 0;
@@ -45,9 +53,15 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
     onCloseRef.current = onClose;
   });
 
+  // Duck the bed while hopping so the bonk and power cues stay on top; restore on close.
+  useEffect(() => {
+    boothMusic.setHopQuiet(true);
+    return () => boothMusic.setHopQuiet(false);
+  }, []);
+
   function hop() {
     const before = stateRef.current;
-    const after = jumpHop(before);
+    const after = jumpHop(before, Math.random);
     if (after !== before) {
       stateRef.current = after;
       setPhase("running");
@@ -60,9 +74,20 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
     }
     setActivity((count) => count + 1);
   }
+
+  function endHopHold() {
+    const before = stateRef.current;
+    const after = releaseJump(before);
+    if (after !== before) {
+      stateRef.current = after;
+    }
+  }
+
   const hopRef = useRef(hop);
+  const endHopHoldRef = useRef(endHopHold);
   useEffect(() => {
     hopRef.current = hop;
+    endHopHoldRef.current = endHopHold;
   });
 
   useEffect(() => {
@@ -71,17 +96,34 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
   }, [activity]);
 
   useEffect(() => {
+    const held = new Set<string>();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         return;
       }
       event.preventDefault();
-      if (!event.repeat && JUMP_KEYS.has(event.key)) {
-        hopRef.current();
+      if (!JUMP_KEYS.has(event.key) || event.repeat || held.has(event.key)) {
+        return;
+      }
+      held.add(event.key);
+      hopRef.current();
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (!JUMP_KEYS.has(event.key)) {
+        return;
+      }
+      held.delete(event.key);
+      // Only cut the hop short when no other jump key is still down.
+      if (held.size === 0) {
+        endHopHoldRef.current();
       }
     };
     window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+    };
   }, []);
 
   // The game loop: step the world each frame and draw it. A tab in the background pauses it with the frames.
@@ -105,8 +147,13 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
           levelRef.current = nextLevel;
           setLevel(nextLevel);
         }
+        if (after.slowRemaining > before.slowRemaining) {
+          boothSound.play(hopPowerCue("slow"));
+        } else if (after.sizeRemaining > before.sizeRemaining) {
+          boothSound.play(hopPowerCue(after.sizeScale >= HOP.sizeBig ? "big" : "small"));
+        }
         if (after.crashed && !before.crashed) {
-          boothSound.play("miss");
+          boothSound.play("hop-bonk");
           setPhase("crashed");
           if (nextScore > sessionBest) {
             sessionBest = nextScore;
@@ -133,6 +180,13 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
           hop();
         }
       }}
+      onPointerUp={(event) => {
+        if (!(event.target instanceof Element && event.target.closest(".logo-badge"))) {
+          endHopHold();
+        }
+      }}
+      onPointerCancel={endHopHold}
+      onPointerLeave={endHopHold}
     >
       <button type="button" className="logo-badge" aria-label="Close Keycap Hop" {...logoHold} />
       <div className="hop-hud" aria-live="polite">
@@ -197,134 +251,458 @@ function draw(canvas: HTMLCanvasElement | null, state: HopState) {
     drawObstacle(context, obstacle, ground);
   }
 
-  // The keycap: a mint key with a lighter top face and a little smile, squashed a touch on the ground.
-  const size = HOP.keycapSize;
-  const x = HOP.keycapX;
+  for (const power of state.powerUps) {
+    drawPowerUp(context, power, ground);
+  }
+
+  // The keycap: a mint key with a lighter top face and a little smile. Size power-ups scale it.
+  const size = hopKeycapSize(state);
+  const x = hopKeycapLeft(state);
   const y = ground - size - state.height;
-  roundedRect(context, x, y, size, size, 7);
+  const face = size / HOP.keycapSize;
+  roundedRect(context, x, y, size, size, 7 * face);
   context.fillStyle = token("--tiny-mint-strong", "#6ccfc7");
   context.fill();
   context.strokeStyle = charcoal;
   context.lineWidth = 2;
   context.stroke();
-  roundedRect(context, x + 5, y + 4, size - 10, size - 12, 5);
+  roundedRect(context, x + 5 * face, y + 4 * face, size - 10 * face, size - 12 * face, 5 * face);
   context.fillStyle = token("--tiny-white", "#fffdfc");
   context.fill();
   context.fillStyle = charcoal;
-  const eyeY = y + 13;
+  const eyeY = y + 13 * face;
   if (state.crashed) {
     // Crossed-out eyes after a bonk.
-    for (const eyeX of [x + 12, x + 22]) {
+    for (const eyeX of [x + 12 * face, x + 22 * face]) {
       context.beginPath();
-      context.moveTo(eyeX - 2.5, eyeY - 2.5);
-      context.lineTo(eyeX + 2.5, eyeY + 2.5);
-      context.moveTo(eyeX + 2.5, eyeY - 2.5);
-      context.lineTo(eyeX - 2.5, eyeY + 2.5);
+      context.moveTo(eyeX - 2.5 * face, eyeY - 2.5 * face);
+      context.lineTo(eyeX + 2.5 * face, eyeY + 2.5 * face);
+      context.moveTo(eyeX + 2.5 * face, eyeY - 2.5 * face);
+      context.lineTo(eyeX - 2.5 * face, eyeY + 2.5 * face);
       context.lineWidth = 1.5;
       context.stroke();
     }
   } else {
     context.beginPath();
-    context.arc(x + 12, eyeY, 2, 0, Math.PI * 2);
-    context.arc(x + 22, eyeY, 2, 0, Math.PI * 2);
+    context.arc(x + 12 * face, eyeY, 2 * face, 0, Math.PI * 2);
+    context.arc(x + 22 * face, eyeY, 2 * face, 0, Math.PI * 2);
     context.fill();
     context.beginPath();
-    context.arc(x + 17, eyeY + 4, 4, 0.15 * Math.PI, 0.85 * Math.PI);
+    context.arc(x + 17 * face, eyeY + 4 * face, 4 * face, 0.15 * Math.PI, 0.85 * Math.PI);
     context.lineWidth = 1.5;
     context.stroke();
   }
+
+  // A soft ring while a size or slow power is active, so the effect reads at a glance.
+  if (state.slowRemaining > 0 || state.sizeRemaining > 0) {
+    context.strokeStyle =
+      state.slowRemaining > 0
+        ? token("--tiny-lavender-deep", "#6b5a9a")
+        : state.sizeScale > 1
+          ? token("--tiny-mint-deep", "#24756e")
+          : token("--tiny-gold-deep", "#8a5d00");
+    context.globalAlpha = 0.55;
+    context.lineWidth = 2;
+    context.strokeRect(x - 3, y - 3, size + 6, size + 6);
+    context.globalAlpha = 1;
+  }
+}
+
+function drawPowerUp(context: CanvasRenderingContext2D, power: HopPowerUp, ground: number) {
+  const cx = power.x;
+  const cy = ground - power.y;
+  const fill =
+    power.kind === "slow"
+      ? token("--tiny-lavender-light", "#d9d0ed")
+      : power.kind === "big"
+        ? token("--tiny-mint", "#a8e6e1")
+        : token("--tiny-gold", "#f2c14e");
+  const stroke =
+    power.kind === "slow"
+      ? token("--tiny-lavender-deep", "#6b5a9a")
+      : power.kind === "big"
+        ? token("--tiny-mint-deep", "#24756e")
+        : token("--tiny-gold-deep", "#8a5d00");
+  // Soft pulsing halo so orbs read as pickups, not clutter.
+  const pulse = 0.55 + 0.45 * Math.sin(performance.now() / 220);
+  const core = 14;
+  for (const [radius, alpha] of [
+    [28, 0.12 * pulse],
+    [22, 0.22 * pulse],
+    [17, 0.35 * pulse],
+  ] as const) {
+    context.beginPath();
+    context.arc(cx, cy, radius, 0, Math.PI * 2);
+    context.fillStyle = fill;
+    context.globalAlpha = alpha;
+    context.fill();
+  }
+  context.globalAlpha = 1;
+  context.beginPath();
+  context.arc(cx, cy, core, 0, Math.PI * 2);
+  context.fillStyle = fill;
+  context.fill();
+  context.strokeStyle = stroke;
+  context.lineWidth = 2;
+  context.stroke();
+  // Bright rim catch-light.
+  context.beginPath();
+  context.arc(cx, cy, core + 0.5, 0, Math.PI * 2);
+  context.strokeStyle = token("--tiny-white", "#fffdfc");
+  context.globalAlpha = 0.55 * pulse;
+  context.lineWidth = 1.25;
+  context.stroke();
+  context.globalAlpha = 1;
+  context.fillStyle = stroke;
+  context.font = "bold 13px sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(power.kind === "slow" ? "S" : power.kind === "big" ? "+" : "−", cx, cy + 0.5);
 }
 
 /**
- * Soft pastel hills and a few doodle stars that scroll slower than the ground, so the strip feels like a place
- * rather than a blank card. Sparse on purpose: nothing crowds the keycap.
+ * Back to front: bright sun, sparse stars, far then near blue clouds, then muted trees. Scenery scrolls on integer
+ * pixels so nothing shimmers; clouds and trees stay washed out so they read as backdrop.
  */
 function drawScenery(context: CanvasRenderingContext2D, distance: number, ground: number) {
-  const far = (distance * 0.18) % 280;
-  const mid = (distance * 0.4) % 220;
-  const lavender = token("--tiny-lavender-light", "#d9d0ed");
-  const pink = token("--tiny-pink", "#f4c1d4");
-  const mint = token("--tiny-mint", "#a8e6e1");
-  const charcoal = token("--tiny-charcoal", "#403738");
+  context.globalAlpha = 0.9;
+  drawSun(context, 548, 34);
+  context.globalAlpha = 1;
 
-  for (const hill of [
-    { x: 40 - far, y: ground - 28, w: 120, h: 36, color: lavender },
-    { x: 220 - far, y: ground - 22, w: 100, h: 30, color: pink },
-    { x: 400 - far, y: ground - 32, w: 130, h: 40, color: lavender },
-    { x: 560 - far, y: ground - 24, w: 110, h: 32, color: mint },
-  ]) {
-    context.fillStyle = hill.color;
-    context.globalAlpha = 0.45;
-    context.beginPath();
-    context.ellipse(hill.x, hill.y, hill.w / 2, hill.h / 2, 0, 0, Math.PI * 2);
-    context.fill();
+  // A few mid-sky stars, sparse on purpose, scrolling a little slower than the trees.
+  const starScroll = Math.floor(distance * 0.22);
+  const starLoop = STAR_BELT[STAR_BELT.length - 1]!.x + 120;
+  const starOffset = ((starScroll % starLoop) + starLoop) % starLoop;
+  context.globalAlpha = 0.4;
+  for (const star of STAR_BELT) {
+    for (const wrap of [0, starLoop]) {
+      const x = Math.floor(star.x - starOffset + wrap);
+      if (x < -8 || x > HOP.worldWidth + 8) {
+        continue;
+      }
+      drawPixelStar(context, x, star.y, star.size);
+    }
   }
   context.globalAlpha = 1;
 
-  for (const cloud of [
-    { x: 90 - mid, y: 28, r: 14 },
-    { x: 310 - mid, y: 22, r: 11 },
-    { x: 500 - mid, y: 34, r: 13 },
-  ]) {
-    context.fillStyle = token("--tiny-white", "#fffdfc");
-    context.globalAlpha = 0.7;
-    context.beginPath();
-    context.ellipse(cloud.x, cloud.y, cloud.r * 1.6, cloud.r, 0, 0, Math.PI * 2);
-    context.ellipse(cloud.x - cloud.r, cloud.y + 2, cloud.r, cloud.r * 0.75, 0, 0, Math.PI * 2);
-    context.ellipse(cloud.x + cloud.r, cloud.y + 2, cloud.r, cloud.r * 0.75, 0, 0, Math.PI * 2);
-    context.fill();
+  // Soft blue clouds: far belt drifts slower and smaller; near belt is rarer and closer.
+  const farSky = mixToken("--tiny-sky", "#b8dcf3", "--tiny-white", "#fffdfc", 0.28);
+  const nearSky = mixToken("--tiny-sky", "#b8dcf3", "--tiny-white", "#fffdfc", 0.08);
+  drawCloudBelt(context, distance, CLOUD_FAR, 0.14, farSky, 0.4);
+  drawCloudBelt(context, distance, CLOUD_NEAR, 0.32, nearSky, 0.55);
+
+  // Soft palette mixes so the trees sit behind the keycap instead of competing with it.
+  const foliage = mixToken("--tiny-mint-deep", "#24756e", "--tiny-white", "#fffdfc", 0.55);
+  const foliageLight = mixToken("--tiny-mint", "#a8e6e1", "--tiny-white", "#fffdfc", 0.65);
+  const trunk = mixToken("--tiny-charcoal", "#403738", "--tiny-white", "#fffdfc", 0.5);
+  const scroll = Math.floor(distance * 0.45);
+  const loop = TREE_BELT[TREE_BELT.length - 1]!.x + 80;
+  const offset = ((scroll % loop) + loop) % loop;
+  context.globalAlpha = 0.32;
+  for (const tree of TREE_BELT) {
+    for (const wrap of [0, loop]) {
+      const x = tree.x - offset + wrap;
+      if (x < -48 || x > HOP.worldWidth + 24) {
+        continue;
+      }
+      drawPixelTree(context, x, ground, tree.shape, tree.scale, foliage, foliageLight, trunk);
+    }
   }
   context.globalAlpha = 1;
+}
 
-  // A couple of hand-drawn stars, drifting with the mid layer.
-  context.strokeStyle = charcoal;
-  context.lineWidth = 1.4;
-  context.lineCap = "round";
-  for (const star of [
-    { x: 160 - mid, y: 48 },
-    { x: 430 - mid, y: 40 },
-  ]) {
-    context.beginPath();
-    context.moveTo(star.x, star.y - 5);
-    context.lineTo(star.x, star.y + 5);
-    context.moveTo(star.x - 5, star.y);
-    context.lineTo(star.x + 5, star.y);
-    context.moveTo(star.x - 3.5, star.y - 3.5);
-    context.lineTo(star.x + 3.5, star.y + 3.5);
-    context.moveTo(star.x + 3.5, star.y - 3.5);
-    context.lineTo(star.x - 3.5, star.y + 3.5);
-    context.stroke();
+/** Sparse far clouds: small, slow, washed toward white. */
+const CLOUD_FAR: Array<{ x: number; y: number; scale: number }> = [
+  { x: 80, y: 48, scale: 0.7 },
+  { x: 310, y: 36, scale: 0.55 },
+  { x: 520, y: 52, scale: 0.65 },
+  { x: 780, y: 40, scale: 0.5 },
+];
+
+/** Even sparser near clouds: larger, a touch stronger, scrolls faster for depth. */
+const CLOUD_NEAR: Array<{ x: number; y: number; scale: number }> = [
+  { x: 160, y: 58, scale: 1.05 },
+  { x: 640, y: 44, scale: 0.95 },
+];
+
+function drawCloudBelt(
+  context: CanvasRenderingContext2D,
+  distance: number,
+  belt: Array<{ x: number; y: number; scale: number }>,
+  parallax: number,
+  fill: string,
+  alpha: number,
+) {
+  const loop = belt[belt.length - 1]!.x + 220;
+  const scroll = Math.floor(distance * parallax);
+  const offset = ((scroll % loop) + loop) % loop;
+  context.fillStyle = fill;
+  context.globalAlpha = alpha;
+  for (const cloud of belt) {
+    for (const wrap of [0, loop]) {
+      const x = Math.floor(cloud.x - offset + wrap);
+      if (x < -70 || x > HOP.worldWidth + 40) {
+        continue;
+      }
+      drawCloud(context, x, cloud.y, cloud.scale);
+    }
   }
+  context.globalAlpha = 1;
+}
+
+/** Soft stacked ovals — handmade cloud, not a cartoon outline. */
+function drawCloud(context: CanvasRenderingContext2D, x: number, y: number, scale: number) {
+  const bumps: Array<[number, number, number, number]> = [
+    [0, 4, 18, 11],
+    [14, 0, 16, 12],
+    [28, 3, 20, 12],
+    [10, 8, 22, 10],
+  ];
+  for (const [dx, dy, w, h] of bumps) {
+    context.beginPath();
+    context.ellipse(x + dx * scale, y + dy * scale, (w / 2) * scale, (h / 2) * scale, 0, 0, Math.PI * 2);
+    context.fill();
+  }
+}
+
+/** Irregular belt: clustered gaps, skipped stretches, and mixed heights so the skyline is not a fence. */
+const TREE_BELT: Array<{ x: number; shape: number; scale: number }> = [
+  { x: 12, shape: 2, scale: 0.7 },
+  { x: 48, shape: 0, scale: 1.1 },
+  { x: 130, shape: 3, scale: 0.55 },
+  { x: 168, shape: 1, scale: 1.35 },
+  { x: 210, shape: 4, scale: 0.8 },
+  { x: 310, shape: 0, scale: 0.9 },
+  { x: 355, shape: 2, scale: 1.2 },
+  { x: 455, shape: 3, scale: 0.65 },
+  { x: 520, shape: 1, scale: 1.05 },
+  { x: 548, shape: 4, scale: 0.75 },
+];
+
+/**
+ * Mid-sky stars with uneven gaps (built from mixed steps) so they never march in a grid. A few more than a dusting,
+ * still plenty of empty sky.
+ */
+const STAR_BELT: Array<{ x: number; y: number; size: number }> = (() => {
+  const gaps = [38, 92, 54, 128, 46, 110, 68, 150, 42, 88];
+  let x = 24;
+  return gaps.map((gap, index) => {
+    const star = {
+      x,
+      y: 26 + ((index * 17) % 36),
+      size: index % 4 === 1 ? 2 : 1,
+    };
+    x += gap;
+    return star;
+  });
+})();
+
+function mixToken(a: string, aFallback: string, b: string, bFallback: string, towardB: number): string {
+  const left = rgb(token(a, aFallback));
+  const right = rgb(token(b, bFallback));
+  if (!left || !right) {
+    return token(a, aFallback);
+  }
+  const mix = (channel: number) => Math.round(left[channel]! * (1 - towardB) + right[channel]! * towardB);
+  return `rgb(${mix(0)} ${mix(1)} ${mix(2)})`;
+}
+
+function rgb(color: string): [number, number, number] | null {
+  const hex = /^#([0-9a-f]{6})$/i.exec(color.trim());
+  if (hex) {
+    const value = Number.parseInt(hex[1]!, 16);
+    return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+  }
+  const rgbMatch = /^rgba?\(\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*[, ]\s*([\d.]+)/i.exec(color.trim());
+  if (rgbMatch) {
+    return [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])];
+  }
+  return null;
+}
+
+function drawSun(context: CanvasRenderingContext2D, cx: number, cy: number) {
+  const gold = mixToken("--tiny-gold", "#f0c36a", "--tiny-white", "#fffdfc", 0.08);
+  const goldDeep = mixToken("--tiny-gold-deep", "#8a5d00", "--tiny-white", "#fffdfc", 0.12);
+  context.fillStyle = gold;
+  // Pixel sun: a filled diamond-ish block circle on the TREE_PX grid.
+  const cells: Array<[number, number]> = [
+    [-2, -1],
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+    [-3, 0],
+    [-2, 0],
+    [-1, 0],
+    [0, 0],
+    [1, 0],
+    [2, 0],
+    [-3, 1],
+    [-2, 1],
+    [-1, 1],
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    [-2, 2],
+    [-1, 2],
+    [0, 2],
+    [1, 2],
+  ];
+  for (const [dx, dy] of cells) {
+    context.fillRect(cx + dx * TREE_PX, cy + dy * TREE_PX, TREE_PX, TREE_PX);
+  }
+  // Short pixel rays.
+  context.fillStyle = goldDeep;
+  for (const [dx, dy] of [
+    [0, -3],
+    [0, 4],
+    [-4, 0],
+    [3, 0],
+    [-3, -2],
+    [2, -2],
+    [-3, 3],
+    [2, 3],
+  ] as Array<[number, number]>) {
+    context.fillRect(cx + dx * TREE_PX, cy + dy * TREE_PX, TREE_PX, TREE_PX);
+  }
+}
+
+/** A tiny pixel star on the integer grid so scroll does not shimmer. */
+function drawPixelStar(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
+  const charcoal = mixToken("--tiny-charcoal", "#403738", "--tiny-white", "#fffdfc", 0.35);
+  context.fillStyle = charcoal;
+  const arm = size === 2 ? 3 : 2;
+  context.fillRect(x, y - arm, 1, arm * 2 + 1);
+  context.fillRect(x - arm, y, arm * 2 + 1, 1);
+  if (size === 2) {
+    context.fillRect(x - 1, y - 1, 3, 3);
+  }
+}
+
+/** Pixel pines and shrubs at a few shapes and scales, drawn in TREE_PX blocks. */
+function drawPixelTree(
+  context: CanvasRenderingContext2D,
+  left: number,
+  ground: number,
+  shape: number,
+  scale: number,
+  foliage: string,
+  foliageLight: string,
+  trunk: string,
+) {
+  const px = Math.max(2, Math.round(TREE_PX * scale));
+  const x = Math.floor(left / px) * px;
+  const rows =
+    shape === 0
+      ? ["..##..", ".####.", "######", ".####.", "..##.."]
+      : shape === 1
+        ? ["...#...", "..###..", ".#####.", "#######", ".#####.", "..###.."]
+        : shape === 2
+          ? [".###.", "#####", ".###."]
+          : shape === 3
+            ? ["...#..", "..###.", ".#####", "#######", "#######", "..###.."]
+            : ["####", "####"];
+  const trunkHeight = shape === 2 || shape === 4 ? 1 : 2;
+  const trunkWidth = shape === 1 || shape === 3 ? 2 : 1;
+  const top = ground - (rows.length + trunkHeight) * px;
+  rows.forEach((row, rowIndex) => {
+    [...row].forEach((cell, colIndex) => {
+      if (cell !== "#") {
+        return;
+      }
+      context.fillStyle = rowIndex % 2 === 0 ? foliage : foliageLight;
+      context.fillRect(x + colIndex * px, top + rowIndex * px, px, px);
+    });
+  });
+  const trunkX = x + Math.floor((rows[0]!.length - trunkWidth) / 2) * px;
+  context.fillStyle = trunk;
+  context.fillRect(trunkX, ground - trunkHeight * px, trunkWidth * px, trunkHeight * px);
 }
 
 function drawObstacle(context: CanvasRenderingContext2D, obstacle: HopObstacle, ground: number) {
   const top = ground - obstacle.height;
-  const kind = obstacle.kind;
-  if (kind === "cable") {
-    context.strokeStyle = token("--tiny-pink", "#f4c1d4");
-    context.lineWidth = 5;
-    context.lineCap = "round";
-    context.beginPath();
-    for (let x = 0; x <= obstacle.width; x += 4) {
-      const y = top + obstacle.height / 2 + Math.sin(x / 4) * (obstacle.height / 2 - 3);
-      if (x === 0) context.moveTo(obstacle.x + x, y);
-      else context.lineTo(obstacle.x + x, y);
+  switch (obstacle.kind) {
+    case "mug": {
+      const fill = token("--tiny-peach", "#f5cfc0");
+      const stroke = token("--tiny-gold-deep", "#8a5d00");
+      roundedRect(context, obstacle.x, top + 4, obstacle.width * 0.72, obstacle.height - 4, 4);
+      context.fillStyle = fill;
+      context.fill();
+      context.strokeStyle = stroke;
+      context.lineWidth = 1.5;
+      context.stroke();
+      // Handle.
+      context.beginPath();
+      context.arc(obstacle.x + obstacle.width * 0.72, top + obstacle.height * 0.55, obstacle.width * 0.28, -0.6, 0.6);
+      context.stroke();
+      return;
     }
-    context.stroke();
-    return;
+    case "note": {
+      const fill = token("--tiny-gold", "#f2c14e");
+      const stroke = token("--tiny-gold-deep", "#8a5d00");
+      roundedRect(context, obstacle.x, top, obstacle.width, obstacle.height, 2);
+      context.fillStyle = fill;
+      context.fill();
+      context.strokeStyle = stroke;
+      context.lineWidth = 1.5;
+      context.stroke();
+      // Folded corner.
+      context.beginPath();
+      context.moveTo(obstacle.x + obstacle.width - 8, top);
+      context.lineTo(obstacle.x + obstacle.width, top + 8);
+      context.lineTo(obstacle.x + obstacle.width - 8, top + 8);
+      context.closePath();
+      context.fillStyle = token("--tiny-white", "#fffdfc");
+      context.fill();
+      context.stroke();
+      return;
+    }
+    case "book": {
+      const fill = token("--tiny-lavender-light", "#d9d0ed");
+      const stroke = token("--tiny-lavender-deep", "#6b5a9a");
+      roundedRect(context, obstacle.x, top, obstacle.width, obstacle.height, 3);
+      context.fillStyle = fill;
+      context.fill();
+      context.strokeStyle = stroke;
+      context.lineWidth = 1.5;
+      context.stroke();
+      context.beginPath();
+      context.moveTo(obstacle.x + 6, top + 2);
+      context.lineTo(obstacle.x + 6, top + obstacle.height - 2);
+      context.stroke();
+      return;
+    }
+    case "eraser": {
+      const fill = token("--tiny-pink", "#f4c1d4");
+      const stroke = mixToken("--tiny-pink", "#f4c1d4", "--tiny-charcoal", "#403738", 0.35);
+      roundedRect(context, obstacle.x, top, obstacle.width, obstacle.height, 4);
+      context.fillStyle = fill;
+      context.fill();
+      context.strokeStyle = stroke;
+      context.lineWidth = 1.5;
+      context.stroke();
+      // Soft bevel stripe so it reads as a pink eraser, not a flat block.
+      context.fillStyle = token("--tiny-white", "#fffdfc");
+      context.globalAlpha = 0.35;
+      roundedRect(context, obstacle.x + 3, top + 3, obstacle.width - 6, Math.max(4, obstacle.height * 0.28), 2);
+      context.fill();
+      context.globalAlpha = 1;
+      return;
+    }
+    case "double": {
+      const fill = token("--tiny-lavender-light", "#d9d0ed");
+      const stroke = token("--tiny-lavender-deep", "#6b5a9a");
+      const gap = 3;
+      const column = (obstacle.width - gap) / 2;
+      drawKeycapStack(context, obstacle.x, top, column, obstacle.height, fill, stroke);
+      drawKeycapStack(context, obstacle.x + column + gap, top, column, obstacle.height, fill, stroke);
+      return;
+    }
+    default: {
+      const fill = token("--tiny-lavender-light", "#d9d0ed");
+      const stroke = token("--tiny-lavender-deep", "#6b5a9a");
+      drawKeycapStack(context, obstacle.x, top, obstacle.width, obstacle.height, fill, stroke);
+    }
   }
-
-  const fill = token("--tiny-lavender-light", "#d9d0ed");
-  const stroke = token("--tiny-lavender-deep", "#6b5a9a");
-  if (kind === "double") {
-    // Two side-by-side stacks: the later-level hazard, still the same lavender keycaps.
-    const gap = 3;
-    const column = (obstacle.width - gap) / 2;
-    drawKeycapStack(context, obstacle.x, top, column, obstacle.height, fill, stroke);
-    drawKeycapStack(context, obstacle.x + column + gap, top, column, obstacle.height, fill, stroke);
-    return;
-  }
-  drawKeycapStack(context, obstacle.x, top, obstacle.width, obstacle.height, fill, stroke);
 }
 
 function drawKeycapStack(

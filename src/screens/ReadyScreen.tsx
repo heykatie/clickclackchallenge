@@ -20,6 +20,8 @@ type ReadyScreenProps = {
   onSetup: () => void;
   /** Told whenever the rolling high-score list opens or closes, so the music can follow it. */
   onRollingChange?: (rolling: boolean) => void;
+  /** Told whenever Keycap Hop opens or closes, so it can play its own tune. */
+  onHoppingChange?: (hopping: boolean) => void;
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
@@ -30,6 +32,7 @@ export function ReadyScreen({
   onStart,
   onSetup,
   onRollingChange,
+  onHoppingChange,
   claimShortEscape,
 }: ReadyScreenProps) {
   const screenRef = useRef<HTMLElement>(null);
@@ -52,6 +55,10 @@ export function ReadyScreen({
     hoppingRef.current = open;
     setHopping(open);
   }
+  useEffect(() => {
+    onHoppingChange?.(hopping);
+    return () => onHoppingChange?.(false);
+  }, [hopping, onHoppingChange]);
   const logoHold = useLogoHold(onSetup, () => {
     if (readyLogoTap(rolling.length) === "roll") {
       asleepRef.current = true;

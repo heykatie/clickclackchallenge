@@ -35,6 +35,11 @@ export interface Theme {
   melody: readonly Melody[];
   /** The instrument that plays the melody. Defaults to the music box. */
   lead?: "bell" | "brass" | "square" | "flute";
+  /**
+   * Sparse music-box accents over the lead (Keycap Hop): short bell winks, not a second full melody.
+   * One phrase per bar of the loop.
+   */
+  sparkle?: readonly Melody[];
   /** A figure on every 16th, one per bar of the loop: semitones above the bar's bass note. */
   ostinato?: readonly (readonly number[])[];
   /** What plays the ostinato. Defaults to strings. */

@@ -1,7 +1,18 @@
 import type { ResultCopy } from "../features/results/resultPlacement";
 import type { TestSession } from "../features/typing/typingEngine";
 
-export type SoundCue = "key" | "miss" | "chime" | "ding";
+export type SoundCue = "key" | "miss" | "chime" | "ding" | "hop-slow" | "hop-big" | "hop-small" | "hop-bonk";
+
+/** Keycap Hop power-up pickups: each kind has its own little cue. */
+export function hopPowerCue(kind: "slow" | "big" | "small"): SoundCue {
+  if (kind === "slow") {
+    return "hop-slow";
+  }
+  if (kind === "big") {
+    return "hop-big";
+  }
+  return "hop-small";
+}
 
 /** A key press makes a soft click when it was right and a low blip when it was wrong. Other keys are quiet. */
 export function keyCue(before: TestSession | null, after: TestSession | null): SoundCue | null {

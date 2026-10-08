@@ -39,6 +39,7 @@ async function renderReady(
   const onStart = vi.fn();
   const onSetup = vi.fn();
   const onRollingChange = vi.fn();
+  const onHoppingChange = vi.fn();
   let shortEscape: (() => void) | null = null;
   render(
     <ReadyScreen
@@ -48,6 +49,7 @@ async function renderReady(
       onStart={onStart}
       onSetup={onSetup}
       onRollingChange={onRollingChange}
+      onHoppingChange={onHoppingChange}
       claimShortEscape={(handler) => {
         shortEscape = handler;
       }}
@@ -55,7 +57,7 @@ async function renderReady(
   );
   // Let the scores load.
   await act(async () => {});
-  return { onRollingChange, onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
+  return { onRollingChange, onHoppingChange, onStart, onSetup, shortEscape: () => act(() => shortEscape?.()) };
 }
 
 /** A tap lands its pointerup on whatever screen is showing once pointerdown has been handled. */
@@ -156,6 +158,15 @@ describe("ReadyScreen", () => {
     fireEvent.pointerUp(game, { button: 0 });
     expect(onStart).not.toHaveBeenCalled();
     expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
+  });
+
+  it("reports when Keycap Hop opens and closes, so the music can follow it", async () => {
+    const { onHoppingChange, shortEscape } = await renderReady([]);
+    expect(onHoppingChange).toHaveBeenLastCalledWith(false);
+    tapLogo();
+    expect(onHoppingChange).toHaveBeenLastCalledWith(true);
+    shortEscape();
+    expect(onHoppingChange).toHaveBeenLastCalledWith(false);
   });
 
   it("opens Keycap Hop on a short Escape with nothing to roll, and closes it on the next", async () => {

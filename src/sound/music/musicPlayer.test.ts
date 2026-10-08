@@ -151,6 +151,20 @@ describe("createMusicPlayer", () => {
     expect(context.createBiquadFilter.mock.calls.length).toBeGreaterThan(16);
   });
 
+  it("ducks the master bed while Keycap Hop is open, then restores it", () => {
+    const { context } = fakeContext();
+    const music = createMusicPlayer(() => context as unknown as AudioContext);
+    music.setEnabled(true);
+    music.setTheme("cozy");
+    const masterGain = context.createGain.mock.results[0]!.value.gain;
+    music.setHopQuiet(true);
+    const ducked = masterGain.setTargetAtTime.mock.calls.at(-1)![0] as number;
+    expect(ducked).toBeLessThan(0.085);
+    expect(ducked).toBeGreaterThan(0);
+    music.setHopQuiet(false);
+    expect(masterGain.setTargetAtTime.mock.calls.at(-1)![0]).toBe(0.085);
+  });
+
   it("plays the arcade's square lead and the storybook's flute and harp, all filtered soft", () => {
     for (const [theme, wave] of [
       ["arcade-lounge", "square"],

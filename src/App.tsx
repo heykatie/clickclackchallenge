@@ -17,7 +17,7 @@ import { TypingScreen } from "./screens/TypingScreen";
 import { appReducer, initialState, type AppState } from "./state/appState";
 import { createEscapeHold, escapeHoldMs } from "./state/escapeHold";
 import { boothMusic } from "./sound/music/musicPlayer";
-import { themeForScreen } from "./sound/music/themes";
+import { HOP_THEME, themeForScreen } from "./sound/music/themes";
 import { boothSound } from "./sound/boothSound";
 import { keyCue, resultCue } from "./sound/soundCues";
 import { createResultSaver } from "./state/resultSave";
@@ -48,6 +48,8 @@ function App() {
   const [palette, setPalette] = useState<Palette>("warm");
   // The idle high-score list sits on top of Ready, so it is tracked apart from the screen for the music.
   const [rolling, setRolling] = useState(false);
+  // Keycap Hop has its own tune; Ready reports when it is open.
+  const [hopping, setHopping] = useState(false);
   // Event Setup previews the highlighted mode's music before the event starts.
   const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
@@ -405,10 +407,12 @@ function App() {
   const musicTheme =
     status !== "ready"
       ? null
-      : themeForScreen(
-          state.screen === "ready" && rolling ? "rolling" : state.screen,
-          state.screen === "setup" ? setupMode : (state.activeEvent?.testMode ?? "famous-lines"),
-        );
+      : hopping
+        ? HOP_THEME
+        : themeForScreen(
+            state.screen === "ready" && rolling ? "rolling" : state.screen,
+            state.screen === "setup" ? setupMode : (state.activeEvent?.testMode ?? "famous-lines"),
+          );
 
   useEffect(() => {
     boothMusic.setEnabled(musicOn);
@@ -519,6 +523,7 @@ function App() {
           }}
           onSetup={() => dispatch({ type: "ENTER_SETUP" })}
           onRollingChange={setRolling}
+          onHoppingChange={setHopping}
           claimShortEscape={claimShortEscape}
         />
       );
