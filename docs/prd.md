@@ -1258,6 +1258,8 @@ A partially completed contestant test does not need to be restored after the app
 
 At launch the app asks the browser to keep its storage (`navigator.storage.persist()`), so the browser does not clear the scores to free space or after a period without use. The browser decides whether to grant it; Safari keeps a Home Screen app's data, but a regular Safari tab can lose it after about 7 days without use. Running the booth from the Home Screen app remains required. The request never blocks the booth.
 
+Event Setup shows whether browser cleanup protection was granted, denied, or is unavailable. If protection was denied or cannot be checked, it reminds staff to download a score backup before the event.
+
 ---
 
 ## 21. Accessibility Requirements
@@ -1266,6 +1268,7 @@ V1 should include:
 
 - semantic buttons and inputs
 - visible keyboard focus
+- Keycap Hop moves focus into its dialog, keeps Tab inside, and returns focus to Ready when it closes
 - readable contrast
 - large text
 - large touch targets for operator controls

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { requestPersistentStorage } from "./db/persistentStorage";
+import { requestPersistentStorage, type PersistResult } from "./db/persistentStorage";
 import { clearCurrentEvent, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, setPalette as savePalette, type Palette, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
@@ -33,6 +33,7 @@ function landscapeOnly(screen: BoothScreen, screenNode: ReactNode, logo?: LogoAc
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
+  const [storageProtection, setStorageProtection] = useState<PersistResult | "checking">("checking");
   // A new version waits until the operator installs it from Event Setup or the app is closed.
   const {
     needRefresh: [updateReady],
@@ -143,7 +144,7 @@ function App() {
         setPalette(booth.settings.palette ?? "warm");
         setStatus("ready");
         // Storage works without this; it only asks the browser not to evict the scores.
-        void requestPersistentStorage();
+        void requestPersistentStorage().then(setStorageProtection);
       },
       () => {
         if (!cancelled) {
@@ -487,6 +488,7 @@ function App() {
           }}
           canRestore={canRestore}
           canClear={boardScoreCount > 0}
+          storageProtection={storageProtection}
           onRestoreScores={() => {
             void restoreScores();
           }}

@@ -132,6 +132,12 @@ h1,
   padding: 5rem 2.5rem calc(2rem + env(safe-area-inset-bottom));
 }
 
+@media (max-width: 560px) {
+  .screen:not(.typing-screen) {
+    padding: calc(4rem + env(safe-area-inset-top)) 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}
+
 .landscape-gate {
   display: flex;
   align-items: center;

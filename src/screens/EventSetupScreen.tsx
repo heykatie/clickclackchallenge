@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   cleanEventName,
   MAX_EVENT_NAME_LENGTH,
@@ -7,6 +8,7 @@ import {
   type TestDuration,
   type TestMode,
 } from "../db/persistence";
+import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
   applyFreshConfirmKey,
@@ -52,6 +54,8 @@ type EventSetupScreenProps = {
   onTestModeChange?: (mode: TestMode) => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
   plinkoWins: number | null;
+  /** Whether the browser granted protection against automatic storage cleanup. */
+  storageProtection?: PersistResult | "checking";
 };
 
 export function EventSetupScreen({
@@ -77,6 +81,7 @@ export function EventSetupScreen({
   palette,
   onTogglePalette,
   plinkoWins,
+  storageProtection = "checking",
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -494,7 +499,16 @@ export function EventSetupScreen({
                 ) : null}
               </div>
             ) : null}
-            {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
+            {storedDuration === null ? <p className="setup-note">No previous event.</p> : null}
+            <p className="setup-storage-status" role="status" aria-live="polite">
+              {storageProtection === "checking"
+                ? "Checking storage…"
+                : storageProtection === "persisted" || storageProtection === "granted"
+                  ? "Score storage is protected."
+                  : storageProtection === "denied"
+                    ? "Storage isn’t protected. Download a backup."
+                    : "Storage status is unavailable. Download a backup."}
+            </p>
           </fieldset>
         </div>
         <footer className="setup-footer" {...shutWhileAsking}>
@@ -530,46 +544,54 @@ export function EventSetupScreen({
           </div>
         </footer>
       {confirmCursor !== null ? (
-        // A modal over the page: Event Setup stays where it was behind it, shut off until CANCEL or a choice.
-        <div className="setup-modal-backdrop">
-        <section className="setup-confirm" role="alertdialog" aria-modal="true" aria-labelledby="setup-confirm-title">
-          {confirmKind === "restore" ? (
-            <>
-              <h2 id="setup-confirm-title">Restore cleared scores?</h2>
-              <p>
-                The scores hidden by the last clear show again on every board and list. The current event and its
-                scores stay.
-              </p>
-            </>
-          ) : confirmKind === "clear" ? (
-            <>
-              <h2 id="setup-confirm-title">Clear this board?</h2>
-              <p>
-                This event's scores are hidden from every leaderboard, the high-score list, and the all-time best,
-                and an empty event starts. Earlier events stay. The scores stay saved on this device.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
-              <p>The recent scores stay saved, but they will not show on current leaderboard again.</p>
-            </>
-          )}
-          <div className="setup-confirm-actions">
-            <button
-              type="button"
-              ref={cancelButtonRef}
-              className="setup-confirm-cancel"
-              onClick={() => setConfirmCursor(null)}
+        // Keep the fixed overlay outside the setup screen's flex layout so it cannot shift the page behind it.
+        createPortal(
+          <div className="setup-modal-backdrop">
+            <section
+              className="setup-confirm"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="setup-confirm-title"
             >
-              CANCEL
-            </button>
-            <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
-              {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
-            </button>
-          </div>
-        </section>
-        </div>
+              {confirmKind === "restore" ? (
+                <>
+                  <h2 id="setup-confirm-title">Restore cleared scores?</h2>
+                  <p>
+                    The scores hidden by the last clear show again on every board and list. The current event and its
+                    scores stay.
+                  </p>
+                </>
+              ) : confirmKind === "clear" ? (
+                <>
+                  <h2 id="setup-confirm-title">Clear this board?</h2>
+                  <p>
+                    This event's scores are hidden from every leaderboard, the high-score list, and the all-time best,
+                    and an empty event starts. Earlier events stay. The scores stay saved on this device.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 id="setup-confirm-title">Start a fresh leaderboard?</h2>
+                  <p>The recent scores stay saved, but they will not show on current leaderboard again.</p>
+                </>
+              )}
+              <div className="setup-confirm-actions">
+                <button
+                  type="button"
+                  ref={cancelButtonRef}
+                  className="setup-confirm-cancel"
+                  onClick={() => setConfirmCursor(null)}
+                >
+                  CANCEL
+                </button>
+                <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
+                  {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
+                </button>
+              </div>
+            </section>
+          </div>,
+          document.body,
+        )
       ) : null}
     </main>
   );

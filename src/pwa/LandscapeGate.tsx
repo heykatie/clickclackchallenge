@@ -26,7 +26,7 @@ export function LandscapeGate({ children, logo, enabled = GATE_ENABLED }: Landsc
         {logo ? <button type="button" className="logo-badge" aria-label="Back to start" {...logoHold} /> : null}
         <div className="ready-copy">
           <h1>GIANT keyboard typing contest!</h1>
-          <p className="display ready-prompt landscape-gate-prompt">Turn sideways and use the full screen.</p>
+          <p className="display ready-prompt landscape-gate-prompt">Turn sideways to continue.</p>
         </div>
       </main>
     );

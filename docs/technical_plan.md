@@ -268,7 +268,7 @@ Use `vite-plugin-pwa` and Workbox. Register the generated service worker through
 
 The manifest is configured in `vite.config.ts`. Its name and short name are “clickclackchallenge.” It starts at `/`, uses `display: "standalone"` and `orientation: "any"`, and uses blush `#FBEDEF` for the background and theme. `registerType` is `"prompt"`, so a new build waits until the Home Screen app is closed and reopened, or until the operator picks UPDATE NOW. `App` registers the worker with `useRegisterSW` from `virtual:pwa-register/react` and passes its `needRefresh` flag to Event Setup. UPDATE NOW calls `updateServiceWorker(true)`, which sends `SKIP_WAITING` and reloads. Nothing else calls `skipWaiting` or reloads, so an update never interrupts a contestant. The manifest icons are the blush keycap at 192 and 512, including a maskable 512. `index.html` also links the 180px Apple touch icon so Safari can install that keycap on the Home Screen.
 
-The installed app can rotate. Safari on iPad does not reliably lock a page that is not installed, and Split View can still narrow a landscape window. Only Typing stays landscape and full screen. If that viewport is portrait, or landscape but narrower than the screen, do not render the passage. Show the contest headline and “Turn sideways and use the full screen.” from `docs/design_system.md`. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. `showsInPortrait` is that rule. The Plinko line stays on Ready. Do not reflow the typing layout into a portrait or narrow viewport. `needsLandscapeGate` compares the viewport width with `screen.availWidth`. A 24px gap still counts as full width, so a scrollbar does not hide Typing. While the instruction is showing, Typing unmounts, so the passage listener stops. The instruction keeps Typing's logo badge in the same corner: a tap, like a short Escape, returns to Ready and discards the attempt, and a long-press opens Event Setup. The reducer in `App` stays mounted, so rotating back does not discard an in-progress test. The local dev server (`npm run dev`) skips this gate so Typing can be built and tested in any window. Every built deploy, including Vercel previews, keeps it.
+The installed app can rotate. Only Typing requires a landscape viewport; it can run in a window. In portrait, do not render the passage and show the contest headline and “Turn sideways to continue.” from `docs/design_system.md`. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait. `showsInPortrait` is that rule. The Plinko line stays on Ready. Do not reflow the typing layout into portrait. `needsLandscapeGate` checks viewport orientation only. While the instruction is showing, Typing unmounts, so the passage listener stops. The instruction keeps Typing's logo badge in the same corner: a tap, like a short Escape, returns to Ready and discards the attempt, and a long-press opens Event Setup. The reducer in `App` stays mounted, so rotating back does not discard an in-progress test. The local dev server (`npm run dev`) skips this gate so Typing can be built and tested in any window. Every built deploy, including Vercel previews, keeps it.
 
 Workbox precaches the Vite build, including hashed JavaScript, CSS, fonts, icons, and the manifest. Passages are imported into the JavaScript bundle, so they ride along in that precache. The navigation fallback is `index.html`, so an installed launch still loads the shell offline.
 
@@ -2001,7 +2001,7 @@ Required cases:
 restoreClearedScores shows the last clear's scores again, keeps the current event and its scores, undoes one clear at a time newest first, and reports when nothing is hidden (hasClearedScores)
 Clear board hides only the current event and its scores, keeps earlier events visible, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearCurrentEvent)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
-launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
+launch asks the browser to keep storage once, skips the request when already persisted, never blocks when refused or unsupported, and Event Setup shows the result with a backup reminder when protection is not confirmed (requestPersistentStorage, App)
 event can be written and read
 score can be written and read
 multiple scores can be retrieved by eventId
@@ -2125,9 +2125,8 @@ Required cases:
 ```text
 portrait shows the instruction for Typing
 portrait keeps Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list visible
-a landscape viewport narrower than the screen shows the instruction
-a landscape viewport that fills the screen width shows the booth
-a scrollbar-sized gap still shows the booth
+a landscape viewport works in a window
+a square viewport shows the instruction
 the instruction keeps the logo badge: a tap returns to Ready, a long-press opens Event Setup
 ```
 
@@ -2139,7 +2138,7 @@ Required on the actual target landscape iPad:
 
 ```text
 Event Setup fits without clipping
-portrait and Split View show the landscape full-screen instruction on Typing. Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait
+portrait shows the orientation instruction on Typing. Windowed landscape displays Typing; Event Setup, Ready, Results, the Leaderboard, and the rolling high-score list stay visible in portrait
 Ready screen is readable from approximately two feet away
 typing sentence remains on one line
 typing sentence does not clip at either side

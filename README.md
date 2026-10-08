@@ -24,7 +24,7 @@ The five booth screens, in order, on the 4:3 stage.
 
 <img src="docs/screenshots/04-results.png" alt="Results screen with a new high score, a Plinko drop, and a name field" width="840">
 
-**Results.** A Top 20 score at 70% accuracy or better can enter a name. Displayed WPM above 50 wins a Plinko drop.
+**Results.** A Top 20 score at 25% displayed accuracy or better can enter a name. Displayed WPM above 50 wins a Plinko drop.
 
 <img src="docs/screenshots/05-leaderboard.png" alt="Leaderboard showing the current score in the Top 5" width="840">
 
@@ -42,7 +42,7 @@ Game modes are Standard, Famous Lines, and Story. A score keeps the length, mode
 
 ### Scoring and names
 
-A score can rank when its accuracy is at least 70% and its displayed WPM is at least 1. The gate uses the stored percentage, so 69.99% does not qualify even though it displays as 70%. The threshold is provisional until it is checked on the giant keyboard.
+A score can rank when its displayed accuracy is at least 25% and its displayed WPM is at least 1. A stored accuracy of 24.5% displays as 25% and qualifies; 24.4% displays as 24% and does not. The threshold is provisional until it is checked on the giant keyboard.
 
 Displayed WPM above 50 wins a Plinko drop. That line is separate from ranking.
 
