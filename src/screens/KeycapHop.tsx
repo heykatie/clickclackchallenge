@@ -209,7 +209,7 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
       </div>
       <canvas ref={canvasRef} className="hop-canvas" aria-hidden="true" />
       <p className="hop-hint">
-        {phase === "crashed" ? "Bonk! Hop to go again." : phase === "ready" ? "No scores yet, so: press Space or tap to hop." : " "}
+        {phase === "crashed" ? "Bonk! Hop to go again." : phase === "ready" ? "Press Space or tap to hop." : " "}
       </p>
     </main>
   );

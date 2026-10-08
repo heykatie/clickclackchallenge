@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { needsLandscapeGate } from "./boothViewport";
 
 function readGate(): boolean {
-  return needsLandscapeGate(window.innerWidth, window.innerHeight, window.screen.availWidth);
+  return needsLandscapeGate(window.innerWidth, window.innerHeight);
 }
 
 export function useNeedsLandscapeGate(): boolean {

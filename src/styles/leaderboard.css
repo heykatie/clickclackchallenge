@@ -26,6 +26,22 @@
   font-weight: 700;
 }
 
+@media (max-width: 560px) {
+  .leaderboard-screen {
+    gap: 0.6rem;
+  }
+
+  .leaderboard-screen h1 {
+    font-size: 2.1rem;
+  }
+
+  .next-player-button {
+    min-height: 3.5rem;
+    margin-top: 0.15rem;
+    font-size: 1.2rem;
+  }
+}
+
 /* Leaderboard motion. The just-saved row climbs from below the board; the rows below it slide down. */
 /* The climbing row rises from inside the board's bottom edge, not over NEXT PLAYER. */
 .leaderboard-rows {

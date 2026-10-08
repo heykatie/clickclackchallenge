@@ -199,6 +199,11 @@
     gap: 0.4rem;
   }
 
+  .score-crown svg {
+    width: 1.15rem;
+    height: auto;
+  }
+
   .score-name {
     font-size: 1.15rem;
   }

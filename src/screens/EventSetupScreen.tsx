@@ -499,15 +499,15 @@ export function EventSetupScreen({
                 ) : null}
               </div>
             ) : null}
-            {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
+            {storedDuration === null ? <p className="setup-note">No previous event.</p> : null}
             <p className="setup-storage-status" role="status" aria-live="polite">
               {storageProtection === "checking"
-                ? "Checking score storage…"
+                ? "Checking storage…"
                 : storageProtection === "persisted" || storageProtection === "granted"
-                  ? "Browser cleanup protection is on."
+                  ? "Score storage is protected."
                   : storageProtection === "denied"
-                    ? "Browser cleanup protection wasn’t granted. Download scores for a backup."
-                    : "Browser cleanup protection status is unavailable. Download scores for a backup."}
+                    ? "Storage isn’t protected. Download a backup."
+                    : "Storage status is unavailable. Download a backup."}
             </p>
           </fieldset>
         </div>

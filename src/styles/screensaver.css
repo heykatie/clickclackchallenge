@@ -67,6 +67,30 @@
   font-size: 2.75rem;
 }
 
+@media (max-width: 560px) {
+  .screensaver {
+    gap: 0.65rem;
+  }
+
+  .screensaver .score-row {
+    min-height: 3rem;
+  }
+
+  .screensaver .score-rank {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .screensaver .score-name {
+    font-size: 1.1rem;
+  }
+
+  .screensaver .score-wpm-value {
+    font-size: 1.4rem;
+  }
+}
+
 /*
  * A list short enough to hold still would look frozen, so after the rows rise in, a slow wave
  * lifts each row in turn every 4 seconds, and the rank 1 crown wiggles as it passes.
