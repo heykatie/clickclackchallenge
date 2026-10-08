@@ -244,7 +244,7 @@ button.is-cursor {
 
 .edge-motifs::before {
   left: -6rem;
-  bottom: -7rem;
+  bottom: 0.75rem;
   width: 18rem;
   height: 16rem;
   border-radius: 58% 42% 50% 50% / 52% 48% 52% 48%;
@@ -269,13 +269,13 @@ main.screen:not(.typing-screen) {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23aa9ad4' stroke-width='4' stroke-linejoin='round'%3E%3Cpath id='p' d='M50 50C34 36 36 8 50 8S66 36 50 50Z'/%3E%3Cuse href='%23p' transform='rotate(72 50 50)'/%3E%3Cuse href='%23p' transform='rotate(144 50 50)'/%3E%3Cuse href='%23p' transform='rotate(216 50 50)'/%3E%3Cuse href='%23p' transform='rotate(288 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='7' fill='%23aa9ad4'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23e9c44f' stroke-width='5' stroke-linejoin='round'%3E%3Cpath id='p' d='M50 50C34 36 36 8 50 8S66 36 50 50Z'/%3E%3Cuse href='%23p' transform='rotate(72 50 50)'/%3E%3Cuse href='%23p' transform='rotate(144 50 50)'/%3E%3Cuse href='%23p' transform='rotate(216 50 50)'/%3E%3Cuse href='%23p' transform='rotate(288 50 50)'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='7' fill='%23e9c44f'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  /* Like the other doodles, the big flower bleeds off its corner, clear of every control and line of text. */
+  /* Keep the large flower fully visible, with a little breathing room from the screen edge. */
   background-size:
     7rem,
     3rem,
     3rem;
   background-position:
-    right -1.75rem bottom -1.75rem,
+    right 0.75rem bottom 0.75rem,
     right 9rem top 1.5rem,
     left 6rem top 1.25rem;
 }

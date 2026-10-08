@@ -183,9 +183,9 @@ Group related information with whitespace, soft surfaces, and fine borders. Avoi
 
 Allowed motifs include organic pastel blobs, swirls, arcs, dots, stars, sparkles, hearts, confetti, and simple keycap-inspired forms.
 
-Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge; essential content may not.
+Place them near corners, edges, or empty background areas. Never overlap passages, scores, timers, inputs, leaderboard rows, or actions. Decoration may be cropped by the screen edge, except bottom motifs must remain fully visible vertically; essential content may not be cropped.
 
-Every screen except Typing shows three outlined flowers, after the shop's workshop flyers: a large pale-yellow one bleeding off the bottom-right corner, and small pale-yellow and lavender ones near the top. Both palettes show them.
+Every screen except Typing shows three outlined flowers, after the shop's workshop flyers: a large pale-yellow one near the bottom-right corner, fully visible inside the screen edge, and small pale-yellow and lavender ones near the top. Both palettes show them.
 
 During Typing, remove or greatly reduce decoration. On Results, use small celebration details that leave the score and name field clear.
 

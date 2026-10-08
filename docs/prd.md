@@ -1187,7 +1187,7 @@ If an offline-readiness indicator is included, it must reflect real cache and se
 
 ### App Updates
 
-A new deployment downloads in the background and waits. It never reloads the app on its own, so it cannot interrupt a contestant. While it waits, Event Setup shows “An update is ready.” with an UPDATE NOW button, first in the arrow-key order. UPDATE NOW installs it and restarts the app on Event Setup; saved scores are kept. Closing and reopening the Home Screen app also installs it. Contestant screens show no update message.
+A new deployment is checked when the service worker registers, when the app returns to the foreground, and every 30 minutes while the app is visible. It downloads in the background and waits. It never reloads the app on its own, so it cannot interrupt a contestant. While it waits, Event Setup shows “An update is ready.” with an UPDATE NOW button, first in the arrow-key order. UPDATE NOW installs it and restarts the app on Event Setup; saved scores are kept. Closing and reopening the Home Screen app also installs it. Contestant screens show no update message.
 
 ### PWA Installation Requirement
 

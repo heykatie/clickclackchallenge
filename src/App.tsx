@@ -9,6 +9,7 @@ import { countPlinkoWins } from "./features/typing/scoring";
 import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
 import { LandscapeGate, type LogoActions } from "./pwa/LandscapeGate";
+import { watchForServiceWorkerUpdates } from "./pwa/updateChecks";
 import { LeaderboardScreen } from "./screens/LeaderboardScreen";
 import { EventSetupScreen } from "./screens/EventSetupScreen";
 import { ReadyScreen } from "./screens/ReadyScreen";
@@ -34,11 +35,18 @@ function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">("loading");
   const [storageProtection, setStorageProtection] = useState<PersistResult | "checking">("checking");
+  const [serviceWorkerRegistration, setServiceWorkerRegistration] = useState<ServiceWorkerRegistration | null>(null);
   // A new version waits until the operator installs it from Event Setup or the app is closed.
   const {
     needRefresh: [updateReady],
     updateServiceWorker,
-  } = useRegisterSW();
+  } = useRegisterSW({
+    onRegisteredSW: (_url, registration) => {
+      if (registration) {
+        setServiceWorkerRegistration(registration);
+      }
+    },
+  });
   const [saving, setSaving] = useState(false);
   const [standing, setStanding] = useState<ResultStanding | null>(null);
   const [leaderboardScores, setLeaderboardScores] = useState<ScoreRecord[]>([]);
@@ -72,6 +80,12 @@ function App() {
   useLayoutEffect(() => {
     stateRef.current = state;
   });
+  useEffect(() => {
+    if (!serviceWorkerRegistration) {
+      return;
+    }
+    return watchForServiceWorkerUpdates(serviceWorkerRegistration);
+  }, [serviceWorkerRegistration]);
   useEffect(() => {
     screenRef.current = state.screen;
     statusRef.current = status;
