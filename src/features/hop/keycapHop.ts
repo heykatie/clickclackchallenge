@@ -9,6 +9,8 @@ export interface HopObstacle {
   x: number;
   width: number;
   height: number;
+  /** A keycap stack, a wide double stack (later levels only), or a low tangle of cable. */
+  kind: "stack" | "double" | "cable";
 }
 
 export interface HopState {
@@ -39,10 +41,12 @@ export const HOP = {
   keycapX: 50,
   keycapSize: 34,
   startSpeed: 280,
-  maxSpeed: 640,
+  maxSpeed: 760,
   /** Speed gained each second of running. */
   acceleration: 10,
-  tallestObstacle: 46,
+  tallestObstacle: 60,
+  /** Seconds from leaving the ground to the top of a jump. */
+  timeToPeak: JUMP_VELOCITY / GRAVITY,
   /** The top of a jump: v² / 2g. */
   jumpPeak: (JUMP_VELOCITY * JUMP_VELOCITY) / (2 * GRAVITY),
   /** Room after one obstacle to land and jump again: a jump's air time at this speed, plus a little ground. */
@@ -77,12 +81,39 @@ export function hopScore(state: HopState): number {
   return Math.floor(state.distance / 25);
 }
 
-function newObstacle(random: () => number): HopObstacle {
-  // Two kinds: a tall stack of keycaps, or a long, low tangle of cable.
-  if (random() < 0.65) {
-    return { x: HOP.worldWidth, width: 22 + Math.round(random() * 12), height: 28 + Math.round(random() * 18) };
+/** A new level every 100 points, as the milestone ding marks. */
+export function hopLevel(state: HopState): number {
+  return 1 + Math.floor(hopScore(state) / 100);
+}
+
+/** How hard the run is, from 0 at the start to 1 at 600 points and beyond. */
+export function hopDifficulty(state: HopState): number {
+  return Math.min(1, hopScore(state) / 600);
+}
+
+/**
+ * The next obstacle, harder as difficulty rises: stacks grow taller (up to the tallest a hop clears with room to
+ * spare), and wide double stacks join in. Every one stays clearable at top speed, as the fairness test proves.
+ */
+function newObstacle(random: () => number, difficulty: number): HopObstacle {
+  const roll = random();
+  if (roll < 0.3 * difficulty) {
+    return {
+      x: HOP.worldWidth,
+      width: 50 + Math.round(random() * 12),
+      height: 26 + Math.round(random() * (12 + 12 * difficulty)),
+      kind: "double",
+    };
   }
-  return { x: HOP.worldWidth, width: 40 + Math.round(random() * 16), height: 14 + Math.round(random() * 6) };
+  if (roll < 0.65) {
+    return {
+      x: HOP.worldWidth,
+      width: 22 + Math.round(random() * 12),
+      height: 28 + Math.round(random() * (18 + 14 * difficulty)),
+      kind: "stack",
+    };
+  }
+  return { x: HOP.worldWidth, width: 40 + Math.round(random() * 16), height: 14 + Math.round(random() * 6), kind: "cable" };
 }
 
 function hits(state: HopState, obstacle: HopObstacle): boolean {
@@ -112,9 +143,11 @@ export function stepHop(state: HopState, dt: number, random: () => number): HopS
   let nextGap = state.nextGap;
   const last = obstacles.at(-1);
   if (!last || last.x + last.width + nextGap <= HOP.worldWidth) {
-    obstacles.push(newObstacle(random));
-    // Spaced for a little more speed than now: the run keeps speeding up while this gap crosses the screen.
-    nextGap = HOP.minGap(Math.min(HOP.maxSpeed, speed + SPEED_HEADROOM)) + random() * 220;
+    const difficulty = hopDifficulty(state);
+    obstacles.push(newObstacle(random, difficulty));
+    // Spaced for a little more speed than now: the run keeps speeding up while this gap crosses the screen. The
+    // extra breathing room shrinks as it gets harder, but never below a fair minimum.
+    nextGap = HOP.minGap(Math.min(HOP.maxSpeed, speed + SPEED_HEADROOM)) + random() * (220 - 170 * difficulty);
   }
 
   const next: HopState = { ...state, height, velocity, speed, distance: state.distance + moved, obstacles, nextGap };

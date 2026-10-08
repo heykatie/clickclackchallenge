@@ -3,6 +3,8 @@ import { pick, seededRandom } from "../../test/seededRandom";
 import {
   HOP,
   createHop,
+  hopDifficulty,
+  hopLevel,
   hopScore,
   jumpHop,
   stepHop,
@@ -79,7 +81,7 @@ describe("Keycap Hop", () => {
       ...jumpHop(createHop()),
       height: 0,
       velocity: 0,
-      obstacles: [{ x: HOP.keycapX + 5, width: 30, height: 40 }],
+      obstacles: [{ x: HOP.keycapX + 5, width: 30, height: 40, kind: "stack" }],
     };
     const crashed = stepHop(hop, FRAME, () => 0.5);
     expect(crashed.crashed).toBe(true);
@@ -92,7 +94,7 @@ describe("Keycap Hop", () => {
       ...jumpHop(createHop()),
       height: HOP.tallestObstacle + 20,
       velocity: 0,
-      obstacles: [{ x: HOP.keycapX + 5, width: 30, height: HOP.tallestObstacle }],
+      obstacles: [{ x: HOP.keycapX + 5, width: 30, height: HOP.tallestObstacle, kind: "stack" }],
     };
     expect(stepHop(hop, FRAME, () => 0.5).crashed).toBe(false);
   });
@@ -105,4 +107,59 @@ describe("Keycap Hop", () => {
     expect(again.obstacles).toEqual([]);
     expect(hopScore(again)).toBe(0);
   });
+
+  it("gets harder gradually: a level every 100 points, and difficulty rising from 0 to 1", () => {
+    const at = (score: number): HopState => ({ ...createHop(), distance: score * 25 });
+    expect(hopLevel(at(0))).toBe(1);
+    expect(hopLevel(at(99))).toBe(1);
+    expect(hopLevel(at(100))).toBe(2);
+    expect(hopLevel(at(450))).toBe(5);
+    expect(hopDifficulty(at(0))).toBe(0);
+    expect(hopDifficulty(at(300))).toBeGreaterThan(hopDifficulty(at(100)));
+    expect(hopDifficulty(at(5_000))).toBe(1);
+  });
+
+  it("brings taller stacks, double stacks, and tighter gaps as it gets harder", () => {
+    const sample = (score: number) => {
+      const random = seededRandom(score + 1);
+      let hop: HopState = { ...jumpHop(createHop()), distance: score * 25 };
+      const seen: HopState["obstacles"] = [];
+      const gaps: number[] = [];
+      for (let t = 0; t < 60; t += FRAME) {
+        const before = hop.obstacles.length;
+        hop = { ...stepHop(hop, FRAME, random), crashed: false, running: true, height: 0, velocity: 0, distance: score * 25 };
+        if (hop.obstacles.length > before) {
+          seen.push(hop.obstacles.at(-1)!);
+          gaps.push(hop.nextGap - HOP.minGap(Math.min(HOP.maxSpeed, hop.speed + 40)));
+        }
+      }
+      return { seen, extraGap: gaps.reduce((a, b) => a + b, 0) / gaps.length };
+    };
+    const easy = sample(0);
+    const hard = sample(2_000);
+    expect(easy.seen.some((obstacle) => obstacle.kind === "double")).toBe(false);
+    expect(hard.seen.some((obstacle) => obstacle.kind === "double")).toBe(true);
+    expect(Math.max(...hard.seen.map((obstacle) => obstacle.height))).toBeGreaterThan(Math.max(...easy.seen.map((obstacle) => obstacle.height)));
+    expect(hard.extraGap).toBeLessThan(easy.extraGap);
+    expect(Math.max(...hard.seen.map((obstacle) => obstacle.height))).toBeLessThanOrEqual(HOP.tallestObstacle);
+  });
+
+  it("stays fair at its hardest: a well-timed hopper clears 60 seconds of every run", () => {
+    for (let seed = 1; seed <= 120; seed += 1) {
+      const random = seededRandom(seed);
+      // Start at full difficulty and top speed.
+      let hop: HopState = { ...jumpHop(createHop()), distance: 10_000 * 25, speed: HOP.maxSpeed, velocity: 0 };
+      for (let t = 0; t < 60; t += FRAME) {
+        const keycapMiddle = HOP.keycapX + HOP.keycapSize / 2;
+        const next = hop.obstacles.find((obstacle) => obstacle.x + obstacle.width > HOP.keycapX);
+        // Hop so the top of the jump lands over the obstacle's middle.
+        if (next && hop.height === 0 && next.x + next.width / 2 - keycapMiddle <= hop.speed * HOP.timeToPeak) {
+          hop = jumpHop(hop);
+        }
+        hop = stepHop(hop, FRAME, random);
+        expect(hop.crashed, `seed ${seed} at ${t.toFixed(2)}s`).toBe(false);
+      }
+    }
+  }, 60_000);
 });
+

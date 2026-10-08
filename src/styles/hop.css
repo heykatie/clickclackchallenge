@@ -43,6 +43,10 @@
   letter-spacing: 0.08em;
 }
 
+.hop-level {
+  color: var(--tiny-mint-deep);
+}
+
 .hop-best {
   color: var(--tiny-lavender-deep);
 }

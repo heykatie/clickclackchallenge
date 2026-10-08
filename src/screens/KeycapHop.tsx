@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { HOP, createHop, hopScore, jumpHop, stepHop, type HopState } from "../features/hop/keycapHop";
+import {
+  HOP,
+  createHop,
+  hopLevel,
+  hopScore,
+  jumpHop,
+  stepHop,
+  type HopObstacle,
+  type HopState,
+} from "../features/hop/keycapHop";
 import { boothSound } from "../sound/boothSound";
 import { useLogoHold } from "./useLogoHold";
 
@@ -24,9 +33,11 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<HopState>(createHop());
   const [score, setScore] = useState(0);
+  const [level, setLevel] = useState(1);
   const [best, setBest] = useState(sessionBest);
   const [phase, setPhase] = useState<"ready" | "running" | "crashed">("ready");
   const [activity, setActivity] = useState(0);
+  const levelRef = useRef(1);
   const onCloseRef = useRef(onClose);
   const logoHold = useLogoHold(onSetup, onClose);
 
@@ -42,6 +53,8 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
       setPhase("running");
       if (before.crashed) {
         setScore(0);
+        setLevel(1);
+        levelRef.current = 1;
       }
       boothSound.play("key");
     }
@@ -83,7 +96,15 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
       if (after !== before) {
         stateRef.current = after;
         const nextScore = hopScore(after);
+        const nextLevel = hopLevel(after);
         setScore((current) => (current === nextScore ? current : nextScore));
+        if (nextLevel !== levelRef.current) {
+          if (nextLevel > levelRef.current) {
+            boothSound.play("ding");
+          }
+          levelRef.current = nextLevel;
+          setLevel(nextLevel);
+        }
         if (after.crashed && !before.crashed) {
           boothSound.play("miss");
           setPhase("crashed");
@@ -118,6 +139,7 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
         <p className="hop-title">Keycap Hop</p>
         <p className="hop-score">
           <span>{String(score).padStart(5, "0")}</span>
+          <span className="hop-level">LV {level}</span>
           <span className="hop-best">BEST {String(best).padStart(5, "0")}</span>
         </p>
       </div>
@@ -152,6 +174,7 @@ function draw(canvas: HTMLCanvasElement | null, state: HopState) {
 
   const ground = HOP.worldHeight - 18;
   const charcoal = token("--tiny-charcoal", "#403738");
+  drawScenery(context, state.distance, ground);
 
   // A hand-drawn ground: a line with little dashes that scroll with the run.
   context.strokeStyle = charcoal;
@@ -171,31 +194,7 @@ function draw(canvas: HTMLCanvasElement | null, state: HopState) {
   }
 
   for (const obstacle of state.obstacles) {
-    const top = ground - obstacle.height;
-    if (obstacle.height > 24) {
-      // A stack of keycaps: lavender blocks with rounded corners.
-      const caps = Math.max(2, Math.round(obstacle.height / 15));
-      const capHeight = obstacle.height / caps;
-      for (let index = 0; index < caps; index += 1) {
-        roundedRect(context, obstacle.x, top + index * capHeight, obstacle.width, capHeight - 1.5, 3);
-        context.fillStyle = token("--tiny-lavender-light", "#d9d0ed");
-        context.fill();
-        context.strokeStyle = token("--tiny-lavender-deep", "#6b5a9a");
-        context.lineWidth = 1.5;
-        context.stroke();
-      }
-    } else {
-      // A tangle of cable: a pink squiggle.
-      context.strokeStyle = token("--tiny-pink", "#f4c1d4");
-      context.lineWidth = 5;
-      context.beginPath();
-      for (let x = 0; x <= obstacle.width; x += 4) {
-        const y = top + obstacle.height / 2 + Math.sin(x / 4) * (obstacle.height / 2 - 3);
-        if (x === 0) context.moveTo(obstacle.x + x, y);
-        else context.lineTo(obstacle.x + x, y);
-      }
-      context.stroke();
-    }
+    drawObstacle(context, obstacle, ground);
   }
 
   // The keycap: a mint key with a lighter top face and a little smile, squashed a touch on the ground.
@@ -231,6 +230,119 @@ function draw(canvas: HTMLCanvasElement | null, state: HopState) {
     context.fill();
     context.beginPath();
     context.arc(x + 17, eyeY + 4, 4, 0.15 * Math.PI, 0.85 * Math.PI);
+    context.lineWidth = 1.5;
+    context.stroke();
+  }
+}
+
+/**
+ * Soft pastel hills and a few doodle stars that scroll slower than the ground, so the strip feels like a place
+ * rather than a blank card. Sparse on purpose: nothing crowds the keycap.
+ */
+function drawScenery(context: CanvasRenderingContext2D, distance: number, ground: number) {
+  const far = (distance * 0.18) % 280;
+  const mid = (distance * 0.4) % 220;
+  const lavender = token("--tiny-lavender-light", "#d9d0ed");
+  const pink = token("--tiny-pink", "#f4c1d4");
+  const mint = token("--tiny-mint", "#a8e6e1");
+  const charcoal = token("--tiny-charcoal", "#403738");
+
+  for (const hill of [
+    { x: 40 - far, y: ground - 28, w: 120, h: 36, color: lavender },
+    { x: 220 - far, y: ground - 22, w: 100, h: 30, color: pink },
+    { x: 400 - far, y: ground - 32, w: 130, h: 40, color: lavender },
+    { x: 560 - far, y: ground - 24, w: 110, h: 32, color: mint },
+  ]) {
+    context.fillStyle = hill.color;
+    context.globalAlpha = 0.45;
+    context.beginPath();
+    context.ellipse(hill.x, hill.y, hill.w / 2, hill.h / 2, 0, 0, Math.PI * 2);
+    context.fill();
+  }
+  context.globalAlpha = 1;
+
+  for (const cloud of [
+    { x: 90 - mid, y: 28, r: 14 },
+    { x: 310 - mid, y: 22, r: 11 },
+    { x: 500 - mid, y: 34, r: 13 },
+  ]) {
+    context.fillStyle = token("--tiny-white", "#fffdfc");
+    context.globalAlpha = 0.7;
+    context.beginPath();
+    context.ellipse(cloud.x, cloud.y, cloud.r * 1.6, cloud.r, 0, 0, Math.PI * 2);
+    context.ellipse(cloud.x - cloud.r, cloud.y + 2, cloud.r, cloud.r * 0.75, 0, 0, Math.PI * 2);
+    context.ellipse(cloud.x + cloud.r, cloud.y + 2, cloud.r, cloud.r * 0.75, 0, 0, Math.PI * 2);
+    context.fill();
+  }
+  context.globalAlpha = 1;
+
+  // A couple of hand-drawn stars, drifting with the mid layer.
+  context.strokeStyle = charcoal;
+  context.lineWidth = 1.4;
+  context.lineCap = "round";
+  for (const star of [
+    { x: 160 - mid, y: 48 },
+    { x: 430 - mid, y: 40 },
+  ]) {
+    context.beginPath();
+    context.moveTo(star.x, star.y - 5);
+    context.lineTo(star.x, star.y + 5);
+    context.moveTo(star.x - 5, star.y);
+    context.lineTo(star.x + 5, star.y);
+    context.moveTo(star.x - 3.5, star.y - 3.5);
+    context.lineTo(star.x + 3.5, star.y + 3.5);
+    context.moveTo(star.x + 3.5, star.y - 3.5);
+    context.lineTo(star.x - 3.5, star.y + 3.5);
+    context.stroke();
+  }
+}
+
+function drawObstacle(context: CanvasRenderingContext2D, obstacle: HopObstacle, ground: number) {
+  const top = ground - obstacle.height;
+  const kind = obstacle.kind;
+  if (kind === "cable") {
+    context.strokeStyle = token("--tiny-pink", "#f4c1d4");
+    context.lineWidth = 5;
+    context.lineCap = "round";
+    context.beginPath();
+    for (let x = 0; x <= obstacle.width; x += 4) {
+      const y = top + obstacle.height / 2 + Math.sin(x / 4) * (obstacle.height / 2 - 3);
+      if (x === 0) context.moveTo(obstacle.x + x, y);
+      else context.lineTo(obstacle.x + x, y);
+    }
+    context.stroke();
+    return;
+  }
+
+  const fill = token("--tiny-lavender-light", "#d9d0ed");
+  const stroke = token("--tiny-lavender-deep", "#6b5a9a");
+  if (kind === "double") {
+    // Two side-by-side stacks: the later-level hazard, still the same lavender keycaps.
+    const gap = 3;
+    const column = (obstacle.width - gap) / 2;
+    drawKeycapStack(context, obstacle.x, top, column, obstacle.height, fill, stroke);
+    drawKeycapStack(context, obstacle.x + column + gap, top, column, obstacle.height, fill, stroke);
+    return;
+  }
+  drawKeycapStack(context, obstacle.x, top, obstacle.width, obstacle.height, fill, stroke);
+}
+
+function drawKeycapStack(
+  context: CanvasRenderingContext2D,
+  x: number,
+  top: number,
+  width: number,
+  height: number,
+  fill: string,
+  stroke: string,
+) {
+  const caps = Math.max(2, Math.round(height / 15));
+  const capHeight = height / caps;
+  for (let index = 0; index < caps; index += 1) {
+    roundedRect(context, x, top + index * capHeight, width, capHeight - 1.5, 3);
+    context.fillStyle = fill;
+    context.fill();
+    context.strokeStyle = stroke;
     context.lineWidth = 1.5;
     context.stroke();
   }

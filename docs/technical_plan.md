@@ -2108,6 +2108,8 @@ the run speeds up to a cap, and the score counts distance
 gaps between obstacles always leave room to land and hop again, at any speed (200 seeded runs)
 hitting an obstacle crashes and freezes the run; passing high enough does not
 a hop after a crash starts a fresh run
+it gets harder gradually: a level every 100 points, difficulty rising from 0 to 1, with taller stacks, double stacks, and tighter gaps
+it stays fair at its hardest: a well-timed hopper clears 60 seconds of every seeded run
 Ready opens it on a logo tap or short Escape only when there is no score to roll; keys and taps there never start a round
 its logo tap or a short Escape closes it; 30 seconds with no input closes it
 ```
