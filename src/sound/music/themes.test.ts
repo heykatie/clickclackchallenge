@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { barEvents, barSeconds, firstBar, HOP_THEME, THEMES, themeForScreen, type ThemeName } from "./themes";
 
 const names = Object.keys(THEMES) as ThemeName[];
-const pageNames = names.filter((name) => name !== HOP_THEME);
+const pageNames: ThemeName[] = names.filter((name) => name !== HOP_THEME);
 
 const MODES = ["words", "famous-lines", "story"] as const;
 const PAGES = ["setup", "ready", "typing", "results", "leaderboard", "rolling"] as const;

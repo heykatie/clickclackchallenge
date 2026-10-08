@@ -30,3 +30,10 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Local AI / agent tooling — keep on disk, never publish
+AGENTS.md
+.claude/
+.cursor/
+CLAUDE.md
+.codex/

@@ -13,7 +13,7 @@ export const THEMES = { ...FANTASY, ...ARCADE, ...STORYBOOK, ...HOP } satisfies 
 export type ThemeName = keyof typeof THEMES;
 
 /** Keycap Hop's dedicated loop — not tied to the active event's world. */
-export const HOP_THEME: ThemeName = "hop-bounce";
+export const HOP_THEME = "hop-bounce" satisfies ThemeName;
 
 const WORLDS: Record<TestMode, Record<BoothScreen, ThemeName>> = {
   // Standard: an arcade cabinet.
