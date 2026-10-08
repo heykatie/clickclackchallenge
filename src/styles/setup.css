@@ -341,6 +341,12 @@ label.setup-option-big {
   font-size: 0.9rem;
 }
 
+.setup-storage-status {
+  margin: 0.6rem 0 0;
+  color: var(--tiny-muted);
+  font-size: 0.875rem;
+}
+
 .setup-footer {
   display: flex;
   /* One row: the left side shrinks and its links wrap, so START EVENT never drops below and adds height. */

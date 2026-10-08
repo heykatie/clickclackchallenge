@@ -7,6 +7,7 @@ import {
   type TestDuration,
   type TestMode,
 } from "../db/persistence";
+import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
   applyFreshConfirmKey,
@@ -52,6 +53,8 @@ type EventSetupScreenProps = {
   onTestModeChange?: (mode: TestMode) => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
   plinkoWins: number | null;
+  /** Whether the browser granted protection against automatic storage cleanup. */
+  storageProtection?: PersistResult | "checking";
 };
 
 export function EventSetupScreen({
@@ -77,6 +80,7 @@ export function EventSetupScreen({
   palette,
   onTogglePalette,
   plinkoWins,
+  storageProtection = "checking",
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
@@ -495,6 +499,15 @@ export function EventSetupScreen({
               </div>
             ) : null}
             {storedDuration === null ? <p className="setup-note">No previous event yet.</p> : null}
+            <p className="setup-storage-status" role="status" aria-live="polite">
+              {storageProtection === "checking"
+                ? "Checking score storage…"
+                : storageProtection === "persisted" || storageProtection === "granted"
+                  ? "Browser cleanup protection is on."
+                  : storageProtection === "denied"
+                    ? "Browser cleanup protection wasn’t granted. Download scores for a backup."
+                    : "Browser cleanup protection status is unavailable. Download scores for a backup."}
+            </p>
           </fieldset>
         </div>
         <footer className="setup-footer" {...shutWhileAsking}>

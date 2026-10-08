@@ -2001,7 +2001,7 @@ Required cases:
 restoreClearedScores shows the last clear's scores again, keeps the current event and its scores, undoes one clear at a time newest first, and reports when nothing is hidden (hasClearedScores)
 Clear board hides only the current event and its scores, keeps earlier events visible, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearCurrentEvent)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
-launch asks the browser to keep storage once, skips the request when already persisted, and never throws when refused or unsupported (requestPersistentStorage)
+launch asks the browser to keep storage once, skips the request when already persisted, never blocks when refused or unsupported, and Event Setup shows the result with a backup reminder when protection is not confirmed (requestPersistentStorage, App)
 event can be written and read
 score can be written and read
 multiple scores can be retrieved by eventId

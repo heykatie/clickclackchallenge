@@ -39,6 +39,7 @@ type KeycapHopProps = {
  */
 export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const stateRef = useRef<HopState>(createHop());
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
@@ -52,6 +53,10 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
   useEffect(() => {
     onCloseRef.current = onClose;
   });
+
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+  }, []);
 
   // Duck the bed while hopping so the bonk and power cues stay on top; restore on close.
   useEffect(() => {
@@ -99,6 +104,11 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
     const held = new Set<string>();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        return;
+      }
+      if (event.key === "Tab") {
+        event.preventDefault();
+        closeButtonRef.current?.focus();
         return;
       }
       event.preventDefault();
@@ -188,7 +198,7 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
       onPointerCancel={endHopHold}
       onPointerLeave={endHopHold}
     >
-      <button type="button" className="logo-badge" aria-label="Close Keycap Hop" {...logoHold} />
+      <button ref={closeButtonRef} type="button" className="logo-badge" aria-label="Close Keycap Hop" {...logoHold} />
       <div className="hop-hud" aria-live="polite">
         <p className="hop-title">Keycap Hop</p>
         <p className="hop-score">

@@ -166,6 +166,12 @@ export function ReadyScreen({
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, []);
 
+  useEffect(() => {
+    if (!hopping) {
+      screenRef.current?.focus();
+    }
+  }, [hopping]);
+
   function noteActivity() {
     setActivity((current) => current + 1);
   }
