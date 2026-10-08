@@ -16,7 +16,7 @@ type ReadyScreenProps = {
   /** The event's board ranks every event's scores. */
   allTime: boolean;
   highScore: HighScoreSummary | null;
-  onStart: (key: string) => void;
+  onStart: (key: string, keyAlreadyReleased?: boolean) => void;
   onSetup: () => void;
   /** Told whenever the rolling high-score list opens or closes, so the music can follow it. */
   onRollingChange?: (rolling: boolean) => void;
@@ -45,6 +45,7 @@ export function ReadyScreen({
     onRollingChange?.(asleep);
   }, [asleep, onRollingChange]);
   const [rolling, setRolling] = useState<RankedScore[]>([]);
+  const rollingCountRef = useRef(0);
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
@@ -78,11 +79,14 @@ export function ReadyScreen({
     (allTime ? listAllScores() : eventId === null ? Promise.resolve([]) : listScores(eventId)).then(
       (scores) => {
         if (!cancelled) {
-          setRolling(rollingListScores(scores));
+          const rankedScores = rollingListScores(scores);
+          rollingCountRef.current = rankedScores.length;
+          setRolling(rankedScores);
         }
       },
       () => {
         if (!cancelled) {
+          rollingCountRef.current = 0;
           setRolling([]);
         }
       },
@@ -139,6 +143,28 @@ export function ReadyScreen({
 
   useEffect(() => {
     screenRef.current?.focus();
+    const secretKeys = new Set(["t", "k", "l"]);
+    const heldSecretKeys = new Set<string>();
+    let firstSecretKey: string | null = null;
+    let secretChordTimer: number | null = null;
+
+    const clearSecretChord = () => {
+      if (secretChordTimer !== null) {
+        window.clearTimeout(secretChordTimer);
+        secretChordTimer = null;
+      }
+      heldSecretKeys.clear();
+      firstSecretKey = null;
+    };
+
+    const startTyping = (key: string, keyAlreadyReleased = false) => {
+      if (keyAlreadyReleased) {
+        onStartRef.current(key, true);
+      } else {
+        onStartRef.current(key);
+      }
+    };
+
     const onKeyDown = (event: KeyboardEvent) => {
       // Keycap Hop takes the keys while it is open, so a hop never starts a typing round.
       if (hoppingRef.current) {
@@ -147,6 +173,38 @@ export function ReadyScreen({
       const rolling =
         asleepRef.current ||
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
+
+      // With scores on the board, T+K+L held together is a five-second Hop shortcut.
+      // Delay ordinary typing only while one of those keys could still become the chord.
+      if (!rolling && rollingCountRef.current > 0 && secretKeys.has(event.key.toLowerCase())) {
+        event.preventDefault();
+        if (event.repeat) {
+          return;
+        }
+        const key = event.key.toLowerCase();
+        if (firstSecretKey === null) {
+          firstSecretKey = event.key;
+        }
+        heldSecretKeys.add(key);
+        if (heldSecretKeys.size === secretKeys.size && secretChordTimer === null) {
+          secretChordTimer = window.setTimeout(() => {
+            secretChordTimer = null;
+            heldSecretKeys.clear();
+            firstSecretKey = null;
+            setHop(true);
+          }, 5_000);
+        }
+        return;
+      }
+
+      // An unrelated key ends a partial chord. Preserve the first character as normal typing.
+      if (firstSecretKey !== null) {
+        const pendingKey = firstSecretKey;
+        clearSecretChord();
+        startTyping(pendingKey);
+        return;
+      }
+
       const action = readyKeyDown(event.key, rolling);
       if (action === "wake") {
         event.preventDefault();
@@ -160,10 +218,24 @@ export function ReadyScreen({
         return;
       }
       event.preventDefault();
-      onStartRef.current(event.key);
+      startTyping(event.key);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (firstSecretKey === null || !secretKeys.has(event.key.toLowerCase())) {
+        return;
+      }
+      event.preventDefault();
+      const pendingKey = firstSecretKey;
+      clearSecretChord();
+      startTyping(pendingKey, true);
     };
     window.addEventListener("keydown", onKeyDown, true);
-    return () => window.removeEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    return () => {
+      clearSecretChord();
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+    };
   }, []);
 
   useEffect(() => {
