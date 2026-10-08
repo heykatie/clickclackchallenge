@@ -83,3 +83,21 @@
     opacity: 1;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .typing-screen {
+    gap: 0.35rem;
+  }
+
+  .passage-line {
+    font-size: min(1.5rem, calc(100cqw / 26));
+  }
+
+  .typing-screen .stats p {
+    margin-block: 0.2rem;
+  }
+
+  .typing-screen .stat-value {
+    font-size: 1.7rem;
+  }
+}

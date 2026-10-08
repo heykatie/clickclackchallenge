@@ -370,3 +370,55 @@
     font-size: 1rem;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .results-screen {
+    gap: 0.25rem;
+  }
+
+  .results-screen h1 {
+    font-size: 1.6rem;
+  }
+
+  .results-screen h1.is-new-high-score {
+    font-size: 2rem;
+  }
+
+  .results-screen .stat-value {
+    margin-top: 0.35rem;
+    font-size: 2.6rem;
+  }
+
+  .results-screen .stat-value + p {
+    margin-top: -0.5rem;
+  }
+
+  .result-pill {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .name-field {
+    gap: 0.2rem;
+  }
+
+  .name-field input {
+    min-height: 2.7rem;
+    padding-block: 0.35rem;
+  }
+
+  .name-hint,
+  .result-name-countdown {
+    font-size: 0.85rem;
+  }
+
+  .results-actions {
+    gap: 0.35rem;
+  }
+
+  .results-actions button {
+    min-height: 2.6rem;
+    padding-block: 0.3rem;
+    font-size: 1.1rem;
+  }
+}

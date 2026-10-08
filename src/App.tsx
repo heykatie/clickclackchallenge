@@ -419,9 +419,13 @@ function App() {
     boothMusic.setEnabled(musicOn);
   }, [musicOn]);
 
-  // The cool palette's colors live in styles/palette-cool.css, keyed off this attribute.
+  // The page background and browser chrome follow the saved palette, including safe areas around the app.
   useEffect(() => {
     document.documentElement.dataset.palette = palette;
+    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (themeColor) {
+      themeColor.content = palette === "cool" ? "#EEE9F8" : "#FBEDEF";
+    }
   }, [palette]);
 
   useEffect(() => {

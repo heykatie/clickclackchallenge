@@ -213,3 +213,41 @@
     font-size: 0.75rem;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .ready-copy {
+    gap: clamp(0.25rem, 1.2vh, 0.5rem);
+  }
+
+  .ready-copy h1 {
+    font-size: clamp(1.4rem, 5.2vh, 1.8rem);
+  }
+
+  .ready-plinko {
+    padding: 0.25rem 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .high-score-card {
+    padding: 0.45rem 0.8rem;
+  }
+
+  .high-score-card .stat-value {
+    margin: 0.2rem 0;
+    font-size: clamp(1.7rem, 6vh, 2rem);
+  }
+
+  .high-score-name,
+  .high-score-empty {
+    font-size: 1rem;
+  }
+
+  .ready-prompt {
+    font-size: 0.9rem;
+  }
+
+  .ready-helper {
+    margin-top: -0.2rem;
+    font-size: 0.75rem;
+  }
+}

@@ -113,3 +113,29 @@
     font-size: 0.9rem;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .hop-screen {
+    gap: 0.4rem;
+  }
+
+  .hop-hud {
+    gap: 0.15rem;
+    margin-bottom: 0;
+  }
+
+  .hop-title {
+    margin-bottom: 0;
+    padding: 0.2rem 0.8rem;
+    font-size: 1.1rem;
+  }
+
+  .hop-score {
+    gap: 0.7rem;
+    font-size: 1rem;
+  }
+
+  .hop-hint {
+    font-size: 0.9rem;
+  }
+}

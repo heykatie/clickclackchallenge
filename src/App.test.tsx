@@ -163,12 +163,22 @@ describe("App", () => {
     await waitFor(() => expect((screen.getByLabelText("Story") as HTMLInputElement).checked).toBe(true));
   }, 20_000);
 
-  it("starts warm, switches the whole app to the cool palette from Event Setup, and remembers it", async () => {
-    render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "PALETTE: WARM" }));
-    expect(screen.getByRole("button", { name: "PALETTE: COOL" })).toBeTruthy();
-    expect(document.documentElement.dataset.palette).toBe("cool");
-    await waitFor(async () => expect((await loadBooth()).settings.palette).toBe("cool"));
+  it("switches browser chrome to lavender with the cool palette and remembers it", async () => {
+    const themeColor = document.createElement("meta");
+    themeColor.name = "theme-color";
+    document.head.append(themeColor);
+    try {
+      render(<App />);
+      await screen.findByRole("button", { name: "PALETTE: WARM" });
+      await waitFor(() => expect(themeColor.content).toBe("#FBEDEF"));
+      fireEvent.click(screen.getByRole("button", { name: "PALETTE: WARM" }));
+      expect(screen.getByRole("button", { name: "PALETTE: COOL" })).toBeTruthy();
+      expect(document.documentElement.dataset.palette).toBe("cool");
+      expect(themeColor.content).toBe("#EEE9F8");
+      await waitFor(async () => expect((await loadBooth()).settings.palette).toBe("cool"));
+    } finally {
+      themeColor.remove();
+    }
   });
 
   it("shows that scores can't be saved when storage does not work", async () => {
