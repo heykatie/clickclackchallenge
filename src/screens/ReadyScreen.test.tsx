@@ -124,13 +124,13 @@ describe("ReadyScreen", () => {
     expect(onStart).not.toHaveBeenCalled();
   });
 
-  it("opens Keycap Hop when T, K, and L are held together for five seconds while scores exist", async () => {
+  it("opens Keycap Hop when T, K, and L are held together for three seconds while scores exist", async () => {
     const { onStart } = await renderReady();
     fireEvent.keyDown(window, { key: "t" });
     fireEvent.keyDown(window, { key: "k" });
     fireEvent.keyDown(window, { key: "l" });
 
-    act(() => vi.advanceTimersByTime(4_999));
+    act(() => vi.advanceTimersByTime(2_999));
     expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
     expect(onStart).not.toHaveBeenCalled();
 
