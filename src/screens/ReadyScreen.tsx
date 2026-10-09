@@ -174,7 +174,7 @@ export function ReadyScreen({
         asleepRef.current ||
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
 
-      // With scores on the board, T+K+L held together is a five-second Hop shortcut.
+      // With scores on the board, T+K+L held together is a three-second Hop shortcut.
       // Delay ordinary typing only while one of those keys could still become the chord.
       if (!rolling && rollingCountRef.current > 0 && secretKeys.has(event.key.toLowerCase())) {
         event.preventDefault();
@@ -192,7 +192,7 @@ export function ReadyScreen({
             heldSecretKeys.clear();
             firstSecretKey = null;
             setHop(true);
-          }, 5_000);
+          }, 3_000);
         }
         return;
       }

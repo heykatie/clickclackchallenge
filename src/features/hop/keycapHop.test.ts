@@ -236,7 +236,7 @@ describe("Keycap Hop", () => {
 
   it("offers slow, big, and small power-ups that change scroll or size for a few seconds", () => {
     const random = seededRandom(11);
-    let hop = jumpHop(createHop());
+    let hop = jumpHop(createHop(random));
     let sawPower = false;
     let firstAt = 0;
     for (let t = 0; t < 20 && !sawPower; t += FRAME) {
