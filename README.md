@@ -8,7 +8,15 @@
 
 ## See it in action
 
-Five screenshots illustrate the core booth flow. Use the live demo to try the interactions.
+These short recordings show the real app in motion. Use the live demo to try the interactions.
+
+<p align="center"><img src="docs/demos/booth-flow.gif" alt="Event setup, the ready screen, and a live typing round with WPM, remaining time, and accuracy" width="800"></p>
+<p align="center"><strong>Booth flow:</strong> event setup through live typing stats.</p>
+
+<p align="center"><img src="docs/demos/keycap-hop.gif" alt="Keycap Hop gameplay: the smiling key jumps over obstacles while the score and scrolling scenery update" width="800"></p>
+<p align="center"><strong>Keycap Hop:</strong> optional runner gameplay, shown after the Easter egg opens.</p>
+
+Five screenshots below show the individual booth screens in more detail.
 
 <table>
   <tr>
