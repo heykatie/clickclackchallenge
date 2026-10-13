@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   cleanEventName,
@@ -8,6 +8,8 @@ import {
   type TestDuration,
   type TestMode,
 } from "../db/persistence";
+import { formatHourWindow, formatPeakHours, type EventRecapStats } from "../features/recap/eventRecap";
+import type { RecapResult } from "../features/recap/recapClient";
 import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
@@ -54,6 +56,10 @@ type EventSetupScreenProps = {
   onTestModeChange?: (mode: TestMode) => void;
   /** Plinko drops won in the active event, for prize stock. Null until counted. */
   plinkoWins: number | null;
+  /** Locally computed, anonymous recap facts for the active event. */
+  recapStats?: EventRecapStats | null;
+  /** Calls the optional AI service. Called only after staff choose AI EVENT RECAP. */
+  onCreateRecap?: (stats: EventRecapStats) => Promise<RecapResult>;
   /** Whether the browser granted protection against automatic storage cleanup. */
   storageProtection?: PersistResult | "checking";
 };
@@ -81,6 +87,8 @@ export function EventSetupScreen({
   palette,
   onTogglePalette,
   plinkoWins,
+  recapStats = null,
+  onCreateRecap,
   storageProtection = "checking",
 }: EventSetupScreenProps) {
   const [mode, setMode] = useState<SetupMode>(
@@ -116,10 +124,55 @@ export function EventSetupScreen({
   const confirmCursorRef = useRef(confirmCursor);
   /** Which confirmation is up: Start fresh, Clear board, or Restore cleared scores. */
   const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
+  const [recapOpen, setRecapOpen] = useState(false);
+  const [recapBusy, setRecapBusy] = useState(false);
+  const [recapResult, setRecapResult] = useState<RecapResult | null>(null);
+  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const recapCloseRef = useRef<HTMLButtonElement>(null);
+  const recapOpenRef = useRef(false);
+  const onCreateRecapRef = useRef(onCreateRecap);
   const canRestoreRef = useRef(canRestore);
   const canClearRef = useRef(canClear);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    onCreateRecapRef.current = onCreateRecap;
+  }, [onCreateRecap]);
+
+  useEffect(() => {
+    const handleOnline = () => setOnline(true);
+    const handleOffline = () => setOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const createRecap = useCallback(async () => {
+    if (!recapStats || recapStats.completedRounds === 0 || !onCreateRecapRef.current) {
+      return;
+    }
+    setRecapOpen(true);
+    recapOpenRef.current = true;
+    setRecapBusy(true);
+    setRecapResult(null);
+    try {
+      setRecapResult(await onCreateRecapRef.current(recapStats));
+    } catch {
+      setRecapResult({ ok: false, reason: "unavailable" });
+    } finally {
+      setRecapBusy(false);
+    }
+  }, [recapStats]);
+
+  function closeRecap() {
+    recapOpenRef.current = false;
+    setRecapOpen(false);
+    screenRef.current?.focus();
+  }
 
   function choiceClass(choice: SetupChoice, fixed = false) {
     const names = [fixed ? "is-fixed" : "", cursor === choice ? "is-cursor" : ""].filter(Boolean);
@@ -222,6 +275,15 @@ export function EventSetupScreen({
       if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) {
         return;
       }
+      if (recapOpenRef.current) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeRecap();
+        } else if (event.key !== "Tab" && event.target !== recapCloseRef.current) {
+          event.preventDefault();
+        }
+        return;
+      }
       // While the event name field has focus, keys type into it. Enter or Escape leaves it; Up, Down,
       // and Tab leave it and move the cursor as usual.
       if (event.target === nameInputRef.current) {
@@ -272,6 +334,10 @@ export function EventSetupScreen({
         onDownloadRef.current();
         return;
       }
+      if (result === "recap") {
+        void createRecap();
+        return;
+      }
       if (result === "sound") {
         onToggleSoundRef.current();
         return;
@@ -310,7 +376,7 @@ export function EventSetupScreen({
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [storedDuration]);
+  }, [storedDuration, online, recapStats, onCreateRecap, createRecap]);
 
   // Keep keyboard focus on the chosen confirmation button, and back on the screen after cancelling.
   useEffect(() => {
@@ -323,8 +389,14 @@ export function EventSetupScreen({
     }
   }, [confirmCursor]);
 
+  useEffect(() => {
+    if (recapOpen) {
+      recapCloseRef.current?.focus();
+    }
+  }, [recapOpen]);
+
   // While a confirmation is up, the page behind it cannot be pressed, tabbed to, or read out.
-  const shutWhileAsking = confirmCursor !== null ? { inert: true, "aria-hidden": true } : {};
+  const shutWhileAsking = confirmCursor !== null || recapOpen ? { inert: true, "aria-hidden": true } : {};
 
   return (
     <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
@@ -479,6 +551,22 @@ export function EventSetupScreen({
                 {storedDuration !== null ? (
                   <button
                     type="button"
+                    className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={() => void createRecap()}
+                    disabled={!recapStats || recapStats.completedRounds === 0 || recapBusy || !onCreateRecap}
+                    title={!online ? "View local event stats; AI text requires Wi-Fi" : "Create a recap from this event's anonymous totals"}
+                  >
+                    AI EVENT RECAP
+                  </button>
+                ) : null}
+                {storedDuration !== null && (!online || recapStats === null || recapStats.completedRounds === 0) ? (
+                  <span className="setup-recap-availability" role="status" aria-live="polite">
+                    {!online ? "AI recap needs Wi-Fi" : recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
+                  </span>
+                ) : null}
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
                     className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
                     onClick={askToClear}
                     disabled={saving || !canClear}
@@ -592,6 +680,74 @@ export function EventSetupScreen({
           </div>,
           document.body,
         )
+      ) : null}
+      {recapOpen && recapStats ? createPortal(
+        <div className="setup-modal-backdrop">
+          <section className="setup-confirm setup-event-recap" role="dialog" aria-modal="true" aria-labelledby="event-recap-title">
+            <button ref={recapCloseRef} type="button" className="setup-recap-close" onClick={closeRecap} aria-label="Close event recap">×</button>
+            <h2 id="event-recap-title">Event recap</h2>
+            <dl className="setup-recap-stats">
+              <div><dt>Completed rounds</dt><dd>{recapStats.completedRounds}</dd></div>
+              <div><dt>Average WPM</dt><dd>{recapStats.averageWpm === null ? "—" : recapStats.averageWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
+              <div><dt>Median WPM</dt><dd>{recapStats.medianWpm === null ? "—" : recapStats.medianWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
+              <div><dt>Average accuracy</dt><dd>{recapStats.averageAccuracy === null ? "—" : `${recapStats.averageAccuracy.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}</dd></div>
+              <div className="setup-recap-hour-row">
+                <dt>Game modes (% of rounds)</dt>
+                <dd><ul className="setup-recap-hours" aria-label="Game mode usage">
+                  {recapStats.modeUsage.map(({ mode, rounds, percentage }) => (
+                    <li key={mode}>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"} · {percentage}% ({rounds})</li>
+                  ))}
+                </ul></dd>
+              </div>
+              <div className="setup-recap-hour-row">
+                <dt>Round lengths (% of rounds)</dt>
+                <dd><ul className="setup-recap-hours" aria-label="Round length usage">
+                  {recapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
+                    <li key={durationSeconds}>{durationSeconds}s · {percentage}% ({rounds})</li>
+                  ))}
+                </ul></dd>
+              </div>
+              <div>
+                <dt>Busiest round hour</dt>
+                <dd>
+                  {formatPeakHours(recapStats.peakHours, recapStats.completedRounds)}
+                  {recapStats.peakHours.length > 0 ? ` · ${recapStats.peakHourRounds} rounds` : ""}
+                </dd>
+              </div>
+              <div className="setup-recap-hour-row">
+                <dt>Rounds by hour</dt>
+                <dd>
+                  {recapStats.roundsByHour.length === 0
+                    ? "Time unavailable"
+                    : <ul className="setup-recap-hours" aria-label="Completed rounds by hour">
+                        {recapStats.roundsByHour.map(({ hour, rounds }) => (
+                          <li key={hour}>{formatHourWindow(hour)} · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
+                        ))}
+                      </ul>}
+                </dd>
+              </div>
+              <div><dt>Plinko drops won</dt><dd>{recapStats.plinkoDropsWon}</dd></div>
+              <div><dt>Plinko win rate (% of rounds)</dt><dd>{recapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
+            </dl>
+            <p className="setup-recap-privacy">Percentages use completed rounds. WPM uses displayed scores; accuracy averages rounds with a recorded value.</p>
+            <p className="setup-recap-privacy">Only these anonymous event statistics are sent for the AI-written recap. Names, score rows, and typed text stay on this device.</p>
+            <p className="setup-recap-message" role="status" aria-live="polite">
+              {recapBusy
+                ? "Writing your recap…"
+                : recapResult?.ok
+                  ? recapResult.recap
+                  : recapResult?.reason === "offline"
+                    ? "You’re offline. The event stats above are still available; reconnect to request an AI recap."
+                    : recapResult
+                      ? "The AI recap is unavailable right now. Your event stats above are still available."
+                      : ""}
+            </p>
+            {recapResult && !recapResult.ok && online ? (
+              <button type="button" className="setup-chip" onClick={() => void createRecap()} disabled={recapBusy}>TRY AGAIN</button>
+            ) : null}
+          </section>
+        </div>,
+        document.body,
       ) : null}
     </main>
   );

@@ -52,6 +52,96 @@
   text-align: center;
 }
 
+.setup-event-recap {
+  position: relative;
+  max-height: min(90dvh, 44rem);
+  overflow-y: auto;
+  text-align: left;
+}
+
+.setup-event-recap h2 {
+  padding-right: 2.5rem;
+  text-align: center;
+}
+
+.setup-recap-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tiny-charcoal);
+  font-size: 1.75rem;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.setup-recap-stats {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.25rem 0;
+}
+
+.setup-recap-stats > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--tiny-lavender-light) 30%, var(--tiny-white));
+}
+
+.setup-recap-stats dt {
+  font-weight: 700;
+}
+
+.setup-recap-stats dd {
+  margin: 0;
+  text-align: right;
+}
+
+.setup-recap-stats .setup-recap-hour-row {
+  align-items: flex-start;
+}
+
+.setup-recap-hour-row dd {
+  flex-basis: 100%;
+}
+
+.setup-recap-hours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  list-style: none;
+}
+
+.setup-recap-hours li {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.setup-recap-privacy,
+.setup-recap-message {
+  margin: 0.75rem 0;
+}
+
+.setup-recap-privacy {
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+}
+
+.setup-recap-message {
+  min-height: 2.5em;
+  font-weight: 700;
+}
+
 .setup-confirm h2 {
   margin: 0 0 0.5rem;
   font-family: var(--font-display);
@@ -422,6 +512,12 @@ label.setup-option-big {
   align-items: center;
   gap: 0.25rem 1rem;
   margin-top: 0.9rem;
+}
+
+.setup-recap-availability {
+  color: var(--tiny-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 

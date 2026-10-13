@@ -164,6 +164,7 @@ V1 includes:
 - local event persistence
 - local score persistence
 - offline PWA operation
+- optional operator-requested AI-written recap of the active event's anonymous aggregate totals
 - landscape-iPad layout
 - locally bundled fonts, passages, and required visual assets
 
@@ -176,14 +177,14 @@ V1 does not include:
 - online multiplayer
 - cloud synchronization
 - cross-device leaderboard synchronization
-- backend API
+- required backend API for gameplay or score storage
 - Flask
 - SQLAlchemy
 - PostgreSQL
 - storefront integration
 - e-commerce
 - historical-event management UI
-- detailed analytics
+- detailed analytics or analytics dashboards
 - AI-generated passages
 - contestants choosing their own game mode
 - advanced anti-cheat systems
@@ -335,6 +336,24 @@ Themes crossfade as the screen changes and loop until it changes again. The musi
 The third, PALETTE: WARM or PALETTE: COOL, switches the booth's colors between the original warm palette and a cool one after the shop's logo (`docs/design_system.md` §3). It is warm by default, a device setting shown before any event exists, kept through Start fresh and Clear board, and remembered after the app reopens. It changes colors only, never layout, text, scoring, or behavior.
 
 Once an event exists, a small line just above the event name field tells staff how many Plinko drops the active event has given out, for prize stock: “Plinko drops won this event: 12”. It keeps “drops” for any count, so it reads the same at 1. It counts the event's saved scores that won a drop under §13, leaves out cleared scores, and is counted fresh each time Event Setup opens.
+
+### Optional AI Event Recap
+
+When an event exists with at least one completed round, Event Setup offers an **AI EVENT RECAP** action beside the score tools. The operator can always open the recap to see local facts. AI-written text is requested only when the device reports an internet connection; offline, the local facts remain available and the modal explains that AI text needs Wi-Fi. The feature never appears in the contestant flow and is never requested automatically.
+
+The recap shows the exact local event statistics before any generated text:
+
+- **Completed rounds:** all saved completed attempts in the active event, including scores that did not qualify for a leaderboard or Plinko drop. Abandoned tests are not saved and do not count.
+- **Average WPM and median WPM:** use each saved round's displayed WPM; show one decimal place when needed.
+- **Average accuracy:** the mean of saved round accuracy values, shown to one decimal place. A round without a recorded accuracy is excluded from this average.
+- **Game modes and round lengths used:** list each mode and duration used, with its share of completed rounds and the round count. Percentages are rounded to one decimal place and may not sum to exactly 100% because of rounding.
+- **Busiest round hour:** the local one-hour clock window containing the most completed rounds, with the number of rounds in that hour. If several hours tie, show each. This is based on when the completed score was first saved, not a measure of people physically passing the booth.
+- **Rounds by hour:** compact counts for each local clock hour containing at least one saved round. Rounds with invalid or missing timestamps still count toward other statistics but cannot be assigned to an hour.
+- **Plinko drops won and win rate:** the saved active-event scores that qualify under §13, plus the percentage of all completed rounds that won a drop, rounded to one decimal place.
+
+Each round stores the game mode and duration used. Historical sound, music, palette, and leaderboard-scope selections are not recorded per round, so the recap does not estimate percentages for those settings.
+
+The AI request happens only after the operator asks for a recap. It may receive only these aggregate statistics and numeric local-hour buckets; it must not receive contestant names, event names, score rows, typed text, passages, or device identifiers. The generated text is explanatory copy; the locally computed statistics remain authoritative. If the network, function, model, or free quota is unavailable, the statistics stay visible and the app reports that the generated recap is unavailable. No event, typing, scoring, or leaderboard action may wait for or depend on this feature.
 
 After a clear that hid scores, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR BOARD. Clearing a board nobody has played hides nothing, so it never offers RESTORE. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list. If nothing has been played on the current board since, the cleared board becomes the current event again, with its own name, length, mode, and board setting, as if the clear never happened. Once the current board has scores, it stays the current event and the restored scores return to the all-time board and lists. Event Setup stays open and shows the current event's choices. It undoes only the most recent clear, and only once: after a restore the button disappears, older clears stay cleared (their scores are still on the device and in the download), and RESTORE comes back only after the next clear. It does not apply other changes made on Event Setup.
 

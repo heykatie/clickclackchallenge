@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import "../test/domSetup";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
+import type { EventRecapStats } from "../features/recap/eventRecap";
+import type { RecapResult } from "../features/recap/recapClient";
 import { EventSetupScreen } from "./EventSetupScreen";
 
 function renderSetup(
@@ -12,6 +14,7 @@ function renderSetup(
   soundOn = false,
   plinkoWins: number | null = null,
   canClear = true,
+  recapOptions?: { stats: EventRecapStats; create: (stats: EventRecapStats) => Promise<RecapResult> },
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
@@ -38,6 +41,8 @@ function renderSetup(
       onDownloadScores={onDownloadScores}
       soundOn={soundOn}
       plinkoWins={plinkoWins}
+      recapStats={recapOptions?.stats ?? null}
+      onCreateRecap={recapOptions?.create}
       canClear={canClear}
       onToggleSound={onToggleSound}
       musicOn={false}
@@ -55,8 +60,8 @@ function renderSetup(
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
-/** From START EVENT, the steps up are All-time leaderboard, Continue, then Start fresh. */
-// START EVENT → event name → CLEAR → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
+/** From START EVENT, move through the score tools, All-time, Continue, then Start fresh. */
+// START EVENT → event name → CLEAR → RECAP → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
 function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
@@ -64,7 +69,9 @@ function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
   press("ArrowUp");
+  press("ArrowUp");
   press("Enter");
+  press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
@@ -79,6 +86,82 @@ describe("EventSetupScreen", () => {
     press("Enter");
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
+  });
+
+  it("requests an AI recap only on demand and shows the local totals with its response", async () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 18,
+      averageWpm: 47.6,
+      medianWpm: 44,
+      averageAccuracy: 91.2,
+      modeUsage: [{ mode: "story", rounds: 12, percentage: 66.7 }, { mode: "words", rounds: 6, percentage: 33.3 }],
+      durationUsage: [{ durationSeconds: 30, rounds: 8, percentage: 44.4 }, { durationSeconds: 60, rounds: 10, percentage: 55.6 }],
+      plinkoDropsWon: 5,
+      plinkoWinnerPercentage: 27.8,
+      roundsByHour: [{ hour: 14, rounds: 6 }, { hour: 15, rounds: 6 }, { hour: 16, rounds: 2 }],
+      peakHours: [14, 15],
+      peakHourRounds: 6,
+    };
+    const create = vi.fn().mockResolvedValue({ ok: true, recap: "Most players came through mid-afternoon." });
+    renderSetup(existing, false, false, false, 5, true, { stats: recapStats, create });
+
+    expect(create).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "AI EVENT RECAP" }));
+    await waitFor(() => expect(create).toHaveBeenCalledExactlyOnceWith(recapStats));
+    expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
+    expect(screen.getByText("Completed rounds").parentElement?.textContent).toContain("18");
+    expect(screen.getByText("Busiest round hour").parentElement?.textContent).toContain("6 rounds");
+    expect(screen.getByText("Plinko drops won").parentElement?.textContent).toContain("5");
+    expect(screen.getByText("Average WPM").parentElement?.textContent).toContain("47.6");
+    expect(screen.getByText("Median WPM").parentElement?.textContent).toContain("44");
+    expect(screen.getByText("Average accuracy").parentElement?.textContent).toContain("91.2%");
+    expect(screen.getByText("Plinko win rate (% of rounds)").parentElement?.textContent).toContain("27.8%");
+    expect(screen.getByText("Game modes (% of rounds)").parentElement?.textContent).toContain("66.7%");
+    expect(screen.getByText("Round lengths (% of rounds)").parentElement?.textContent).toContain("55.6%");
+    expect(screen.getByText("Rounds by hour").parentElement?.textContent).toContain("6 rounds");
+    expect(await screen.findByText("Most players came through mid-afternoon.")).toBeTruthy();
+    expect(screen.getByText(/Names, score rows, and typed text stay on this device/)).toBeTruthy();
+  });
+
+  it("opens the recap from the arrow-key setup cursor", async () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 1, averageWpm: 40, medianWpm: 40, averageAccuracy: 95,
+      modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }],
+      plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 11, rounds: 1 }], peakHours: [11], peakHourRounds: 1,
+    };
+    const create = vi.fn().mockResolvedValue({ ok: true, recap: "One round was completed." });
+    renderSetup(existing, false, false, false, 0, true, { stats: recapStats, create });
+    press("ArrowUp");
+    press("ArrowUp");
+    press("ArrowUp");
+
+    expect(screen.getByRole("button", { name: "AI EVENT RECAP" }).className).toContain("is-cursor");
+    press("Enter");
+    await waitFor(() => expect(create).toHaveBeenCalledExactlyOnceWith(recapStats));
+    expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
+  });
+
+  it("shows local event totals offline without requesting an AI recap", async () => {
+    const original = navigator.onLine;
+    Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
+    const recapStats: EventRecapStats = {
+      completedRounds: 2, averageWpm: 60, medianWpm: 60, averageAccuracy: 95,
+      modeUsage: [{ mode: "famous-lines", rounds: 2, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 2, percentage: 100 }],
+      plinkoDropsWon: 1, plinkoWinnerPercentage: 50, roundsByHour: [{ hour: 9, rounds: 2 }], peakHours: [9], peakHourRounds: 2,
+    };
+    const create = vi.fn().mockResolvedValue({ ok: false, reason: "offline" });
+    try {
+      renderSetup(existing, false, false, false, 1, true, {
+        stats: recapStats,
+        create,
+      });
+      fireEvent.click(screen.getByRole("button", { name: "AI EVENT RECAP" }));
+      await waitFor(() => expect(create).toHaveBeenCalledExactlyOnceWith(recapStats));
+      expect(screen.getByText("Busiest round hour").parentElement?.textContent).toContain("2 rounds");
+      expect(screen.getByText(/You’re offline/)).toBeTruthy();
+    } finally {
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: original });
+    }
   });
 
   it("starts fresh without asking when no event exists yet", () => {
@@ -168,13 +251,15 @@ describe("EventSetupScreen", () => {
 
   it("keeps the event and switches its board to all-time", () => {
     const { onContinue, onStartFresh } = renderSetup(existing);
-    // START EVENT → event name → CLEAR → DOWNLOAD → All-time.
+    // START EVENT → event name → CLEAR → RECAP → DOWNLOAD → All-time.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("Enter");
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -265,7 +350,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches DOWNLOAD SCORES before CLEAR BOARD in the arrow-key order, and Enter downloads", () => {
     const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
-    // START EVENT → event name → CLEAR BOARD → DOWNLOAD SCORES.
+    // START EVENT → event name → CLEAR BOARD → AI EVENT RECAP → DOWNLOAD SCORES.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");

@@ -62,6 +62,7 @@ describe("all-time choice", () => {
       "continue",
       "all-time",
       "download",
+      "recap",
       "clear",
       "name",
       "start",
@@ -79,11 +80,12 @@ describe("all-time choice", () => {
 describe("clear choice", () => {
   it("comes right after DOWNLOAD SCORES in the Leaderboard group, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("download") + 1]).toBe("clear");
+    expect(choices[choices.indexOf("download") + 1]).toBe("recap");
+    expect(choices[choices.indexOf("recap") + 1]).toBe("clear");
     expect(setupChoices("famous-lines", false)).not.toContain("clear");
     expect(applySetupKey({ ...ready, cursor: "download" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({
       ...ready,
-      cursor: "clear",
+      cursor: "recap",
     });
   });
 
@@ -96,6 +98,7 @@ describe("download choice", () => {
   it("comes first of the score actions, right after the Leaderboard choices, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
     expect(choices[choices.indexOf("all-time") + 1]).toBe("download");
+    expect(choices[choices.indexOf("download") + 1]).toBe("recap");
     expect(setupChoices("famous-lines", false)).not.toContain("download");
   });
 
@@ -103,6 +106,10 @@ describe("download choice", () => {
     expect(applySetupKey({ ...ready, cursor: "download" }, "Enter", { shiftKey: false, canContinue: true })).toBe(
       "download",
     );
+  });
+
+  it("opens the AI event recap on Enter", () => {
+    expect(applySetupKey({ ...ready, cursor: "recap" }, "Enter", { shiftKey: false, canContinue: true })).toBe("recap");
   });
 });
 
@@ -123,7 +130,7 @@ describe("score actions", () => {
   it("sit with the Leaderboard choices: DOWNLOAD, then CLEAR, then RESTORE, before the event name", () => {
     const choices = setupChoices("famous-lines", true, false, true);
     const from = choices.indexOf("all-time");
-    expect(choices.slice(from, from + 6)).toEqual(["all-time", "download", "clear", "restore", "name", "start"]);
+    expect(choices.slice(from, from + 7)).toEqual(["all-time", "download", "recap", "clear", "restore", "name", "start"]);
   });
 });
 
@@ -189,6 +196,6 @@ describe("update choice", () => {
       "ArrowDown",
       { shiftKey: false, canContinue: true, canClear: false },
     );
-    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("name");
+    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("recap");
   });
 });

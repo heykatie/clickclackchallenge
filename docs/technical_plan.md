@@ -85,6 +85,7 @@ V1 supports:
 - automatic reset after the Leaderboard screen
 - local event persistence
 - offline operation after installation/caching
+- optional event recap generated on request from locally computed aggregate counts
 
 ### Out of Scope
 
@@ -103,7 +104,7 @@ V1 does not require:
 - historical-event management UI
 - AI-generated passages
 - advanced anti-cheat systems
-- detailed analytics
+- detailed analytics or dashboards
 - operator score deletion
 - multiple-device event management
 
@@ -157,6 +158,14 @@ create / continue event
 → derive leaderboard
 → reset for next contestant
 ```
+
+### Optional online event recap
+
+The app may call one Vercel Function at `POST /api/recap` after the operator explicitly requests an event recap in Event Setup. The browser computes completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, and the local-hour round breakdown from IndexedDB. It sends only those aggregate statistics to the function. The function calls Cloudflare Workers AI using server-side environment variables and returns short text. It has no database, account system, or authority to change event data.
+
+The recap is not a required dependency. The local recap opens even when offline; the browser makes no model request when it reports offline, and the modal explains that generated text needs Wi-Fi. The action is unavailable until at least one completed round exists. Connection failures, missing credentials, provider errors, and exhausted free quota produce an unavailable message while local facts remain visible. Do not make recap calls during gameplay, during score saving, or automatically on opening Event Setup.
+
+The model request must not include names, event names, individual score rows, passages, typed text, or persistent device identifiers. Derive exact values in TypeScript and show them separately from generated language. The API function validates and whitelists the aggregate numeric fields, limits the request and output, checks same-origin requests, and never returns provider credentials or raw provider errors.
 
 The application must remain usable when the iPad is:
 
@@ -257,6 +266,8 @@ Suitable hosts include:
 - GitHub Pages if configured correctly for the build and PWA behavior
 
 No application server is required for V1 booth operation.
+
+When the optional recap is enabled, Vercel also deploys the small Node.js function in `api/recap.ts`; the Vite-built app remains static. The function requires `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in Vercel's server-side environment. Do not add these values to `VITE_*` variables, source code, or committed files. Keep Workers AI on its Free plan if the no-charge quota is a requirement; the quota and provider terms can change. The feature must still fail closed if the function is not configured.
 
 ---
 
@@ -1808,6 +1819,20 @@ Vitest covers the unit and persistence cases. React Testing Library covers the c
 
 Booth acceptance tests live in `docs/prd.md`. This section lists the automated cases and hardware checks.
 
+### Optional AI recap evaluation
+
+The baseline is deterministic: before the AI response, the app computes and displays round count, average and median displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The model is evaluated only as a writer for a short explanation; it is not the source of any number or product decision.
+
+Automated acceptance thresholds:
+
+- Round counts, WPM and accuracy averages/median, mode and duration shares, Plinko rate, hourly buckets, and peak-hour ties are exact to their documented rounding in unit fixtures; invalid timestamps are omitted from the hour breakdown but still count as completed saved rounds.
+- No request is made when offline, before an explicit operator action, or while there are no completed rounds.
+- The request body contains only allow-listed aggregate fields; names, event names, passages, and score records are excluded.
+- An unavailable function, timeout, malformed response, provider error, or exhausted quota leaves event data and the normal booth flow unchanged.
+- Generated text is plain text, trimmed, and capped at 280 characters. The separately displayed local totals remain authoritative.
+
+Before enabling a live provider, manually review at least 12 varied aggregate fixtures (empty/single-round, busy one-hour event, multiple tied hours, no Plinko wins, and high Plinko counts). Reject outputs that invent numbers, dates, causes, participants, or rankings. The API request has an eight-second provider timeout, and only an operator-triggered request consumes provider quota. Live provider quality and current free-tier cost cannot be verified in unit tests; verify them in a deployed preview with credentials configured.
+
 Ignore browser key-repeat when `KeyboardEvent.repeat` is true. Separate physical presses of the same key still count.
 
 ### Unit Tests — Scoring
@@ -2269,11 +2294,9 @@ Deployment should prioritize simplicity and reliable HTTPS.
 
 ## 21. Environment Configuration
 
-V1 should not require secrets because there is no backend/API.
+Normal booth operation requires no secrets and no online service. The optional recap function reads `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` on the server. Set them in Vercel's project environment for the deployments where recap is enabled. A local `.env.local` may be used with `vercel dev`; never expose either as a `VITE_*` value or commit a real token.
 
-No `.env` values should be required for normal booth operation.
-
-If deployment tooling later introduces environment variables, commit only:
+If environment variables are documented in the repository, commit only:
 
 ```text
 .env.example
