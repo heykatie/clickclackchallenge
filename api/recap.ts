@@ -1,4 +1,4 @@
-import { formatHourWindow, type EventRecapStats } from "../src/features/recap/eventRecap";
+import type { EventRecapStats } from "../src/features/recap/eventRecap";
 
 const MODEL = "@cf/meta/llama-3.2-3b-instruct";
 const MAX_REQUEST_BYTES = 2048;
@@ -175,8 +175,8 @@ function exactRecap(stats: EventRecapStats, facts: readonly RecapFact[]): string
     sentences.push(`Plinko winners were ${stats.plinkoWinnerPercentage}% of rounds (${stats.plinkoDropsWon} ${stats.plinkoDropsWon === 1 ? "win" : "wins"}).`);
   }
   if (facts.includes("peakHours") && stats.peakHours.length > 0) {
-    const hours = stats.peakHours.map(formatHourWindow);
-    sentences.push(`Busiest local booth hour${hours.length === 1 ? "" : "s"}: ${hours.join(", ")} (${stats.peakHourRounds} rounds each).`);
+    const hours = stats.peakHours.map(formatLocalHourWindow);
+    sentences.push(`Busiest local booth hour${hours.length === 1 ? "" : "s"}: ${hours.join(", ")} (${stats.peakHourRounds} ${stats.peakHourRounds === 1 ? "round" : "rounds"} each).`);
   }
   return sentences.join(" ").slice(0, 280);
 }
@@ -189,6 +189,14 @@ function fallbackFacts(stats: EventRecapStats): RecapFact[] {
     ...(stats.modeUsage.length === 0 ? [] : ["modeUsage" as const]),
     ...(stats.completedRounds === 0 ? [] : ["plinko" as const]),
   ];
+}
+
+function formatLocalHourWindow(hour: number): string {
+  const formatHour = (value: number) => {
+    const normalized = value % 24;
+    return `${normalized % 12 || 12} ${normalized < 12 ? "AM" : "PM"}`;
+  };
+  return `${formatHour(hour)}–${formatHour(hour + 1)}`;
 }
 
 export function createRecapHandler(dependencies: RecapHandlerDependencies) {

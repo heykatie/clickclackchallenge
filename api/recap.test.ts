@@ -99,6 +99,27 @@ describe("event recap API", () => {
     expect(await response.json()).toEqual({ recap: "The event completed 23 rounds. Busiest local booth hours: 2 PM–3 PM, 3 PM–4 PM (6 rounds each)." });
   });
 
+  it("formats one-hour windows across midnight without changing the booth clock hour", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: ["completedRounds", "peakHours"] }) } }),
+    );
+    const response = await handler(fetchImpl).fetch(request({
+      completedRounds: 2,
+      averageWpm: 20,
+      medianWpm: 20,
+      averageAccuracy: 95,
+      modeUsage: [{ mode: "words", rounds: 2, percentage: 100 }],
+      durationUsage: [{ durationSeconds: 60, rounds: 2, percentage: 100 }],
+      plinkoDropsWon: 0,
+      plinkoWinnerPercentage: 0,
+      roundsByHour: [{ hour: 23, rounds: 1 }, { hour: 0, rounds: 1 }],
+      peakHours: [0, 23],
+      peakHourRounds: 1,
+    }));
+
+    expect(await response.json()).toEqual({ recap: "The event completed 2 rounds. Busiest local booth hours: 12 AM–1 AM, 11 PM–12 AM (1 round each)." });
+  });
+
   it("falls back when model highlights are empty or duplicated", async () => {
     const empty = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({ success: true, result: { response: JSON.stringify({ highlights: [] }) } }),
