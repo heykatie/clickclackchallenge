@@ -31,20 +31,27 @@ function handler(fetchImpl = vi.fn<typeof fetch>()) {
   });
 }
 
+const selectedFacts = {
+  completedRounds: "completedRounds",
+  medianWpm: "medianWpm",
+  modeUsage: "modeUsage",
+  plinko: "plinko",
+};
+
 describe("event recap API", () => {
   it("accepts only a same-origin request and sends only computed aggregate statistics to the model", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
-      Response.json({ success: true, result: { response: "The booth was busiest mid-afternoon." } }),
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: Object.values(selectedFacts) }) } }),
     );
     const response = await handler(fetchImpl).fetch(request({ ...validStats, name: "private name" }));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ recap: "The booth was busiest mid-afternoon." });
+    expect(await response.json()).toEqual({ recap: "The event completed 23 rounds. Median speed was 53 WPM. Mode use: Story 100%. Plinko winners were 17.4% of rounds (4 wins)." });
     const [url, init] = fetchImpl.mock.calls[0]!;
     expect(url).toContain("/accounts/account/ai/run/");
     expect(new Headers(init?.headers).get("authorization")).toBe("Bearer private-token");
     expect(JSON.stringify(JSON.parse(String(init?.body)))).not.toContain("private name");
-    expect(JSON.parse(String(init?.body))).toMatchObject({ max_tokens: 120 });
+    expect(JSON.parse(String(init?.body))).toMatchObject({ max_tokens: 80 });
     const providerBody = JSON.parse(String(init?.body));
     const aggregatePayload = JSON.parse(providerBody.messages[1].content);
     expect(aggregatePayload).toEqual({
@@ -59,6 +66,51 @@ describe("event recap API", () => {
       roundsByHour: [{ hour: 14, rounds: 6 }, { hour: 15, rounds: 6 }],
       peakTraffic: { localHourStarts: [14, 15], roundsInEachPeakHour: 6 },
     });
+  });
+
+  it("does not return unsupported prose from the model and uses a recap built from exact local facts", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: "The popular game session showed exceptional performance." } }),
+    );
+    const response = await handler(fetchImpl).fetch(request({ ...validStats, completedRounds: 1, averageWpm: 0, medianWpm: 0, averageAccuracy: 100, modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 15, rounds: 1 }], peakHours: [15], peakHourRounds: 1 }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ recap: "The event completed 1 round. Median speed was 0 WPM, and average accuracy was 100%. Mode use: Famous Lines 100%. Plinko winners were 0% of rounds (0 wins)." });
+  });
+
+  it("ignores unavailable or unknown highlight keys and never asks the model to write free-form prose", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: ["peakHours", "inventedTrend"] }) } }),
+    );
+    const response = await handler(fetchImpl).fetch(request({ ...validStats, averageWpm: null, medianWpm: null, averageAccuracy: null, completedRounds: 0, modeUsage: [], durationUsage: [], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [], peakHours: [], peakHourRounds: 0 }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ recap: "The event completed 0 rounds." });
+    const [, init] = fetchImpl.mock.calls[0]!;
+    expect(String(init?.body)).toContain("Return only JSON with a highlights array");
+  });
+
+  it("renders tied peak hours as exact one-hour local windows", async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: ["completedRounds", "peakHours"] }) } }),
+    );
+    const response = await handler(fetchImpl).fetch(request(validStats));
+
+    expect(await response.json()).toEqual({ recap: "The event completed 23 rounds. Busiest local booth hours: 2 PM–3 PM, 3 PM–4 PM (6 rounds each)." });
+  });
+
+  it("falls back when model highlights are empty or duplicated", async () => {
+    const empty = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: [] }) } }),
+    );
+    const duplicate = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({ success: true, result: { response: JSON.stringify({ highlights: ["completedRounds", "completedRounds"] }) } }),
+    );
+    const emptyResponse = await handler(empty).fetch(request(validStats));
+    const duplicateResponse = await handler(duplicate).fetch(request(validStats));
+
+    expect(await emptyResponse.json()).toEqual({ recap: "The event completed 23 rounds. Median speed was 53 WPM, and average accuracy was 94.6%. Mode use: Story 100%. Plinko winners were 17.4% of rounds (4 wins)." });
+    expect(await duplicateResponse.json()).toEqual({ recap: "The event completed 23 rounds. Median speed was 53 WPM, and average accuracy was 94.6%. Mode use: Story 100%. Plinko winners were 17.4% of rounds (4 wins)." });
   });
 
   it("rejects malformed aggregate data before contacting the model", async () => {

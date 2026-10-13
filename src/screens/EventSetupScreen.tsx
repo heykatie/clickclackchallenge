@@ -730,7 +730,7 @@ export function EventSetupScreen({
               <div><dt>Plinko win rate (% of rounds)</dt><dd>{recapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
             </dl>
             <p className="setup-recap-privacy">Percentages use completed rounds. WPM uses displayed scores; accuracy averages rounds with a recorded value.</p>
-            <p className="setup-recap-privacy">Only these anonymous event statistics are sent for the AI-written recap. Names, score rows, and typed text stay on this device.</p>
+            <p className="setup-recap-privacy">Only anonymous event statistics are sent. The AI selects which facts to highlight; recap text is built from those exact totals. Names, score rows, and typed text stay on this device.</p>
             <p className="setup-recap-message" role="status" aria-live="polite">
               {recapBusy
                 ? "Writing your recap…"

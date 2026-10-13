@@ -164,7 +164,7 @@ V1 includes:
 - local event persistence
 - local score persistence
 - offline PWA operation
-- optional operator-requested AI-written recap of the active event's anonymous aggregate totals
+- optional operator-requested recap that uses AI to select highlights from the active event's anonymous aggregate totals
 - landscape-iPad layout
 - locally bundled fonts, passages, and required visual assets
 
@@ -339,7 +339,7 @@ Once an event exists, a small line just above the event name field tells staff h
 
 ### Optional AI Event Recap
 
-When an event exists with at least one completed round, Event Setup offers an **AI EVENT RECAP** action beside the score tools. The operator can always open the recap to see local facts. AI-written text is requested only when the device reports an internet connection; offline, the local facts remain available and the modal explains that AI text needs Wi-Fi. The feature never appears in the contestant flow and is never requested automatically.
+When an event exists with at least one completed round, Event Setup offers an **AI EVENT RECAP** action beside the score tools. The operator can always open the recap to see local facts. AI is requested only when the device reports an internet connection; it selects which supplied facts to highlight, while the server builds recap text from exact local totals. Offline, the local facts remain available and the modal explains that AI needs Wi-Fi. The feature never appears in the contestant flow and is never requested automatically.
 
 The recap shows the exact local event statistics before any generated text:
 
@@ -353,7 +353,7 @@ The recap shows the exact local event statistics before any generated text:
 
 Each round stores the game mode and duration used. Historical sound, music, palette, and leaderboard-scope selections are not recorded per round, so the recap does not estimate percentages for those settings.
 
-The AI request happens only after the operator asks for a recap. It may receive only these aggregate statistics and numeric local-hour buckets; it must not receive contestant names, event names, score rows, typed text, passages, or device identifiers. The generated text is explanatory copy; the locally computed statistics remain authoritative. If the network, function, model, or free quota is unavailable, the statistics stay visible and the app reports that the generated recap is unavailable. No event, typing, scoring, or leaderboard action may wait for or depend on this feature.
+The AI request happens only after the operator asks for a recap. It may receive only these aggregate statistics and numeric local-hour buckets; it must not receive contestant names, event names, score rows, typed text, passages, or device identifiers. The model can return only allow-listed fact keys; the server renders the recap from those exact totals and ignores free-form model prose. The locally computed statistics remain authoritative. Vercel Firewall limits `/api/recap` to five requests per source IP in each ten-minute fixed window. If the network, function, model, or free quota is unavailable, the statistics stay visible and the app reports that the generated recap is unavailable. No event, typing, scoring, or leaderboard action may wait for or depend on this feature.
 
 After a clear that hid scores, Event Setup also shows RESTORE CLEARED SCORES next to CLEAR BOARD. Clearing a board nobody has played hides nothing, so it never offers RESTORE. It asks “Restore cleared scores?” with CANCEL chosen. RESTORE undoes the most recent clear: its scores show again on every board and list. If nothing has been played on the current board since, the cleared board becomes the current event again, with its own name, length, mode, and board setting, as if the clear never happened. Once the current board has scores, it stays the current event and the restored scores return to the all-time board and lists. Event Setup stays open and shows the current event's choices. It undoes only the most recent clear, and only once: after a restore the button disappears, older clears stay cleared (their scores are still on the device and in the download), and RESTORE comes back only after the next clear. It does not apply other changes made on Event Setup.
 

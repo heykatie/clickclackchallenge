@@ -161,11 +161,11 @@ create / continue event
 
 ### Optional online event recap
 
-The app may call one Vercel Function at `POST /api/recap` after the operator explicitly requests an event recap in Event Setup. The browser computes completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, and the local-hour round breakdown from IndexedDB. It sends only those aggregate statistics to the function. The function calls Cloudflare Workers AI using server-side environment variables and returns short text. It has no database, account system, or authority to change event data.
+The app may call one Vercel Function at `POST /api/recap` after the operator explicitly requests an event recap in Event Setup. The browser computes completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, and the local-hour round breakdown from IndexedDB. It sends only those aggregate statistics to the function. The function calls Cloudflare Workers AI using server-side environment variables. The model may return only up to four allow-listed fact keys; the function rejects malformed or unknown keys and renders recap text itself from the supplied exact totals. It never trusts model prose as factual output. It has no database, account system, or authority to change event data.
 
-The recap is not a required dependency. The local recap opens even when offline; the browser makes no model request when it reports offline, and the modal explains that generated text needs Wi-Fi. The action is unavailable until at least one completed round exists. Connection failures, missing credentials, provider errors, and exhausted free quota produce an unavailable message while local facts remain visible. Do not make recap calls during gameplay, during score saving, or automatically on opening Event Setup.
+The recap is not a required dependency. The local recap opens even when offline; the browser makes no model request when it reports offline, and the modal explains that AI needs Wi-Fi. The action is unavailable until at least one completed round exists. Connection failures, missing credentials, provider errors, and exhausted free quota produce an unavailable message while local facts remain visible. Vercel Firewall enforces a fixed-window limit of five `POST /api/recap` requests per source IP in ten minutes, preventing direct callers from bypassing the browser's same-origin check to spend the model quota rapidly. Do not make recap calls during gameplay, during score saving, or automatically on opening Event Setup.
 
-The model request must not include names, event names, individual score rows, passages, typed text, or persistent device identifiers. Derive exact values in TypeScript and show them separately from generated language. The API function validates and whitelists the aggregate numeric fields, limits the request and output, checks same-origin requests, and never returns provider credentials or raw provider errors.
+The model request must not include names, event names, individual score rows, passages, typed text, or persistent device identifiers. Derive exact values in TypeScript and show them separately from the recap text rendered by the server. The API function validates and whitelists the aggregate numeric fields, limits the request and output, checks same-origin requests, and never returns provider credentials or raw provider errors.
 
 The application must remain usable when the iPad is:
 
@@ -1821,17 +1821,17 @@ Booth acceptance tests live in `docs/prd.md`. This section lists the automated c
 
 ### Optional AI recap evaluation
 
-The baseline is deterministic: before the AI response, the app computes and displays round count, average and median displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The model is evaluated only as a writer for a short explanation; it is not the source of any number or product decision.
+The baseline is deterministic: before the AI response, the app computes and displays round count, average and median displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The model only chooses which exact fact keys to highlight; server code renders the recap and owns every number and phrase.
 
 Automated acceptance thresholds:
 
 - Round counts, WPM and accuracy averages/median, mode and duration shares, Plinko rate, hourly buckets, and peak-hour ties are exact to their documented rounding in unit fixtures; invalid timestamps are omitted from the hour breakdown but still count as completed saved rounds.
 - No request is made when offline, before an explicit operator action, or while there are no completed rounds.
 - The request body contains only allow-listed aggregate fields; names, event names, passages, and score records are excluded.
-- An unavailable function, timeout, malformed response, provider error, or exhausted quota leaves event data and the normal booth flow unchanged.
-- Generated text is plain text, trimmed, and capped at 280 characters. The separately displayed local totals remain authoritative.
+- An unavailable function, timeout, invalid provider envelope, provider error, or exhausted quota leaves event data and the normal booth flow unchanged; malformed model selections fall back to exact local totals.
+- The model response parses as JSON with at most four unique, available fact keys; malformed prose, invented keys, and unavailable statistics trigger a deterministic local fallback. The recap contains only values and labels rendered from the validated totals and is capped at 280 characters.
 
-Before enabling a live provider, manually review at least 12 varied aggregate fixtures (empty/single-round, busy one-hour event, multiple tied hours, no Plinko wins, and high Plinko counts). Reject outputs that invent numbers, dates, causes, participants, or rankings. The API request has an eight-second provider timeout, and only an operator-triggered request consumes provider quota. Live provider quality and current free-tier cost cannot be verified in unit tests; verify them in a deployed preview with credentials configured.
+Use representative fixtures including empty and single-round events, a busy hour, tied peak hours, zero Plinko wins, and high Plinko counts. Tests verify every rendered claim against the supplied totals and reject free-form model output. The API request has an eight-second provider timeout, and only an operator-triggered request consumes provider quota. Live provider availability and current free-tier terms cannot be verified in unit tests; verify them in a deployed preview with credentials configured.
 
 Ignore browser key-repeat when `KeyboardEvent.repeat` is true. Separate physical presses of the same key still count.
 

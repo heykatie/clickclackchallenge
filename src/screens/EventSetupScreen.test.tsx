@@ -102,7 +102,7 @@ describe("EventSetupScreen", () => {
       peakHours: [14, 15],
       peakHourRounds: 6,
     };
-    const create = vi.fn().mockResolvedValue({ ok: true, recap: "Most players came through mid-afternoon." });
+    const create = vi.fn().mockResolvedValue({ ok: true, recap: "The event completed 18 rounds. Median speed was 44 WPM." });
     renderSetup(existing, false, false, false, 5, true, { stats: recapStats, create });
 
     expect(create).not.toHaveBeenCalled();
@@ -119,7 +119,8 @@ describe("EventSetupScreen", () => {
     expect(screen.getByText("Game modes (% of rounds)").parentElement?.textContent).toContain("66.7%");
     expect(screen.getByText("Round lengths (% of rounds)").parentElement?.textContent).toContain("55.6%");
     expect(screen.getByText("Rounds by hour").parentElement?.textContent).toContain("6 rounds");
-    expect(await screen.findByText("Most players came through mid-afternoon.")).toBeTruthy();
+    expect(await screen.findByText("The event completed 18 rounds. Median speed was 44 WPM.")).toBeTruthy();
+    expect(screen.getByText(/The AI selects which facts to highlight; recap text is built from those exact totals/)).toBeTruthy();
     expect(screen.getByText(/Names, score rows, and typed text stay on this device/)).toBeTruthy();
   });
 

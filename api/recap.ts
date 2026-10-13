@@ -1,4 +1,4 @@
-import type { EventRecapStats } from "../src/features/recap/eventRecap";
+import { formatHourWindow, type EventRecapStats } from "../src/features/recap/eventRecap";
 
 const MODEL = "@cf/meta/llama-3.2-3b-instruct";
 const MAX_REQUEST_BYTES = 2048;
@@ -118,6 +118,79 @@ function promptFor(stats: EventRecapStats): string {
   });
 }
 
+type RecapFact = "completedRounds" | "averageWpm" | "medianWpm" | "averageAccuracy" | "modeUsage" | "durationUsage" | "plinko" | "peakHours";
+
+function availableFacts(stats: EventRecapStats): RecapFact[] {
+  return [
+    "completedRounds",
+    ...(stats.averageWpm === null ? [] : ["averageWpm" as const]),
+    ...(stats.medianWpm === null ? [] : ["medianWpm" as const]),
+    ...(stats.averageAccuracy === null ? [] : ["averageAccuracy" as const]),
+    ...(stats.modeUsage.length === 0 ? [] : ["modeUsage" as const]),
+    ...(stats.durationUsage.length === 0 ? [] : ["durationUsage" as const]),
+    "plinko",
+    ...(stats.peakHours.length === 0 ? [] : ["peakHours" as const]),
+  ];
+}
+
+function selectedFactsFromModel(response: string, stats: EventRecapStats): RecapFact[] | null {
+  try {
+    const parsed: unknown = JSON.parse(response);
+    if (typeof parsed !== "object" || parsed === null || !Array.isArray((parsed as { highlights?: unknown }).highlights)) {
+      return null;
+    }
+    const highlights = (parsed as { highlights: unknown[] }).highlights;
+    const allowed = new Set(availableFacts(stats));
+    if (highlights.length === 0 || highlights.length > 4 || new Set(highlights).size !== highlights.length || highlights.some((fact) => typeof fact !== "string" || !allowed.has(fact as RecapFact))) {
+      return null;
+    }
+    return [...new Set(highlights as RecapFact[])];
+  } catch {
+    return null;
+  }
+}
+
+function exactRecap(stats: EventRecapStats, facts: readonly RecapFact[]): string {
+  const sentences: string[] = [];
+  if (facts.includes("completedRounds")) {
+    sentences.push(`The event completed ${stats.completedRounds} ${stats.completedRounds === 1 ? "round" : "rounds"}.`);
+  }
+  const performance = [
+    facts.includes("averageWpm") && stats.averageWpm !== null ? `average speed was ${stats.averageWpm} WPM` : "",
+    facts.includes("medianWpm") && stats.medianWpm !== null ? `median speed was ${stats.medianWpm} WPM` : "",
+    facts.includes("averageAccuracy") && stats.averageAccuracy !== null ? `average accuracy was ${stats.averageAccuracy}%` : "",
+  ].filter(Boolean);
+  if (performance.length > 0) {
+    const [first, ...rest] = performance;
+    sentences.push(`${first?.[0]?.toUpperCase()}${first?.slice(1)}${rest.map((item) => `, and ${item}`).join("")}.`);
+  }
+  if (facts.includes("modeUsage") && stats.modeUsage.length > 0) {
+    const labels = { words: "Standard", "famous-lines": "Famous Lines", story: "Story" };
+    sentences.push(`Mode use: ${stats.modeUsage.map(({ mode, percentage }) => `${labels[mode]} ${percentage}%`).join(", ")}.`);
+  }
+  if (facts.includes("durationUsage") && stats.durationUsage.length > 0) {
+    sentences.push(`Round lengths: ${stats.durationUsage.map(({ durationSeconds, percentage }) => `${durationSeconds} seconds ${percentage}%`).join(", ")}.`);
+  }
+  if (facts.includes("plinko")) {
+    sentences.push(`Plinko winners were ${stats.plinkoWinnerPercentage}% of rounds (${stats.plinkoDropsWon} ${stats.plinkoDropsWon === 1 ? "win" : "wins"}).`);
+  }
+  if (facts.includes("peakHours") && stats.peakHours.length > 0) {
+    const hours = stats.peakHours.map(formatHourWindow);
+    sentences.push(`Busiest local booth hour${hours.length === 1 ? "" : "s"}: ${hours.join(", ")} (${stats.peakHourRounds} rounds each).`);
+  }
+  return sentences.join(" ").slice(0, 280);
+}
+
+function fallbackFacts(stats: EventRecapStats): RecapFact[] {
+  return [
+    "completedRounds",
+    ...(stats.medianWpm === null ? [] : ["medianWpm" as const]),
+    ...(stats.averageAccuracy === null ? [] : ["averageAccuracy" as const]),
+    ...(stats.modeUsage.length === 0 ? [] : ["modeUsage" as const]),
+    ...(stats.completedRounds === 0 ? [] : ["plinko" as const]),
+  ];
+}
+
 export function createRecapHandler(dependencies: RecapHandlerDependencies) {
   return {
     async fetch(request: Request): Promise<Response> {
@@ -170,11 +243,11 @@ export function createRecapHandler(dependencies: RecapHandlerDependencies) {
               messages: [
                 {
                   role: "system",
-                  content: "Write a warm, concise event recap in at most two sentences. Use only the supplied aggregate facts. You may mention the WPM and accuracy summaries, most-used mode or round length, Plinko win rate, or busiest hours. Do not invent causes, dates, participants, rankings, or other numbers, and do not recalculate or alter any supplied statistic. Hour values are local booth clock hours; describe them as one-hour windows. Use the round-by-hour breakdown only if helpful.",
+                  content: "Choose up to four useful highlights from the supplied aggregate facts. Return only JSON with a highlights array of allowed keys: completedRounds, averageWpm, medianWpm, averageAccuracy, modeUsage, durationUsage, plinko, peakHours. Never write prose or add facts. The server will render the selected facts exactly.",
                 },
                 { role: "user", content: promptFor(body) },
               ],
-              max_tokens: 120,
+              max_tokens: 80,
             }),
             signal: AbortSignal.timeout(8_000),
           },
@@ -190,7 +263,8 @@ export function createRecapHandler(dependencies: RecapHandlerDependencies) {
         if (typeof result?.response !== "string" || result.response.trim().length === 0) {
           return json({ error: "recap_unavailable" }, 502);
         }
-        return json({ recap: result.response.trim().slice(0, 280) });
+        const selected = selectedFactsFromModel(result.response.trim(), body);
+        return json({ recap: exactRecap(body, selected ?? fallbackFacts(body)) });
       } catch {
         return json({ error: "recap_unavailable" }, 502);
       }
