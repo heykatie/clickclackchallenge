@@ -29,7 +29,7 @@ function press(key: string) {
 }
 
 /** From Event Setup: a Story event, started, then one Story round typed perfectly, ending on Results. */
-async function playStoryRound(eventName?: string) {
+async function playStoryRound(eventName?: string): Promise<number> {
   await screen.findByText("Set up today's typing test");
   fireEvent.click(screen.getByLabelText("Story"));
   if (eventName !== undefined) {
@@ -40,13 +40,15 @@ async function playStoryRound(eventName?: string) {
   // The key that starts the round is not typed.
   press("Shift");
   await waitFor(() => expect(document.querySelector(".caret")).toBeTruthy());
+  const storyStartSkew = skew;
   while (document.querySelector(".caret")) {
     const glyph = document.querySelector(".caret")!.closest(".passage-char")!.querySelector(".passage-char-glyph")!;
-    // 150 ms a key is about 80 WPM: fast enough to rank, well under the 200 WPM cap.
-    skew += 150;
+    // 75 ms a key is about 160 WPM, so Story ends well before the 30-second timer and stays under the 200 WPM cap.
+    skew += 75;
     press(glyph.textContent!);
   }
   await waitFor(() => expect(document.querySelector(".results-screen")).toBeTruthy());
+  return skew - storyStartSkew;
 }
 
 async function resetDatabase() {
@@ -67,7 +69,8 @@ afterEach(async () => {
 describe("App", () => {
   it("plays a round, saves the name typed on Results with Enter, and shows it on the Leaderboard", async () => {
     render(<App />);
-    await playStoryRound();
+    const storyElapsedMs = await playStoryRound();
+    expect(storyElapsedMs).toBeLessThan(30_000);
     fireEvent.change(await screen.findByRole("textbox", { name: "Name" }), { target: { value: "Robin" } });
     press("Enter");
     await waitFor(() => expect(document.querySelector(".leaderboard-screen")).toBeTruthy());

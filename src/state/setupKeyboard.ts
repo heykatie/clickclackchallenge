@@ -16,6 +16,7 @@ export type SetupChoice =
   | "clear"
   | "restore"
   | "download"
+  | "recap"
   | "sound"
   | "music"
   | "palette";
@@ -40,7 +41,7 @@ export function setupChoices(
   }
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
-    // The score actions sit in the Leaderboard group, under its choices.
+    // Download and board actions sit under Leaderboard; the recap sits with the event name in the footer.
     choices.push("continue", "all-time", "download");
     // CLEAR BOARD is greyed out on a board with no scores, so the cursor skips it.
     if (canClear) {
@@ -50,7 +51,11 @@ export function setupChoices(
   if (canRestore) {
     choices.push("restore");
   }
-  choices.push("name", "start", "sound", "music", "palette");
+  choices.push("name");
+  if (canContinue) {
+    choices.push("recap");
+  }
+  choices.push("start", "sound", "music", "palette");
   return choices;
 }
 
@@ -78,13 +83,13 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", on CLEAR BOARD "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
+ * "update", on CLEAR BOARD "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on EVENT RECAP "recap", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
  */
 export function applySetupKey(
   selection: SetupSelection,
   key: string,
   options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean; canClear?: boolean },
-): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "sound" | "music" | "palette" | "name" | null {
+): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "recap" | "sound" | "music" | "palette" | "name" | null {
   const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore, options.canClear);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
@@ -109,6 +114,9 @@ export function applySetupKey(
     }
     if (current.cursor === "download") {
       return "download";
+    }
+    if (current.cursor === "recap") {
+      return "recap";
     }
     if (current.cursor === "sound") {
       return "sound";

@@ -3,6 +3,7 @@ import "../test/domSetup";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
+import type { EventRecapStats } from "../features/recap/eventRecap";
 import { EventSetupScreen } from "./EventSetupScreen";
 
 function renderSetup(
@@ -12,6 +13,7 @@ function renderSetup(
   soundOn = false,
   plinkoWins: number | null = null,
   canClear = true,
+  recapOptions?: { stats: EventRecapStats; allTimeStats?: EventRecapStats },
 ) {
   const onStartFresh = vi.fn();
   const onContinue = vi.fn();
@@ -38,6 +40,8 @@ function renderSetup(
       onDownloadScores={onDownloadScores}
       soundOn={soundOn}
       plinkoWins={plinkoWins}
+      recapStats={recapOptions?.stats ?? null}
+      allTimeRecapStats={recapOptions?.allTimeStats ?? null}
       canClear={canClear}
       onToggleSound={onToggleSound}
       musicOn={false}
@@ -55,8 +59,8 @@ function renderSetup(
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
-/** From START EVENT, the steps up are All-time leaderboard, Continue, then Start fresh. */
-// START EVENT → event name → CLEAR → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
+/** From START EVENT, move through the score tools, All-time, Continue, then Start fresh. */
+// START EVENT → EVENT RECAP → event name → CLEAR → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
 function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
@@ -64,7 +68,9 @@ function chooseStartFresh() {
   press("ArrowUp");
   press("ArrowUp");
   press("ArrowUp");
+  press("ArrowUp");
   press("Enter");
+  press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
   press("ArrowDown");
@@ -79,6 +85,177 @@ describe("EventSetupScreen", () => {
     press("Enter");
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
+  });
+
+  it("opens an offline-ready deterministic recap with the local totals", () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 18,
+      averageWpm: 47.6,
+      medianWpm: 44,
+      fastestWpm: 92,
+      averageAccuracy: 91.2,
+      modeUsage: [{ mode: "story", rounds: 12, percentage: 66.7 }, { mode: "words", rounds: 6, percentage: 33.3 }],
+      durationUsage: [{ durationSeconds: 30, rounds: 8, percentage: 44.4 }, { durationSeconds: 60, rounds: 10, percentage: 55.6 }],
+      plinkoDropsWon: 5,
+      plinkoWinnerPercentage: 27.8,
+      roundsByHour: [{ hour: 14, rounds: 6 }, { hour: 15, rounds: 6 }, { hour: 16, rounds: 2 }],
+      peakHours: [14, 15],
+      peakHourRounds: 6,
+    };
+    renderSetup(existing, false, false, false, 5, true, { stats: recapStats });
+
+    const eventNameInput = screen.getByLabelText("Event name (optional)");
+    const recapButton = screen.getByRole("button", { name: "EVENT RECAP" });
+    expect(eventNameInput.parentElement?.parentElement).toBe(recapButton.parentElement?.parentElement);
+
+    fireEvent.click(recapButton);
+    expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "At a glance" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Settings" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Activity & prizes" })).toBeNull();
+    expect(screen.queryByText("Leaderboard setting")).toBeNull();
+    expect(screen.getByRole("dialog").querySelectorAll(".setup-recap-highlights .setup-recap-kpi")).toHaveLength(4);
+    expect(screen.getByText("Rounds", { exact: true }).parentElement?.textContent).toContain("18");
+    expect(screen.getByText("Peak hour").parentElement?.textContent).toContain("6 rounds");
+    expect(screen.getByText("Plinko wins", { exact: true }).parentElement?.textContent).toContain("5");
+    expect(screen.queryByText("Average WPM")).toBeNull();
+    expect(screen.getByText("Median WPM").parentElement?.textContent).toContain("44");
+    expect(screen.getByText("Fastest WPM").parentElement?.textContent).toContain("92");
+    expect(screen.queryByText("Rounds ≥50 WPM")).toBeNull();
+    expect(screen.getByText("Avg. accuracy").parentElement?.textContent).toContain("91.2%");
+    expect(screen.getByText("Plinko rate").parentElement?.textContent).toContain("27.8%");
+    expect(screen.getByText("Modes", { exact: true }).parentElement?.textContent).toContain("66.7%");
+    expect(screen.getByText("Round lengths", { exact: true }).parentElement?.textContent).toContain("55.6%");
+    const hourlyChart = screen.getByRole("list", { name: "Hourly activity" });
+    expect(hourlyChart.textContent).toContain("6 rounds");
+    expect(hourlyChart.querySelectorAll(".setup-recap-chart-bar")).toHaveLength(3);
+    expect(screen.queryByText(/Percentages use completed rounds/)).toBeNull();
+    expect(screen.queryByText(/Calculated on this device/)).toBeNull();
+    expect(screen.queryByText(/The event completed 18 rounds/)).toBeNull();
+    const accuracyHelp = screen.getByRole("button", { name: "Avg. accuracy help" });
+    const accuracyTooltipId = accuracyHelp.getAttribute("aria-describedby");
+    expect(accuracyTooltipId).toBeTruthy();
+    expect(document.getElementById(accuracyTooltipId!)?.textContent).toMatch(/rounds with saved accuracy/);
+    const hourHelp = screen.getByRole("button", { name: "Peak hour help" });
+    const hourTooltipId = hourHelp.getAttribute("aria-describedby");
+    expect(hourTooltipId).toBeTruthy();
+    expect(document.getElementById(hourTooltipId!)?.textContent).toMatch(/saved round times.*not foot traffic/i);
+    expect(screen.getByRole("button", { name: "Avg. accuracy help" }).querySelector("svg")).toBeTruthy();
+  });
+
+  it("switches between current-event and all-time recap totals", () => {
+    const eventStats: EventRecapStats = {
+      completedRounds: 1, averageWpm: 48, medianWpm: 48, fastestWpm: 48, averageAccuracy: 96,
+      modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }],
+      durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }],
+      plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 14, rounds: 1 },], peakHours: [14], peakHourRounds: 1,
+    };
+    const allTimeStats = { ...eventStats, completedRounds: 43, medianWpm: 72, fastestWpm: 155 };
+    renderSetup(existing, false, false, false, 0, true, { stats: eventStats, allTimeStats });
+    fireEvent.click(screen.getByRole("button", { name: "EVENT RECAP" }));
+
+    expect(screen.getByRole("group", { name: "Recap period" })).toBeTruthy();
+    expect(screen.getByText("Rounds", { exact: true }).parentElement?.textContent).toContain("1");
+    fireEvent.click(screen.getByRole("button", { name: "All time" }));
+    expect(screen.getByText("Rounds", { exact: true }).parentElement?.textContent).toContain("43");
+    expect(screen.getByText("Median WPM").parentElement?.textContent).toContain("72");
+    fireEvent.click(screen.getByRole("button", { name: "This event" }));
+    expect(screen.getByText("Rounds", { exact: true }).parentElement?.textContent).toContain("1");
+  });
+
+  it("uses the event name in the recap title and shows its saved leaderboard scope", () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 1,
+      averageWpm: 48,
+      medianWpm: 48,
+      fastestWpm: 48,
+      averageAccuracy: 96,
+      modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }],
+      durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }],
+      plinkoDropsWon: 0,
+      plinkoWinnerPercentage: 0,
+      roundsByHour: [],
+      peakHours: [],
+      peakHourRounds: 0,
+    };
+    renderSetup({ ...existing, name: "Saturday Market", board: "all-time" }, false, false, false, 0, true, { stats: recapStats });
+
+    fireEvent.click(screen.getByRole("button", { name: "EVENT RECAP" }));
+
+    expect(screen.getByRole("dialog", { name: "Saturday Market" })).toBeTruthy();
+    expect(screen.queryByText("Leaderboard setting")).toBeNull();
+  });
+
+  it("keeps the disabled recap hint attached to the button as a hover tooltip", () => {
+    renderSetup(existing, false, false, false, 0, true, {
+      stats: {
+        completedRounds: 0, averageWpm: null, medianWpm: null, fastestWpm: null, averageAccuracy: null,
+        modeUsage: [], durationUsage: [], plinkoDropsWon: 0, plinkoWinnerPercentage: 0,
+        roundsByHour: [], peakHours: [], peakHourRounds: 0,
+      },
+    });
+
+    const recapButton = screen.getByRole("button", { name: "EVENT RECAP" }) as HTMLButtonElement;
+    expect(recapButton.disabled).toBe(true);
+    const hintId = recapButton.getAttribute("aria-describedby");
+    expect(hintId).toBeTruthy();
+    const hint = document.getElementById(hintId!);
+    expect(hint?.getAttribute("role")).toBe("tooltip");
+    expect(hint?.textContent).toBe("Complete a round to enable recap");
+    expect(recapButton.parentElement?.contains(hint)).toBe(true);
+  });
+
+  it("toggles recap help tooltips when tapped", () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 1, averageWpm: 40, medianWpm: 40, fastestWpm: 40, averageAccuracy: 95,
+      modeUsage: [], durationUsage: [], plinkoDropsWon: 0, plinkoWinnerPercentage: 0,
+      roundsByHour: [], peakHours: [], peakHourRounds: 0,
+    };
+    renderSetup(existing, false, false, false, 0, true, { stats: recapStats });
+    fireEvent.click(screen.getByRole("button", { name: "EVENT RECAP" }));
+
+    const helpButton = screen.getByRole("button", { name: "Avg. accuracy help" });
+    expect(helpButton.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(helpButton);
+    expect(helpButton.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(helpButton);
+    expect(helpButton.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("opens the recap from the arrow-key setup cursor", async () => {
+    const recapStats: EventRecapStats = {
+      completedRounds: 1, averageWpm: 40, medianWpm: 40, fastestWpm: 40, averageAccuracy: 95,
+      modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }],
+      plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 11, rounds: 1 }], peakHours: [11], peakHourRounds: 1,
+    };
+    renderSetup(existing, false, false, false, 0, true, { stats: recapStats });
+    press("ArrowUp");
+
+    expect(screen.getByRole("button", { name: "EVENT RECAP" }).className).toContain("is-cursor");
+    press("Enter");
+    expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
+    expect(screen.getByText("Peak hour").parentElement?.textContent).toContain("1 round");
+  });
+
+  it("shows local event totals offline without a network request", () => {
+    const original = navigator.onLine;
+    Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
+    const recapStats: EventRecapStats = {
+      completedRounds: 2, averageWpm: 60, medianWpm: 60, fastestWpm: 60, averageAccuracy: 95,
+      modeUsage: [{ mode: "famous-lines", rounds: 2, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 2, percentage: 100 }],
+      plinkoDropsWon: 1, plinkoWinnerPercentage: 50, roundsByHour: [{ hour: 9, rounds: 2 }], peakHours: [9], peakHourRounds: 2,
+    };
+    try {
+      renderSetup(existing, false, false, false, 1, true, {
+        stats: recapStats,
+      });
+      fireEvent.click(screen.getByRole("button", { name: "EVENT RECAP" }));
+      expect(screen.getByText("Peak hour").parentElement?.textContent).toContain("2 rounds");
+      expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
+      expect(screen.queryByText(/You’re offline|AI recap is unavailable/)).toBeNull();
+    } finally {
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: original });
+    }
   });
 
   it("starts fresh without asking when no event exists yet", () => {
@@ -168,13 +345,15 @@ describe("EventSetupScreen", () => {
 
   it("keeps the event and switches its board to all-time", () => {
     const { onContinue, onStartFresh } = renderSetup(existing);
-    // START EVENT → event name → CLEAR → DOWNLOAD → All-time.
+    // START EVENT → EVENT RECAP → event name → CLEAR → DOWNLOAD → All-time.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("Enter");
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
+    press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
     press("ArrowDown");
@@ -216,7 +395,8 @@ describe("EventSetupScreen", () => {
 
   it("clears with the selected length and mode once CLEAR BOARD is confirmed", () => {
     const { onClearScores } = renderSetup(existing);
-    // START EVENT → event name → CLEAR BOARD.
+    // START EVENT → EVENT RECAP → event name → CLEAR BOARD.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     expect(screen.getByRole("button", { name: "CLEAR BOARD" }).className).toContain("is-cursor");
@@ -244,7 +424,8 @@ describe("EventSetupScreen", () => {
 
   it("restores from the keyboard once RESTORE is picked", () => {
     const { onRestoreScores, onClearScores } = renderSetup(existing, false, true);
-    // START EVENT → event name → RESTORE CLEARED SCORES.
+    // START EVENT → EVENT RECAP → event name → RESTORE CLEARED SCORES.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     expect(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }).className).toContain("is-cursor");
@@ -265,7 +446,8 @@ describe("EventSetupScreen", () => {
 
   it("reaches DOWNLOAD SCORES before CLEAR BOARD in the arrow-key order, and Enter downloads", () => {
     const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
-    // START EVENT → event name → CLEAR BOARD → DOWNLOAD SCORES.
+    // START EVENT → EVENT RECAP → event name → CLEAR BOARD → DOWNLOAD SCORES.
+    press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
     press("ArrowUp");
@@ -339,6 +521,7 @@ describe("EventSetupScreen", () => {
 
   it("reaches the field with Up from START EVENT, and Enter puts the cursor in it", () => {
     renderSetup(existing);
+    press("ArrowUp");
     press("ArrowUp");
     press("Enter");
     expect(document.activeElement).toBe(screen.getByLabelText("Event name (optional)"));

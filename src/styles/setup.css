@@ -52,6 +52,383 @@
   text-align: center;
 }
 
+.setup-event-recap {
+  position: relative;
+  width: min(100%, 42rem);
+  max-height: min(94dvh, 50rem);
+  overflow-y: auto;
+  padding: 1.75rem 2rem;
+  text-align: left;
+  scrollbar-gutter: stable;
+}
+
+.setup-recap-header {
+  margin: 0 0 1.25rem;
+  text-align: center;
+}
+
+.setup-recap-eyebrow {
+  margin: 0 2.5rem 0.15rem;
+  color: var(--tiny-lavender);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.setup-event-recap h2 {
+  margin: 0 2.5rem 0.7rem;
+  color: var(--tiny-charcoal);
+  font-size: clamp(1.65rem, 4vw, 2.15rem);
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.setup-recap-period {
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.2rem;
+  margin: 0 auto 1.1rem;
+  padding: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--tiny-lavender) 28%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tiny-lavender-light) 26%, var(--tiny-white));
+}
+
+.setup-recap-period button {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--tiny-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.setup-recap-period button[aria-pressed="true"] {
+  background: var(--tiny-white);
+  color: var(--tiny-charcoal);
+  box-shadow: 0 1px 4px rgb(40 30 36 / 13%);
+}
+
+.setup-recap-period button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.setup-recap-period button:focus-visible {
+  outline: 2px solid var(--tiny-mint-strong);
+  outline-offset: 2px;
+}
+
+.setup-recap-close {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.75rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tiny-charcoal);
+  font-size: 1.75rem;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.setup-recap-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.setup-recap-section + .setup-recap-section {
+  margin-top: 0.9rem;
+}
+
+.setup-recap-section h3 {
+  margin: 0 0 0.4rem;
+  color: var(--tiny-charcoal);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.setup-recap-highlights .setup-recap-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.setup-recap-details {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.setup-recap-prizes {
+  margin-top: 0.55rem;
+}
+
+.setup-recap-stats > div {
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--tiny-lavender-light) 24%, var(--tiny-white));
+}
+
+.setup-recap-stats dt {
+  color: var(--tiny-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.setup-recap-stats .setup-recap-kpi {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  min-height: 4.1rem;
+  border: 1px solid color-mix(in srgb, var(--tiny-lavender) 22%, transparent);
+  background: color-mix(in srgb, var(--tiny-lavender-light) 38%, var(--tiny-white));
+}
+
+.setup-recap-stats .setup-recap-kpi-secondary {
+  min-height: 3.6rem;
+  background: color-mix(in srgb, var(--tiny-mint) 22%, var(--tiny-white));
+  border-color: color-mix(in srgb, var(--tiny-mint-strong) 30%, transparent);
+}
+
+.setup-recap-stats .setup-recap-kpi dd {
+  color: var(--tiny-charcoal);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: left;
+}
+
+.setup-recap-help {
+  position: relative;
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  margin: -0.6rem -0.6rem -0.6rem 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tiny-lavender);
+  vertical-align: middle;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.setup-recap-help svg {
+  display: block;
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+}
+
+.setup-recap-help-text {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 0.45rem);
+  left: 50%;
+  width: min(16rem, calc(100vw - 4rem));
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: var(--tiny-charcoal);
+  color: var(--tiny-white);
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  box-shadow: 0 0.25rem 0.75rem rgb(40 30 36 / 22%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-50%, 0.2rem);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
+
+.setup-recap-help:hover .setup-recap-help-text,
+.setup-recap-help:focus-visible .setup-recap-help-text,
+.setup-recap-help[data-open] .setup-recap-help-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.setup-recap-stats dd {
+  margin: 0;
+  text-align: right;
+}
+
+.setup-recap-stats .setup-recap-hour-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
+  gap: 0.5rem 1rem;
+  background: var(--tiny-white);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tiny-lavender) 24%, transparent);
+}
+
+.setup-recap-hour-row dd {
+  min-width: 0;
+  color: var(--tiny-charcoal);
+  text-align: right;
+}
+
+.setup-recap-hours {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  list-style: none;
+}
+
+.setup-recap-hours li {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.setup-recap-chart {
+  display: grid;
+  gap: 0.55rem;
+  width: min(100%, 28rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.setup-recap-chart-row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1fr) auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+
+.setup-recap-chart-row > :nth-child(2) {
+  color: var(--tiny-charcoal);
+  white-space: nowrap;
+}
+
+.setup-recap-chart-track {
+  grid-column: 1 / -1;
+  display: block;
+  height: 0.55rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tiny-lavender) 22%, var(--tiny-white));
+}
+
+.setup-recap-chart-bar {
+  display: block;
+  min-width: 0.4rem;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tiny-mint-strong);
+}
+
+/* A short landscape screen uses its width to keep the recap compact; long event charts can still scroll inside it. */
+@media (orientation: landscape) and (min-width: 40rem) and (max-height: 54rem) {
+  .setup-event-recap {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 0.65rem 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .setup-recap-header,
+  .setup-recap-highlights,
+  .setup-recap-period {
+    grid-column: 1 / -1;
+  }
+
+  .setup-recap-header {
+    margin-bottom: 0;
+  }
+
+  .setup-event-recap h2 {
+    margin-bottom: 0.4rem;
+    font-size: 1.65rem;
+  }
+
+  .setup-recap-highlights .setup-recap-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .setup-recap-section + .setup-recap-section {
+    margin-top: 0;
+  }
+
+  .setup-recap-section h3 {
+    margin-bottom: 0.25rem;
+  }
+
+  .setup-recap-stats > div {
+    padding: 0.5rem 0.65rem;
+    border-radius: 0.9rem;
+  }
+
+  .setup-recap-stats dt {
+    font-size: 0.8rem;
+  }
+
+  .setup-recap-stats .setup-recap-kpi {
+    min-height: 3.25rem;
+    gap: 0.15rem;
+  }
+
+  .setup-recap-stats .setup-recap-kpi-secondary {
+    min-height: 3rem;
+  }
+
+  .setup-recap-stats .setup-recap-kpi dd {
+    font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+  }
+
+  .setup-recap-stats .setup-recap-hour-row {
+    grid-template-columns: minmax(5rem, 0.7fr) minmax(0, 1.3fr);
+    gap: 0.25rem 0.5rem;
+  }
+
+  .setup-recap-details {
+    gap: 0.35rem;
+  }
+
+  .setup-recap-chart {
+    gap: 0.35rem;
+  }
+}
+
+.setup-recap-action {
+  position: relative;
+  display: inline-flex;
+}
+
 .setup-confirm h2 {
   margin: 0 0 0.5rem;
   font-family: var(--font-display);
@@ -365,6 +742,14 @@ label.setup-option-big {
   justify-items: start;
 }
 
+/* Keep the event name field and its recap action together in the footer. */
+.setup-name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* The label sits beside the field, so the name adds one short row, not two. */
 .setup-name {
   display: flex;
@@ -424,8 +809,82 @@ label.setup-option-big {
   margin-top: 0.9rem;
 }
 
+.setup-recap-availability {
+  position: absolute;
+  z-index: 12;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.7rem;
+  background: var(--tiny-charcoal);
+  box-shadow: 0 0.35rem 1rem rgb(40 30 36 / 20%);
+  color: var(--tiny-white);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 0.2rem);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
 
+.setup-recap-action:hover .setup-recap-availability {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
 
+.setup-recap-action:has(button:disabled) button {
+  cursor: not-allowed;
+}
+
+@media (max-width: 35rem) {
+  .setup-event-recap {
+    padding: 1.25rem 1rem;
+    border-radius: 1.25rem;
+  }
+
+  .setup-event-recap h2 {
+    margin: 0 1.25rem 0.65rem;
+    font-size: 1.55rem;
+  }
+
+  .setup-recap-header { margin-bottom: 1rem; }
+
+  .setup-recap-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .setup-recap-highlights .setup-recap-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .setup-recap-stats > div {
+    padding: 0.7rem;
+    border-radius: 0.9rem;
+  }
+
+  .setup-recap-stats .setup-recap-hour-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+  }
+
+  .setup-recap-section + .setup-recap-section { margin-top: 1rem; }
+
+  .setup-recap-hour-row dd,
+  .setup-recap-hours {
+    text-align: left;
+  }
+
+  .setup-recap-hours {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 /* A setting chip: a small outlined pill instead of an underlined link, tinted while the setting is on. */
 .setup-tool.setup-chip {
   min-height: 34px;

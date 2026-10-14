@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrative event recap preview</title>
+  <desc id="desc">A sample event summary with typing highlights, mode and round-length breakdowns, hourly activity, and Plinko results.</desc>
+  <rect width="1200" height="760" rx="32" fill="#f7f2f8"/>
+  <rect x="56" y="42" width="1088" height="676" rx="30" fill="#fffefd" stroke="#b6a5d9" stroke-width="3"/>
+
+  <text x="600" y="91" text-anchor="middle" fill="#9283b1" font-family="Arial, sans-serif" font-size="16" font-weight="700" letter-spacing="3">EVENT RECAP</text>
+  <text x="600" y="140" text-anchor="middle" fill="#352f38" font-family="Arial, sans-serif" font-size="35" font-weight="800">Market Day</text>
+  <rect x="478" y="160" width="244" height="48" rx="24" fill="#f0ebf5"/>
+  <rect x="484" y="166" width="116" height="36" rx="18" fill="#fffefd" stroke="#e2d9ed"/>
+  <text x="542" y="190" text-anchor="middle" fill="#403a43" font-family="Arial, sans-serif" font-size="16" font-weight="700">This event</text>
+  <text x="658" y="190" text-anchor="middle" fill="#706a74" font-family="Arial, sans-serif" font-size="16">All time</text>
+
+  <g font-family="Arial, sans-serif">
+    <g>
+      <rect x="92" y="230" width="496" height="116" rx="22" fill="#f3eff8" stroke="#e1d8ec" stroke-width="2"/>
+      <text x="122" y="285" fill="#352f38" font-size="42" font-weight="800">42</text>
+      <text x="122" y="320" fill="#706a74" font-size="18" font-weight="700">Rounds</text>
+    </g>
+    <g>
+      <rect x="612" y="230" width="496" height="116" rx="22" fill="#f3eff8" stroke="#e1d8ec" stroke-width="2"/>
+      <text x="642" y="285" fill="#352f38" font-size="42" font-weight="800">57</text>
+      <text x="642" y="320" fill="#706a74" font-size="18" font-weight="700">Median WPM</text>
+    </g>
+    <g>
+      <rect x="92" y="366" width="496" height="116" rx="22" fill="#f3eff8" stroke="#e1d8ec" stroke-width="2"/>
+      <text x="122" y="421" fill="#352f38" font-size="42" font-weight="800">92</text>
+      <text x="122" y="456" fill="#706a74" font-size="18" font-weight="700">Fastest WPM</text>
+    </g>
+    <g>
+      <rect x="612" y="366" width="496" height="116" rx="22" fill="#f3eff8" stroke="#e1d8ec" stroke-width="2"/>
+      <text x="642" y="421" fill="#352f38" font-size="42" font-weight="800">94.8%</text>
+      <text x="642" y="456" fill="#706a74" font-size="18" font-weight="700">Avg. accuracy</text>
+    </g>
+
+    <rect x="92" y="506" width="496" height="164" rx="20" fill="#fffefd" stroke="#e7e1e8" stroke-width="2"/>
+    <text x="120" y="544" fill="#403a43" font-size="19" font-weight="800">Settings</text>
+    <text x="120" y="582" fill="#706a74" font-size="16" font-weight="700">Modes</text>
+    <text x="554" y="582" text-anchor="end" fill="#403a43" font-size="16">Standard 55% · Story 45%</text>
+    <line x1="120" y1="598" x2="560" y2="598" stroke="#eee8ef"/>
+    <text x="120" y="633" fill="#706a74" font-size="16" font-weight="700">Round lengths</text>
+    <text x="554" y="633" text-anchor="end" fill="#403a43" font-size="16">30s 71% · 60s 29%</text>
+
+    <rect x="612" y="506" width="496" height="164" rx="20" fill="#fffefd" stroke="#e7e1e8" stroke-width="2"/>
+    <text x="640" y="544" fill="#403a43" font-size="19" font-weight="800">Activity &amp; prizes</text>
+    <text x="640" y="578" fill="#706a74" font-size="16" font-weight="700">Peak hour</text>
+    <text x="1080" y="578" text-anchor="end" fill="#403a43" font-size="16">2 PM–3 PM · 11 rounds</text>
+    <text x="640" y="610" fill="#706a74" font-size="16" font-weight="700">Hourly activity</text>
+    <rect x="640" y="625" width="130" height="8" rx="4" fill="#a4ded8"/>
+    <rect x="780" y="617" width="190" height="16" rx="8" fill="#58c7bd"/>
+    <rect x="980" y="622" width="100" height="11" rx="5" fill="#a4ded8"/>
+    <text x="640" y="655" fill="#706a74" font-size="14">1 PM</text>
+    <text x="840" y="655" fill="#706a74" font-size="14">2 PM</text>
+    <text x="1040" y="655" fill="#706a74" font-size="14">3 PM</text>
+  </g>
+
+  <text x="92" y="696" fill="#7c7480" font-family="Arial, sans-serif" font-size="14">Illustrative sample values · Calculated on this device</text>
+</svg>

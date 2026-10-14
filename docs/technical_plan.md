@@ -85,6 +85,7 @@ V1 supports:
 - automatic reset after the Leaderboard screen
 - local event persistence
 - offline operation after installation/caching
+- optional event recap generated on request from locally computed aggregate counts
 
 ### Out of Scope
 
@@ -103,7 +104,7 @@ V1 does not require:
 - historical-event management UI
 - AI-generated passages
 - advanced anti-cheat systems
-- detailed analytics
+- detailed analytics or dashboards
 - operator score deletion
 - multiple-device event management
 
@@ -157,6 +158,12 @@ create / continue event
 → derive leaderboard
 → reset for next contestant
 ```
+
+### Local event recap
+
+Event Setup derives completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, busiest local saved-score hour(s), and the hour-by-hour breakdown from IndexedDB. Opening the recap performs no fetch, requires no credentials or network, and cannot delay gameplay or persistence. The modal presents the metrics without a repeated narrative summary. Small hover and keyboard-focus help explains the accuracy denominator and that peak hours are based on saved round times, not physical foot traffic. Names, typed text, and individual score rows never leave the device for this feature.
+
+The optional Cloudflare Workers AI client and server route remain available for future aggregate-only analysis, such as event comparisons or questions about event statistics. The current recap UI does not call the AI route.
 
 The application must remain usable when the iPad is:
 
@@ -257,6 +264,8 @@ Suitable hosts include:
 - GitHub Pages if configured correctly for the build and PWA behavior
 
 No application server is required for V1 booth operation.
+
+The booth workflow remains a static Vite app. The optional Vercel `/api/recap` function is retained as a building block for future AI-assisted aggregate analysis; the current recap UI does not call it.
 
 ---
 
@@ -1808,6 +1817,19 @@ Vitest covers the unit and persistence cases. React Testing Library covers the c
 
 Booth acceptance tests live in `docs/prd.md`. This section lists the automated cases and hardware checks.
 
+### Event recap evaluation
+
+The app computes round count, average, median, and fastest displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The recap displays those computed values without a redundant narrative summary and renders hourly activity as a compact bar chart.
+
+Automated acceptance thresholds:
+
+- Round counts, WPM averages/median/maximum, the 50+ WPM threshold count, accuracy average, mode and duration shares, Plinko rate, hourly buckets, and peak-hour ties are exact to their documented rounding in unit fixtures; invalid timestamps are omitted from the hour breakdown but still count as completed saved rounds.
+- No network request occurs when opening a recap, online or offline.
+- Summary values match the local aggregate statistics exactly; missing optional statistics are omitted rather than invented.
+- The optional AI route validates aggregate input and never receives names, score rows, or typed text; opening the recap never calls it.
+
+Use representative fixtures including empty and single-round events, a busy hour, tied peak hours, zero Plinko wins, and high Plinko counts. Tests verify every rendered claim against the supplied totals.
+
 Ignore browser key-repeat when `KeyboardEvent.repeat` is true. Separate physical presses of the same key still count.
 
 ### Unit Tests — Scoring
@@ -2269,11 +2291,9 @@ Deployment should prioritize simplicity and reliable HTTPS.
 
 ## 21. Environment Configuration
 
-V1 should not require secrets because there is no backend/API.
+Normal booth operation, including the event recap, requires no secrets and no online service. The optional AI analysis route reads `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` server-side when called; the current recap UI does not make that request. Configure these only in Vercel when enabling an AI-assisted aggregate-analysis flow.
 
-No `.env` values should be required for normal booth operation.
-
-If deployment tooling later introduces environment variables, commit only:
+If environment variables are documented in the repository, commit only:
 
 ```text
 .env.example
