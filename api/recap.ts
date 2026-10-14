@@ -21,11 +21,12 @@ function isValidStats(value: unknown): value is EventRecapStats {
     return false;
   }
   const input = value as Record<string, unknown>;
-  const { completedRounds, averageWpm, medianWpm, averageAccuracy, modeUsage, durationUsage, plinkoDropsWon, plinkoWinnerPercentage, roundsByHour, peakHours, peakHourRounds } = input;
+  const { completedRounds, averageWpm, medianWpm, fastestWpm, averageAccuracy, modeUsage, durationUsage, plinkoDropsWon, plinkoWinnerPercentage, roundsByHour, peakHours, peakHourRounds } = input;
   if (
     !Number.isSafeInteger(completedRounds) || !Number.isSafeInteger(plinkoDropsWon) ||
     !(averageWpm === null || (typeof averageWpm === "number" && Number.isFinite(averageWpm) && averageWpm >= 0 && averageWpm <= 1000)) ||
     !(medianWpm === null || (typeof medianWpm === "number" && Number.isFinite(medianWpm) && medianWpm >= 0 && medianWpm <= 1000)) ||
+    !(fastestWpm === null || (typeof fastestWpm === "number" && Number.isFinite(fastestWpm) && fastestWpm >= 0 && fastestWpm <= 1000)) ||
     !(averageAccuracy === null || (typeof averageAccuracy === "number" && Number.isFinite(averageAccuracy) && averageAccuracy >= 0 && averageAccuracy <= 100)) ||
     typeof plinkoWinnerPercentage !== "number" || !Number.isFinite(plinkoWinnerPercentage) ||
     plinkoWinnerPercentage < 0 || plinkoWinnerPercentage > 100 ||
@@ -78,7 +79,8 @@ function isValidStats(value: unknown): value is EventRecapStats {
   return (
     rounds >= 0 && plinkoWins >= 0 && plinkoWins <= rounds &&
     plinkoWinnerPercentage === expectedPlinkoPercent &&
-    (rounds === 0 ? averageWpm === null && medianWpm === null && averageAccuracy === null : averageWpm !== null && medianWpm !== null) &&
+    (rounds === 0 ? averageWpm === null && medianWpm === null && fastestWpm === null && averageAccuracy === null : averageWpm !== null && medianWpm !== null && fastestWpm !== null) &&
+    (fastestWpm === null || (medianWpm !== null && fastestWpm >= medianWpm && averageWpm !== null && fastestWpm >= averageWpm)) &&
     modeCounts.every((bucket) => bucket !== null) && durationCounts.every((bucket) => bucket !== null) &&
     (rounds === 0 ? modeCounts.length === 0 && durationCounts.length === 0 : isConsistentUsage(validModes, "mode") && isConsistentUsage(validDurations, "durationSeconds")) &&
     (averageAccuracy === null || (rounds > 0 && averageAccuracy >= 0 && averageAccuracy <= 100)) &&
@@ -108,6 +110,7 @@ function promptFor(stats: EventRecapStats): string {
     completedRounds: stats.completedRounds,
     averageWpm: stats.averageWpm,
     medianWpm: stats.medianWpm,
+    fastestWpm: stats.fastestWpm,
     averageAccuracy: stats.averageAccuracy,
     modeUsage: stats.modeUsage,
     durationUsage: stats.durationUsage,

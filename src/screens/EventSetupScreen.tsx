@@ -9,7 +9,6 @@ import {
   type TestMode,
 } from "../db/persistence";
 import { formatHourWindow, formatPeakHours, type EventRecapStats } from "../features/recap/eventRecap";
-import type { RecapResult } from "../features/recap/recapClient";
 import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
 import {
@@ -58,8 +57,8 @@ type EventSetupScreenProps = {
   plinkoWins: number | null;
   /** Locally computed, anonymous recap facts for the active event. */
   recapStats?: EventRecapStats | null;
-  /** Calls the optional AI service. Called only after staff choose AI EVENT RECAP. */
-  onCreateRecap?: (stats: EventRecapStats) => Promise<RecapResult>;
+  /** Locally computed aggregate for every visible event on this device. */
+  allTimeRecapStats?: EventRecapStats | null;
   /** Whether the browser granted protection against automatic storage cleanup. */
   storageProtection?: PersistResult | "checking";
 };
@@ -88,9 +87,10 @@ export function EventSetupScreen({
   onTogglePalette,
   plinkoWins,
   recapStats = null,
-  onCreateRecap,
+  allTimeRecapStats = null,
   storageProtection = "checking",
 }: EventSetupScreenProps) {
+  const recapAvailabilityId = useId();
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
   );
@@ -125,47 +125,23 @@ export function EventSetupScreen({
   /** Which confirmation is up: Start fresh, Clear board, or Restore cleared scores. */
   const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
   const [recapOpen, setRecapOpen] = useState(false);
-  const [recapBusy, setRecapBusy] = useState(false);
-  const [recapResult, setRecapResult] = useState<RecapResult | null>(null);
-  const [online, setOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
+  const [recapPeriod, setRecapPeriod] = useState<"event" | "all-time">("event");
   const recapCloseRef = useRef<HTMLButtonElement>(null);
   const recapOpenRef = useRef(false);
-  const onCreateRecapRef = useRef(onCreateRecap);
   const canRestoreRef = useRef(canRestore);
   const canClearRef = useRef(canClear);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
+  const displayedRecapStats = recapPeriod === "all-time" ? allTimeRecapStats : recapStats;
+  const busiestChartHour = Math.max(0, ...(displayedRecapStats?.roundsByHour.map(({ rounds }) => rounds) ?? []));
 
-  useEffect(() => {
-    onCreateRecapRef.current = onCreateRecap;
-  }, [onCreateRecap]);
-
-  useEffect(() => {
-    const handleOnline = () => setOnline(true);
-    const handleOffline = () => setOnline(false);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  const createRecap = useCallback(async () => {
-    if (!recapStats || recapStats.completedRounds === 0 || !onCreateRecapRef.current) {
+  const openRecap = useCallback(() => {
+    if (!recapStats || recapStats.completedRounds === 0) {
       return;
     }
     setRecapOpen(true);
+    setRecapPeriod("event");
     recapOpenRef.current = true;
-    setRecapBusy(true);
-    setRecapResult(null);
-    try {
-      setRecapResult(await onCreateRecapRef.current(recapStats));
-    } catch {
-      setRecapResult({ ok: false, reason: "unavailable" });
-    } finally {
-      setRecapBusy(false);
-    }
   }, [recapStats]);
 
   function closeRecap() {
@@ -335,7 +311,7 @@ export function EventSetupScreen({
         return;
       }
       if (result === "recap") {
-        void createRecap();
+        openRecap();
         return;
       }
       if (result === "sound") {
@@ -376,7 +352,7 @@ export function EventSetupScreen({
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [storedDuration, online, recapStats, onCreateRecap, createRecap]);
+  }, [storedDuration, recapStats, openRecap]);
 
   // Keep keyboard focus on the chosen confirmation button, and back on the screen after cancelling.
   useEffect(() => {
@@ -551,22 +527,6 @@ export function EventSetupScreen({
                 {storedDuration !== null ? (
                   <button
                     type="button"
-                    className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
-                    onClick={() => void createRecap()}
-                    disabled={!recapStats || recapStats.completedRounds === 0 || recapBusy || !onCreateRecap}
-                    title={!online ? "View local event stats; AI text requires Wi-Fi" : "Create a recap from this event's anonymous totals"}
-                  >
-                    AI EVENT RECAP
-                  </button>
-                ) : null}
-                {storedDuration !== null && (!online || recapStats === null || recapStats.completedRounds === 0) ? (
-                  <span className="setup-recap-availability" role="status" aria-live="polite">
-                    {!online ? "AI recap needs Wi-Fi" : recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
-                  </span>
-                ) : null}
-                {storedDuration !== null ? (
-                  <button
-                    type="button"
                     className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
                     onClick={askToClear}
                     disabled={saving || !canClear}
@@ -604,20 +564,40 @@ export function EventSetupScreen({
             {storedDuration !== null && plinkoWins !== null ? (
               <p className="setup-plinko-count">Plinko drops won this event: {plinkoWins}</p>
             ) : null}
-            <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
-              <span>Event name (optional)</span>
-              <input
-                ref={nameInputRef}
-                type="text"
-                value={eventName}
-                maxLength={MAX_EVENT_NAME_LENGTH}
-                autoComplete="off"
-                spellCheck={false}
-                placeholder="e.g. Saturday market"
-                onFocus={() => setCursor("name")}
-                onChange={(event) => setEventName(event.target.value)}
-              />
-            </label>
+            <div className="setup-name-row">
+              <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
+                <span>Event name (optional)</span>
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  value={eventName}
+                  maxLength={MAX_EVENT_NAME_LENGTH}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="e.g. Saturday market"
+                  onFocus={() => setCursor("name")}
+                  onChange={(event) => setEventName(event.target.value)}
+                />
+              </label>
+              {storedDuration !== null ? (
+                <span className="setup-recap-action">
+                  <button
+                    type="button"
+                    className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={openRecap}
+                    disabled={!recapStats || recapStats.completedRounds === 0}
+                    aria-describedby={!recapStats || recapStats.completedRounds === 0 ? recapAvailabilityId : undefined}
+                  >
+                    EVENT RECAP
+                  </button>
+                  {!recapStats || recapStats.completedRounds === 0 ? (
+                    <span className="setup-recap-availability" id={recapAvailabilityId} role="tooltip">
+                      {recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
+            </div>
           </div>
           <div className="setup-start-group">
             <button
@@ -685,71 +665,106 @@ export function EventSetupScreen({
         <div className="setup-modal-backdrop">
           <section className="setup-confirm setup-event-recap" role="dialog" aria-modal="true" aria-labelledby="event-recap-title">
             <button ref={recapCloseRef} type="button" className="setup-recap-close" onClick={closeRecap} aria-label="Close event recap">×</button>
-            <h2 id="event-recap-title">Event recap</h2>
-            <dl className="setup-recap-stats">
-              <div><dt>Completed rounds</dt><dd>{recapStats.completedRounds}</dd></div>
-              <div><dt>Average WPM</dt><dd>{recapStats.averageWpm === null ? "—" : recapStats.averageWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
-              <div><dt>Median WPM</dt><dd>{recapStats.medianWpm === null ? "—" : recapStats.medianWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
-              <div><dt>Average accuracy</dt><dd>{recapStats.averageAccuracy === null ? "—" : `${recapStats.averageAccuracy.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}</dd></div>
-              <div className="setup-recap-hour-row">
-                <dt>Game modes (% of rounds)</dt>
-                <dd><ul className="setup-recap-hours" aria-label="Game mode usage">
-                  {recapStats.modeUsage.map(({ mode, rounds, percentage }) => (
-                    <li key={mode}>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"} · {percentage}% ({rounds})</li>
-                  ))}
-                </ul></dd>
-              </div>
-              <div className="setup-recap-hour-row">
-                <dt>Round lengths (% of rounds)</dt>
-                <dd><ul className="setup-recap-hours" aria-label="Round length usage">
-                  {recapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
-                    <li key={durationSeconds}>{durationSeconds}s · {percentage}% ({rounds})</li>
-                  ))}
-                </ul></dd>
-              </div>
-              <div>
-                <dt>Busiest round hour</dt>
-                <dd>
-                  {formatPeakHours(recapStats.peakHours, recapStats.completedRounds)}
-                  {recapStats.peakHours.length > 0 ? ` · ${recapStats.peakHourRounds} rounds` : ""}
-                </dd>
-              </div>
-              <div className="setup-recap-hour-row">
-                <dt>Rounds by hour</dt>
-                <dd>
-                  {recapStats.roundsByHour.length === 0
-                    ? "Time unavailable"
-                    : <ul className="setup-recap-hours" aria-label="Completed rounds by hour">
-                        {recapStats.roundsByHour.map(({ hour, rounds }) => (
-                          <li key={hour}>{formatHourWindow(hour)} · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
-                        ))}
-                      </ul>}
-                </dd>
-              </div>
-              <div><dt>Plinko drops won</dt><dd>{recapStats.plinkoDropsWon}</dd></div>
-              <div><dt>Plinko win rate (% of rounds)</dt><dd>{recapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
-            </dl>
-            <p className="setup-recap-privacy">Percentages use completed rounds. WPM uses displayed scores; accuracy averages rounds with a recorded value.</p>
-            <p className="setup-recap-privacy">Only anonymous event statistics are sent. The AI selects which facts to highlight; recap text is built from those exact totals. Names, score rows, and typed text stay on this device.</p>
-            <p className="setup-recap-message" role="status" aria-live="polite">
-              {recapBusy
-                ? "Writing your recap…"
-                : recapResult?.ok
-                  ? recapResult.recap
-                  : recapResult?.reason === "offline"
-                    ? "You’re offline. The event stats above are still available; reconnect to request an AI recap."
-                    : recapResult
-                      ? "The AI recap is unavailable right now. Your event stats above are still available."
-                      : ""}
-            </p>
-            {recapResult && !recapResult.ok && online ? (
-              <button type="button" className="setup-chip" onClick={() => void createRecap()} disabled={recapBusy}>TRY AGAIN</button>
-            ) : null}
+            <header className="setup-recap-header">
+              <p className="setup-recap-eyebrow">EVENT RECAP</p>
+              <h2 id="event-recap-title">{cleanEventName(eventName) ?? "Event recap"}</h2>
+            </header>
+            <div className="setup-recap-period" role="group" aria-label="Recap period">
+              <button type="button" aria-pressed={recapPeriod === "event"} onClick={() => setRecapPeriod("event")}>This event</button>
+              <button type="button" aria-pressed={recapPeriod === "all-time"} disabled={!allTimeRecapStats} onClick={() => setRecapPeriod("all-time")}>All time</button>
+            </div>
+            {displayedRecapStats ? <>
+            <section className="setup-recap-section setup-recap-highlights" aria-label="Highlights">
+              <dl className="setup-recap-stats">
+                <div className="setup-recap-kpi"><dt>Rounds</dt><dd>{displayedRecapStats.completedRounds}</dd></div>
+                <div className="setup-recap-kpi"><dt>Median WPM</dt><dd>{displayedRecapStats.medianWpm === null ? "—" : displayedRecapStats.medianWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
+                <div className="setup-recap-kpi"><dt>Fastest WPM</dt><dd>{displayedRecapStats.fastestWpm === null ? "—" : displayedRecapStats.fastestWpm.toLocaleString(undefined, { maximumFractionDigits: 1 })}</dd></div>
+                <div className="setup-recap-kpi"><dt>Avg. accuracy <RecapHelp label="Avg. accuracy help" text="Average of rounds with saved accuracy." /></dt><dd>{displayedRecapStats.averageAccuracy === null ? "—" : `${displayedRecapStats.averageAccuracy.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}</dd></div>
+              </dl>
+            </section>
+            <section className="setup-recap-section" aria-label="Settings">
+              <dl className="setup-recap-stats setup-recap-details">
+                <div className="setup-recap-hour-row">
+                  <dt>Modes</dt>
+                  <dd><ul className="setup-recap-hours" aria-label="Mode breakdown">
+                    {displayedRecapStats.modeUsage.map(({ mode, rounds, percentage }) => (
+                      <li key={mode}>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"} · {percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
+                    ))}
+                  </ul></dd>
+                </div>
+                <div className="setup-recap-hour-row">
+                  <dt>Round lengths</dt>
+                  <dd><ul className="setup-recap-hours" aria-label="Round length breakdown">
+                    {displayedRecapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
+                      <li key={durationSeconds}>{durationSeconds}s · {percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
+                    ))}
+                  </ul></dd>
+                </div>
+              </dl>
+            </section>
+            <section className="setup-recap-section" aria-label="Activity and prizes">
+              <dl className="setup-recap-stats setup-recap-details">
+                <div className="setup-recap-hour-row">
+                  <dt>Peak hour <RecapHelp label="Peak hour help" text="Based on saved round times in your local time, not foot traffic." /></dt>
+                  <dd>
+                    {formatPeakHours(displayedRecapStats.peakHours, displayedRecapStats.completedRounds)}
+                    {displayedRecapStats.peakHours.length > 0 ? ` · ${displayedRecapStats.peakHourRounds} ${displayedRecapStats.peakHourRounds === 1 ? "round" : "rounds"}` : ""}
+                  </dd>
+                </div>
+                <div className="setup-recap-hour-row">
+                  <dt>Hourly activity</dt>
+                  <dd>
+                    {displayedRecapStats.roundsByHour.length === 0
+                      ? "Time unavailable"
+                      : <ul className="setup-recap-chart" aria-label="Hourly activity">
+                          {displayedRecapStats.roundsByHour.map(({ hour, rounds }) => (
+                            <li className="setup-recap-chart-row" key={hour}>
+                              <span>{formatHourWindow(hour)}</span>
+                              <span>{rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                              <span className="setup-recap-chart-track" aria-hidden="true">
+                                <span className="setup-recap-chart-bar" style={{ width: `${(rounds / busiestChartHour) * 100}%` }} />
+                              </span>
+                            </li>
+                          ))}
+                        </ul>}
+                  </dd>
+                </div>
+              </dl>
+              <dl className="setup-recap-stats setup-recap-prizes">
+                <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko wins</dt><dd>{displayedRecapStats.plinkoDropsWon}</dd></div>
+                <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko rate</dt><dd>{displayedRecapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
+              </dl>
+            </section>
+            </> : null}
           </section>
         </div>,
         document.body,
       ) : null}
     </main>
+  );
+}
+
+function RecapHelp({ label, text }: { label: string; text: string }) {
+  const tooltipId = useId();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="setup-recap-help"
+      aria-label={label}
+      aria-describedby={tooltipId}
+      aria-expanded={isOpen}
+      aria-controls={tooltipId}
+      onClick={() => setIsOpen((open) => !open)}
+      data-open={isOpen || undefined}
+    >
+      <svg aria-hidden="true" viewBox="0 0 20 20" focusable="false">
+        <circle cx="10" cy="10" r="8.25" />
+        <path d="M8.1 7.4a1.95 1.95 0 1 1 3.48 1.2c-.54.68-1.58 1.13-1.58 2.18M10 13.7h.01" />
+      </svg>
+      <span className="setup-recap-help-text" id={tooltipId} role="tooltip">{text}</span>
+    </button>
   );
 }
 

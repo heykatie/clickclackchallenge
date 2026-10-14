@@ -7,7 +7,6 @@ import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
 import { countPlinkoWins } from "./features/typing/scoring";
 import { summarizeEvent, type EventRecapStats } from "./features/recap/eventRecap";
-import { generateEventRecap } from "./features/recap/recapClient";
 import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
 import { LandscapeGate, type LogoActions } from "./pwa/LandscapeGate";
@@ -64,7 +63,7 @@ function App() {
   // Event Setup previews the highlighted mode's music before the event starts.
   const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
   const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
-  const [eventRecapSnapshot, setEventRecapSnapshot] = useState<{ eventId: string; stats: EventRecapStats } | null>(null);
+  const [eventRecapSnapshot, setEventRecapSnapshot] = useState<{ eventId: string; stats: EventRecapStats; allTimeStats: EventRecapStats } | null>(null);
   // How many scores the active event's board holds, so CLEAR BOARD is greyed out when there is nothing to clear.
   const [boardScoreCount, setBoardScoreCount] = useState(0);
   // The latest state, for working out a key's sound the moment the key goes down.
@@ -184,12 +183,12 @@ function App() {
       return;
     }
     let cancelled = false;
-    listScores(activeEventId).then(
-      (scores) => {
+    Promise.all([listScores(activeEventId), listAllScores()]).then(
+      ([scores, allTimeScores]) => {
         if (!cancelled) {
           setPlinkoWins(countPlinkoWins(scores));
           setBoardScoreCount(scores.length);
-          setEventRecapSnapshot({ eventId: activeEventId, stats: summarizeEvent(scores) });
+          setEventRecapSnapshot({ eventId: activeEventId, stats: summarizeEvent(scores), allTimeStats: summarizeEvent(allTimeScores) });
         }
       },
       // The count is a convenience: if it cannot be read, Event Setup simply leaves it out.
@@ -515,7 +514,7 @@ function App() {
           canClear={boardScoreCount > 0}
           storageProtection={storageProtection}
           recapStats={eventRecapSnapshot?.eventId === activeEventId ? eventRecapSnapshot.stats : null}
-          onCreateRecap={generateEventRecap}
+          allTimeRecapStats={eventRecapSnapshot?.eventId === activeEventId ? eventRecapSnapshot.allTimeStats : null}
           onRestoreScores={() => {
             void restoreScores();
           }}

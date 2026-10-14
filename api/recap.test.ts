@@ -5,6 +5,7 @@ const validStats = {
   completedRounds: 23,
   averageWpm: 58.2,
   medianWpm: 53,
+  fastestWpm: 90,
   averageAccuracy: 94.6,
   modeUsage: [{ mode: "story", rounds: 23, percentage: 100 }],
   durationUsage: [{ durationSeconds: 60, rounds: 23, percentage: 100 }],
@@ -58,6 +59,7 @@ describe("event recap API", () => {
       completedRounds: 23,
       averageWpm: 58.2,
       medianWpm: 53,
+      fastestWpm: 90,
       averageAccuracy: 94.6,
       modeUsage: [{ mode: "story", rounds: 23, percentage: 100 }],
       durationUsage: [{ durationSeconds: 60, rounds: 23, percentage: 100 }],
@@ -72,7 +74,7 @@ describe("event recap API", () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({ success: true, result: { response: "The popular game session showed exceptional performance." } }),
     );
-    const response = await handler(fetchImpl).fetch(request({ ...validStats, completedRounds: 1, averageWpm: 0, medianWpm: 0, averageAccuracy: 100, modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 15, rounds: 1 }], peakHours: [15], peakHourRounds: 1 }));
+    const response = await handler(fetchImpl).fetch(request({ ...validStats, completedRounds: 1, averageWpm: 0, medianWpm: 0, fastestWpm: 0, averageAccuracy: 100, modeUsage: [{ mode: "famous-lines", rounds: 1, percentage: 100 }], durationUsage: [{ durationSeconds: 30, rounds: 1, percentage: 100 }], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 15, rounds: 1 }], peakHours: [15], peakHourRounds: 1 }));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ recap: "The event completed 1 round. Median speed was 0 WPM, and average accuracy was 100%. Mode use: Famous Lines 100%. Plinko winners were 0% of rounds (0 wins)." });
@@ -82,7 +84,7 @@ describe("event recap API", () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({ success: true, result: { response: JSON.stringify({ highlights: ["peakHours", "inventedTrend"] }) } }),
     );
-    const response = await handler(fetchImpl).fetch(request({ ...validStats, averageWpm: null, medianWpm: null, averageAccuracy: null, completedRounds: 0, modeUsage: [], durationUsage: [], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [], peakHours: [], peakHourRounds: 0 }));
+    const response = await handler(fetchImpl).fetch(request({ ...validStats, averageWpm: null, medianWpm: null, fastestWpm: null, averageAccuracy: null, completedRounds: 0, modeUsage: [], durationUsage: [], plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [], peakHours: [], peakHourRounds: 0 }));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ recap: "The event completed 0 rounds." });
@@ -107,6 +109,7 @@ describe("event recap API", () => {
       completedRounds: 2,
       averageWpm: 20,
       medianWpm: 20,
+      fastestWpm: 20,
       averageAccuracy: 95,
       modeUsage: [{ mode: "words", rounds: 2, percentage: 100 }],
       durationUsage: [{ durationSeconds: 60, rounds: 2, percentage: 100 }],
@@ -150,6 +153,7 @@ describe("event recap API", () => {
       completedRounds: 2,
       averageWpm: 40,
       medianWpm: 40,
+      fastestWpm: 40,
       averageAccuracy: 95,
       modeUsage: [{ mode: "famous-lines", rounds: 2, percentage: 100 }],
       durationUsage: [{ durationSeconds: 30, rounds: 2, percentage: 100 }],

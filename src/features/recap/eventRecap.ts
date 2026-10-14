@@ -6,6 +6,7 @@ export type EventRecapStats = {
   /** Rounded to one decimal, based on the WPM value shown to contestants. */
   averageWpm: number | null;
   medianWpm: number | null;
+  fastestWpm: number | null;
   /** Rounded to one decimal; rounds without accuracy are excluded from this average. */
   averageAccuracy: number | null;
   modeUsage: { mode: TestMode; rounds: number; percentage: number }[];
@@ -74,6 +75,7 @@ export function summarizeEvent(scores: readonly RecapScore[]): EventRecapStats {
     completedRounds: scores.length,
     averageWpm: average(wpms),
     medianWpm,
+    fastestWpm: wpms.length === 0 ? null : wpms[wpms.length - 1] ?? null,
     averageAccuracy: average(accuracies),
     modeUsage,
     durationUsage,

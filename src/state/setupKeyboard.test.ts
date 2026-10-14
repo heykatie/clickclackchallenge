@@ -11,7 +11,7 @@ const ready: SetupSelection = {
 describe("applySetupKey", () => {
   it("moves the cursor without changing the selected choice", () => {
     const moved = applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true });
-    expect(moved).toEqual({ ...ready, cursor: "name" });
+    expect(moved).toEqual({ ...ready, cursor: "recap" });
   });
 
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
@@ -62,9 +62,9 @@ describe("all-time choice", () => {
       "continue",
       "all-time",
       "download",
-      "recap",
       "clear",
       "name",
+      "recap",
       "start",
     ]);
     expect(setupChoices("famous-lines", false)).not.toContain("all-time");
@@ -78,12 +78,12 @@ describe("all-time choice", () => {
 });
 
 describe("clear choice", () => {
-  it("comes right after DOWNLOAD SCORES in the Leaderboard group, and only while an event exists", () => {
+  it("comes after the event name and before START EVENT, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("download") + 1]).toBe("recap");
-    expect(choices[choices.indexOf("recap") + 1]).toBe("clear");
+    expect(choices[choices.indexOf("name") + 1]).toBe("recap");
+    expect(choices[choices.indexOf("recap") + 1]).toBe("start");
     expect(setupChoices("famous-lines", false)).not.toContain("clear");
-    expect(applySetupKey({ ...ready, cursor: "download" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({
+    expect(applySetupKey({ ...ready, cursor: "name" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({
       ...ready,
       cursor: "recap",
     });
@@ -98,7 +98,7 @@ describe("download choice", () => {
   it("comes first of the score actions, right after the Leaderboard choices, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
     expect(choices[choices.indexOf("all-time") + 1]).toBe("download");
-    expect(choices[choices.indexOf("download") + 1]).toBe("recap");
+    expect(choices[choices.indexOf("download") + 1]).toBe("clear");
     expect(setupChoices("famous-lines", false)).not.toContain("download");
   });
 
@@ -108,17 +108,19 @@ describe("download choice", () => {
     );
   });
 
-  it("opens the AI event recap on Enter", () => {
+  it("opens the event recap on Enter", () => {
     expect(applySetupKey({ ...ready, cursor: "recap" }, "Enter", { shiftKey: false, canContinue: true })).toBe("recap");
   });
 });
 
 describe("event name choice", () => {
-  it("comes right before START EVENT, so Up from START EVENT reaches it", () => {
+  it("comes before EVENT RECAP, and Up from START EVENT reaches the recap", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("start") - 1]).toBe("name");
+    expect(choices[choices.indexOf("recap") - 1]).toBe("name");
+    expect(choices[choices.indexOf("start") - 1]).toBe("recap");
     expect(setupChoices("famous-lines", false)).toContain("name");
-    expect(applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
+    expect(applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "recap" });
+    expect(applySetupKey({ ...ready, cursor: "recap" }, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
   });
 
   it("asks to edit the name on Enter", () => {
@@ -130,7 +132,7 @@ describe("score actions", () => {
   it("sit with the Leaderboard choices: DOWNLOAD, then CLEAR, then RESTORE, before the event name", () => {
     const choices = setupChoices("famous-lines", true, false, true);
     const from = choices.indexOf("all-time");
-    expect(choices.slice(from, from + 7)).toEqual(["all-time", "download", "recap", "clear", "restore", "name", "start"]);
+    expect(choices.slice(from, from + 7)).toEqual(["all-time", "download", "clear", "restore", "name", "recap", "start"]);
   });
 });
 
@@ -196,6 +198,6 @@ describe("update choice", () => {
       "ArrowDown",
       { shiftKey: false, canContinue: true, canClear: false },
     );
-    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("recap");
+    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("name");
   });
 });

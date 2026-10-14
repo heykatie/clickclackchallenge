@@ -159,13 +159,11 @@ create / continue event
 → reset for next contestant
 ```
 
-### Optional online event recap
+### Local event recap
 
-The app may call one Vercel Function at `POST /api/recap` after the operator explicitly requests an event recap in Event Setup. The browser computes completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, and the local-hour round breakdown from IndexedDB. It sends only those aggregate statistics to the function. The function calls Cloudflare Workers AI using server-side environment variables. The model may return only up to four allow-listed fact keys; the function rejects malformed or unknown keys and renders recap text itself from the supplied exact totals. It never trusts model prose as factual output. It has no database, account system, or authority to change event data.
+Event Setup derives completed-round count, average and median displayed WPM, average accuracy, game-mode and round-length usage shares, Plinko-win count and percentage, busiest local saved-score hour(s), and the hour-by-hour breakdown from IndexedDB. Opening the recap performs no fetch, requires no credentials or network, and cannot delay gameplay or persistence. The modal presents the metrics without a repeated narrative summary. Small hover and keyboard-focus help explains the accuracy denominator and that peak hours are based on saved round times, not physical foot traffic. Names, typed text, and individual score rows never leave the device for this feature.
 
-The recap is not a required dependency. The local recap opens even when offline; the browser makes no model request when it reports offline, and the modal explains that AI needs Wi-Fi. The action is unavailable until at least one completed round exists. Connection failures, missing credentials, provider errors, and exhausted free quota produce an unavailable message while local facts remain visible. Vercel Firewall enforces a fixed-window limit of five `POST /api/recap` requests per source IP in ten minutes, preventing direct callers from bypassing the browser's same-origin check to spend the model quota rapidly. Do not make recap calls during gameplay, during score saving, or automatically on opening Event Setup.
-
-The model request must not include names, event names, individual score rows, passages, typed text, or persistent device identifiers. Derive exact values in TypeScript and show them separately from the recap text rendered by the server. The API function validates and whitelists the aggregate numeric fields, limits the request and output, checks same-origin requests, and never returns provider credentials or raw provider errors.
+The optional Cloudflare Workers AI client and server route remain available for future aggregate-only analysis, such as event comparisons or questions about event statistics. The current recap UI does not call the AI route.
 
 The application must remain usable when the iPad is:
 
@@ -267,7 +265,7 @@ Suitable hosts include:
 
 No application server is required for V1 booth operation.
 
-When the optional recap is enabled, Vercel also deploys the small Node.js function in `api/recap.ts`; the Vite-built app remains static. The function requires `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in Vercel's server-side environment. Do not add these values to `VITE_*` variables, source code, or committed files. Keep Workers AI on its Free plan if the no-charge quota is a requirement; the quota and provider terms can change. The feature must still fail closed if the function is not configured.
+The booth workflow remains a static Vite app. The optional Vercel `/api/recap` function is retained as a building block for future AI-assisted aggregate analysis; the current recap UI does not call it.
 
 ---
 
@@ -1819,19 +1817,18 @@ Vitest covers the unit and persistence cases. React Testing Library covers the c
 
 Booth acceptance tests live in `docs/prd.md`. This section lists the automated cases and hardware checks.
 
-### Optional AI recap evaluation
+### Event recap evaluation
 
-The baseline is deterministic: before the AI response, the app computes and displays round count, average and median displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The model only chooses which exact fact keys to highlight; server code renders the recap and owns every number and phrase.
+The app computes round count, average, median, and fastest displayed WPM, average accuracy, mode and duration usage shares, busiest local saved-score hour(s), the hour-by-hour round breakdown, and Plinko count and win percentage directly from the current event's score records. The recap displays those computed values without a redundant narrative summary and renders hourly activity as a compact bar chart.
 
 Automated acceptance thresholds:
 
-- Round counts, WPM and accuracy averages/median, mode and duration shares, Plinko rate, hourly buckets, and peak-hour ties are exact to their documented rounding in unit fixtures; invalid timestamps are omitted from the hour breakdown but still count as completed saved rounds.
-- No request is made when offline, before an explicit operator action, or while there are no completed rounds.
-- The request body contains only allow-listed aggregate fields; names, event names, passages, and score records are excluded.
-- An unavailable function, timeout, invalid provider envelope, provider error, or exhausted quota leaves event data and the normal booth flow unchanged; malformed model selections fall back to exact local totals.
-- The model response parses as JSON with at most four unique, available fact keys; malformed prose, invented keys, and unavailable statistics trigger a deterministic local fallback. The recap contains only values and labels rendered from the validated totals and is capped at 280 characters.
+- Round counts, WPM averages/median/maximum, the 50+ WPM threshold count, accuracy average, mode and duration shares, Plinko rate, hourly buckets, and peak-hour ties are exact to their documented rounding in unit fixtures; invalid timestamps are omitted from the hour breakdown but still count as completed saved rounds.
+- No network request occurs when opening a recap, online or offline.
+- Summary values match the local aggregate statistics exactly; missing optional statistics are omitted rather than invented.
+- The optional AI route validates aggregate input and never receives names, score rows, or typed text; opening the recap never calls it.
 
-Use representative fixtures including empty and single-round events, a busy hour, tied peak hours, zero Plinko wins, and high Plinko counts. Tests verify every rendered claim against the supplied totals and reject free-form model output. The API request has an eight-second provider timeout, and only an operator-triggered request consumes provider quota. Live provider availability and current free-tier terms cannot be verified in unit tests; verify them in a deployed preview with credentials configured.
+Use representative fixtures including empty and single-round events, a busy hour, tied peak hours, zero Plinko wins, and high Plinko counts. Tests verify every rendered claim against the supplied totals.
 
 Ignore browser key-repeat when `KeyboardEvent.repeat` is true. Separate physical presses of the same key still count.
 
@@ -2294,7 +2291,7 @@ Deployment should prioritize simplicity and reliable HTTPS.
 
 ## 21. Environment Configuration
 
-Normal booth operation requires no secrets and no online service. The optional recap function reads `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` on the server. Set them in Vercel's project environment for the deployments where recap is enabled. A local `.env.local` may be used with `vercel dev`; never expose either as a `VITE_*` value or commit a real token.
+Normal booth operation, including the event recap, requires no secrets and no online service. The optional AI analysis route reads `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` server-side when called; the current recap UI does not make that request. Configure these only in Vercel when enabling an AI-assisted aggregate-analysis flow.
 
 If environment variables are documented in the repository, commit only:
 

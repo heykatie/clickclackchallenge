@@ -6,6 +6,7 @@ const stats: EventRecapStats = {
   completedRounds: 8,
   averageWpm: 48.4,
   medianWpm: 45,
+  fastestWpm: 82,
   averageAccuracy: 91.5,
   modeUsage: [{ mode: "story", rounds: 8, percentage: 100 }],
   durationUsage: [{ durationSeconds: 30, rounds: 8, percentage: 100 }],

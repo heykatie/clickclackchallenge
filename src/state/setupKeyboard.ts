@@ -41,8 +41,8 @@ export function setupChoices(
   }
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
-    // The score actions sit in the Leaderboard group, under its choices.
-    choices.push("continue", "all-time", "download", "recap");
+    // Download and board actions sit under Leaderboard; the recap sits with the event name in the footer.
+    choices.push("continue", "all-time", "download");
     // CLEAR BOARD is greyed out on a board with no scores, so the cursor skips it.
     if (canClear) {
       choices.push("clear");
@@ -51,7 +51,11 @@ export function setupChoices(
   if (canRestore) {
     choices.push("restore");
   }
-  choices.push("name", "start", "sound", "music", "palette");
+  choices.push("name");
+  if (canContinue) {
+    choices.push("recap");
+  }
+  choices.push("start", "sound", "music", "palette");
   return choices;
 }
 
@@ -79,7 +83,7 @@ function selectChoice(selection: SetupSelection, choice: SetupChoice): SetupSele
 
 /**
  * Arrow keys move the cursor. Enter selects it. Enter on START EVENT returns "start", on UPDATE NOW
- * "update", on CLEAR BOARD "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on AI EVENT RECAP "recap", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
+ * "update", on CLEAR BOARD "clear", on RESTORE CLEARED SCORES "restore", on DOWNLOAD SCORES "download", on EVENT RECAP "recap", on SOUND "sound", on MUSIC "music", on PALETTE "palette", and on the event name field "name".
  */
 export function applySetupKey(
   selection: SetupSelection,
