@@ -16,10 +16,13 @@
 
 ## See it in action
 
-These recordings show the core experience. The settings and typing clips predate the latest recap screen; the recap preview below reflects the current interface.
+These recordings show the current app on a landscape iPad-sized screen, with sample scores on the board.
 
-<p align="center"><img src="docs/demos/booth-flow.gif" alt="Event setup, the ready screen, and a live typing round with WPM, remaining time, and accuracy" width="800"></p>
+<p align="center"><img src="docs/demos/booth-flow.gif" alt="Event setup with length and mode choices, then a live typing round with WPM, remaining time, and accuracy" width="800"></p>
 <p align="center"><strong>Choose settings, start a round, and follow live typing stats.</strong></p>
+
+<p align="center"><img src="docs/demos/results-leaderboard.gif" alt="Results counting up to a new high score with a Plinko win, a name being saved, and the score climbing to first place on the leaderboard" width="800"></p>
+<p align="center"><strong>See the result, save a name, and watch the score climb the leaderboard.</strong></p>
 
 <p align="center"><img src="docs/demos/keycap-hop.gif" alt="Keycap Hop gameplay: the smiling key jumps over obstacles while the score and scrolling scenery update" width="800"></p>
 <p align="center"><strong>Keycap Hop:</strong> optional runner gameplay, shown after the Easter egg opens.</p>
@@ -28,9 +31,18 @@ These recordings show the core experience. The settings and typing clips predate
 
 Operators can review this event or all-time totals, including round count, median and fastest WPM, accuracy, mode and round-length mix, activity by hour, and Plinko wins. The recap is calculated on-device and works offline.
 
-<p align="center"><img src="docs/readme/event-recap.svg" alt="Illustrative event recap preview with sample typing statistics, mode and duration breakdowns, hourly activity, and Plinko results" width="800"></p>
+<p align="center"><img src="docs/screenshots/05-event-recap.png" alt="Event recap for a sample event: rounds, median and fastest WPM, average accuracy, mode and round-length mix, hourly activity, and Plinko wins" width="800"></p>
 
-The preview uses illustrative sample values. Names, typed text, and individual score rows are not included in recap totals.
+The recap above is calculated from sample scores. Names, typed text, and individual score rows are not included in recap totals.
+
+### Screens
+
+| | |
+| --- | --- |
+| <img src="docs/screenshots/01-event-setup.png" alt="Event setup with test length, game mode, leaderboard choices, settings, and the event name" width="400"> | <img src="docs/screenshots/02-typing.png" alt="Typing screen mid-sentence with live WPM, time remaining, and accuracy" width="400"> |
+| **Event setup:** length, mode, board, and device settings | **Typing:** the current word highlighted, with live stats |
+| <img src="docs/screenshots/03-results.png" alt="Results with a new high score, a Plinko win, and a name field" width="400"> | <img src="docs/screenshots/04-leaderboard.png" alt="Leaderboard with the new score in first place and a YOU tag" width="400"> |
+| **Results:** headline, WPM, accuracy, prize, and name entry | **Leaderboard:** today's top five, then the next player |
 
 ## What you can do
 
