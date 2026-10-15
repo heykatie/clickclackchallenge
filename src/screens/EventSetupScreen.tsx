@@ -706,17 +706,25 @@ export function EventSetupScreen({
                     ))}
                   </ul></dd>
                 </div>
+                <div className="setup-recap-hour-row setup-recap-mix-row">
+                  <dt>Peak hour <RecapHelp label="Peak hour help" text="Based on saved round times in your local time, not foot traffic." /></dt>
+                  <dd>
+                    {displayedRecapStats.peakHours.length === 0
+                      ? formatPeakHours(displayedRecapStats.peakHours, displayedRecapStats.completedRounds)
+                      : <ul className="setup-recap-mix" aria-label="Peak hours">
+                          {displayedRecapStats.peakHours.map((hour) => (
+                            <li key={hour}>
+                              <span>{formatHourWindow(hour)}</span>
+                              <span>{displayedRecapStats.peakHourRounds} {displayedRecapStats.peakHourRounds === 1 ? "round" : "rounds"}</span>
+                            </li>
+                          ))}
+                        </ul>}
+                  </dd>
+                </div>
               </dl>
             </section>
             <section className="setup-recap-section" aria-label="Activity and prizes">
               <dl className="setup-recap-stats setup-recap-details">
-                <div className="setup-recap-hour-row">
-                  <dt>Peak hour <RecapHelp label="Peak hour help" text="Based on saved round times in your local time, not foot traffic." /></dt>
-                  <dd>
-                    {formatPeakHours(displayedRecapStats.peakHours, displayedRecapStats.completedRounds)}
-                    {displayedRecapStats.peakHours.length > 0 ? ` · ${displayedRecapStats.peakHourRounds} ${displayedRecapStats.peakHourRounds === 1 ? "round" : "rounds"}` : ""}
-                  </dd>
-                </div>
                 <div className="setup-recap-hour-row">
                   <dt>Hourly activity</dt>
                   <dd>

@@ -135,6 +135,15 @@ describe("EventSetupScreen", () => {
       (row) => row.children[1]?.textContent,
     );
     expect(lengthShares.some((share) => /^55.6% · \d+ rounds?$/.test(share ?? ""))).toBe(true);
+    // Peak hour sits under Round lengths, one line per busiest hour with its round count.
+    const settings = screen.getByRole("region", { name: "Settings" });
+    const labels = [...settings.querySelectorAll("dt")].map((label) => label.textContent ?? "");
+    expect(labels.map((label) => label.split(" Based on")[0]!.trim())).toEqual(["Modes", "Round lengths", "Peak hour"]);
+    const peakRows = [...screen.getByRole("list", { name: "Peak hours" }).querySelectorAll("li")].map((row) =>
+      [...row.children].map((part) => part.textContent),
+    );
+    expect(peakRows).toHaveLength(2);
+    expect(peakRows.every(([, rounds]) => rounds === "6 rounds")).toBe(true);
     const hourlyChart = screen.getByRole("list", { name: "Hourly activity" });
     expect(hourlyChart.textContent).toContain("6 rounds");
     expect(hourlyChart.querySelectorAll(".setup-recap-chart-bar")).toHaveLength(3);
