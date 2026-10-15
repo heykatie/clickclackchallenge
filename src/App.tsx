@@ -6,7 +6,6 @@ import { backupFileName, createBackup, type Backup } from "./features/backup/bac
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
-import { countPlinkoWins } from "./features/typing/scoring";
 import { summarizeEvent, type EventRecapStats } from "./features/recap/eventRecap";
 import { describeAttempt, resultCopy, type ResultStanding } from "./features/results/resultPlacement";
 import { showsInPortrait, type BoothScreen } from "./pwa/boothViewport";
@@ -63,7 +62,6 @@ function App() {
   const [hopping, setHopping] = useState(false);
   // Event Setup previews the highlighted mode's music before the event starts.
   const [setupMode, setSetupMode] = useState<TestMode>("famous-lines");
-  const [plinkoWins, setPlinkoWins] = useState<number | null>(null);
   const [eventRecapSnapshot, setEventRecapSnapshot] = useState<{ eventId: string; stats: EventRecapStats; allTimeStats: EventRecapStats } | null>(null);
   // How many scores the active event's board holds, so CLEAR BOARD is greyed out when there is nothing to clear.
   const [boardScoreCount, setBoardScoreCount] = useState(0);
@@ -189,7 +187,6 @@ function App() {
     Promise.all([listScores(activeEventId), listAllScores()]).then(
       ([scores, allTimeScores]) => {
         if (!cancelled) {
-          setPlinkoWins(countPlinkoWins(scores));
           setBoardScoreCount(scores.length);
           setEventRecapSnapshot({ eventId: activeEventId, stats: summarizeEvent(scores), allTimeStats: summarizeEvent(allTimeScores) });
         }
@@ -562,7 +559,6 @@ function App() {
           }}
           onRestoreBackup={restoreBackup}
           soundOn={soundOn}
-          plinkoWins={plinkoWins}
           onToggleSound={() => {
             void toggleSound();
           }}

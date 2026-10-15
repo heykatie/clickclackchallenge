@@ -44,7 +44,7 @@ export function setupChoices(
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
     // Download and board actions sit under Leaderboard; the recap sits with the event name in the footer.
-    choices.push("continue", "all-time", "download", "backup");
+    choices.push("continue", "all-time", "download");
     // CLEAR BOARD is greyed out on a board with no scores, so the cursor skips it.
     if (canClear) {
       choices.push("clear");
@@ -53,11 +53,13 @@ export function setupChoices(
   if (canRestore) {
     choices.push("restore");
   }
-  // RESTORE BACKUP is always offered, so a fresh or reset device can bring its scores back.
-  choices.push("import", "name");
+  // The footer tools sit under the event name: EVENT RECAP and SAVE BACKUP need an event; RESTORE BACKUP is always
+  // offered, so a fresh or reset device can bring its scores back.
+  choices.push("name");
   if (canContinue) {
-    choices.push("recap");
+    choices.push("recap", "backup");
   }
+  choices.push("import");
   choices.push("start", "sound", "music", "palette");
   return choices;
 }
