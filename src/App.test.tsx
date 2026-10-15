@@ -168,7 +168,7 @@ describe("App", () => {
     fireEvent.pointerUp(logo);
     await screen.findByText("Set up today's typing test");
     // CLEAR BOARD turns on once the board's scores are counted.
-    await waitFor(() => expect((screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement).disabled).toBe(false));
+    await waitFor(() => expect(screen.getByRole("button", { name: "CLEAR BOARD" }).getAttribute("aria-disabled")).toBe("false"));
 
     // The empty board the clear starts uses whatever is picked now: Standard instead of the played board's Story.
     fireEvent.click(screen.getByLabelText("Standard"));
@@ -180,13 +180,13 @@ describe("App", () => {
     expect(screen.queryByText(/PRESS ANY KEY TO START/i)).toBeNull();
 
     // The board that clear started is empty, so there is nothing to clear on it yet.
-    await waitFor(() => expect((screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement).disabled).toBe(true));
+    await waitFor(() => expect(screen.getByRole("button", { name: "CLEAR BOARD" }).getAttribute("aria-disabled")).toBe("true"));
     fireEvent.click(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }));
     fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "RESTORE" }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull());
     expect(screen.getByText("Set up today's typing test")).toBeTruthy();
     // Nothing was played on the empty board, so RESTORE put the played board back as the current event.
-    await waitFor(() => expect((screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement).disabled).toBe(false));
+    await waitFor(() => expect(screen.getByRole("button", { name: "CLEAR BOARD" }).getAttribute("aria-disabled")).toBe("false"));
     expect((await loadBooth()).activeEvent?.testMode).toBe("story");
     // Setup shows the restored board's own choices, so continuing it does not quietly change its mode.
     await waitFor(() => expect((screen.getByLabelText("Story") as HTMLInputElement).checked).toBe(true));

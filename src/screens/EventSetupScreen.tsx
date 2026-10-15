@@ -9,6 +9,7 @@ import {
   type TestMode,
 } from "../db/persistence";
 import { parseBackup, type Backup } from "../features/backup/backup";
+import { useOnlineStatus } from "../pwa/useOnlineStatus";
 import { formatHourWindow, formatPeakHours, type EventRecapStats } from "../features/recap/eventRecap";
 import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
@@ -65,6 +66,9 @@ type EventSetupScreenProps = {
   /** Whether the browser granted protection against automatic storage cleanup. */
   storageProtection?: PersistResult | "checking";
 };
+
+/** How long a tapped, greyed-out button keeps its tooltip showing. */
+const TOOLTIP_TAP_MS = 2500;
 
 export function EventSetupScreen({
   storedDuration,
@@ -145,6 +149,19 @@ export function EventSetupScreen({
   // Several hours can tie for busiest, so the label follows how many there are.
   const peakLabel = (displayedRecapStats?.peakHours.length ?? 0) > 1 ? "Peak hours" : "Peak hour";
   const busiestChartHour = Math.max(0, ...(displayedRecapStats?.roundsByHour.map(({ rounds }) => rounds) ?? []));
+
+  // A greyed-out button still takes a tap, to show why it is unavailable: a touch screen has no hover.
+  const [openTooltip, setOpenTooltip] = useState<"clear" | "recap" | null>(null);
+  useEffect(() => {
+    if (openTooltip === null) {
+      return;
+    }
+    const id = window.setTimeout(() => setOpenTooltip(null), TOOLTIP_TAP_MS);
+    return () => window.clearTimeout(id);
+  }, [openTooltip]);
+  const online = useOnlineStatus();
+  const recapUnavailable = !recapStats || recapStats.completedRounds === 0;
+  const clearUnavailable = saving || !canClear;
 
   const openRecap = useCallback(() => {
     if (!recapStats || recapStats.completedRounds === 0) {
@@ -441,6 +458,13 @@ export function EventSetupScreen({
         </div>
         {/* Device settings, top right, as chips that show their state. Last in the arrow-key order. */}
         <div className="setup-settings" role="group" aria-label="Settings">
+          {/* Green while the device is online. The booth works offline too; this just tells staff which it is. */}
+          <span
+            className={online ? "setup-online-dot is-online" : "setup-online-dot"}
+            role="img"
+            aria-label={online ? "Online" : "Offline: scores still save on this iPad"}
+            title={online ? "Online" : "Offline: scores still save on this iPad"}
+          />
           <button
             type="button"
             className={settingClass("sound", soundOn)}
@@ -490,13 +514,13 @@ export function EventSetupScreen({
             />
           </label>
           {storedDuration !== null ? (
-            <span className="setup-recap-action">
+            <span className={openTooltip === "recap" ? "setup-recap-action is-tooltip-open" : "setup-recap-action"}>
               <button
                 type="button"
                 className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
-                onClick={openRecap}
-                disabled={!recapStats || recapStats.completedRounds === 0}
-                aria-describedby={!recapStats || recapStats.completedRounds === 0 ? recapAvailabilityId : undefined}
+                onClick={() => (recapUnavailable ? setOpenTooltip("recap") : openRecap())}
+                aria-disabled={recapUnavailable}
+                aria-describedby={recapUnavailable ? recapAvailabilityId : undefined}
               >
                 EVENT RECAP
               </button>
@@ -620,9 +644,9 @@ export function EventSetupScreen({
                 {storedDuration !== null ? (
                   <button
                     type="button"
-                    className={cursor === "clear" ? "setup-tool is-danger is-cursor" : "setup-tool is-danger"}
-                    onClick={askToClear}
-                    disabled={saving || !canClear}
+                    className={["setup-tool is-danger", cursor === "clear" ? "is-cursor" : "", openTooltip === "clear" ? "is-tooltip-open" : ""].filter(Boolean).join(" ")}
+                    onClick={() => (clearUnavailable ? setOpenTooltip("clear") : askToClear())}
+                    aria-disabled={clearUnavailable}
                     data-tooltip={canClear ? "Clear current event" : "No scores to clear yet"}
                   >
                     CLEAR BOARD

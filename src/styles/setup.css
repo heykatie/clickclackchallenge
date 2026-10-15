@@ -683,7 +683,7 @@ label.setup-option:not(.is-disabled):active {
     background: color-mix(in srgb, var(--tiny-lavender-light) 30%, var(--tiny-white));
   }
 
-  button.setup-tool:not(.setup-chip):not(.is-danger):hover:not(:disabled) {
+  button.setup-tool:not(.setup-chip):not(.is-danger):hover:not(:disabled):not([aria-disabled="true"]) {
     color: var(--tiny-charcoal);
     filter: none;
   }
@@ -755,7 +755,7 @@ label.setup-option-big {
   display: flex;
   /* One row: the left side shrinks and its links wrap, so START EVENT never drops below and adds height. */
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem 1rem;
 }
@@ -871,13 +871,14 @@ label.setup-option-big {
   transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
 }
 
-.setup-recap-action:hover .setup-recap-availability {
+.setup-recap-action:hover .setup-recap-availability,
+.setup-recap-action.is-tooltip-open .setup-recap-availability {
   opacity: 1;
   visibility: visible;
   transform: translate(-50%, 0);
 }
 
-.setup-recap-action:has(button:disabled) button {
+.setup-recap-action:has(button[aria-disabled="true"]) button {
   cursor: not-allowed;
 }
 
@@ -971,7 +972,7 @@ html[data-palette="cool"] .palette-swatch {
 }
 
 /* A pressed link darkens and dips a pixel: subtle, but enough to show the tap landed. */
-button.setup-tool:active:not(:disabled) {
+button.setup-tool:active:not(:disabled):not([aria-disabled="true"]) {
   color: var(--tiny-charcoal);
   transform: translateY(1px);
   box-shadow: none;
@@ -1022,21 +1023,22 @@ button.setup-tool:active:not(:disabled) {
 
 .setup-tool[data-tooltip]:hover::after,
 .setup-tool[data-tooltip]:focus-visible::after,
-.setup-tool[data-tooltip].is-cursor::after {
+.setup-tool[data-tooltip].is-cursor::after,
+.setup-tool[data-tooltip].is-tooltip-open::after {
   opacity: 1;
   transform: translate(-50%, 0);
 }
 
 /* The red wash shows on press everywhere, and on hover only with a mouse or trackpad. */
 @media (hover: hover) and (pointer: fine) {
-  .setup-tool.is-danger:hover:not(:disabled) {
+  .setup-tool.is-danger:hover:not(:disabled):not([aria-disabled="true"]) {
     background: color-mix(in srgb, #b23a3a 10%, transparent);
     color: #b23a3a;
     filter: none;
   }
 }
 
-button.setup-tool.is-danger:active:not(:disabled) {
+button.setup-tool.is-danger:active:not(:disabled):not([aria-disabled="true"]) {
   background: color-mix(in srgb, #b23a3a 10%, transparent);
   color: #b23a3a;
 }
@@ -1289,3 +1291,22 @@ button.setup-tool.is-danger:active:not(:disabled) {
     font-size: 0.7rem;
   }
 }
+
+/* The online dot, before the setting chips: soft green while the device is online, muted grey while offline. */
+.setup-online-dot {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.15rem;
+  align-self: center;
+  border-radius: 50%;
+  background: var(--tiny-muted);
+  opacity: 0.5;
+}
+
+.setup-online-dot.is-online {
+  background: #3fae6a;
+  opacity: 1;
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, #3fae6a 22%, transparent);
+}
+

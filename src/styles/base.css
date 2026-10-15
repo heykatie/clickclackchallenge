@@ -183,12 +183,12 @@ button {
  * iPad never keeps a "stuck" hover tint after a tap. Pressing goes a step further, so the two stay distinct.
  */
 @media (hover: hover) and (pointer: fine) {
-  button:hover:not(:disabled) {
+  button:hover:not(:disabled):not([aria-disabled="true"]) {
     filter: brightness(0.97);
   }
 }
 
-button:active:not(:disabled) {
+button:active:not(:disabled):not([aria-disabled="true"]) {
   transform: translateY(0.3rem);
   box-shadow: 0 0 0 var(--tiny-mint-deep);
   filter: brightness(0.93);
@@ -285,7 +285,8 @@ main.screen:not(.typing-screen) {
     left 6rem top 1.25rem;
 }
 
-button:disabled {
+button:disabled,
+button[aria-disabled="true"] {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -295,7 +296,7 @@ button:disabled {
  * and a text cursor on fields and their labels. Ready and the rolling high-score list start or return
  * on a tap anywhere, so the whole screen shows a pointer. Typing listens only to the keyboard and keeps the arrow.
  */
-button:not(:disabled),
+button:not(:disabled):not([aria-disabled="true"]),
 .ready-screen,
 .screensaver {
   cursor: pointer;
