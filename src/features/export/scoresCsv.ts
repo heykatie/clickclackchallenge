@@ -1,3 +1,6 @@
+import { WORD_LIST_ID } from "../../data/commonWords";
+import { PASSAGE_SET_ID } from "../../data/passages";
+import { STORY_ID } from "../../data/story";
 import type { EventRecord, ScoreRecord, TestMode } from "../../db/persistence";
 import { rankScores } from "../leaderboard/ranking";
 import { winsPlinko } from "../typing/scoring";
@@ -92,7 +95,7 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
       String(score.correctAttempts),
       String(score.incorrectAttempts),
       timeTaken(score).toFixed(1),
-      score.passageSetId,
+      passageSetLabel(score.passageSetId),
       score.device ?? "",
       score.restoredAt ? format.eventStart(score.restoredAt) : "",
       clearedAt.has(score.eventId) ? format.eventStart(clearedAt.get(score.eventId) as string) : "",
@@ -130,6 +133,17 @@ function timeTaken(score: ScoreRecord): number {
   return score.rawWpm > 0 && score.correctCharacters > 0
     ? Math.min(score.durationSeconds, (score.correctCharacters * 12) / score.rawWpm)
     : score.durationSeconds;
+}
+
+/** "stories-v2" reads as "Stories v2"; an id this build doesn't know stays as it is. */
+const PASSAGE_SET_LABELS: Record<string, string> = {
+  [WORD_LIST_ID]: "Common words v1",
+  [PASSAGE_SET_ID]: "Famous lines v2",
+  [STORY_ID]: "Stories v2",
+};
+
+function passageSetLabel(id: string): string {
+  return PASSAGE_SET_LABELS[id] ?? id;
 }
 
 function rankText(rank: number | undefined): string {

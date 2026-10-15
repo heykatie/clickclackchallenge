@@ -179,7 +179,7 @@ describe("scoresCsv", () => {
       "225",
       "5",
       "40.0",
-      "stories-v2",
+      "Stories v2",
       "Device 4F2A",
       "Oct 7, 6:15 PM",
       "Oct 8, 8:30 PM",
