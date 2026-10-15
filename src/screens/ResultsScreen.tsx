@@ -266,7 +266,7 @@ export function ResultsScreen({
 
   return (
     <main
-      className="screen results-screen"
+      className="screen results-screen has-edge-blob has-edge-ring"
       ref={screenRef}
       tabIndex={-1}
       // The pills pop in once this score's count-up settles.

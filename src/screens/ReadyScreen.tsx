@@ -274,7 +274,7 @@ export function ReadyScreen({
 
   return (
       <main
-        className="screen ready-screen"
+        className="screen ready-screen has-edge-blob"
         ref={screenRef}
         tabIndex={-1}
         onPointerDown={noteActivity}

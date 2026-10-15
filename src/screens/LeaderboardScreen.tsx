@@ -109,7 +109,7 @@ export function LeaderboardScreen({
   }, [shownAt]);
 
   return (
-    <main className="screen leaderboard-screen edge-motifs" ref={screenRef} tabIndex={-1}>
+    <main className="screen leaderboard-screen has-edge-blob has-edge-ring" ref={screenRef} tabIndex={-1}>
       {currentRank === 1 ? <Celebration /> : null}
       <button
         type="button"

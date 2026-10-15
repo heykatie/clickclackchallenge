@@ -228,24 +228,28 @@ button.is-cursor {
   outline-offset: 3px;
 }
 
-/* Sparse edge motifs for score screens: a blush-pink blob low left and a mint arc high right. */
-.edge-motifs {
-  overflow: hidden;
+/*
+ * Sparse edge motifs, chosen per screen: a whole blush-pink blob in the bottom-left corner (has-edge-blob) and a
+ * mint ring half off the top-right corner (has-edge-ring). Both are pinned to the real screen corners, not the 4:3
+ * stage, so on a wide screen the ring runs off the true edge instead of stopping short at the stage's side.
+ * Colours come from the palette tokens, so they follow warm and cool.
+ */
+.has-edge-blob,
+.has-edge-ring {
   isolation: isolate;
 }
 
-.edge-motifs::before,
-.edge-motifs::after {
+.has-edge-blob::before,
+.has-edge-ring::after {
   content: "";
-  position: absolute;
+  position: fixed;
   z-index: -1;
   pointer-events: none;
 }
 
-/* Whole shapes, fully inside the corners, so neither looks cut off by the edge of the screen. */
-.edge-motifs::before {
-  left: 1.25rem;
-  bottom: 1.25rem;
+.has-edge-blob::before {
+  left: calc(1.25rem + env(safe-area-inset-left));
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
   width: 8rem;
   height: 7rem;
   border-radius: 58% 42% 50% 50% / 52% 48% 52% 48%;
@@ -254,13 +258,12 @@ button.is-cursor {
   opacity: 0.7;
 }
 
-.edge-motifs::after {
-  top: 1.25rem;
-  right: 1.25rem;
-  width: 5.5rem;
-  height: 5.5rem;
-  box-sizing: border-box;
-  border: 0.7rem solid var(--tiny-mint);
+.has-edge-ring::after {
+  top: -7rem;
+  right: -7rem;
+  width: 14rem;
+  height: 14rem;
+  border: 1rem solid var(--tiny-mint);
   border-radius: 50%;
 }
 

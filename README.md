@@ -24,6 +24,9 @@ These recordings show the current app on a landscape iPad-sized screen, with sam
 <p align="center"><img src="docs/demos/results-leaderboard.gif" alt="Results counting up to a new high score with a Plinko win, a name being saved, and the score climbing to first place on the leaderboard" width="800"></p>
 <p align="center"><strong>See the result, save a name, and watch the score climb the leaderboard.</strong></p>
 
+<p align="center"><img src="docs/demos/rolling-high-scores.gif" alt="The rolling high-score list scrolling through the event's ranked scores between players" width="640"></p>
+<p align="center"><strong>Between players, the ready screen rolls through the event's high scores.</strong></p>
+
 <p align="center"><img src="docs/demos/keycap-hop.gif" alt="Keycap Hop gameplay: the smiling key jumps over obstacles while the score and scrolling scenery update" width="800"></p>
 <p align="center"><strong>Keycap Hop:</strong> optional runner gameplay, shown after the Easter egg opens.</p>
 
