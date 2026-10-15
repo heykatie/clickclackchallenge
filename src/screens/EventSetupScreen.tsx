@@ -473,6 +473,41 @@ export function EventSetupScreen({
           </button>
         </section>
       ) : null}
+        {/* The event name, with its recap beside it, opens the page above Test length. */}
+        <div className="setup-event-line setup-name-row" {...shutWhileAsking}>
+          <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
+            <span>Event name (optional)</span>
+            <input
+              ref={nameInputRef}
+              type="text"
+              value={eventName}
+              maxLength={MAX_EVENT_NAME_LENGTH}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="e.g. Saturday market"
+              onFocus={() => setCursor("name")}
+              onChange={(event) => setEventName(event.target.value)}
+            />
+          </label>
+          {storedDuration !== null ? (
+            <span className="setup-recap-action">
+              <button
+                type="button"
+                className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                onClick={openRecap}
+                disabled={!recapStats || recapStats.completedRounds === 0}
+                aria-describedby={!recapStats || recapStats.completedRounds === 0 ? recapAvailabilityId : undefined}
+              >
+                EVENT RECAP
+              </button>
+              {!recapStats || recapStats.completedRounds === 0 ? (
+                <span className="setup-recap-availability" id={recapAvailabilityId} role="tooltip">
+                  {recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
+                </span>
+              ) : null}
+            </span>
+          ) : null}
+        </div>
         <div className="setup-groups" {...shutWhileAsking}>
           <fieldset className="setup-group setup-group-length">
             <legend>Test length</legend>
@@ -610,42 +645,8 @@ export function EventSetupScreen({
         </div>
         <footer className="setup-footer" {...shutWhileAsking}>
           <div className="setup-footer-side">
-            <div className="setup-name-row">
-              <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
-                <span>Event name (optional)</span>
-                <input
-                  ref={nameInputRef}
-                  type="text"
-                  value={eventName}
-                  maxLength={MAX_EVENT_NAME_LENGTH}
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder="e.g. Saturday market"
-                  onFocus={() => setCursor("name")}
-                  onChange={(event) => setEventName(event.target.value)}
-                />
-              </label>
-            </div>
-            {/* The event's tools sit under its name: its recap, a backup of every score, and restoring one. */}
+            {/* A backup of every score, and restoring one, beside START EVENT; the storage line sits under them. */}
             <div className="setup-footer-tools">
-              {storedDuration !== null ? (
-                <span className="setup-recap-action">
-                  <button
-                    type="button"
-                    className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
-                    onClick={openRecap}
-                    disabled={!recapStats || recapStats.completedRounds === 0}
-                    aria-describedby={!recapStats || recapStats.completedRounds === 0 ? recapAvailabilityId : undefined}
-                  >
-                    EVENT RECAP
-                  </button>
-                  {!recapStats || recapStats.completedRounds === 0 ? (
-                    <span className="setup-recap-availability" id={recapAvailabilityId} role="tooltip">
-                      {recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
-                    </span>
-                  ) : null}
-                </span>
-              ) : null}
               {storedDuration !== null ? (
                 <button
                   type="button"

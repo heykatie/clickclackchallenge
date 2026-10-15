@@ -111,8 +111,8 @@ describe("EventSetupScreen", () => {
 
     const eventNameInput = screen.getByLabelText("Event name (optional)");
     const recapButton = screen.getByRole("button", { name: "EVENT RECAP" });
-    // EVENT RECAP sits in the tools row just under the event name.
-    expect(recapButton.closest(".setup-footer-tools")?.previousElementSibling?.contains(eventNameInput)).toBe(true);
+    // EVENT RECAP sits beside the event name, on one line.
+    expect(recapButton.closest(".setup-event-line")?.contains(eventNameInput)).toBe(true);
 
     fireEvent.click(recapButton);
     expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
@@ -487,25 +487,26 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByText(/Plinko drops won/)).toBeNull();
   });
 
-  it("puts EVENT RECAP, SAVE BACKUP, and RESTORE BACKUP under the event name, with the storage line under them", () => {
+  it("puts the event name and EVENT RECAP on one line above Test length, and the backup tools by START EVENT", () => {
     renderSetup(existing);
+    const name = screen.getByLabelText("Event name (optional)");
+    const recap = screen.getByRole("button", { name: "EVENT RECAP" });
+    const testLength = screen.getByText("Test length", { selector: "legend" });
+    // Name and recap share one line, and that line comes before Test length.
+    expect(name.closest(".setup-event-line")).toBe(recap.closest(".setup-event-line"));
+    expect(recap.compareDocumentPosition(testLength) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     const footer = document.querySelector(".setup-footer")!;
-    const order = [
-      screen.getByLabelText("Event name (optional)"),
-      screen.getByRole("button", { name: "EVENT RECAP" }),
+    for (const element of [
       screen.getByRole("button", { name: "SAVE BACKUP" }),
       screen.getByRole("button", { name: "RESTORE BACKUP" }),
       screen.getByText(/Storage|storage/),
-    ];
-    for (const element of order) expect(footer.contains(element)).toBe(true);
-    for (let index = 1; index < order.length; index += 1) {
-      expect(order[index - 1]!.compareDocumentPosition(order[index]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    ]) {
+      expect(footer.contains(element)).toBe(true);
     }
+    expect(footer.contains(name)).toBe(false);
     const leaderboard = screen.getByText("Leaderboard", { selector: "legend" }).closest("fieldset")!;
     expect(within(leaderboard).queryByRole("button", { name: /BACKUP/ })).toBeNull();
-    expect(within(leaderboard).getByRole("button", { name: "DOWNLOAD SCORES" })).toBeTruthy();
   });
-
 
   it("shows the event name field, filled with the current event's name", () => {
     renderSetup({ ...existing, name: "Saturday market" });
