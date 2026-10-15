@@ -610,6 +610,22 @@ function openVersionOneBooth(): Promise<void> {
   });
 }
 
+describe("device label", () => {
+  beforeEach(async () => {
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+  });
+
+  it("stamps every score with this device's label, made once and kept for the device's later scores", async () => {
+    const event = await startFreshEvent(30, "words");
+    const first = await saveScore(scoreInput(event.id, 70));
+    const second = await saveScore(scoreInput(event.id, 60));
+    expect(first.device).toMatch(/^Device [0-9A-F]{4}$/);
+    expect(second.device).toBe(first.device);
+    expect((await loadBooth()).settings.deviceLabel).toBe(first.device);
+  });
+});
+
 describe("backup and restore", () => {
   beforeEach(async () => {
     await closeDatabase();
@@ -635,7 +651,7 @@ describe("backup and restore", () => {
 
     expect(await restoreBackupData(data)).toEqual({ eventsAdded: 1, scoresAdded: 1 });
     expect((await loadBooth()).activeEvent?.id).toBe(event.id);
-    expect(await listAllScores()).toEqual([earned]);
+    expect(await listAllScores()).toEqual([{ ...earned, restoredAt: expect.any(String) }]);
   });
 
   it("merges into a device in use: adds what is missing, keeps everything already here, and keeps today's event current", async () => {
@@ -655,7 +671,7 @@ describe("backup and restore", () => {
     expect(everything.events.filter((event) => event.status === "active").map((event) => event.id)).toEqual([sunday.id]);
     expect((await listAllScores()).map((score) => score.id).sort()).toEqual([saturdayScore.id, sundayScore.id].sort());
     // Saturday's scores stay on Saturday's board, which is now a past event.
-    expect(await listScores(saturday.id)).toEqual([saturdayScore]);
+    expect(await listScores(saturday.id)).toEqual([{ ...saturdayScore, restoredAt: expect.any(String) }]);
   });
 
   it("changes nothing when the same backup is restored twice, and never overwrites a record already here", async () => {
@@ -665,6 +681,23 @@ describe("backup and restore", () => {
     await updateScoreName(earned.id, "Renamed");
     expect(await restoreBackupData(backup)).toEqual({ eventsAdded: 0, scoresAdded: 0 });
     expect((await listAllScores())[0]?.name).toBe("Renamed");
+  });
+
+  it("marks each score it adds with when it was restored, keeps the device it was played on, and keeps an earlier restore date", async () => {
+    const event = await startFreshEvent(30, "words");
+    const played = await saveScore(scoreInput(event.id, 70));
+    const backup = await readBackupData();
+    const restoredBefore = { ...played, id: "older", restoredAt: "2026-10-01T10:00:00.000Z" };
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+
+    const before = Date.now();
+    await restoreBackupData({ ...backup, scores: [...backup.scores, restoredBefore] });
+    const scores = await listAllScores();
+    const restored = scores.find((score) => score.id === played.id);
+    expect(restored?.device).toBe(played.device);
+    expect(Date.parse(restored?.restoredAt ?? "")).toBeGreaterThanOrEqual(before - 1000);
+    expect(scores.find((score) => score.id === "older")?.restoredAt).toBe("2026-10-01T10:00:00.000Z");
   });
 
   it("keeps cleared boards cleared after a restore", async () => {

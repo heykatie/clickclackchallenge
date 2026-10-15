@@ -57,6 +57,10 @@ export interface ScoreRecord {
   testMode: TestMode;
   passageSetId: string;
   createdAt: string;
+  /** The label of the device the score was played on, such as "Device 4F2A". Missing on older scores. */
+  device?: string;
+  /** When a backup restore added this score to this device. Missing on scores played here. */
+  restoredAt?: string;
 }
 
 export interface AppSettings {
@@ -74,6 +78,11 @@ export interface AppSettings {
    * the most recent clear once and never steps back to older ones. Missing on older records.
    */
   restoredClearAt?: string | null;
+  /**
+   * A short random label for this device, made with its first saved score and stamped on every score, so files
+   * from several devices can be told apart once combined. Missing until then.
+   */
+  deviceLabel?: string;
 }
 
 export interface BoothState {
@@ -627,9 +636,11 @@ export async function restoreBackupData(data: {
     eventsAdded += 1;
   }
   let scoresAdded = 0;
+  const restoredAt = new Date().toISOString();
   for (const score of data.scores) {
     if (!existingScores.has(score.id)) {
-      await scores.put(normalizeScore(score));
+      // A score restored before keeps its first restore date.
+      await scores.put({ ...normalizeScore(score), restoredAt: score.restoredAt ?? restoredAt });
       scoresAdded += 1;
     }
   }
@@ -647,13 +658,27 @@ export function listBoardScores(event: EventRecord): Promise<ScoreRecord[]> {
 
 export async function saveScore(input: NewScore): Promise<ScoreRecord> {
   const database = await openDatabase();
+  const transaction = database.transaction(["scores", "settings"], "readwrite");
+  const settingsStore = transaction.objectStore("settings");
+  const settings = (await settingsStore.get(SETTINGS_KEY)) ?? defaultSettings();
+  const device = settings.deviceLabel ?? newDeviceLabel();
+  if (!settings.deviceLabel) {
+    await settingsStore.put({ ...settings, deviceLabel: device }, SETTINGS_KEY);
+  }
   const score: ScoreRecord = {
     ...input,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
+    device,
   };
-  await database.put("scores", score);
+  await transaction.objectStore("scores").put(score);
+  await transaction.done;
   return score;
+}
+
+/** "Device 4F2A": four random hex digits, enough to tell a booth's few devices apart. */
+function newDeviceLabel(): string {
+  return `Device ${crypto.randomUUID().replaceAll("-", "").slice(0, 4).toUpperCase()}`;
 }
 
 export async function updateScoreName(

@@ -35,7 +35,42 @@ function score(id: string, eventId: string, name: string | null, displayedWpm: n
   };
 }
 
-const lines = (csv: string) => csv.trimEnd().split("\r\n");
+/** Splits one CSV row into its cells, undoing the quoting. */
+function cells(row: string): string[] {
+  const out: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < row.length; index += 1) {
+    const char = row[index];
+    if (quoted) {
+      if (char === '"' && row[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        cell += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === ",") {
+      out.push(cell);
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  return [...out, cell];
+}
+
+const quote = (cell: string) => (/[",]/.test(cell) ? `"${cell.replaceAll('"', '""')}"` : cell);
+// The first 14 columns, the original report; the detail columns after them have their own tests.
+const lines = (csv: string) =>
+  csv
+    .trimEnd()
+    .split("\r\n")
+    .map((row) => cells(row).slice(0, 14).map(quote).join(","));
+const fullRows = (csv: string) => csv.trimEnd().split("\r\n").map(cells);
 
 // Fixed to UTC so the expected text does not depend on where the tests run.
 const csvAt = (scores: ScoreRecord[], events: EventRecord[]) => scoresCsv(scores, events, "UTC");
@@ -104,6 +139,57 @@ describe("scoresCsv", () => {
     expect(rows[3]).toContain(',"Jo, ""Ace""",');
     expect(rows[2]).toContain(",'=SUM(A1),");
     expect(rows[1]).toContain(",'@me,");
+  });
+
+  it("adds detail columns after the report: exact numbers, keystrokes, time taken, passage set, device, restored, cleared", () => {
+    const story = {
+      ...score("1", "a", "Ana", 61),
+      rawWpm: 60.567,
+      displayedWpm: 61,
+      accuracy: 97.8261,
+      correctCharacters: 202,
+      correctAttempts: 225,
+      incorrectAttempts: 5,
+      durationSeconds: 60 as const,
+      testMode: "story" as const,
+      passageSetId: "stories-v2",
+      device: "Device 4F2A",
+      restoredAt: "2026-10-07T18:15:00.000Z",
+    };
+    const rows = fullRows(
+      csvAt([story], [event("a", "2026-10-06T09:00:00.000Z", "2026-10-08T20:30:00.000Z")]),
+    );
+    expect(rows[0].slice(14)).toEqual([
+      "Exact WPM",
+      "Exact accuracy %",
+      "Correct characters",
+      "Correct keystrokes",
+      "Wrong keystrokes",
+      "Time taken (s)",
+      "Passage set",
+      "Device",
+      "Restored on",
+      "Cleared on",
+    ]);
+    // 202 correct characters at 60.567 WPM took 40.0 seconds of the 60, because the story was finished early.
+    expect(rows[1].slice(14)).toEqual([
+      "60.57",
+      "97.83",
+      "202",
+      "225",
+      "5",
+      "40.0",
+      "stories-v2",
+      "Device 4F2A",
+      "Oct 7, 6:15 PM",
+      "Oct 8, 8:30 PM",
+    ]);
+  });
+
+  it("leaves the detail columns blank where an older score has no such record, and uses the round length when nothing was typed", () => {
+    const blank = { ...score("1", "a", null, 0, 0), correctCharacters: 0 };
+    const rows = fullRows(csvAt([blank], [event("a", "2026-10-06T09:00:00.000Z")]));
+    expect(rows[1].slice(14)).toEqual(["0.00", "0.00", "0", "100", "2", "30.0", "words-v1", "", "", ""]);
   });
 
   it("names the file with the download date", () => {
