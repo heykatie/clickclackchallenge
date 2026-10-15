@@ -1316,13 +1316,14 @@ button.setup-tool.is-danger:active:not(:disabled):not([aria-disabled="true"]) {
   }
 }
 
-/* The online dot, before the setting chips: soft green while the device is online, muted grey while offline. */
+/* The online dot, leading the device status line: soft green while the device is online, muted grey while offline. */
 .setup-online-dot {
+  display: inline-block;
   flex: none;
   width: 0.7rem;
   height: 0.7rem;
-  margin-right: 0.15rem;
-  align-self: center;
+  margin-right: 0.4rem;
+  vertical-align: 0.05em;
   border-radius: 50%;
   background: var(--tiny-muted);
   opacity: 0.5;
@@ -1331,6 +1332,6 @@ button.setup-tool.is-danger:active:not(:disabled):not([aria-disabled="true"]) {
 .setup-online-dot.is-online {
   background: #3fae6a;
   opacity: 1;
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, #3fae6a 22%, transparent);
+  box-shadow: 0 0 0 0.15rem color-mix(in srgb, #3fae6a 22%, transparent);
 }
 

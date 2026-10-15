@@ -458,13 +458,6 @@ export function EventSetupScreen({
         </div>
         {/* Device settings, top right, as chips that show their state. Last in the arrow-key order. */}
         <div className="setup-settings" role="group" aria-label="Settings">
-          {/* Green while the device is online. The booth works offline too; this just tells staff which it is. */}
-          <span
-            className={online ? "setup-online-dot is-online" : "setup-online-dot"}
-            role="img"
-            aria-label={online ? "Online" : "Offline: scores still save on this iPad"}
-            title={online ? "Online" : "Offline: scores still save on this iPad"}
-          />
           <button
             type="button"
             className={settingClass("sound", soundOn)}
@@ -702,7 +695,15 @@ export function EventSetupScreen({
                 }}
               />
             </div>
-            <p className="setup-storage-status" role="status" aria-live="polite">
+            {/* The device's status in one line: online or not, then whether its stored scores are protected. */}
+            <p className="setup-storage-status setup-device-status" role="status" aria-live="polite">
+              <span
+                className={online ? "setup-online-dot is-online" : "setup-online-dot"}
+                role="img"
+                aria-label={online ? "Online" : "Offline: scores still save on this iPad"}
+                title={online ? "Online" : "Offline: scores still save on this iPad"}
+              />
+              <span className="setup-online-label">{online ? "Online" : "Offline"} · </span>
               {storageProtection === "checking"
                 ? "Checking storage…"
                 : storageProtection === "persisted" || storageProtection === "granted"

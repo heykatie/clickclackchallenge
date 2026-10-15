@@ -748,6 +748,9 @@ describe("EventSetupScreen", () => {
       renderSetup(existing);
       const dot = screen.getByRole("img", { name: "Online" });
       expect(dot.className).toContain("is-online");
+      // It sits with the device's other status, at the start of the storage line, not among the settings.
+      expect(dot.closest(".setup-device-status")?.textContent).toMatch(/storage/i);
+      expect(dot.closest(".setup-settings")).toBeNull();
       Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
       act(() => {
         window.dispatchEvent(new Event("offline"));
