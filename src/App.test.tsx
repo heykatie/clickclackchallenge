@@ -29,6 +29,20 @@ function press(key: string) {
 }
 
 /** From Event Setup: a Story event, started, then one Story round typed perfectly, ending on Results. */
+/**
+ * Presses Shift on Ready until the round starts. Ready attaches its key listener in an effect that runs a moment
+ * after the screen appears, so on a busy machine a single press can land before it is listening. Shift is ignored
+ * once typing has started, and the key that starts a round is never typed, so pressing again is harmless.
+ */
+async function startRoundFromReady() {
+  await waitFor(() => {
+    if (!document.querySelector(".caret")) {
+      press("Shift");
+    }
+    expect(document.querySelector(".caret")).toBeTruthy();
+  });
+}
+
 async function playStoryRound(eventName?: string): Promise<number> {
   await screen.findByText("Set up today's typing test");
   fireEvent.click(screen.getByLabelText("Story"));
@@ -37,9 +51,7 @@ async function playStoryRound(eventName?: string): Promise<number> {
   }
   fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
   await screen.findByText(/PRESS ANY KEY TO START/i);
-  // The key that starts the round is not typed.
-  press("Shift");
-  await waitFor(() => expect(document.querySelector(".caret")).toBeTruthy());
+  await startRoundFromReady();
   const storyStartSkew = skew;
   while (document.querySelector(".caret")) {
     const glyph = document.querySelector(".caret")!.closest(".passage-char")!.querySelector(".passage-char-glyph")!;
@@ -117,8 +129,7 @@ describe("App", () => {
     await screen.findByText("Set up today's typing test");
     fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
     await screen.findByText(/PRESS ANY KEY TO START/i);
-    press("Shift");
-    await waitFor(() => expect(document.querySelector(".caret")).toBeTruthy());
+    await startRoundFromReady();
     const glyph = document.querySelector(".caret")!.closest(".passage-char")!.querySelector(".passage-char-glyph")!;
     play.mockClear();
     // A plain browser event, outside React's test helpers, so nothing flushes React's work early.

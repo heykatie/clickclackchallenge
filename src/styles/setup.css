@@ -308,6 +308,40 @@
   line-height: 1.4;
 }
 
+/*
+ * Modes and Round lengths read as a small table: the label above, then one line per item with its name on the left
+ * and its share on the right. Each part keeps to one line, so "Words · 33.3% · 4 rounds" never splits mid-phrase.
+ */
+.setup-recap-stats .setup-recap-hour-row.setup-recap-mix-row {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+}
+
+.setup-recap-mix {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-recap-mix li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.setup-recap-mix li span {
+  white-space: nowrap;
+}
+
+.setup-recap-mix li span:last-child {
+  color: var(--tiny-muted);
+}
+
 .setup-recap-chart {
   display: grid;
   gap: 0.55rem;
