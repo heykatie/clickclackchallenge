@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { requestPersistentStorage, type PersistResult } from "./db/persistentStorage";
-import { clearCurrentEvent, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, setPalette as savePalette, type Palette, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything } from "./db/persistence";
+import { clearCurrentEvent, hasClearedScores, restoreClearedScores, startFreshEvent, listScores, loadBooth, passageSetIdFor, saveScore, updateActiveEvent, updateScoreName, setSoundOn as saveSoundSetting, setMusicOn as saveMusicSetting, setPalette as savePalette, type Palette, type NewScore, type EventRecord, type ScoreRecord, type TestDuration, type TestMode, type BoardScope, listAllScores, listBoardScores, listEverything, readBackupData, restoreBackupData } from "./db/persistence";
+import { backupFileName, createBackup, type Backup } from "./features/backup/backup";
 import { downloadTextFile } from "./features/export/downloadTextFile";
 import { scoresCsv, scoresFileName } from "./features/export/scoresCsv";
 import { highScore } from "./features/leaderboard/ranking";
@@ -66,6 +67,8 @@ function App() {
   const [eventRecapSnapshot, setEventRecapSnapshot] = useState<{ eventId: string; stats: EventRecapStats; allTimeStats: EventRecapStats } | null>(null);
   // How many scores the active event's board holds, so CLEAR BOARD is greyed out when there is nothing to clear.
   const [boardScoreCount, setBoardScoreCount] = useState(0);
+  // Bumped after a backup restore, so Event Setup's counts and recap read the store again.
+  const [dataVersion, setDataVersion] = useState(0);
   // The latest state, for working out a key's sound the moment the key goes down.
   const stateRef = useRef(state);
   const [trackedScreen, setTrackedScreen] = useState(state.screen);
@@ -197,7 +200,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [state.screen, activeEventId]);
+  }, [state.screen, activeEventId, dataVersion]);
 
 
   // One chime or ding when Results knows where the attempt stands.
@@ -258,6 +261,7 @@ function App() {
     boardScope: BoardScope,
     name: string | null,
   ) {
+    protectStorage();
     const event = state.activeEvent;
     if (!event) {
       return;
@@ -354,7 +358,39 @@ function App() {
     }
   }
 
+  /**
+   * Asks the browser again to protect the scores. Browsers weigh a request made right after a tap far more than one
+   * made on page load, so START EVENT and SAVE BACKUP ask too, and the status line on Event Setup follows.
+   */
+  function protectStorage() {
+    void requestPersistentStorage().then(setStorageProtection);
+  }
+
+  async function saveBackup() {
+    protectStorage();
+    try {
+      const backup = createBackup(await readBackupData(), new Date());
+      downloadTextFile(backupFileName(new Date()), JSON.stringify(backup), "application/json");
+    } catch (error) {
+      // A failed backup must not stop the event: the scores are still on the device.
+      console.error("Could not save a backup", error);
+    }
+  }
+
+  /** Merges a backup in, then refreshes what Event Setup shows: the current event, RESTORE, and the recap. */
+  async function restoreBackup(backup: Backup) {
+    const result = await restoreBackupData(backup);
+    const booth = await loadBooth();
+    if (booth.activeEvent) {
+      dispatch({ type: "SET_ACTIVE_EVENT", event: booth.activeEvent });
+    }
+    setCanRestore(booth.hasClearedScores);
+    setDataVersion((version) => version + 1);
+    return result;
+  }
+
   async function startFresh(durationSeconds: TestDuration, testMode: TestMode, name: string | null) {
+    protectStorage();
     setSaving(true);
     try {
       const event = await startFreshEvent(durationSeconds, testMode, { name });
@@ -521,6 +557,10 @@ function App() {
           onDownloadScores={() => {
             void downloadScores();
           }}
+          onSaveBackup={() => {
+            void saveBackup();
+          }}
+          onRestoreBackup={restoreBackup}
           soundOn={soundOn}
           plinkoWins={plinkoWins}
           onToggleSound={() => {

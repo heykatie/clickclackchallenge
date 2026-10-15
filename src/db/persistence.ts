@@ -581,6 +581,65 @@ export async function listEverything(): Promise<{ scores: ScoreRecord[]; events:
   return { scores: scores.map(normalizeScore), events: events.map(normalizeEvent) };
 }
 
+/** Everything a backup holds: every event and score (cleared ones too), and the device settings. */
+export async function readBackupData(): Promise<{ events: EventRecord[]; scores: ScoreRecord[]; settings: AppSettings | null }> {
+  const database = await openDatabase();
+  const [events, scores, settings] = await Promise.all([
+    database.getAll("events"),
+    database.getAll("scores"),
+    database.get("settings", SETTINGS_KEY),
+  ]);
+  return { events: events.map(normalizeEvent), scores: scores.map(normalizeScore), settings: settings ?? null };
+}
+
+/**
+ * Restores a backup by merging, never replacing: events and scores missing from this device are added, and
+ * everything already here is kept as it is, so a restore can never lose newer scores and running it twice changes
+ * nothing. Restored events arrive as past events, so this device's current event stays current; only on a device
+ * with no event yet does the backup's current event become current. Cleared boards stay cleared.
+ */
+export async function restoreBackupData(data: {
+  events: EventRecord[];
+  scores: ScoreRecord[];
+  settings: AppSettings | null;
+}): Promise<{ eventsAdded: number; scoresAdded: number }> {
+  const database = await openDatabase();
+  const transaction = database.transaction(["events", "scores", "settings"], "readwrite");
+  const events = transaction.objectStore("events");
+  const scores = transaction.objectStore("scores");
+  const settingsStore = transaction.objectStore("settings");
+  const settings = (await settingsStore.get(SETTINGS_KEY)) ?? defaultSettings();
+  const existingEvents = new Set(await events.getAllKeys());
+  const existingScores = new Set(await scores.getAllKeys());
+  const takeBackupCurrent = settings.activeEventId === null ? (data.settings?.activeEventId ?? null) : null;
+
+  let eventsAdded = 0;
+  let activeEventId = settings.activeEventId;
+  for (const event of data.events) {
+    if (existingEvents.has(event.id)) {
+      continue;
+    }
+    const current = event.id === takeBackupCurrent && !event.hiddenAt;
+    await events.put({ ...normalizeEvent(event), status: current ? "active" : "archived" });
+    if (current) {
+      activeEventId = event.id;
+    }
+    eventsAdded += 1;
+  }
+  let scoresAdded = 0;
+  for (const score of data.scores) {
+    if (!existingScores.has(score.id)) {
+      await scores.put(normalizeScore(score));
+      scoresAdded += 1;
+    }
+  }
+  if (activeEventId !== settings.activeEventId || !(await settingsStore.get(SETTINGS_KEY))) {
+    await settingsStore.put({ ...settings, activeEventId }, SETTINGS_KEY);
+  }
+  await transaction.done;
+  return { eventsAdded, scoresAdded };
+}
+
 /** The scores the event's board ranks: its own, or every event's when the board is all-time. */
 export function listBoardScores(event: EventRecord): Promise<ScoreRecord[]> {
   return event.boardScope === "all-time" ? listAllScores() : listScores(event.id);

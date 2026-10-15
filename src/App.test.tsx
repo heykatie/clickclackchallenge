@@ -123,6 +123,21 @@ describe("App", () => {
     expect(scores.map((score) => score.eventName).sort()).toEqual(["Fanime Sat", "Fanime Sun"]);
   }, 20_000);
 
+  it("asks to protect storage again when START EVENT is pressed, since browsers favour a request made from a tap", async () => {
+    const persist = vi.fn(async () => false);
+    const storage = { persisted: vi.fn(async () => false), persist };
+    Object.defineProperty(navigator, "storage", { configurable: true, value: storage });
+    try {
+      render(<App />);
+      await screen.findByText("Set up today's typing test");
+      await waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+      fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+      await waitFor(() => expect(persist).toHaveBeenCalledTimes(2));
+    } finally {
+      Reflect.deleteProperty(navigator, "storage");
+    }
+  }, 20_000);
+
   it("plays a key's sound during the key press itself, before the screen redraws", async () => {
     const play = vi.spyOn(boothSound, "play").mockImplementation(() => {});
     render(<App />);

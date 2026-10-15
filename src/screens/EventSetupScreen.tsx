@@ -8,6 +8,7 @@ import {
   type TestDuration,
   type TestMode,
 } from "../db/persistence";
+import { parseBackup, type Backup } from "../features/backup/backup";
 import { formatHourWindow, formatPeakHours, type EventRecapStats } from "../features/recap/eventRecap";
 import type { PersistResult } from "../db/persistentStorage";
 import { applySetupKey, type SetupChoice, type SetupSelection } from "../state/setupKeyboard";
@@ -40,8 +41,12 @@ type EventSetupScreenProps = {
   canClear: boolean;
   /** Shows the scores hidden by the most recent clear again. */
   onRestoreScores: () => void;
-  /** Saves every score on the device as a CSV file, for a backup or to look up winners later. */
+  /** Saves every score on the device as a CSV file, a report to read in a spreadsheet or look up winners. */
   onDownloadScores: () => void;
+  /** Saves a full backup file that RESTORE BACKUP can load again, here or on another device. */
+  onSaveBackup: () => void;
+  /** Merges a backup into this device; resolves with how many events and scores were added. */
+  onRestoreBackup: (backup: Backup) => Promise<{ eventsAdded: number; scoresAdded: number }>;
   /** Key clicks and result chimes, off by default for a noisy booth. */
   soundOn: boolean;
   onToggleSound: () => void;
@@ -78,6 +83,8 @@ export function EventSetupScreen({
   canClear,
   onRestoreScores,
   onDownloadScores,
+  onSaveBackup,
+  onRestoreBackup,
   soundOn,
   onToggleSound,
   musicOn,
@@ -116,6 +123,11 @@ export function EventSetupScreen({
   const updateReadyRef = useRef(updateReady);
   const onApplyUpdateRef = useRef(onApplyUpdate);
   const onDownloadRef = useRef(onDownloadScores);
+  const onSaveBackupRef = useRef(onSaveBackup);
+  const backupInputRef = useRef<HTMLInputElement>(null);
+  // A backup file waiting for its confirmation, and the last restore's outcome to show under the score actions.
+  const [pendingBackup, setPendingBackup] = useState<Backup | null>(null);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
   const onToggleSoundRef = useRef(onToggleSound);
   const onToggleMusicRef = useRef(onToggleMusic);
   const onTogglePaletteRef = useRef(onTogglePalette);
@@ -123,7 +135,7 @@ export function EventSetupScreen({
   const [confirmCursor, setConfirmCursor] = useState<FreshConfirmChoice | null>(null);
   const confirmCursorRef = useRef(confirmCursor);
   /** Which confirmation is up: Start fresh, Clear board, or Restore cleared scores. */
-  const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore">("fresh");
+  const [confirmKind, setConfirmKind] = useState<"fresh" | "clear" | "restore" | "import">("fresh");
   const [recapOpen, setRecapOpen] = useState(false);
   const [recapPeriod, setRecapPeriod] = useState<"event" | "all-time">("event");
   const recapCloseRef = useRef<HTMLButtonElement>(null);
@@ -202,7 +214,45 @@ export function EventSetupScreen({
     setConfirmCursor("cancel");
   }
 
+  async function chooseBackupFile(file: File | undefined) {
+    if (!file) {
+      return;
+    }
+    const parsed = parseBackup(await file.text());
+    if (!parsed.ok) {
+      setBackupMessage(parsed.reason);
+      return;
+    }
+    setBackupMessage(null);
+    setPendingBackup(parsed.backup);
+    setConfirmKind("import");
+    setConfirmCursor("cancel");
+  }
+
+  async function restorePendingBackup() {
+    const backup = pendingBackup;
+    setConfirmCursor(null);
+    setPendingBackup(null);
+    if (!backup) {
+      return;
+    }
+    try {
+      const { eventsAdded, scoresAdded } = await onRestoreBackup(backup);
+      setBackupMessage(
+        scoresAdded === 0 && eventsAdded === 0
+          ? "Everything in that backup is already here."
+          : `Restored ${scoresAdded} ${scoresAdded === 1 ? "score" : "scores"} from ${eventsAdded} ${eventsAdded === 1 ? "event" : "events"}.`,
+      );
+    } catch {
+      setBackupMessage("That backup couldn’t be restored. Nothing was changed.");
+    }
+  }
+
   function confirm() {
+    if (confirmKind === "import") {
+      void restorePendingBackup();
+      return;
+    }
     // Clearing and restoring keep staff on Event Setup, so the modal closes itself.
     if (confirmKind === "clear") {
       setConfirmCursor(null);
@@ -235,6 +285,7 @@ export function EventSetupScreen({
     updateReadyRef.current = updateReady;
     onApplyUpdateRef.current = onApplyUpdate;
     onDownloadRef.current = onDownloadScores;
+    onSaveBackupRef.current = onSaveBackup;
     onToggleSoundRef.current = onToggleSound;
     onToggleMusicRef.current = onToggleMusic;
     onTogglePaletteRef.current = onTogglePalette;
@@ -310,6 +361,14 @@ export function EventSetupScreen({
       }
       if (result === "download") {
         onDownloadRef.current();
+        return;
+      }
+      if (result === "backup") {
+        onSaveBackupRef.current();
+        return;
+      }
+      if (result === "import") {
+        backupInputRef.current?.click();
         return;
       }
       if (result === "recap") {
@@ -515,7 +574,7 @@ export function EventSetupScreen({
                 description="Every score ever"
               />
             </div>
-            {storedDuration !== null || canRestore ? (
+            {(
               <div className="setup-score-actions">
                 {storedDuration !== null ? (
                   <button
@@ -524,6 +583,15 @@ export function EventSetupScreen({
                     onClick={onDownloadScores}
                   >
                     DOWNLOAD SCORES
+                  </button>
+                ) : null}
+                {storedDuration !== null ? (
+                  <button
+                    type="button"
+                    className={cursor === "backup" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={onSaveBackup}
+                  >
+                    SAVE BACKUP
                   </button>
                 ) : null}
                 {storedDuration !== null ? (
@@ -547,7 +615,33 @@ export function EventSetupScreen({
                     RESTORE CLEARED SCORES
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  className={cursor === "import" ? "setup-tool is-cursor" : "setup-tool"}
+                  onClick={() => backupInputRef.current?.click()}
+                  disabled={saving}
+                >
+                  RESTORE BACKUP
+                </button>
+                <input
+                  ref={backupInputRef}
+                  className="visually-hidden"
+                  type="file"
+                  accept="application/json,.json"
+                  aria-label="Backup file"
+                  tabIndex={-1}
+                  onChange={(event) => {
+                    void chooseBackupFile(event.target.files?.[0]);
+                    // Clearing the value lets the same file be chosen again.
+                    event.target.value = "";
+                  }}
+                />
               </div>
+            )}
+            {backupMessage ? (
+              <p className="setup-storage-status" role="status">
+                {backupMessage}
+              </p>
             ) : null}
             {storedDuration === null ? <p className="setup-note">No previous event.</p> : null}
             <p className="setup-storage-status" role="status" aria-live="polite">
@@ -556,8 +650,8 @@ export function EventSetupScreen({
                 : storageProtection === "persisted" || storageProtection === "granted"
                   ? "Score storage is protected."
                   : storageProtection === "denied"
-                    ? "Storage isn’t protected. Download a backup."
-                    : "Storage status is unavailable. Download a backup."}
+                    ? "Storage isn’t protected. Save a backup."
+                    : "Storage status is unavailable. Save a backup."}
             </p>
           </fieldset>
         </div>
@@ -623,7 +717,16 @@ export function EventSetupScreen({
               aria-modal="true"
               aria-labelledby="setup-confirm-title"
             >
-              {confirmKind === "restore" ? (
+              {confirmKind === "import" ? (
+                <>
+                  <h2 id="setup-confirm-title">Restore from backup?</h2>
+                  <p>
+                    Adds the events and scores in this file that aren’t on this iPad yet
+                    {pendingBackup ? ` (${pendingBackup.scores.length} ${pendingBackup.scores.length === 1 ? "score" : "scores"} in the file)` : ""}.
+                    Scores already on this iPad stay.
+                  </p>
+                </>
+              ) : confirmKind === "restore" ? (
                 <>
                   <h2 id="setup-confirm-title">Restore cleared scores?</h2>
                   <p>
@@ -655,7 +758,7 @@ export function EventSetupScreen({
                   CANCEL
                 </button>
                 <button type="button" ref={confirmButtonRef} onClick={confirm} disabled={saving}>
-                  {confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
+                  {confirmKind === "import" ? "RESTORE BACKUP" : confirmKind === "restore" ? "RESTORE" : confirmKind === "clear" ? "CLEAR BOARD" : "START FRESH"}
                 </button>
               </div>
             </section>

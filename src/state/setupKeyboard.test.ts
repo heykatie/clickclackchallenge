@@ -47,10 +47,10 @@ describe("applySetupKey", () => {
     expect(back).toMatchObject({ cursor: "60" });
   });
 
-  it("skips Continue when no event exists", () => {
+  it("skips Continue when no event exists, going on to RESTORE BACKUP", () => {
     const fresh: SetupSelection = { ...ready, cursor: "fresh", leaderboard: "fresh" };
     expect(applySetupKey(fresh, "ArrowDown", { shiftKey: false, canContinue: false })).toMatchObject({
-      cursor: "name",
+      cursor: "import",
     });
   });
 });
@@ -62,7 +62,9 @@ describe("all-time choice", () => {
       "continue",
       "all-time",
       "download",
+      "backup",
       "clear",
+      "import",
       "name",
       "recap",
       "start",
@@ -98,7 +100,8 @@ describe("download choice", () => {
   it("comes first of the score actions, right after the Leaderboard choices, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
     expect(choices[choices.indexOf("all-time") + 1]).toBe("download");
-    expect(choices[choices.indexOf("download") + 1]).toBe("clear");
+    expect(choices[choices.indexOf("download") + 1]).toBe("backup");
+    expect(choices[choices.indexOf("backup") + 1]).toBe("clear");
     expect(setupChoices("famous-lines", false)).not.toContain("download");
   });
 
@@ -129,10 +132,18 @@ describe("event name choice", () => {
 });
 
 describe("score actions", () => {
-  it("sit with the Leaderboard choices: DOWNLOAD, then CLEAR, then RESTORE, before the event name", () => {
+  it("sit with the Leaderboard choices: DOWNLOAD, SAVE BACKUP, CLEAR, RESTORE, then RESTORE BACKUP, before the event name", () => {
     const choices = setupChoices("famous-lines", true, false, true);
     const from = choices.indexOf("all-time");
-    expect(choices.slice(from, from + 7)).toEqual(["all-time", "download", "clear", "restore", "name", "recap", "start"]);
+    expect(choices.slice(from, from + 9)).toEqual(["all-time", "download", "backup", "clear", "restore", "import", "name", "recap", "start"]);
+  });
+
+  it("offers RESTORE BACKUP on a fresh device, where there is nothing yet to save", () => {
+    const choices = setupChoices("famous-lines", false);
+    expect(choices).toContain("import");
+    expect(choices).not.toContain("backup");
+    expect(choices.slice(choices.indexOf("fresh"), choices.indexOf("fresh") + 3)).toEqual(["fresh", "import", "name"]);
+    expect(applySetupKey({ ...ready, cursor: "import" }, "Enter", { shiftKey: false, canContinue: false })).toBe("import");
   });
 });
 
@@ -158,7 +169,7 @@ describe("sound and music choices", () => {
 describe("restore choice", () => {
   it("comes after CLEAR BOARD, and only while a clear can be undone", () => {
     const choices = setupChoices("famous-lines", true, false, true);
-    expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "name"]);
+    expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "import"]);
     expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");
   });
 
@@ -194,10 +205,10 @@ describe("update choice", () => {
     expect(setupChoices("words", true, false, false, false)).not.toContain("clear");
     expect(setupChoices("words", true, false, false, true)).toContain("clear");
     const fromDownload = applySetupKey(
-      { cursor: "download", duration: 30, testMode: "words", leaderboard: "continue" },
+      { cursor: "backup", duration: 30, testMode: "words", leaderboard: "continue" },
       "ArrowDown",
       { shiftKey: false, canContinue: true, canClear: false },
     );
-    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("name");
+    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("import");
   });
 });

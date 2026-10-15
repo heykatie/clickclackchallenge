@@ -6,7 +6,7 @@ import { planEventStart } from "./setupRules";
 
 const MODES: readonly TestMode[] = ["words", "famous-lines", "story"];
 const KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Tab", "Enter", "NumpadEnter", " ", "Escape", "a", "Shift"];
-const ACTIONS = ["start", "update", "clear", "restore", "download", "recap", "sound", "music", "palette", "name"];
+const ACTIONS = ["start", "update", "clear", "restore", "download", "backup", "import", "recap", "sound", "music", "palette", "name"];
 const BOOLEANS = [false, true];
 
 /** Every Setup state a device can be in: no event yet, an event, an update waiting, a clear to undo. */

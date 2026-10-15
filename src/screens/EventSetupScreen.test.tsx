@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import "../test/domSetup";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import type { EventRecapStats } from "../features/recap/eventRecap";
+import { createBackup } from "../features/backup/backup";
 import { EventSetupScreen } from "./EventSetupScreen";
 
 function renderSetup(
@@ -21,6 +22,8 @@ function renderSetup(
   const onClearScores = vi.fn();
   const onRestoreScores = vi.fn();
   const onDownloadScores = vi.fn();
+  const onSaveBackup = vi.fn();
+  const onRestoreBackup = vi.fn(async () => ({ eventsAdded: 1, scoresAdded: 2 }));
   const onToggleSound = vi.fn();
   const onToggleMusic = vi.fn();
   const onTestModeChange = vi.fn();
@@ -38,6 +41,8 @@ function renderSetup(
       canRestore={canRestore}
       onRestoreScores={onRestoreScores}
       onDownloadScores={onDownloadScores}
+      onSaveBackup={onSaveBackup}
+      onRestoreBackup={onRestoreBackup}
       soundOn={soundOn}
       plinkoWins={plinkoWins}
       recapStats={recapOptions?.stats ?? null}
@@ -53,30 +58,31 @@ function renderSetup(
       onContinue={onContinue}
     />,
   );
-  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onToggleSound, onToggleMusic, onTestModeChange, onTogglePalette };
+  return { onStartFresh, onContinue, onApplyUpdate, onClearScores, onRestoreScores, onDownloadScores, onSaveBackup, onRestoreBackup, onToggleSound, onToggleMusic, onTestModeChange, onTogglePalette };
 }
 
 const press = (key: string, shiftKey = false) => fireEvent.keyDown(window, { key, shiftKey });
 const existing = { duration: 30, mode: "famous-lines" } as const;
 
-/** From START EVENT, move through the score tools, All-time, Continue, then Start fresh. */
-// START EVENT → EVENT RECAP → event name → CLEAR → DOWNLOAD → All-time → Continue → Start fresh, then back down to START EVENT.
+/**
+ * Presses an arrow key until the setup cursor rests on the target. The exact arrow-key order is pinned by the
+ * setupKeyboard tests, so these screen tests name where they are going instead of counting presses.
+ */
+function moveCursorTo(target: () => Element, key: "ArrowUp" | "ArrowDown" = "ArrowUp") {
+  for (let presses = 0; presses < 40 && !target().className.includes("is-cursor"); presses += 1) {
+    press(key);
+  }
+  expect(target().className).toContain("is-cursor");
+}
+
+const startButton = () => screen.getByRole("button", { name: /START EVENT/ });
+const tile = (label: string) => screen.getByLabelText(label).closest("label")!;
+
+/** From START EVENT, up to Start fresh, pick it, then back down to START EVENT. */
 function chooseStartFresh() {
-  press("ArrowUp");
-  press("ArrowUp");
-  press("ArrowUp");
-  press("ArrowUp");
-  press("ArrowUp");
-  press("ArrowUp");
-  press("ArrowUp");
+  moveCursorTo(() => tile("Start fresh"));
   press("Enter");
-  press("ArrowDown");
-  press("ArrowDown");
-  press("ArrowDown");
-  press("ArrowDown");
-  press("ArrowDown");
-  press("ArrowDown");
-  press("ArrowDown");
+  moveCursorTo(startButton, "ArrowDown");
 }
 
 describe("EventSetupScreen", () => {
@@ -368,19 +374,10 @@ describe("EventSetupScreen", () => {
 
   it("keeps the event and switches its board to all-time", () => {
     const { onContinue, onStartFresh } = renderSetup(existing);
-    // START EVENT → EVENT RECAP → event name → CLEAR → DOWNLOAD → All-time.
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
+    moveCursorTo(() => tile("All-time leaderboard"));
     press("Enter");
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
-    press("ArrowDown");
-    press("ArrowDown");
-    press("ArrowDown");
-    press("ArrowDown");
-    press("ArrowDown");
+    moveCursorTo(startButton, "ArrowDown");
     press("Enter");
     expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time", null);
     expect(onStartFresh).not.toHaveBeenCalled();
@@ -418,11 +415,7 @@ describe("EventSetupScreen", () => {
 
   it("clears with the selected length and mode once CLEAR BOARD is confirmed", () => {
     const { onClearScores } = renderSetup(existing);
-    // START EVENT → EVENT RECAP → event name → CLEAR BOARD.
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    expect(screen.getByRole("button", { name: "CLEAR BOARD" }).className).toContain("is-cursor");
+    moveCursorTo(() => screen.getByRole("button", { name: "CLEAR BOARD" }));
     press("Enter");
     press("ArrowRight");
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "CLEAR BOARD" }));
@@ -447,11 +440,7 @@ describe("EventSetupScreen", () => {
 
   it("restores from the keyboard once RESTORE is picked", () => {
     const { onRestoreScores, onClearScores } = renderSetup(existing, false, true);
-    // START EVENT → EVENT RECAP → event name → RESTORE CLEARED SCORES.
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    expect(screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }).className).toContain("is-cursor");
+    moveCursorTo(() => screen.getByRole("button", { name: "RESTORE CLEARED SCORES" }));
     press("Enter");
     press("ArrowRight");
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "RESTORE" }));
@@ -467,14 +456,9 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
-  it("reaches DOWNLOAD SCORES before CLEAR BOARD in the arrow-key order, and Enter downloads", () => {
+  it("reaches DOWNLOAD SCORES with the arrow keys, and Enter downloads", () => {
     const { onDownloadScores } = renderSetup({ duration: 30, mode: "famous-lines" });
-    // START EVENT → EVENT RECAP → event name → CLEAR BOARD → DOWNLOAD SCORES.
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    press("ArrowUp");
-    expect(screen.getByRole("button", { name: "DOWNLOAD SCORES" }).className).toContain("is-cursor");
+    moveCursorTo(() => screen.getByRole("button", { name: "DOWNLOAD SCORES" }));
     press("Enter");
     expect(onDownloadScores).toHaveBeenCalledOnce();
   });
@@ -697,5 +681,39 @@ describe("EventSetupScreen", () => {
     const main = document.querySelector("main")!;
     expect(main.classList.contains("has-edge-blob")).toBe(false);
     expect(main.classList.contains("has-edge-ring")).toBe(false);
+  });
+
+  it("offers SAVE BACKUP only with an event, and RESTORE BACKUP always, even on a fresh device", () => {
+    cleanup();
+    renderSetup(null);
+    expect(screen.queryByRole("button", { name: "SAVE BACKUP" })).toBeNull();
+    expect(screen.getByRole("button", { name: "RESTORE BACKUP" })).toBeTruthy();
+    cleanup();
+    const { onSaveBackup } = renderSetup(existing);
+    fireEvent.click(screen.getByRole("button", { name: "SAVE BACKUP" }));
+    expect(onSaveBackup).toHaveBeenCalledOnce();
+  });
+
+  it("restores a backup file after asking, then says what came back", async () => {
+    cleanup();
+    const { onRestoreBackup } = renderSetup(null);
+    const backup = createBackup({ events: [], scores: [], settings: null }, new Date("2026-10-15T09:00:00.000Z"));
+    const file = new File([JSON.stringify(backup)], "clickclackchallenge-backup-2026-10-15.json", { type: "application/json" });
+    fireEvent.change(screen.getByLabelText("Backup file"), { target: { files: [file] } });
+    const dialog = await screen.findByRole("alertdialog", { name: "Restore from backup?" });
+    expect(dialog.textContent).toMatch(/already on this iPad stay/);
+    fireEvent.click(within(dialog).getByRole("button", { name: "RESTORE BACKUP" }));
+    expect(onRestoreBackup).toHaveBeenCalledWith(backup);
+    expect(await screen.findByText("Restored 2 scores from 1 event.")).toBeTruthy();
+  });
+
+  it("refuses a file that is not a backup, without asking or restoring anything", async () => {
+    cleanup();
+    const { onRestoreBackup } = renderSetup(existing);
+    const file = new File(["date,name,wpm\n1,2,3"], "scores.csv", { type: "text/csv" });
+    fireEvent.change(screen.getByLabelText("Backup file"), { target: { files: [file] } });
+    expect(await screen.findByText("That file isn’t a clickclackchallenge backup.")).toBeTruthy();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(onRestoreBackup).not.toHaveBeenCalled();
   });
 });
