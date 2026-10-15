@@ -1,3 +1,6 @@
+import { WORD_LIST_ID } from "../../data/commonWords";
+import { PASSAGE_SET_ID } from "../../data/passages";
+import { STORY_ID } from "../../data/story";
 import type { EventRecord, ScoreRecord, TestMode } from "../../db/persistence";
 import { rankScores } from "../leaderboard/ranking";
 import { winsPlinko } from "../typing/scoring";
@@ -23,6 +26,17 @@ const HEADER = [
   "All-time rank",
   "Plinko",
   "Cleared",
+  // Detail columns, for anyone checking or analyzing the scores.
+  "Exact WPM",
+  "Exact accuracy %",
+  "Correct characters",
+  "Correct keystrokes",
+  "Wrong keystrokes",
+  "Time taken (s)",
+  "Passage set",
+  "Device",
+  "Restored on",
+  "Cleared on",
 ];
 
 /**
@@ -32,7 +46,8 @@ const HEADER = [
  */
 export function scoresCsv(scores: readonly ScoreRecord[], events: readonly EventRecord[], timeZone?: string): string {
   const format = formatters(timeZone);
-  const clearedEvents = new Set(events.filter((event) => event.hiddenAt).map((event) => event.id));
+  const clearedAt = new Map(events.filter((event) => event.hiddenAt).map((event) => [event.id, event.hiddenAt as string]));
+  const clearedEvents = new Set(clearedAt.keys());
 
   // Events are numbered in the order they started: "Event 3". The operator's name, if any, has its own column.
   const eventInfo = new Map(
@@ -74,6 +89,16 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
       rankText(allTimeRanks.get(score.id)),
       winsPlinko(score.displayedWpm, score.accuracy) ? "yes" : "no",
       clearedEvents.has(score.eventId) ? "yes" : "no",
+      score.rawWpm.toFixed(2),
+      score.accuracy.toFixed(2),
+      String(score.correctCharacters),
+      String(score.correctAttempts),
+      String(score.incorrectAttempts),
+      timeTaken(score).toFixed(1),
+      passageSetLabel(score.passageSetId),
+      score.device ?? "",
+      score.restoredAt ? format.eventStart(score.restoredAt) : "",
+      clearedAt.has(score.eventId) ? format.eventStart(clearedAt.get(score.eventId) as string) : "",
     ]);
 
   return [HEADER, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
@@ -98,6 +123,27 @@ function formatters(timeZone: string | undefined) {
     time: make({ hour: "numeric", minute: "2-digit" }),
     eventStart: make({ month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
   };
+}
+
+/**
+ * Seconds the round actually ran. WPM is (characters / 5) per minute, so the time follows from the two; it is
+ * shorter than the round length only when a Story was finished early. With nothing typed, it is the round length.
+ */
+function timeTaken(score: ScoreRecord): number {
+  return score.rawWpm > 0 && score.correctCharacters > 0
+    ? Math.min(score.durationSeconds, (score.correctCharacters * 12) / score.rawWpm)
+    : score.durationSeconds;
+}
+
+/** "stories-v2" reads as "Stories v2"; an id this build doesn't know stays as it is. */
+const PASSAGE_SET_LABELS: Record<string, string> = {
+  [WORD_LIST_ID]: "Common words v1",
+  [PASSAGE_SET_ID]: "Famous lines v2",
+  [STORY_ID]: "Stories v2",
+};
+
+function passageSetLabel(id: string): string {
+  return PASSAGE_SET_LABELS[id] ?? id;
 }
 
 function rankText(rank: number | undefined): string {

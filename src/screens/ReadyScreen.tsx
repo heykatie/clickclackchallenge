@@ -25,6 +25,9 @@ type ReadyScreenProps = {
   claimShortEscape: (handler: (() => void) | null) => void;
 };
 
+/** How close together two logo taps or short Escapes must be to open Keycap Hop. */
+const HOP_DOUBLE_TAP_MS = 500;
+
 export function ReadyScreen({
   eventId,
   allTime,
@@ -49,12 +52,23 @@ export function ReadyScreen({
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
-  // With no score to roll, the logo (or a short Escape) opens Keycap Hop, the booth's secret runner, instead.
+  // With no score to roll, two quick logo taps (or short Escapes) open Keycap Hop, the booth's secret runner, so one
+  // stray tap by a passer-by does nothing.
   const [hopping, setHopping] = useState(false);
   const hoppingRef = useRef(false);
+  const lastHopTapRef = useRef(Number.NEGATIVE_INFINITY);
   function setHop(open: boolean) {
     hoppingRef.current = open;
     setHopping(open);
+  }
+  function hopTap() {
+    const now = Date.now();
+    if (now - lastHopTapRef.current <= HOP_DOUBLE_TAP_MS) {
+      lastHopTapRef.current = Number.NEGATIVE_INFINITY;
+      setHop(true);
+    } else {
+      lastHopTapRef.current = now;
+    }
   }
   useEffect(() => {
     onHoppingChange?.(hopping);
@@ -65,7 +79,7 @@ export function ReadyScreen({
       asleepRef.current = true;
       setAsleep(true);
     } else {
-      setHop(true);
+      hopTap();
     }
   });
 
@@ -119,7 +133,7 @@ export function ReadyScreen({
     return () => window.clearTimeout(id);
   }, [asleep, activity, rolling.length]);
 
-  // A short Escape does what a logo tap does: open the rolling list or Keycap Hop, or close whichever is up.
+  // A short Escape does what a logo tap does: open the rolling list or (on the second quick one) Keycap Hop, or close whichever is up.
   useEffect(() => {
     claimShortEscape(() => {
       if (hoppingRef.current) {
@@ -135,7 +149,7 @@ export function ReadyScreen({
         asleepRef.current = true;
         setAsleep(true);
       } else {
-        setHop(true);
+        hopTap();
       }
     });
     return () => claimShortEscape(null);
