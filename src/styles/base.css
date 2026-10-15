@@ -250,7 +250,7 @@ button.is-cursor {
 .has-edge-blob::before {
   left: calc(4rem + env(safe-area-inset-left));
   /* Lifted well off the bottom edge so it reads as placed, not sinking. */
-  bottom: calc(5rem + env(safe-area-inset-bottom));
+  bottom: calc(3.5rem + env(safe-area-inset-bottom));
   width: 11rem;
   height: 9.6rem;
   border-radius: 58% 42% 50% 50% / 52% 48% 52% 48%;
