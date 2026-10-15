@@ -58,8 +58,6 @@ type EventSetupScreenProps = {
   onTogglePalette: () => void;
   /** Told the highlighted game mode, so the music can preview that mode's world. */
   onTestModeChange?: (mode: TestMode) => void;
-  /** Plinko drops won in the active event, for prize stock. Null until counted. */
-  plinkoWins: number | null;
   /** Locally computed, anonymous recap facts for the active event. */
   recapStats?: EventRecapStats | null;
   /** Locally computed aggregate for every visible event on this device. */
@@ -92,7 +90,6 @@ export function EventSetupScreen({
   onTestModeChange,
   palette,
   onTogglePalette,
-  plinkoWins,
   recapStats = null,
   allTimeRecapStats = null,
   storageProtection = "checking",
@@ -574,7 +571,7 @@ export function EventSetupScreen({
                 description="Every score ever"
               />
             </div>
-            {(
+            {storedDuration !== null || canRestore ? (
               <div className="setup-score-actions">
                 {storedDuration !== null ? (
                   <button
@@ -583,15 +580,6 @@ export function EventSetupScreen({
                     onClick={onDownloadScores}
                   >
                     DOWNLOAD SCORES
-                  </button>
-                ) : null}
-                {storedDuration !== null ? (
-                  <button
-                    type="button"
-                    className={cursor === "backup" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
-                    onClick={onSaveBackup}
-                  >
-                    SAVE BACKUP
                   </button>
                 ) : null}
                 {storedDuration !== null ? (
@@ -615,51 +603,13 @@ export function EventSetupScreen({
                     RESTORE CLEARED SCORES
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  className={cursor === "import" ? "setup-tool is-cursor" : "setup-tool"}
-                  onClick={() => backupInputRef.current?.click()}
-                  disabled={saving}
-                >
-                  RESTORE BACKUP
-                </button>
-                <input
-                  ref={backupInputRef}
-                  className="visually-hidden"
-                  type="file"
-                  accept="application/json,.json"
-                  aria-label="Backup file"
-                  tabIndex={-1}
-                  onChange={(event) => {
-                    void chooseBackupFile(event.target.files?.[0]);
-                    // Clearing the value lets the same file be chosen again.
-                    event.target.value = "";
-                  }}
-                />
               </div>
-            )}
-            {backupMessage ? (
-              <p className="setup-storage-status" role="status">
-                {backupMessage}
-              </p>
             ) : null}
             {storedDuration === null ? <p className="setup-note">No previous event.</p> : null}
-            <p className="setup-storage-status" role="status" aria-live="polite">
-              {storageProtection === "checking"
-                ? "Checking storage…"
-                : storageProtection === "persisted" || storageProtection === "granted"
-                  ? "Score storage is protected."
-                  : storageProtection === "denied"
-                    ? "Storage isn’t protected. Save a backup."
-                    : "Storage status is unavailable. Save a backup."}
-            </p>
           </fieldset>
         </div>
         <footer className="setup-footer" {...shutWhileAsking}>
           <div className="setup-footer-side">
-            {storedDuration !== null && plinkoWins !== null ? (
-              <p className="setup-plinko-count">Plinko drops won this event: {plinkoWins}</p>
-            ) : null}
             <div className="setup-name-row">
               <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
                 <span>Event name (optional)</span>
@@ -675,6 +625,9 @@ export function EventSetupScreen({
                   onChange={(event) => setEventName(event.target.value)}
                 />
               </label>
+            </div>
+            {/* The event's tools sit under its name: its recap, a backup of every score, and restoring one. */}
+            <div className="setup-footer-tools">
               {storedDuration !== null ? (
                 <span className="setup-recap-action">
                   <button
@@ -693,7 +646,51 @@ export function EventSetupScreen({
                   ) : null}
                 </span>
               ) : null}
+              {storedDuration !== null ? (
+                <button
+                  type="button"
+                  className={cursor === "backup" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                  onClick={onSaveBackup}
+                >
+                  SAVE BACKUP
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className={cursor === "import" ? "setup-tool is-cursor" : "setup-tool"}
+                onClick={() => backupInputRef.current?.click()}
+                disabled={saving}
+              >
+                RESTORE BACKUP
+              </button>
+              <input
+                ref={backupInputRef}
+                className="visually-hidden"
+                type="file"
+                accept="application/json,.json"
+                aria-label="Backup file"
+                tabIndex={-1}
+                onChange={(event) => {
+                  void chooseBackupFile(event.target.files?.[0]);
+                  // Clearing the value lets the same file be chosen again.
+                  event.target.value = "";
+                }}
+              />
             </div>
+            <p className="setup-storage-status" role="status" aria-live="polite">
+              {storageProtection === "checking"
+                ? "Checking storage…"
+                : storageProtection === "persisted" || storageProtection === "granted"
+                  ? "Score storage is protected."
+                  : storageProtection === "denied"
+                    ? "Storage isn’t protected. Save a backup."
+                    : "Storage status is unavailable. Save a backup."}
+            </p>
+            {backupMessage ? (
+              <p className="setup-storage-status" role="status">
+                {backupMessage}
+              </p>
+            ) : null}
           </div>
           <div className="setup-start-group">
             <button

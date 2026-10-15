@@ -549,14 +549,6 @@ then one line per item with its name on the left
   margin-top: 0.35rem;
 }
 
-/* A quiet count for staff, above the event name, beside the other event details. */
-.setup-plinko-count {
-  margin: 0;
-  color: var(--tiny-muted);
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
 .setup-screen > :last-child {
   margin-bottom: auto;
 }
@@ -783,6 +775,18 @@ label.setup-option-big {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Under the event name: its recap, SAVE BACKUP, and RESTORE BACKUP in one row, then the storage line beneath. */
+.setup-footer-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+}
+
+.setup-footer-side .setup-storage-status {
+  margin: 0;
 }
 
 /* The label sits beside the field, so the name adds one short row, not two. */

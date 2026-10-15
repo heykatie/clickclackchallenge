@@ -12,7 +12,7 @@ function renderSetup(
   updateReady = false,
   canRestore = false,
   soundOn = false,
-  plinkoWins: number | null = null,
+  _plinkoWins: number | null = null,
   canClear = true,
   recapOptions?: { stats: EventRecapStats; allTimeStats?: EventRecapStats },
 ) {
@@ -44,7 +44,6 @@ function renderSetup(
       onSaveBackup={onSaveBackup}
       onRestoreBackup={onRestoreBackup}
       soundOn={soundOn}
-      plinkoWins={plinkoWins}
       recapStats={recapOptions?.stats ?? null}
       allTimeRecapStats={recapOptions?.allTimeStats ?? null}
       canClear={canClear}
@@ -112,7 +111,8 @@ describe("EventSetupScreen", () => {
 
     const eventNameInput = screen.getByLabelText("Event name (optional)");
     const recapButton = screen.getByRole("button", { name: "EVENT RECAP" });
-    expect(eventNameInput.parentElement?.parentElement).toBe(recapButton.parentElement?.parentElement);
+    // EVENT RECAP sits in the tools row just under the event name.
+    expect(recapButton.closest(".setup-footer-tools")?.previousElementSibling?.contains(eventNameInput)).toBe(true);
 
     fireEvent.click(recapButton);
     expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
@@ -258,9 +258,7 @@ describe("EventSetupScreen", () => {
       plinkoDropsWon: 0, plinkoWinnerPercentage: 0, roundsByHour: [{ hour: 11, rounds: 1 }], peakHours: [11], peakHourRounds: 1,
     };
     renderSetup(existing, false, false, false, 0, true, { stats: recapStats });
-    press("ArrowUp");
-
-    expect(screen.getByRole("button", { name: "EVENT RECAP" }).className).toContain("is-cursor");
+    moveCursorTo(() => screen.getByRole("button", { name: "EVENT RECAP" }));
     press("Enter");
     expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
     expect(screen.getByText("Peak hour").parentElement?.textContent).toContain("1 round");
@@ -484,20 +482,30 @@ describe("EventSetupScreen", () => {
     expect(onToggleSound).toHaveBeenCalledOnce();
   });
 
-  it("tells staff how many Plinko drops this event has given out", () => {
+  it("leaves the Plinko count to the recap, so Event Setup shows no Plinko line", () => {
     renderSetup(existing, false, false, false, 12);
-    expect(screen.getByText("Plinko drops won this event: 12")).toBeTruthy();
+    expect(screen.queryByText(/Plinko drops won/)).toBeNull();
   });
 
-  it("keeps the plural for one drop, so the line reads the same at any count", () => {
-    renderSetup(existing, false, false, false, 1);
-    expect(screen.getByText("Plinko drops won this event: 1")).toBeTruthy();
+  it("puts EVENT RECAP, SAVE BACKUP, and RESTORE BACKUP under the event name, with the storage line under them", () => {
+    renderSetup(existing);
+    const footer = document.querySelector(".setup-footer")!;
+    const order = [
+      screen.getByLabelText("Event name (optional)"),
+      screen.getByRole("button", { name: "EVENT RECAP" }),
+      screen.getByRole("button", { name: "SAVE BACKUP" }),
+      screen.getByRole("button", { name: "RESTORE BACKUP" }),
+      screen.getByText(/Storage|storage/),
+    ];
+    for (const element of order) expect(footer.contains(element)).toBe(true);
+    for (let index = 1; index < order.length; index += 1) {
+      expect(order[index - 1]!.compareDocumentPosition(order[index]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+    const leaderboard = screen.getByText("Leaderboard", { selector: "legend" }).closest("fieldset")!;
+    expect(within(leaderboard).queryByRole("button", { name: /BACKUP/ })).toBeNull();
+    expect(within(leaderboard).getByRole("button", { name: "DOWNLOAD SCORES" })).toBeTruthy();
   });
 
-  it("shows no Plinko count before any event exists", () => {
-    renderSetup(null);
-    expect(screen.queryByText(/won this event/)).toBeNull();
-  });
 
   it("shows the event name field, filled with the current event's name", () => {
     renderSetup({ ...existing, name: "Saturday market" });
@@ -526,10 +534,9 @@ describe("EventSetupScreen", () => {
     expect(onStartFresh).not.toHaveBeenCalled();
   });
 
-  it("reaches the field with Up from START EVENT, and Enter puts the cursor in it", () => {
+  it("reaches the field with Up from START EVENT, past the footer tools, and Enter puts the cursor in it", () => {
     renderSetup(existing);
-    press("ArrowUp");
-    press("ArrowUp");
+    moveCursorTo(() => screen.getByLabelText("Event name (optional)").closest("label")!);
     press("Enter");
     expect(document.activeElement).toBe(screen.getByLabelText("Event name (optional)"));
   });
