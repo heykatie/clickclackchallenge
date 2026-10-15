@@ -248,11 +248,11 @@ button.is-cursor {
 }
 
 .has-edge-blob::before {
-  left: calc(1.25rem + env(safe-area-inset-left));
+  left: calc(4rem + env(safe-area-inset-left));
   /* Lifted well off the bottom edge so it reads as placed, not sinking. */
   bottom: calc(5rem + env(safe-area-inset-bottom));
-  width: 8rem;
-  height: 7rem;
+  width: 11rem;
+  height: 9.6rem;
   border-radius: 58% 42% 50% 50% / 52% 48% 52% 48%;
   /* A little lighter than the pink token (#F4C1D4); the cool palette goes lighter still. */
   background: #f6cbdb;
