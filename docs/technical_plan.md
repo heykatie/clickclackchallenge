@@ -2141,7 +2141,7 @@ slow makes hops hang longer on the way down without raising the jump peak
 obstacle gaps pick uneven extra bands so consecutive spaces are not the same length
 slow, big, and small power-ups change scroll or size for a few seconds when collected; placement keeps prior clearance/slow rules, with more walk-in orbs early and higher trickier hops as difficulty rises, and they keep appearing after difficulty tops out
 it stays fair at its hardest: a well-timed hopper clears 60 seconds of every seeded run
-Ready opens it on a logo tap or short Escape only when there is no score to roll; keys and taps there never start a round
+Ready opens it on two logo taps or short Escapes within `HOP_DOUBLE_TAP_MS` (500 ms) only when there is no score to roll; a single tap does nothing; keys and taps there never start a round
 its logo tap or a short Escape closes it; 20 seconds with no input closes it
 ```
 

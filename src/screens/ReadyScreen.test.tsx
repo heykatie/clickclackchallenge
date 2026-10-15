@@ -72,6 +72,12 @@ function tapLogo() {
   fireEvent.pointerUp(logo, { button: 0 });
 }
 
+/** Two quick logo taps: what opens Keycap Hop when there is no score to roll. */
+function doubleTapLogo() {
+  tapLogo();
+  tapLogo();
+}
+
 describe("ReadyScreen", () => {
   beforeEach(fakeBoothClock);
 
@@ -179,9 +185,21 @@ describe("ReadyScreen", () => {
     expect(onRollingChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("opens Keycap Hop on a logo tap when there is no score to roll, and a key there jumps instead of starting", async () => {
-    const { onStart } = await renderReady([]);
+  it("needs two quick logo taps to open Keycap Hop, so one stray tap does nothing", async () => {
+    await renderReady([]);
     tapLogo();
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+    act(() => vi.advanceTimersByTime(1_000));
+    tapLogo();
+    // Too slow: that tap starts a new pair instead of finishing the first.
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
+    tapLogo();
+    expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
+  });
+
+  it("opens Keycap Hop on two quick logo taps when there is no score to roll, and a key there jumps instead of starting", async () => {
+    const { onStart } = await renderReady([]);
+    doubleTapLogo();
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     const game = screen.getByRole("dialog", { name: "Keycap Hop" });
     expect(game).toBeTruthy();
@@ -194,7 +212,7 @@ describe("ReadyScreen", () => {
 
   it("starts a hop from a tap on the HUD, not only the canvas", async () => {
     await renderReady([]);
-    tapLogo();
+    doubleTapLogo();
     const game = screen.getByRole("dialog", { name: "Keycap Hop" });
     expect(screen.getByText("Press Space or tap to hop.")).toBeTruthy();
 
@@ -206,14 +224,16 @@ describe("ReadyScreen", () => {
   it("reports when Keycap Hop opens and closes, so the music can follow it", async () => {
     const { onHoppingChange, shortEscape } = await renderReady([]);
     expect(onHoppingChange).toHaveBeenLastCalledWith(false);
-    tapLogo();
+    doubleTapLogo();
     expect(onHoppingChange).toHaveBeenLastCalledWith(true);
     shortEscape();
     expect(onHoppingChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("opens Keycap Hop on a short Escape with nothing to roll, and closes it on the next", async () => {
+  it("opens Keycap Hop on two quick short Escapes with nothing to roll, and closes it on the next one", async () => {
     const { onStart, shortEscape } = await renderReady([]);
+    shortEscape();
+    expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
     shortEscape();
     expect(screen.getByRole("dialog", { name: "Keycap Hop" })).toBeTruthy();
     shortEscape();
@@ -224,12 +244,12 @@ describe("ReadyScreen", () => {
 
   it("closes Keycap Hop on its logo tap, and on its own after 20 seconds with no input", async () => {
     await renderReady([]);
-    tapLogo();
+    doubleTapLogo();
     fireEvent.pointerDown(screen.getByRole("button", { name: "Close Keycap Hop" }), { button: 0 });
     fireEvent.pointerUp(screen.getByRole("button", { name: "Close Keycap Hop" }), { button: 0 });
     expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
 
-    tapLogo();
+    doubleTapLogo();;
     act(() => vi.advanceTimersByTime(15_000));
     fireEvent.keyDown(window, { key: " " });
     act(() => vi.advanceTimersByTime(19_999));
