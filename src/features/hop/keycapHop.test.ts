@@ -202,7 +202,7 @@ describe("Keycap Hop", () => {
   it("mixes desk clutter early, then brings doubles, taller hazards, and tighter gaps as it gets harder", () => {
     const sample = (score: number) => {
       const random = seededRandom(score + 1);
-      let hop: HopState = { ...jumpHop(createHop()), distance: score * 25 };
+      let hop: HopState = { ...jumpHop(createHop(random), random), distance: score * 25 };
       const seen: HopState["obstacles"] = [];
       const gaps: number[] = [];
       for (let t = 0; t < 60; t += FRAME) {
