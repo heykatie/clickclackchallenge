@@ -38,6 +38,11 @@ export function setupChoices(
   canClear = true,
 ): SetupChoice[] {
   const choices: SetupChoice[] = updateReady ? ["update"] : [];
+  // The event name and its recap sit on one line above Test length, so they come first.
+  choices.push("name");
+  if (canContinue) {
+    choices.push("recap");
+  }
   if (testMode !== "story") {
     choices.push("30", "60");
   }
@@ -53,11 +58,10 @@ export function setupChoices(
   if (canRestore) {
     choices.push("restore");
   }
-  // The footer tools sit under the event name: EVENT RECAP and SAVE BACKUP need an event; RESTORE BACKUP is always
-  // offered, so a fresh or reset device can bring its scores back.
-  choices.push("name");
+  // The backup tools sit by START EVENT: SAVE BACKUP needs an event; RESTORE BACKUP is always offered, so a fresh
+  // or reset device can bring its scores back.
   if (canContinue) {
-    choices.push("recap", "backup");
+    choices.push("backup");
   }
   choices.push("import");
   choices.push("start", "sound", "music", "palette");
