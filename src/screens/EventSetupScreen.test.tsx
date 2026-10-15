@@ -116,14 +116,15 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByText("Leaderboard setting")).toBeNull();
     expect(screen.getByRole("dialog").querySelectorAll(".setup-recap-highlights .setup-recap-kpi")).toHaveLength(4);
     expect(screen.getByText("Rounds", { exact: true }).parentElement?.textContent).toContain("18");
-    expect(screen.getByText("Peak hour").parentElement?.textContent).toContain("6 rounds");
+    expect(screen.getByText("Peak hours").parentElement?.textContent).toContain("6 rounds");
     expect(screen.getByText("Plinko wins", { exact: true }).parentElement?.textContent).toContain("5");
     expect(screen.queryByText("Average WPM")).toBeNull();
     expect(screen.getByText("Median WPM").parentElement?.textContent).toContain("44");
     expect(screen.getByText("Fastest WPM").parentElement?.textContent).toContain("92");
     expect(screen.queryByText("Rounds ≥50 WPM")).toBeNull();
     expect(screen.getByText("Avg. accuracy").parentElement?.textContent).toContain("91.2%");
-    expect(screen.getByText("Plinko rate").parentElement?.textContent).toContain("27.8%");
+    expect(screen.queryByText("Plinko rate")).toBeNull();
+    expect(screen.getByText("Plinko win rate").parentElement?.textContent).toContain("27.8%");
     expect(screen.getByText("Modes", { exact: true }).parentElement?.textContent).toContain("66.7%");
     expect(screen.getByText("Round lengths", { exact: true }).parentElement?.textContent).toContain("55.6%");
     // Each mode and length is one row: its name on the left, its share on the right, so nothing wraps mid-phrase.
@@ -135,10 +136,14 @@ describe("EventSetupScreen", () => {
       (row) => row.children[1]?.textContent,
     );
     expect(lengthShares.some((share) => /^55.6% · \d+ rounds?$/.test(share ?? ""))).toBe(true);
-    // Peak hour sits under Round lengths, one line per busiest hour with its round count.
-    const settings = screen.getByRole("region", { name: "Settings" });
-    const labels = [...settings.querySelectorAll("dt")].map((label) => label.textContent ?? "");
-    expect(labels.map((label) => label.split(" Based on")[0]!.trim())).toEqual(["Modes", "Round lengths", "Peak hour"]);
+    // The breakdowns flow as one balanced set: modes, lengths, peak hours, hourly activity, then the Plinko pair.
+    const flow = screen.getByRole("dialog").querySelector(".setup-recap-flow")!;
+    const blocks = [...flow.children].map((block) => block.getAttribute("data-block"));
+    expect(blocks).toEqual(["modes", "lengths", "peak", "hourly", "plinko"]);
+    // Modes, Round lengths, and Hourly activity read well without a title, so those stay for screen readers only.
+    for (const title of ["Modes", "Round lengths", "Hourly activity"]) {
+      expect(screen.getByText(title, { selector: "dt" }).className).toContain("visually-hidden");
+    }
     const peakRows = [...screen.getByRole("list", { name: "Peak hours" }).querySelectorAll("li")].map((row) =>
       [...row.children].map((part) => part.textContent),
     );
@@ -154,7 +159,7 @@ describe("EventSetupScreen", () => {
     const accuracyTooltipId = accuracyHelp.getAttribute("aria-describedby");
     expect(accuracyTooltipId).toBeTruthy();
     expect(document.getElementById(accuracyTooltipId!)?.textContent).toMatch(/rounds with saved accuracy/);
-    const hourHelp = screen.getByRole("button", { name: "Peak hour help" });
+    const hourHelp = screen.getByRole("button", { name: "Peak hours help" });
     const hourTooltipId = hourHelp.getAttribute("aria-describedby");
     expect(hourTooltipId).toBeTruthy();
     expect(document.getElementById(hourTooltipId!)?.textContent).toMatch(/saved round times.*not foot traffic/i);
@@ -684,5 +689,13 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+  });
+
+  it("keeps Event Setup free of corner motifs", () => {
+    cleanup();
+    renderSetup(existing);
+    const main = document.querySelector("main")!;
+    expect(main.classList.contains("has-edge-blob")).toBe(false);
+    expect(main.classList.contains("has-edge-ring")).toBe(false);
   });
 });

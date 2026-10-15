@@ -133,6 +133,8 @@ export function EventSetupScreen({
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
   const displayedRecapStats = recapPeriod === "all-time" ? allTimeRecapStats : recapStats;
+  // Several hours can tie for busiest, so the label follows how many there are.
+  const peakLabel = (displayedRecapStats?.peakHours.length ?? 0) > 1 ? "Peak hours" : "Peak hour";
   const busiestChartHour = Math.max(0, ...(displayedRecapStats?.roundsByHour.map(({ rounds }) => rounds) ?? []));
 
   const openRecap = useCallback(() => {
@@ -375,7 +377,7 @@ export function EventSetupScreen({
   const shutWhileAsking = confirmCursor !== null || recapOpen ? { inert: true, "aria-hidden": true } : {};
 
   return (
-    <main className="screen setup-screen edge-motifs" ref={screenRef} tabIndex={-1}>
+    <main className="screen setup-screen" ref={screenRef} tabIndex={-1}>
       <span className="logo-badge" aria-hidden="true" />
       <div className="setup-heading" {...shutWhileAsking}>
         <div className="setup-heading-text">
@@ -682,71 +684,69 @@ export function EventSetupScreen({
                 <div className="setup-recap-kpi"><dt>Avg. accuracy <RecapHelp label="Avg. accuracy help" text="Average of rounds with saved accuracy." /></dt><dd>{displayedRecapStats.averageAccuracy === null ? "—" : `${displayedRecapStats.averageAccuracy.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}</dd></div>
               </dl>
             </section>
-            <section className="setup-recap-section" aria-label="Settings">
-              <dl className="setup-recap-stats setup-recap-details">
-                <div className="setup-recap-hour-row setup-recap-mix-row">
-                  <dt>Modes</dt>
-                  <dd><ul className="setup-recap-mix" aria-label="Mode breakdown">
-                    {displayedRecapStats.modeUsage.map(({ mode, rounds, percentage }) => (
-                      <li key={mode}>
-                        <span>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"}</span>
-                        <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
-                      </li>
-                    ))}
-                  </ul></dd>
-                </div>
-                <div className="setup-recap-hour-row setup-recap-mix-row">
-                  <dt>Round lengths</dt>
-                  <dd><ul className="setup-recap-mix" aria-label="Round length breakdown">
-                    {displayedRecapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
-                      <li key={durationSeconds}>
-                        <span>{durationSeconds}s</span>
-                        <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
-                      </li>
-                    ))}
-                  </ul></dd>
-                </div>
-                <div className="setup-recap-hour-row setup-recap-mix-row">
-                  <dt>Peak hour <RecapHelp label="Peak hour help" text="Based on saved round times in your local time, not foot traffic." /></dt>
-                  <dd>
-                    {displayedRecapStats.peakHours.length === 0
-                      ? formatPeakHours(displayedRecapStats.peakHours, displayedRecapStats.completedRounds)
-                      : <ul className="setup-recap-mix" aria-label="Peak hours">
-                          {displayedRecapStats.peakHours.map((hour) => (
-                            <li key={hour}>
-                              <span>{formatHourWindow(hour)}</span>
-                              <span>{displayedRecapStats.peakHourRounds} {displayedRecapStats.peakHourRounds === 1 ? "round" : "rounds"}</span>
-                            </li>
-                          ))}
-                        </ul>}
-                  </dd>
-                </div>
+            {/*
+              The breakdowns flow through two balanced columns in this order, so neither side is left with a gap
+              however many modes, lengths, or busy hours an event has.
+            */}
+            <section className="setup-recap-flow" aria-label="Breakdown">
+              <dl className="setup-recap-block" data-block="modes">
+                <dt className="visually-hidden">Modes</dt>
+                <dd><ul className="setup-recap-mix" aria-label="Mode breakdown">
+                  {displayedRecapStats.modeUsage.map(({ mode, rounds, percentage }) => (
+                    <li key={mode}>
+                      <span>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"}</span>
+                      <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                    </li>
+                  ))}
+                </ul></dd>
               </dl>
-            </section>
-            <section className="setup-recap-section" aria-label="Activity and prizes">
-              <dl className="setup-recap-stats setup-recap-details">
-                <div className="setup-recap-hour-row">
-                  <dt>Hourly activity</dt>
-                  <dd>
-                    {displayedRecapStats.roundsByHour.length === 0
-                      ? "Time unavailable"
-                      : <ul className="setup-recap-chart" aria-label="Hourly activity">
-                          {displayedRecapStats.roundsByHour.map(({ hour, rounds }) => (
-                            <li className="setup-recap-chart-row" key={hour}>
-                              <span>{formatHourWindow(hour)}</span>
-                              <span>{rounds} {rounds === 1 ? "round" : "rounds"}</span>
-                              <span className="setup-recap-chart-track" aria-hidden="true">
-                                <span className="setup-recap-chart-bar" style={{ width: `${(rounds / busiestChartHour) * 100}%` }} />
-                              </span>
-                            </li>
-                          ))}
-                        </ul>}
-                  </dd>
-                </div>
+              <dl className="setup-recap-block" data-block="lengths">
+                <dt className="visually-hidden">Round lengths</dt>
+                <dd><ul className="setup-recap-mix" aria-label="Round length breakdown">
+                  {displayedRecapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
+                    <li key={durationSeconds}>
+                      <span>{durationSeconds}s</span>
+                      <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                    </li>
+                  ))}
+                </ul></dd>
               </dl>
-              <dl className="setup-recap-stats setup-recap-prizes">
+              <dl className="setup-recap-block" data-block="peak">
+                <dt>{peakLabel} <RecapHelp label={`${peakLabel} help`} text="Based on saved round times in your local time, not foot traffic." /></dt>
+                <dd>
+                  {displayedRecapStats.peakHours.length === 0
+                    ? formatPeakHours(displayedRecapStats.peakHours, displayedRecapStats.completedRounds)
+                    : <ul className="setup-recap-mix" aria-label="Peak hours">
+                        {displayedRecapStats.peakHours.map((hour) => (
+                          <li key={hour}>
+                            <span>{formatHourWindow(hour)}</span>
+                            <span>{displayedRecapStats.peakHourRounds} {displayedRecapStats.peakHourRounds === 1 ? "round" : "rounds"}</span>
+                          </li>
+                        ))}
+                      </ul>}
+                </dd>
+              </dl>
+              <dl className="setup-recap-block" data-block="hourly">
+                <dt className="visually-hidden">Hourly activity</dt>
+                <dd>
+                  {displayedRecapStats.roundsByHour.length === 0
+                    ? "Time unavailable"
+                    : <ul className="setup-recap-chart" aria-label="Hourly activity">
+                        {displayedRecapStats.roundsByHour.map(({ hour, rounds }) => (
+                          <li className="setup-recap-chart-row" key={hour}>
+                            <span>{formatHourWindow(hour)}</span>
+                            <span>{rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                            <span className="setup-recap-chart-track" aria-hidden="true">
+                              <span className="setup-recap-chart-bar" style={{ width: `${(rounds / busiestChartHour) * 100}%` }} />
+                            </span>
+                          </li>
+                        ))}
+                      </ul>}
+                </dd>
+              </dl>
+              <dl className="setup-recap-block setup-recap-stats setup-recap-prizes" data-block="plinko">
                 <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko wins</dt><dd>{displayedRecapStats.plinkoDropsWon}</dd></div>
-                <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko rate</dt><dd>{displayedRecapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
+                <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko win rate</dt><dd>{displayedRecapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
               </dl>
             </section>
             </> : null}
