@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { WORD_LIST_ID } from "../data/commonWords";
 import { PASSAGE_SET_ID } from "../data/passages";
 import {
+  restoreBackupData,
+  readBackupData,
   clearCurrentEvent,
   hasClearedScores,
   restoreClearedScores,
@@ -607,3 +609,74 @@ function openVersionOneBooth(): Promise<void> {
     };
   });
 }
+
+describe("backup and restore", () => {
+  beforeEach(async () => {
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+  });
+
+  it("reads everything a backup needs: every event, every score (cleared ones too), and the settings", async () => {
+    const event = await startFreshEvent(30, "words", { name: "Maker Faire" });
+    await saveScore(scoreInput(event.id, 70));
+    await clearCurrentEvent(30, "words");
+    const data = await readBackupData();
+    expect(data.events).toHaveLength(2);
+    expect(data.scores).toHaveLength(1);
+    expect(data.settings?.activeEventId).toBe((await loadBooth()).activeEvent?.id);
+  });
+
+  it("restores onto an empty device: every score comes back, and the backup's current event is current again", async () => {
+    const event = await startFreshEvent(30, "words", { name: "Maker Faire" });
+    const earned = await saveScore(scoreInput(event.id, 70));
+    const data = await readBackupData();
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+
+    expect(await restoreBackupData(data)).toEqual({ eventsAdded: 1, scoresAdded: 1 });
+    expect((await loadBooth()).activeEvent?.id).toBe(event.id);
+    expect(await listAllScores()).toEqual([earned]);
+  });
+
+  it("merges into a device in use: adds what is missing, keeps everything already here, and keeps today's event current", async () => {
+    const saturday = await startFreshEvent(30, "words", { name: "Saturday" });
+    const saturdayScore = await saveScore(scoreInput(saturday.id, 70));
+    const backup = await readBackupData();
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+
+    const sunday = await startFreshEvent(60, "story", { name: "Sunday" });
+    const sundayScore = await saveScore(scoreInput(sunday.id, 80));
+    expect(await restoreBackupData(backup)).toEqual({ eventsAdded: 1, scoresAdded: 1 });
+
+    const booth = await loadBooth();
+    expect(booth.activeEvent?.id).toBe(sunday.id);
+    const everything = await listEverything();
+    expect(everything.events.filter((event) => event.status === "active").map((event) => event.id)).toEqual([sunday.id]);
+    expect((await listAllScores()).map((score) => score.id).sort()).toEqual([saturdayScore.id, sundayScore.id].sort());
+    // Saturday's scores stay on Saturday's board, which is now a past event.
+    expect(await listScores(saturday.id)).toEqual([saturdayScore]);
+  });
+
+  it("changes nothing when the same backup is restored twice, and never overwrites a record already here", async () => {
+    const event = await startFreshEvent(30, "words", { name: "Maker Faire" });
+    const earned = await saveScore(scoreInput(event.id, 70));
+    const backup = await readBackupData();
+    await updateScoreName(earned.id, "Renamed");
+    expect(await restoreBackupData(backup)).toEqual({ eventsAdded: 0, scoresAdded: 0 });
+    expect((await listAllScores())[0]?.name).toBe("Renamed");
+  });
+
+  it("keeps cleared boards cleared after a restore", async () => {
+    const test = await startFreshEvent(30, "words");
+    await saveScore(scoreInput(test.id, 70));
+    await clearCurrentEvent(30, "words");
+    const backup = await readBackupData();
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+
+    await restoreBackupData(backup);
+    expect(await listAllScores()).toEqual([]);
+    expect((await listEverything()).scores).toHaveLength(1);
+  });
+});

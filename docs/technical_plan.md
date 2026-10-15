@@ -1596,6 +1596,7 @@ src/
 │   ├── results/            placement, result copy, name rules, count-up, name timeout
 │   ├── leaderboard/        ranking, board motion, the idle list's roll
 │   ├── hop/                Keycap Hop, the secret runner: physics, obstacle spacing, collisions, score
+│   ├── backup/             full backup file: create, validate, and read; restore merges in persistence.ts
 │   └── export/             the scores CSV download
 ├── db/                     persistence.ts (events, scores, settings, migrations) and persistent storage
 ├── data/                   word list, famous lines, and stories
@@ -2023,7 +2024,10 @@ Required cases:
 restoreClearedScores shows the last clear's scores again, keeps the current event and its scores, undoes one clear at a time newest first, and reports when nothing is hidden (hasClearedScores)
 Clear board hides only the current event and its scores, keeps earlier events visible, starts an empty active event, deletes nothing, shows scores saved afterward, stays hidden after Start fresh or a board change, and unhiding an event restores its scores (clearCurrentEvent)
 a fresh event ranks its own scores; switching the active event to all-time and back keeps its id and scores; an event saved before board choices reads as its own board; listBoardScores loads every event's scores only for all-time
-launch asks the browser to keep storage once, skips the request when already persisted, never blocks when refused or unsupported, and Event Setup shows the result with a backup reminder when protection is not confirmed (requestPersistentStorage, App)
+launch asks the browser to keep storage, and START EVENT and SAVE BACKUP ask again from the tap; it skips the request when already persisted, never blocks when refused or unsupported, and Event Setup shows the result with a backup reminder when protection is not confirmed (requestPersistentStorage, protectStorage in App)
+a backup round-trips every event, score, and setting; a non-backup, damaged, or newer-version file, or one with a score whose event is missing, is refused with one reason (createBackup, parseBackup)
+restore merges: it adds missing events and scores, never overwrites a record already on the device, keeps the device's current event current (the backup's becomes current only on an empty device), keeps cleared boards cleared, and a second restore of the same file adds nothing (readBackupData, restoreBackupData)
+Event Setup offers SAVE BACKUP with an event and RESTORE BACKUP always; a valid file asks first and reports what came back; an invalid file is refused without asking
 event can be written and read
 score can be written and read
 multiple scores can be retrieved by eventId
