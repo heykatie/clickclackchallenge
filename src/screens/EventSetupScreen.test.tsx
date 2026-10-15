@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import "../test/domSetup";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { BoardScope, TestDuration, TestMode } from "../db/persistence";
 import type { EventRecapStats } from "../features/recap/eventRecap";
@@ -225,13 +225,26 @@ describe("EventSetupScreen", () => {
     });
 
     const recapButton = screen.getByRole("button", { name: "EVENT RECAP" }) as HTMLButtonElement;
-    expect(recapButton.disabled).toBe(true);
+    // Unavailable but still tappable, so a touch screen can show why.
+    expect(recapButton.getAttribute("aria-disabled")).toBe("true");
+    expect(recapButton.disabled).toBe(false);
     const hintId = recapButton.getAttribute("aria-describedby");
     expect(hintId).toBeTruthy();
     const hint = document.getElementById(hintId!);
     expect(hint?.getAttribute("role")).toBe("tooltip");
     expect(hint?.textContent).toBe("Complete a round to enable recap");
     expect(recapButton.parentElement?.contains(hint)).toBe(true);
+    // A tap shows the hint for a moment and does not open the recap.
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(recapButton);
+      expect(recapButton.parentElement?.className).toContain("is-tooltip-open");
+      expect(screen.queryByRole("dialog", { name: "Event recap" })).toBeNull();
+      act(() => vi.advanceTimersByTime(3_000));
+      expect(recapButton.parentElement?.className).not.toContain("is-tooltip-open");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("toggles recap help tooltips when tapped", () => {
@@ -667,9 +680,11 @@ describe("EventSetupScreen", () => {
     cleanup();
     const { onClearScores } = renderSetup(existing, false, false, false, null, false);
     const clear = screen.getByRole("button", { name: "CLEAR BOARD" }) as HTMLButtonElement;
-    expect(clear.disabled).toBe(true);
+    expect(clear.getAttribute("aria-disabled")).toBe("true");
     expect(clear.getAttribute("data-tooltip")).toBe("No scores to clear yet");
+    // A tap shows the tooltip, since a touch screen has no hover, and clears nothing.
     fireEvent.click(clear);
+    expect(clear.className).toContain("is-tooltip-open");
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(onClearScores).not.toHaveBeenCalled();
   });
@@ -723,5 +738,32 @@ describe("EventSetupScreen", () => {
     expect(await screen.findByText("That file isn’t a clickclackchallenge backup.")).toBeTruthy();
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(onRestoreBackup).not.toHaveBeenCalled();
+  });
+
+  it("shows a dot for whether the device is online, and follows the connection as it changes", () => {
+    cleanup();
+    const original = navigator.onLine;
+    Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
+    try {
+      renderSetup(existing);
+      const dot = screen.getByRole("img", { name: "Online" });
+      expect(dot.className).toContain("is-online");
+      // It sits with the device's other status, at the start of the storage line, not among the settings.
+      expect(dot.closest(".setup-device-status")?.textContent).toMatch(/storage/i);
+      expect(dot.closest(".setup-settings")).toBeNull();
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: false });
+      act(() => {
+        window.dispatchEvent(new Event("offline"));
+      });
+      const offline = screen.getByRole("img", { name: /Offline/ });
+      expect(offline.className).not.toContain("is-online");
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: true });
+      act(() => {
+        window.dispatchEvent(new Event("online"));
+      });
+      expect(screen.getByRole("img", { name: "Online" })).toBeTruthy();
+    } finally {
+      Object.defineProperty(navigator, "onLine", { configurable: true, value: original });
+    }
   });
 });
