@@ -126,6 +126,15 @@ describe("EventSetupScreen", () => {
     expect(screen.getByText("Plinko rate").parentElement?.textContent).toContain("27.8%");
     expect(screen.getByText("Modes", { exact: true }).parentElement?.textContent).toContain("66.7%");
     expect(screen.getByText("Round lengths", { exact: true }).parentElement?.textContent).toContain("55.6%");
+    // Each mode and length is one row: its name on the left, its share on the right, so nothing wraps mid-phrase.
+    const modeRows = [...screen.getByRole("list", { name: "Mode breakdown" }).querySelectorAll("li")].map((row) =>
+      [...row.children].map((part) => part.textContent),
+    );
+    expect(modeRows).toEqual([["Story", "66.7% · 12 rounds"], ["Words", "33.3% · 6 rounds"]]);
+    const lengthShares = [...screen.getByRole("list", { name: "Round length breakdown" }).querySelectorAll("li")].map(
+      (row) => row.children[1]?.textContent,
+    );
+    expect(lengthShares.some((share) => /^55.6% · \d+ rounds?$/.test(share ?? ""))).toBe(true);
     const hourlyChart = screen.getByRole("list", { name: "Hourly activity" });
     expect(hourlyChart.textContent).toContain("6 rounds");
     expect(hourlyChart.querySelectorAll(".setup-recap-chart-bar")).toHaveLength(3);

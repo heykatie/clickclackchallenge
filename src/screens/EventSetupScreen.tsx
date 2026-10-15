@@ -684,19 +684,25 @@ export function EventSetupScreen({
             </section>
             <section className="setup-recap-section" aria-label="Settings">
               <dl className="setup-recap-stats setup-recap-details">
-                <div className="setup-recap-hour-row">
+                <div className="setup-recap-hour-row setup-recap-mix-row">
                   <dt>Modes</dt>
-                  <dd><ul className="setup-recap-hours" aria-label="Mode breakdown">
+                  <dd><ul className="setup-recap-mix" aria-label="Mode breakdown">
                     {displayedRecapStats.modeUsage.map(({ mode, rounds, percentage }) => (
-                      <li key={mode}>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"} · {percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
+                      <li key={mode}>
+                        <span>{mode === "famous-lines" ? "Famous Lines" : mode === "words" ? "Words" : "Story"}</span>
+                        <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                      </li>
                     ))}
                   </ul></dd>
                 </div>
-                <div className="setup-recap-hour-row">
+                <div className="setup-recap-hour-row setup-recap-mix-row">
                   <dt>Round lengths</dt>
-                  <dd><ul className="setup-recap-hours" aria-label="Round length breakdown">
+                  <dd><ul className="setup-recap-mix" aria-label="Round length breakdown">
                     {displayedRecapStats.durationUsage.map(({ durationSeconds, rounds, percentage }) => (
-                      <li key={durationSeconds}>{durationSeconds}s · {percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</li>
+                      <li key={durationSeconds}>
+                        <span>{durationSeconds}s</span>
+                        <span>{percentage}% · {rounds} {rounds === 1 ? "round" : "rounds"}</span>
+                      </li>
                     ))}
                   </ul></dd>
                 </div>
