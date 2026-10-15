@@ -517,4 +517,11 @@ describe("ResultsScreen headline animation", () => {
     act(() => vi.advanceTimersByTime(8_100));
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(heading);
   });
+
+  it("shows both corner motifs: the pink blob and the mint ring", () => {
+    renderResults(ranked);
+    const main = document.querySelector("main")!;
+    expect(main.classList.contains("has-edge-blob")).toBe(true);
+    expect(main.classList.contains("has-edge-ring")).toBe(true);
+  });
 });

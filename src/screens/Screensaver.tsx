@@ -38,7 +38,7 @@ export function Screensaver({ title, scores, onWake }: ScreensaverProps) {
 
   return (
     <main
-      className="screen screensaver edge-motifs"
+      className="screen screensaver has-edge-blob has-edge-ring"
       ref={screenRef}
       tabIndex={-1}
       // Waking on pointerdown would let the same tap's pointerup reach Ready and start a test.

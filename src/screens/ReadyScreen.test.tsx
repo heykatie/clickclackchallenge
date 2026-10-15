@@ -357,4 +357,11 @@ describe("ReadyScreen", () => {
     expect(screen.queryByText("HIGH SCORES")).toBeNull();
     expect(onStart).not.toHaveBeenCalled();
   });
+
+  it("shows only the pink corner blob, no mint ring", async () => {
+    await renderReady([]);
+    const main = document.querySelector("main")!;
+    expect(main.classList.contains("has-edge-blob")).toBe(true);
+    expect(main.classList.contains("has-edge-ring")).toBe(false);
+  });
 });

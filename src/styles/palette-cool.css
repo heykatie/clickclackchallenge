@@ -88,6 +88,6 @@ html[data-palette="cool"] .screensaver .score-name.has-name {
 }
 
 /* The pink doodle in the corner: the same soft pink as the rest. */
-html[data-palette="cool"] .edge-motifs::before {
+html[data-palette="cool"] .has-edge-blob::before {
   background: #f9d6e3;
 }
