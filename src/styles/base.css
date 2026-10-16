@@ -230,7 +230,7 @@ button.is-cursor {
 
 /*
  * Sparse edge motifs, chosen per screen: a large blush-pink blob partly off the bottom-left corner (has-edge-blob) and a
- * mint ring half off the top-right corner (has-edge-ring). The blob sits on the stage like the flowers; the ring is pinned to the real screen corners, not the 4:3
+ * mint ring half off the top-right corner (has-edge-ring). Both are pinned to the real screen corners, not the 4:3
  * stage, so on a wide screen the ring runs off the true edge instead of stopping short at the stage's side.
  * Colours come from the palette tokens, so they follow warm and cool.
  */
@@ -248,8 +248,10 @@ button.is-cursor {
 }
 
 .has-edge-blob::before {
-  /* On the stage, like the bottom-right flower, a little lower than it and partly off the corner. */
-  position: absolute;
+  /*
+   * Partly off the real screen corner, like the ring, and a little lower than the bottom-right flower. Fixed, so the
+   * part off screen never makes the page scroll.
+   */
   left: -3rem;
   bottom: -3rem;
   width: 15rem;
