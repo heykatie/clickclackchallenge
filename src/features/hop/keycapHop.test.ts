@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { pick, seededRandom } from "../../test/seededRandom";
 import {
   HOP,
@@ -28,8 +28,18 @@ function run(state: HopState, seconds: number, random: () => number = () => 0.5)
 }
 
 describe("Keycap Hop", () => {
+  // Every random draw comes from a seeded generator, so a failure replays exactly; an unseeded call fails loudly.
+  beforeEach(() => {
+    vi.spyOn(Math, "random").mockImplementation(() => {
+      throw new Error("Keycap Hop tests must pass a seeded random");
+    });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("starts on the ground, not running, with no obstacles and a score of 0", () => {
-    const hop = createHop();
+    const hop = createHop(seededRandom(1));
     expect(hop.height).toBe(0);
     expect(hop.running).toBe(false);
     expect(hop.obstacles).toEqual([]);
@@ -37,7 +47,7 @@ describe("Keycap Hop", () => {
   });
 
   it("starts running on the first jump, rises, and lands back on the ground", () => {
-    const jumped = jumpHop(createHop());
+    const jumped = jumpHop(createHop(seededRandom(1)));
     expect(jumped.running).toBe(true);
     expect(jumped.velocity).toBeGreaterThan(0);
     const midAir = run(jumped, 0.25);
@@ -48,7 +58,7 @@ describe("Keycap Hop", () => {
   });
 
   it("only jumps from the ground, so holding or mashing jump does not fly", () => {
-    const midAir = run(jumpHop(createHop()), 0.2);
+    const midAir = run(jumpHop(createHop(seededRandom(1))), 0.2);
     expect(jumpHop(midAir)).toBe(midAir);
   });
 
@@ -64,7 +74,7 @@ describe("Keycap Hop", () => {
 
   it("a held jump rises higher and longer than a tap that releases early", () => {
     const peak = (releaseAfter: number | null) => {
-      let hop = jumpHop(createHop());
+      let hop = jumpHop(createHop(seededRandom(1)));
       let maxHeight = 0;
       let airTime = 0;
       let released = false;
@@ -102,7 +112,7 @@ describe("Keycap Hop", () => {
   });
 
   it("speeds up as it runs, up to a cap, and the score counts distance", () => {
-    const start = jumpHop(createHop());
+    const start = jumpHop(createHop(seededRandom(1)));
     const later = run(start, 10);
     expect(later.speed).toBeGreaterThan(start.speed);
     expect(hopScore(later)).toBeGreaterThan(0);
@@ -113,7 +123,7 @@ describe("Keycap Hop", () => {
   it("always leaves room to land and jump again between obstacles, at any speed", () => {
     for (let seed = 1; seed <= 200; seed += 1) {
       const random = seededRandom(seed);
-      let hop: HopState = { ...jumpHop(createHop()), speed: pick(random, [HOP.startSpeed, 400, HOP.maxSpeed]) };
+      let hop: HopState = { ...jumpHop(createHop(seededRandom(1))), speed: pick(random, [HOP.startSpeed, 400, HOP.maxSpeed]) };
       for (let t = 0; t < 20; t += FRAME) {
         // Keep it alive and airborne-free so only spacing is tested.
         hop = { ...stepHop(hop, FRAME, random), crashed: false, running: true, height: 0, velocity: 0 };
@@ -129,7 +139,7 @@ describe("Keycap Hop", () => {
 
   it("crashes on hitting an obstacle and then stops moving", () => {
     const hop: HopState = {
-      ...jumpHop(createHop()),
+      ...jumpHop(createHop(seededRandom(1))),
       height: 0,
       velocity: 0,
       obstacles: [{ x: HOP.keycapX + 5, width: 30, height: 40, kind: "stack" }],
@@ -142,7 +152,7 @@ describe("Keycap Hop", () => {
 
   it("passes over an obstacle while high enough in the air", () => {
     const hop: HopState = {
-      ...jumpHop(createHop()),
+      ...jumpHop(createHop(seededRandom(1))),
       height: HOP.tallestObstacle + 20,
       velocity: 0,
       obstacles: [{ x: HOP.keycapX + 5, width: 30, height: HOP.tallestObstacle, kind: "stack" }],
@@ -151,8 +161,8 @@ describe("Keycap Hop", () => {
   });
 
   it("starts a fresh run on a jump after crashing, keeping nothing from the last run", () => {
-    const crashed: HopState = { ...run(jumpHop(createHop()), 3), crashed: true, running: false };
-    const again = jumpHop(crashed);
+    const crashed: HopState = { ...run(jumpHop(createHop(seededRandom(1))), 3), crashed: true, running: false };
+    const again = jumpHop(crashed, seededRandom(2));
     expect(again.crashed).toBe(false);
     expect(again.running).toBe(true);
     expect(again.obstacles).toEqual([]);
@@ -160,7 +170,7 @@ describe("Keycap Hop", () => {
   });
 
   it("gets harder gradually: a level every 150 points, and difficulty rising from 0 to 1 by 450 points", () => {
-    const at = (score: number): HopState => ({ ...createHop(), distance: score * 25 });
+    const at = (score: number): HopState => ({ ...createHop(seededRandom(1)), distance: score * 25 });
     expect(hopLevel(at(0))).toBe(1);
     expect(hopLevel(at(149))).toBe(1);
     expect(hopLevel(at(150))).toBe(2);
@@ -321,7 +331,7 @@ describe("Keycap Hop", () => {
 
     const slowed = stepHop(
       {
-        ...jumpHop(createHop()),
+        ...jumpHop(createHop(seededRandom(1))),
         speed: 500,
         powerUps: [{ x: HOP.keycapX + 10, y: 20, kind: "slow" }],
         height: 10,
@@ -335,7 +345,7 @@ describe("Keycap Hop", () => {
 
     const grown = stepHop(
       {
-        ...jumpHop(createHop()),
+        ...jumpHop(createHop(seededRandom(1))),
         powerUps: [{ x: HOP.keycapX + 10, y: 20, kind: "big" }],
         height: 10,
       },
@@ -347,7 +357,7 @@ describe("Keycap Hop", () => {
 
     const shrunk = stepHop(
       {
-        ...jumpHop(createHop()),
+        ...jumpHop(createHop(seededRandom(1))),
         powerUps: [{ x: HOP.keycapX + 10, y: 20, kind: "small" }],
         height: 10,
       },
@@ -393,7 +403,7 @@ describe("Keycap Hop", () => {
     const random = seededRandom(77);
     // Full difficulty used to cut power-ups off; they should still appear late in a long run.
     let hop: HopState = {
-      ...jumpHop(createHop()),
+      ...jumpHop(createHop(seededRandom(1))),
       distance: DIFFICULTY_DISTANCE,
       speed: HOP.maxSpeed,
       lastPowerDistance: DIFFICULTY_DISTANCE,
@@ -413,7 +423,7 @@ describe("Keycap Hop", () => {
       const random = seededRandom(seed);
       // Start at full difficulty and top speed. Strip power-ups so fairness is about obstacle spacing only.
       let hop: HopState = {
-        ...jumpHop(createHop()),
+        ...jumpHop(createHop(seededRandom(1))),
         distance: 10_000 * 25,
         speed: HOP.maxSpeed,
         velocity: 0,
