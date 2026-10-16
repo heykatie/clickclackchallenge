@@ -271,7 +271,7 @@ describe("Keycap Hop", () => {
     // Spacing: big/small stay clear sideways; slow sits over a hazard or after it — never only in front.
     for (let seed = 1; seed <= 80; seed += 1) {
       const clearanceRandom = seededRandom(seed + 40);
-      let clearanceHop: HopState = { ...jumpHop(createHop()), speed: HOP.startSpeed };
+      let clearanceHop: HopState = { ...jumpHop(createHop(clearanceRandom), clearanceRandom), speed: HOP.startSpeed };
       for (let t = 0; t < 25; t += FRAME) {
         clearanceHop = {
           ...stepHop(clearanceHop, FRAME, clearanceRandom),
