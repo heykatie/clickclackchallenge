@@ -130,8 +130,11 @@ describe("ReadyScreen", () => {
     expect(onStart).not.toHaveBeenCalled();
   });
 
-  it("opens Keycap Hop when T, K, and L are held together for three seconds while scores exist", async () => {
-    const { onStart } = await renderReady();
+  it.each([
+    ["while scores exist", [qualifying]],
+    ["with no scores yet", []],
+  ])("opens Keycap Hop when T, K, and L are held together for three seconds %s", async (_label, scores) => {
+    const { onStart } = await renderReady(scores, scores.length > 0 ? { displayedWpm: 60, name: "Alex" } : null);
     fireEvent.keyDown(window, { key: "t" });
     fireEvent.keyDown(window, { key: "k" });
     fireEvent.keyDown(window, { key: "l" });
@@ -156,10 +159,12 @@ describe("ReadyScreen", () => {
     expect(screen.queryByRole("dialog", { name: "Keycap Hop" })).toBeNull();
   });
 
-  it("does not reserve T, K, or L when there are no scores", async () => {
+  it("starts typing with T once it is released when there are no scores", async () => {
     const { onStart } = await renderReady([], null);
     fireEvent.keyDown(window, { key: "t" });
-    expect(onStart).toHaveBeenCalledExactlyOnceWith("t");
+    expect(onStart).not.toHaveBeenCalled();
+    fireEvent.keyUp(window, { key: "t" });
+    expect(onStart).toHaveBeenCalledExactlyOnceWith("t", true);
   });
 
   it("starts the test from a tap on Ready, as no typed character", async () => {
