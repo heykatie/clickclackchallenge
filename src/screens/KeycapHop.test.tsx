@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { fakeBoothClock } from "../test/domSetup";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { boothSound } from "../sound/boothSound";
 import { KeycapHop } from "./KeycapHop";
@@ -35,5 +35,32 @@ describe("KeycapHop pointer controls", () => {
 
     expect(onClose).toHaveBeenCalledOnce();
     expect(boothSound.play).not.toHaveBeenCalledWith("key");
+  });
+
+  it("hops again with a key whose release was missed while the app lost focus", () => {
+    render(<KeycapHop onClose={onClose} onSetup={onSetup} />);
+    fireEvent.keyDown(window, { key: " " });
+    // Space is let go while the app is in the background, so no keyup arrives.
+    fireEvent.blur(window);
+    act(() => vi.advanceTimersByTime(1_000));
+    vi.mocked(boothSound.play).mockClear();
+
+    fireEvent.keyDown(window, { key: " " });
+
+    expect(boothSound.play).toHaveBeenCalledWith("key");
+  });
+
+  it("keeps a run's score as the best when the game is closed mid-run", () => {
+    const first = render(<KeycapHop onClose={onClose} onSetup={onSetup} />);
+    fireEvent.keyDown(window, { key: " " });
+    fireEvent.keyUp(window, { key: " " });
+    act(() => vi.advanceTimersByTime(1_000));
+    const score = Number(document.querySelector(".hop-score span")!.textContent);
+    expect(score).toBeGreaterThan(0);
+    first.unmount();
+
+    render(<KeycapHop onClose={onClose} onSetup={onSetup} />);
+
+    expect(Number(document.querySelector(".hop-best")!.textContent!.replace("BEST ", ""))).toBeGreaterThanOrEqual(score);
   });
 });

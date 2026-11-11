@@ -232,7 +232,15 @@ export function EventSetupScreen({
     if (!file) {
       return;
     }
-    const parsed = parseBackup(await file.text());
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      // The file can vanish or be unreadable between choosing and reading it, e.g. a cloud file not downloaded yet.
+      setBackupMessage("That file couldn’t be read. Nothing was changed.");
+      return;
+    }
+    const parsed = parseBackup(text);
     if (!parsed.ok) {
       setBackupMessage(parsed.reason);
       return;

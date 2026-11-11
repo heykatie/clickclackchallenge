@@ -343,6 +343,9 @@ function App() {
     try {
       await restoreClearedScores();
       setCanRestore(await hasClearedScores());
+      // When the current board keeps its place, the restored scores still rejoin the all-time totals, so Event
+      // Setup must read its counts and recap again.
+      setDataVersion((version) => version + 1);
       // Restoring onto an empty board puts the cleared board back as the current event.
       const { activeEvent } = await loadBooth();
       if (activeEvent && activeEvent.id !== state.activeEvent?.id) {

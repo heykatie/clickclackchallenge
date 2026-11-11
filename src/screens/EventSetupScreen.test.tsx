@@ -740,6 +740,17 @@ describe("EventSetupScreen", () => {
     expect(onRestoreBackup).not.toHaveBeenCalled();
   });
 
+  it("says so when the chosen file cannot be read, without asking or restoring anything", async () => {
+    cleanup();
+    const { onRestoreBackup } = renderSetup(existing);
+    const file = new File(["{}"], "clickclackchallenge-backup.json", { type: "application/json" });
+    vi.spyOn(file, "text").mockRejectedValue(new DOMException("The file could not be read.", "NotReadableError"));
+    fireEvent.change(screen.getByLabelText("Backup file"), { target: { files: [file] } });
+    expect(await screen.findByText("That file couldn’t be read. Nothing was changed.")).toBeTruthy();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(onRestoreBackup).not.toHaveBeenCalled();
+  });
+
   it("shows a dot for whether the device is online, and follows the connection as it changes", () => {
     cleanup();
     const original = navigator.onLine;

@@ -95,6 +95,13 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
     endHopHoldRef.current = endHopHold;
   });
 
+  // Closing the game mid-run still counts the run toward the best, as a bonk would.
+  useEffect(() => {
+    return () => {
+      sessionBest = Math.max(sessionBest, hopScore(stateRef.current));
+    };
+  }, []);
+
   useEffect(() => {
     const id = window.setTimeout(() => onCloseRef.current(), HOP_IDLE_MS);
     return () => window.clearTimeout(id);
@@ -128,11 +135,28 @@ export function KeycapHop({ onClose, onSetup }: KeycapHopProps) {
         endHopHoldRef.current();
       }
     };
+    // A key let go while the app is in the background never sends its keyup, and would stay "held" for good, so
+    // that key could never hop again. Losing focus forgets every held key and ends the hold.
+    const forgetHeldKeys = () => {
+      if (held.size > 0) {
+        held.clear();
+        endHopHoldRef.current();
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) {
+        forgetHeldKeys();
+      }
+    };
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("keyup", onKeyUp, true);
+    window.addEventListener("blur", forgetHeldKeys);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("keyup", onKeyUp, true);
+      window.removeEventListener("blur", forgetHeldKeys);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
