@@ -192,6 +192,40 @@ describe("App", () => {
     await waitFor(() => expect((screen.getByLabelText("Story") as HTMLInputElement).checked).toBe(true));
   }, 20_000);
 
+  it("counts restored scores in the all-time recap when RESTORE leaves the current board in place", async () => {
+    const holdLogoToSetup = async () => {
+      const logo = screen.getByRole("button", { name: "Back to start" });
+      fireEvent.pointerDown(logo);
+      await wait(700);
+      fireEvent.pointerUp(logo);
+      await screen.findByText("Set up today's typing test");
+    };
+    render(<App />);
+    await playStoryRound();
+    await screen.findByRole("button", { name: /VIEW LEADERBOARD/ });
+    await holdLogoToSetup();
+    await waitFor(() => expect(screen.getByRole("button", { name: "CLEAR BOARD" }).getAttribute("aria-disabled")).toBe("false"));
+    fireEvent.click(screen.getByRole("button", { name: "CLEAR BOARD" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "CLEAR BOARD" }));
+    await screen.findByRole("button", { name: "RESTORE CLEARED SCORES" });
+
+    // A round on the new board, so RESTORE keeps that board current instead of reopening the cleared one.
+    await playStoryRound();
+    await screen.findByRole("button", { name: /VIEW LEADERBOARD/ });
+    await holdLogoToSetup();
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(1));
+    fireEvent.click(await screen.findByRole("button", { name: "RESTORE CLEARED SCORES" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "RESTORE" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "RESTORE CLEARED SCORES" })).toBeNull());
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(2));
+
+    await waitFor(() => expect(screen.getByRole("button", { name: /EVENT RECAP/ }).getAttribute("aria-disabled")).toBe("false"));
+    fireEvent.click(screen.getByRole("button", { name: /EVENT RECAP/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "All time" }));
+    const rounds = () => screen.getByText("Rounds").closest(".setup-recap-kpi")!.querySelector("dd")!.textContent;
+    await waitFor(() => expect(rounds()).toBe("2"));
+  }, 30_000);
+
   it("switches browser chrome to lavender with the cool palette and remembers it", async () => {
     const themeColor = document.createElement("meta");
     themeColor.name = "theme-color";

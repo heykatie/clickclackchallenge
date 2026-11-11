@@ -48,7 +48,6 @@ export function ReadyScreen({
     onRollingChange?.(asleep);
   }, [asleep, onRollingChange]);
   const [rolling, setRolling] = useState<RankedScore[]>([]);
-  const rollingCountRef = useRef(0);
   const [allTimeBest, setAllTimeBest] = useState<ScoreRecord | null>(null);
   const bestLine = allTimeBestLine(allTimeBest, rolling[0]?.score ?? null);
 
@@ -94,13 +93,11 @@ export function ReadyScreen({
       (scores) => {
         if (!cancelled) {
           const rankedScores = rollingListScores(scores);
-          rollingCountRef.current = rankedScores.length;
           setRolling(rankedScores);
         }
       },
       () => {
         if (!cancelled) {
-          rollingCountRef.current = 0;
           setRolling([]);
         }
       },
@@ -188,9 +185,9 @@ export function ReadyScreen({
         asleepRef.current ||
         (event.target instanceof Element && event.target.closest(".screensaver") !== null);
 
-      // With scores on the board, T+K+L held together is a three-second Hop shortcut.
+      // T+K+L held together for three seconds opens Hop, with or without scores on the board.
       // Delay ordinary typing only while one of those keys could still become the chord.
-      if (!rolling && rollingCountRef.current > 0 && secretKeys.has(event.key.toLowerCase())) {
+      if (!rolling && secretKeys.has(event.key.toLowerCase())) {
         event.preventDefault();
         if (event.repeat) {
           return;

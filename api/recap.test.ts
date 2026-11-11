@@ -26,6 +26,7 @@ function request(body: unknown, headers: Record<string, string> = {}): Request {
 
 function handler(fetchImpl = vi.fn<typeof fetch>()) {
   return createRecapHandler({
+    enabled: true,
     accountId: "account",
     apiToken: "private-token",
     fetch: fetchImpl,
@@ -40,6 +41,15 @@ const selectedFacts = {
 };
 
 describe("event recap API", () => {
+  it("stays off, without calling the model, unless it is turned on", async () => {
+    const fetchImpl = vi.fn<typeof fetch>();
+    const response = await createRecapHandler({ enabled: false, accountId: "account", apiToken: "private-token", fetch: fetchImpl }).fetch(
+      request(validStats),
+    );
+    expect(response.status).toBe(404);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("accepts only a same-origin request and sends only computed aggregate statistics to the model", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({ success: true, result: { response: JSON.stringify({ highlights: Object.values(selectedFacts) }) } }),
@@ -178,7 +188,7 @@ describe("event recap API", () => {
 
   it("fails closed when the server-side provider credentials are missing", async () => {
     const fetchImpl = vi.fn<typeof fetch>();
-    const response = await createRecapHandler({ accountId: "", apiToken: "", fetch: fetchImpl }).fetch(request(validStats));
+    const response = await createRecapHandler({ enabled: true, accountId: "", apiToken: "", fetch: fetchImpl }).fetch(request(validStats));
 
     expect(response.status).toBe(503);
     expect(fetchImpl).not.toHaveBeenCalled();
