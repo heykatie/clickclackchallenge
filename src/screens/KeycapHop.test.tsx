@@ -3,6 +3,7 @@ import { fakeBoothClock } from "../test/domSetup";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { boothSound } from "../sound/boothSound";
+import { seededRandom } from "../test/seededRandom";
 import { KeycapHop } from "./KeycapHop";
 
 describe("KeycapHop pointer controls", () => {
@@ -12,6 +13,8 @@ describe("KeycapHop pointer controls", () => {
   beforeEach(() => {
     fakeBoothClock();
     vi.spyOn(boothSound, "play");
+    // The game draws obstacles from Math.random; a seed makes every run of these tests the same.
+    vi.spyOn(Math, "random").mockImplementation(seededRandom(1));
   });
 
   afterEach(() => {
