@@ -4,6 +4,11 @@ const MODEL = "@cf/meta/llama-3.2-3b-instruct";
 const MAX_REQUEST_BYTES = 2048;
 
 type RecapHandlerDependencies = {
+  /**
+   * The route is off unless RECAP_API_ENABLED is "true". Nothing in the app calls it yet, and the Origin check only
+   * stops browsers, so having Cloudflare credentials set must not on its own open a public route that spends them.
+   */
+  enabled: boolean;
   accountId: string | undefined;
   apiToken: string | undefined;
   fetch: typeof fetch;
@@ -205,6 +210,9 @@ function formatLocalHourWindow(hour: number): string {
 export function createRecapHandler(dependencies: RecapHandlerDependencies) {
   return {
     async fetch(request: Request): Promise<Response> {
+      if (!dependencies.enabled) {
+        return json({ error: "not_found" }, 404);
+      }
       if (request.method !== "POST") {
         return json({ error: "method_not_allowed" }, 405);
       }
@@ -284,6 +292,7 @@ export function createRecapHandler(dependencies: RecapHandlerDependencies) {
 }
 
 const handler = createRecapHandler({
+  enabled: process.env.RECAP_API_ENABLED === "true",
   accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
   apiToken: process.env.CLOUDFLARE_API_TOKEN,
   fetch: globalThis.fetch,

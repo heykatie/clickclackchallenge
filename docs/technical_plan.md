@@ -265,7 +265,7 @@ Suitable hosts include:
 
 No application server is required for V1 booth operation.
 
-The booth workflow remains a static Vite app. The optional Vercel `/api/recap` function is retained as a building block for future AI-assisted aggregate analysis; the current recap UI does not call it.
+The booth workflow remains a static Vite app. The optional Vercel `/api/recap` function is retained as a building block for future AI-assisted aggregate analysis; the current recap UI does not call it. It answers 404 unless `RECAP_API_ENABLED=true` is set alongside the Cloudflare credentials, so the credentials alone never expose it.
 
 ---
 
@@ -2073,7 +2073,7 @@ EventSetup can select 30-second mode
 EventSetup can select 60-second mode
 while Continue is selected, choosing the other duration updates the next contestant and keeps the event's scores
 Ready screen responds to a key press through a window-level keydown listener
-when Ready has a qualifying board score, T, K, and L held together open Keycap Hop after three seconds; releasing one first starts typing with the first key and does not leave a stale held-key gate
+on Ready, with or without board scores, T, K, and L held together open Keycap Hop after three seconds; releasing one first starts typing with the first key and does not leave a stale held-key gate
 a short Escape press on Ready does not start the test and opens the rolling list when it has a score
 holding Escape opens Event Setup after 1.5 seconds on Ready and 3 seconds on Typing, Results, or the Leaderboard; an earlier release is a short press (escapeHoldMs)
 after 90 idle seconds, Ready shows a rolling list of at most 20 of the active event's scores that meet the accuracy gate and display at least 1 WPM; other events' scores are not on it
