@@ -164,7 +164,7 @@ V1 includes:
 - local event persistence
 - local score persistence
 - offline PWA operation
-- optional operator-requested recap that uses AI to select highlights from the active event's anonymous aggregate totals
+- optional operator-requested recap calculated on-device from aggregate event statistics, available offline without calling an AI service
 - landscape-iPad layout
 - locally bundled fonts, passages, and required visual assets
 
