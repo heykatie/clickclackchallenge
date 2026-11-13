@@ -72,3 +72,10 @@ describe("backup", () => {
     }
   });
 });
+
+it("preserves event and round prize states and rejects non-boolean flags", () => {
+  const backup = createBackup({ events: [{ ...event, plinkoEnabled: false }], scores: [{ ...score, plinkoEnabled: false }], settings }, new Date());
+  expect(parseBackup(JSON.stringify(backup))).toEqual({ ok: true, backup });
+  expect(parseBackup(JSON.stringify({ ...backup, events: [{ ...event, plinkoEnabled: "false" }] })).ok).toBe(false);
+  expect(parseBackup(JSON.stringify({ ...backup, scores: [{ ...score, plinkoEnabled: "false" }] })).ok).toBe(false);
+});

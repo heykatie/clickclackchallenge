@@ -18,6 +18,7 @@ import { useLogoHold } from "./useLogoHold";
 import type { TestResult } from "../state/appState";
 
 type ResultsScreenProps = {
+  plinkoEnabled?: boolean;
   result: TestResult;
   standing: ResultStanding | null;
   saving: boolean;
@@ -30,6 +31,7 @@ type ResultsScreenProps = {
 };
 
 export function ResultsScreen({
+  plinkoEnabled = true,
   result,
   standing,
   saving,
@@ -61,7 +63,7 @@ export function ResultsScreen({
   const typedName = useRef(false);
   const problem = nameProblem(name);
   const savedName = normalizeName(name);
-  const copy = standing ? resultCopy(standing, result.displayedWpm, result.accuracy) : null;
+  const copy = standing ? resultCopy(standing, result.displayedWpm, result.accuracy, plinkoEnabled) : null;
   const phase = nameTimerPhase(Boolean(standing?.showNameEntry), name, saving);
   const timerKey = nameTimerKey(phase, name);
   const [activeTimer, setActiveTimer] = useState(timerKey);

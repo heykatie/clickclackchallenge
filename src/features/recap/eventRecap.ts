@@ -22,6 +22,7 @@ export type EventRecapStats = {
 };
 
 type RecapScore = {
+  plinkoEnabled?: boolean;
   displayedWpm: number;
   accuracy: number | null;
   testMode: TestMode;

@@ -44,7 +44,7 @@ const HEADER = [
  * Dates are in the device's local time unless `timeZone` is given. Cleared scores are included and marked,
  * because they are still on the device; like the all-time board, the all-time rank leaves them out.
  */
-export function scoresCsv(scores: readonly ScoreRecord[], events: readonly EventRecord[], timeZone?: string): string {
+export function scoresCsv(scores: readonly ScoreRecord[], events: readonly EventRecord[], timeZone?: string, includePlinko = true): string {
   const format = formatters(timeZone);
   const clearedAt = new Map(events.filter((event) => event.hiddenAt).map((event) => [event.id, event.hiddenAt as string]));
   const clearedEvents = new Set(clearedAt.keys());
@@ -87,7 +87,7 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
       MODE_LABELS[score.testMode],
       rankText(eventRanks.get(score.id)),
       rankText(allTimeRanks.get(score.id)),
-      winsPlinko(score.displayedWpm, score.accuracy) ? "yes" : "no",
+      score.plinkoEnabled !== false && winsPlinko(score.displayedWpm, score.accuracy) ? "yes" : "no",
       clearedEvents.has(score.eventId) ? "yes" : "no",
       score.rawWpm.toFixed(2),
       score.accuracy.toFixed(2),
@@ -101,7 +101,8 @@ export function scoresCsv(scores: readonly ScoreRecord[], events: readonly Event
       clearedAt.has(score.eventId) ? format.eventStart(clearedAt.get(score.eventId) as string) : "",
     ]);
 
-  return [HEADER, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  const visibleRows = [HEADER, ...rows].map((row) => includePlinko ? row : row.filter((_, index) => index !== HEADER.indexOf("Plinko")));
+  return visibleRows.map((row) => row.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
 
 /** "clickclackchallenge-scores-2026-10-06.csv", dated by the device's local day. */

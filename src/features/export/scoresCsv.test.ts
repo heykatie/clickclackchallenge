@@ -196,3 +196,13 @@ describe("scoresCsv", () => {
     expect(scoresFileName(new Date("2026-10-06T15:30:00"))).toBe("clickclackchallenge-scores-2026-10-06.csv");
   });
 });
+
+it("exports no prize column when disabled and never awards off rounds when enabled again", () => {
+  const off = { ...score("1", "e", "Alex", 80), plinkoEnabled: false };
+  const events = [event("e", "2026-10-06T10:00:00Z")];
+  const visible = scoresCsv([off], events).trim().split("\r\n").map(cells);
+  expect(visible[1]![visible[0]!.indexOf("Plinko")]).toBe("no");
+  const hidden = scoresCsv([off], events, undefined, false).trim().split("\r\n").map(cells);
+  expect(hidden[0]).not.toContain("Plinko");
+  expect(hidden[1]).toHaveLength(hidden[0]!.length);
+});

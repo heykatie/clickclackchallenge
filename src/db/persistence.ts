@@ -21,6 +21,8 @@ export function passageSetIdFor(testMode: TestMode): string {
 }
 
 export interface EventRecord {
+  /** Missing on older events means on, preserving the original prize behavior. */
+  plinkoEnabled?: boolean;
   id: string;
   durationSeconds: TestDuration;
   testMode: TestMode;
@@ -47,6 +49,8 @@ export interface ScoreRecord {
    * in the scores download. Missing on scores saved before scores kept their own name.
    */
   eventName?: string | null;
+  /** Whether prizes were enabled when this round was played; missing means on. */
+  plinkoEnabled?: boolean;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;
@@ -96,6 +100,8 @@ export interface NewScore {
   eventId: string;
   name: string | null;
   eventName?: string | null;
+  /** Whether prizes were enabled when this round was played; missing means on. */
+  plinkoEnabled?: boolean;
   rawWpm: number;
   displayedWpm: number;
   accuracy: number;
@@ -319,6 +325,7 @@ function normalizeEvent(event: EventRecord): EventRecord {
   const testMode = asTestMode(event.testMode);
   return {
     ...event,
+    plinkoEnabled: event.plinkoEnabled !== false,
     // Events saved before the board choice existed rank their own scores.
     boardScope: event.boardScope === "all-time" ? "all-time" : "event",
     hiddenAt: event.hiddenAt ?? null,
@@ -368,7 +375,7 @@ export async function loadBooth(): Promise<BoothState> {
 export async function startFreshEvent(
   durationSeconds: TestDuration,
   testMode: TestMode = "famous-lines",
-  options: { clearScores?: boolean; name?: string | null } = {},
+  options: { clearScores?: boolean; name?: string | null; plinkoEnabled?: boolean } = {},
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const transaction = database.transaction(["events", "settings", "scores"], "readwrite");
@@ -386,6 +393,7 @@ export async function startFreshEvent(
 
   const event: EventRecord = {
     id: crypto.randomUUID(),
+    plinkoEnabled: options.plinkoEnabled ?? true,
     durationSeconds,
     testMode,
     passageSetId: passageSetIdFor(testMode),
@@ -414,7 +422,7 @@ export async function startFreshEvent(
 
 export async function updateActiveEvent(
   eventId: string,
-  next: { durationSeconds: TestDuration; testMode: TestMode; boardScope?: BoardScope; name?: string | null },
+  next: { durationSeconds: TestDuration; testMode: TestMode; boardScope?: BoardScope; name?: string | null; plinkoEnabled?: boolean },
 ): Promise<EventRecord> {
   const database = await openDatabase();
   const event = await database.get("events", eventId);
@@ -422,6 +430,7 @@ export async function updateActiveEvent(
     throw new Error("No active event to update");
   }
   const current = normalizeEvent(event);
+  const plinkoEnabled = next.plinkoEnabled ?? current.plinkoEnabled;
   const boardScope = next.boardScope ?? current.boardScope;
   const name = next.name === undefined ? current.name : cleanEventName(next.name);
   if (
@@ -429,6 +438,7 @@ export async function updateActiveEvent(
     current.testMode === next.testMode &&
     current.passageSetId === passageSetIdFor(next.testMode) &&
     current.boardScope === boardScope &&
+    current.plinkoEnabled === plinkoEnabled &&
     current.name === name
   ) {
     return current;
@@ -436,6 +446,7 @@ export async function updateActiveEvent(
 
   const updated: EventRecord = {
     ...current,
+    plinkoEnabled,
     durationSeconds: next.durationSeconds,
     testMode: next.testMode,
     passageSetId: passageSetIdFor(next.testMode),

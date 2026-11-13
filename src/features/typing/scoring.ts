@@ -70,6 +70,6 @@ export function winsPlinko(displayedWpm: number, accuracy: number | null): boole
 }
 
 /** How many saved scores won a Plinko drop, so staff can keep track of prize stock. */
-export function countPlinkoWins(scores: readonly { displayedWpm: number; accuracy: number | null }[]): number {
-  return scores.filter((score) => winsPlinko(score.displayedWpm, score.accuracy)).length;
+export function countPlinkoWins(scores: readonly { displayedWpm: number; accuracy: number | null; plinkoEnabled?: boolean }[]): number {
+  return scores.filter((score) => score.plinkoEnabled !== false && winsPlinko(score.displayedWpm, score.accuracy)).length;
 }

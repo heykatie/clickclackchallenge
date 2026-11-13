@@ -22,6 +22,7 @@ import {
 } from "../state/setupRules";
 
 type EventSetupScreenProps = {
+  storedPlinkoEnabled?: boolean;
   storedDuration: TestDuration | null;
   storedTestMode: TestMode | null;
   /** The active event's optional name, for the scores download. Never shown to contestants. */
@@ -32,8 +33,8 @@ type EventSetupScreenProps = {
   updateReady: boolean;
   /** Activates the waiting version and reloads the app. */
   onApplyUpdate: () => void;
-  onStartFresh: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
-  onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope, name: string | null) => void;
+  onStartFresh: (durationSeconds: TestDuration, testMode: TestMode, name: string | null, plinkoEnabled: boolean) => void;
+  onContinue: (durationSeconds: TestDuration, testMode: TestMode, boardScope: BoardScope, name: string | null, plinkoEnabled: boolean) => void;
   /** Hides the current event's scores and starts an empty event with these choices. */
   onClearScores: (durationSeconds: TestDuration, testMode: TestMode, name: string | null) => void;
   /** An earlier clear can be undone. */
@@ -71,6 +72,7 @@ type EventSetupScreenProps = {
 const TOOLTIP_TAP_MS = 2500;
 
 export function EventSetupScreen({
+  storedPlinkoEnabled = true,
   storedDuration,
   storedTestMode,
   storedEventName,
@@ -99,6 +101,7 @@ export function EventSetupScreen({
   storageProtection = "checking",
 }: EventSetupScreenProps) {
   const recapAvailabilityId = useId();
+  const [plinkoEnabled, setPlinkoEnabled] = useState(storedPlinkoEnabled);
   const [mode, setMode] = useState<SetupMode>(
     storedDuration === null ? "fresh" : storedBoardScope === "all-time" ? "all-time" : "continue",
   );
@@ -207,7 +210,7 @@ export function EventSetupScreen({
       selectedTestMode,
     );
     if (plan.mode === "continue") {
-      onContinue(plan.durationSeconds, plan.testMode, plan.boardScope, cleanEventName(eventName));
+      onContinue(plan.durationSeconds, plan.testMode, plan.boardScope, cleanEventName(eventName), plinkoEnabled);
       return;
     }
     if (!confirmed && needsFreshConfirm(plan, storedDuration !== null && canClear)) {
@@ -215,7 +218,7 @@ export function EventSetupScreen({
       setConfirmCursor("cancel");
       return;
     }
-    onStartFresh(plan.durationSeconds, plan.testMode, cleanEventName(eventName));
+    onStartFresh(plan.durationSeconds, plan.testMode, cleanEventName(eventName), plinkoEnabled);
   }
 
   function askToClear() {
@@ -401,6 +404,10 @@ export function EventSetupScreen({
         onToggleSoundRef.current();
         return;
       }
+      if (result === "plinko") {
+        setPlinkoEnabled((enabled) => !enabled);
+        return;
+      }
       if (result === "music") {
         onToggleMusicRef.current();
         return;
@@ -498,7 +505,7 @@ export function EventSetupScreen({
           </button>
         </section>
       ) : null}
-        {/* The event name, with its recap beside it, opens the page above Test length. */}
+        {/* The event name and Plinko choice sit above Test length. */}
         <div className="setup-event-line setup-name-row" {...shutWhileAsking}>
           <label className={cursor === "name" ? "setup-name is-cursor" : "setup-name"}>
             <span>Event name (optional)</span>
@@ -514,24 +521,11 @@ export function EventSetupScreen({
               onChange={(event) => setEventName(event.target.value)}
             />
           </label>
-          {storedDuration !== null ? (
-            <span className={openTooltip === "recap" ? "setup-recap-action is-tooltip-open" : "setup-recap-action"}>
-              <button
-                type="button"
-                className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
-                onClick={() => (recapUnavailable ? setOpenTooltip("recap") : openRecap())}
-                aria-disabled={recapUnavailable}
-                aria-describedby={recapUnavailable ? recapAvailabilityId : undefined}
-              >
-                EVENT RECAP
-              </button>
-              {!recapStats || recapStats.completedRounds === 0 ? (
-                <span className="setup-recap-availability" id={recapAvailabilityId} role="tooltip">
-                  {recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
-                </span>
-              ) : null}
-            </span>
-          ) : null}
+          <button type="button" className={settingClass("plinko", plinkoEnabled)}
+            aria-pressed={plinkoEnabled} disabled={saving}
+            onClick={() => setPlinkoEnabled((enabled) => !enabled)}>
+            PLINKO DROP: {plinkoEnabled ? "ON" : "OFF"}
+          </button>
         </div>
         <div className="setup-groups" {...shutWhileAsking}>
           <fieldset className="setup-group setup-group-length">
@@ -672,6 +666,24 @@ export function EventSetupScreen({
           <div className="setup-footer-side">
             {/* A backup of every score, and restoring one, beside START EVENT; the storage line sits under them. */}
             <div className="setup-footer-tools">
+              {storedDuration !== null ? (
+                <span className={openTooltip === "recap" ? "setup-recap-action is-tooltip-open" : "setup-recap-action"}>
+                  <button
+                    type="button"
+                    className={cursor === "recap" ? "setup-tool setup-chip is-cursor" : "setup-tool setup-chip"}
+                    onClick={() => (recapUnavailable ? setOpenTooltip("recap") : openRecap())}
+                    aria-disabled={recapUnavailable}
+                    aria-describedby={recapUnavailable ? recapAvailabilityId : undefined}
+                  >
+                    EVENT RECAP
+                  </button>
+                  {!recapStats || recapStats.completedRounds === 0 ? (
+                    <span className="setup-recap-availability" id={recapAvailabilityId} role="tooltip">
+                      {recapStats === null ? "Loading event stats…" : "Complete a round to enable recap"}
+                    </span>
+                  ) : null}
+                </span>
+              ) : null}
               {storedDuration !== null ? (
                 <button
                   type="button"
@@ -878,10 +890,10 @@ export function EventSetupScreen({
                       </ul>}
                 </dd>
               </dl>
-              <dl className="setup-recap-block setup-recap-stats setup-recap-prizes" data-block="plinko">
+              {plinkoEnabled ? <dl className="setup-recap-block setup-recap-stats setup-recap-prizes" data-block="plinko">
                 <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko wins</dt><dd>{displayedRecapStats.plinkoDropsWon}</dd></div>
                 <div className="setup-recap-kpi setup-recap-kpi-secondary"><dt>Plinko win rate</dt><dd>{displayedRecapStats.plinkoWinnerPercentage.toLocaleString(undefined, { maximumFractionDigits: 1 })}%</dd></div>
-              </dl>
+              </dl> : null}
             </section>
             </> : null}
           </section>

@@ -79,6 +79,43 @@ afterEach(async () => {
 });
 
 describe("App", () => {
+  it("continues the same board with Plinko off, reloads off, then turns it back on", async () => {
+    let view = render(<App />);
+    await playStoryRound();
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(1));
+    const before = await loadBooth();
+    const scores = await listAllScores();
+    view.unmount();
+    view = render(<App />);
+    await screen.findByText("Set up today's typing test");
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: ON" }));
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    await screen.findByText(/PRESS ANY KEY TO START/i);
+    expect(screen.queryByText(/Type above 50 WPM/)).toBeNull();
+    expect((await loadBooth()).activeEvent).toMatchObject({ id: before.activeEvent!.id, plinkoEnabled: false });
+    expect(await listAllScores()).toEqual(scores);
+    view.unmount();
+    view = render(<App />);
+    await screen.findByText("Set up today's typing test");
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: OFF" }));
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    await screen.findByText(/Type above 50 WPM/);
+    expect((await loadBooth()).activeEvent).toMatchObject({ id: before.activeEvent!.id, plinkoEnabled: true });
+    expect(await listAllScores()).toEqual(scores);
+    view.unmount();
+  }, 15_000);
+
+  it("saves an off round without a prize while keeping its leaderboard result", async () => {
+    render(<App />);
+    await screen.findByText("Set up today's typing test");
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: ON" }));
+    await playStoryRound();
+    await waitFor(async () => expect(await listAllScores()).toHaveLength(1));
+    expect(document.querySelector(".result-plinko")).toBeNull();
+    expect(screen.getByText("NEW HIGH SCORE!")).toBeTruthy();
+    expect((await listAllScores())[0]).toMatchObject({ plinkoEnabled: false });
+  }, 15_000);
+
   it("plays a round, saves the name typed on Results with Enter, and shows it on the Leaderboard", async () => {
     render(<App />);
     const storyElapsedMs = await playStoryRound();
