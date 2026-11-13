@@ -2615,3 +2615,14 @@ over unnecessary infrastructure or feature complexity.
 - The viewport uses `viewport-fit=cover`, safe-area padding, and fixed text-size adjustment so iOS does not inflate the layout when the device rotates.
 - The browser theme color follows the persisted palette so Safari and installed-app chrome match the page background.
 - Keycap Hop accepts a tap anywhere on the visible viewport except the logo badge, including space outside the centered game stage; the badge keeps its close and long-press-to-Setup behavior.
+
+
+### Per-event Plinko availability
+
+`EventRecord.plinkoEnabled` is an optional boolean normalized to true for older events. Fresh events save an explicit
+value; `updateActiveEvent` updates it without touching the scores store or replacing the event. Setup drafts the choice
+until START EVENT. App passes the saved flag to Ready, Results, and the shared result-copy function used for sound.
+Conditional rendering removes prize elements from layout. The setup keyboard includes the staff switch.
+`ScoreRecord` and `NewScore` retain the round's flag; recap prize counts and CSV eligibility exclude off rounds.
+Backups accept missing flags for compatibility, reject non-boolean flags, and preserve explicit false. No IndexedDB
+store/index or schema-version change is needed for these additive record fields.

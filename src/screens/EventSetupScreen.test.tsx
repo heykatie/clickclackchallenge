@@ -8,7 +8,7 @@ import { createBackup } from "../features/backup/backup";
 import { EventSetupScreen } from "./EventSetupScreen";
 
 function renderSetup(
-  stored: { duration: TestDuration; mode: TestMode; board?: BoardScope; name?: string | null } | null,
+  stored: { duration: TestDuration; mode: TestMode; board?: BoardScope; name?: string | null; plinkoEnabled?: boolean } | null,
   updateReady = false,
   canRestore = false,
   soundOn = false,
@@ -30,6 +30,7 @@ function renderSetup(
   const onTogglePalette = vi.fn();
   render(
     <EventSetupScreen
+      storedPlinkoEnabled={stored?.plinkoEnabled}
       storedDuration={stored?.duration ?? null}
       storedTestMode={stored?.mode ?? null}
       storedBoardScope={stored?.board ?? null}
@@ -85,10 +86,34 @@ function chooseStartFresh() {
 }
 
 describe("EventSetupScreen", () => {
+  it("collapses the recap prize block when Plinko is switched off", () => {
+    renderSetup(existing, false, false, false, null, true, { stats: {
+      completedRounds: 1, averageWpm: 65, medianWpm: 65, fastestWpm: 65, averageAccuracy: 100,
+      modeUsage: [], durationUsage: [], plinkoDropsWon: 1, plinkoWinnerPercentage: 100,
+      roundsByHour: [{ hour: 9, rounds: 1 }], peakHours: [9], peakHourRounds: 1,
+    } });
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: ON" }));
+    fireEvent.click(screen.getByRole("button", { name: "EVENT RECAP" }));
+    expect(screen.queryByText("Plinko wins")).toBeNull();
+    expect(document.querySelector('[data-block="plinko"]')).toBeNull();
+  });
+
+  it("can disable Plinko while continuing, and can re-enable an off event", () => {
+    const { onContinue } = renderSetup(existing);
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: ON" }));
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null, false);
+    cleanup();
+    const next = renderSetup({ ...existing, plinkoEnabled: false });
+    fireEvent.click(screen.getByRole("button", { name: "PLINKO DROP: OFF" }));
+    fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
+    expect(next.onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null, true);
+  });
+
   it("continues the existing event without asking", () => {
     const { onContinue } = renderSetup(existing);
     press("Enter");
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null, true);
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
   });
 
@@ -111,8 +136,9 @@ describe("EventSetupScreen", () => {
 
     const eventNameInput = screen.getByLabelText("Event name (optional)");
     const recapButton = screen.getByRole("button", { name: "EVENT RECAP" });
-    // EVENT RECAP sits beside the event name, on one line.
-    expect(recapButton.closest(".setup-event-line")?.contains(eventNameInput)).toBe(true);
+    // EVENT RECAP sits with the footer tools.
+    expect(recapButton.closest(".setup-footer-tools")).toBeTruthy();
+    expect(recapButton.closest(".setup-footer-tools")?.contains(eventNameInput)).toBe(false);
 
     fireEvent.click(recapButton);
     expect(screen.getByRole("dialog", { name: "Event recap" })).toBeTruthy();
@@ -301,7 +327,7 @@ describe("EventSetupScreen", () => {
   it("starts fresh without asking when no event exists yet", () => {
     const { onStartFresh } = renderSetup(null);
     press("Enter");
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null, true);
   });
 
   it("asks before Start fresh replaces an existing event's leaderboard, with CANCEL chosen", () => {
@@ -340,7 +366,7 @@ describe("EventSetupScreen", () => {
     press("ArrowRight");
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "START FRESH" }));
     press("Enter");
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null, true);
   });
 
   it("asks on touch too, and starts fresh from the START FRESH button", () => {
@@ -349,7 +375,7 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(onStartFresh).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null, true);
   });
 
   it("shows no update message when there is no update", () => {
@@ -390,7 +416,7 @@ describe("EventSetupScreen", () => {
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
     moveCursorTo(startButton, "ArrowDown");
     press("Enter");
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time", null);
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "all-time", null, true);
     expect(onStartFresh).not.toHaveBeenCalled();
     expect(screen.queryByText("Start a fresh leaderboard?")).toBeNull();
   });
@@ -400,7 +426,7 @@ describe("EventSetupScreen", () => {
     expect((screen.getByLabelText("All-time leaderboard") as HTMLInputElement).checked).toBe(true);
     fireEvent.click(screen.getByLabelText("Continue previous"));
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null);
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", null, true);
   });
 
   it("offers CLEAR BOARD only when an event exists", () => {
@@ -500,14 +526,18 @@ describe("EventSetupScreen", () => {
     expect(screen.queryByText(/Plinko drops won/)).toBeNull();
   });
 
-  it("puts the event name and EVENT RECAP on one line above Test length, and the backup tools by START EVENT", () => {
+  it("puts Plinko after the event name and EVENT RECAP before SAVE BACKUP", () => {
     renderSetup(existing);
     const name = screen.getByLabelText("Event name (optional)");
     const recap = screen.getByRole("button", { name: "EVENT RECAP" });
     const testLength = screen.getByText("Test length", { selector: "legend" });
-    // Name and recap share one line, and that line comes before Test length.
-    expect(name.closest(".setup-event-line")).toBe(recap.closest(".setup-event-line"));
-    expect(recap.compareDocumentPosition(testLength) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const plinko = screen.getByRole("button", { name: /PLINKO DROP:/ });
+    expect(name.closest(".setup-event-line")).toBe(plinko.closest(".setup-event-line"));
+    expect(name.compareDocumentPosition(plinko) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(plinko.compareDocumentPosition(testLength) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const backup = screen.getByRole("button", { name: "SAVE BACKUP" });
+    expect(recap.closest(".setup-footer-tools")).toBe(backup.closest(".setup-footer-tools"));
+    expect(recap.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     const footer = document.querySelector(".setup-footer")!;
     for (const element of [
       screen.getByRole("button", { name: "SAVE BACKUP" }),
@@ -559,7 +589,7 @@ describe("EventSetupScreen", () => {
     const { onContinue } = renderSetup(existing);
     fireEvent.change(screen.getByLabelText("Event name (optional)"), { target: { value: "Fall pop-up" } });
     fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
-    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", "Fall pop-up");
+    expect(onContinue).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "event", "Fall pop-up", true);
   });
 
   it("passes the typed name to a fresh event, after the confirmation", () => {
@@ -568,7 +598,7 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByLabelText("Start fresh"));
     fireEvent.click(screen.getByRole("button", { name: /START EVENT/ }));
     fireEvent.click(screen.getByRole("button", { name: "START FRESH" }));
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "Night market");
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", "Night market", true);
   });
 
   it("shows MUSIC: OFF beside SOUND, even before any event exists, and toggles music on click", () => {
@@ -695,7 +725,7 @@ describe("EventSetupScreen", () => {
     fireEvent.click(screen.getByLabelText("Start fresh"));
     fireEvent.click(screen.getByRole("button", { name: "START EVENT" }));
     expect(screen.queryByRole("alertdialog")).toBeNull();
-    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null);
+    expect(onStartFresh).toHaveBeenCalledExactlyOnceWith(30, "famous-lines", null, true);
   });
 
   it("keeps Event Setup free of corner motifs", () => {

@@ -11,6 +11,7 @@ import { Crown } from "./ScoreRow";
 const READY_IDLE_MS = 90_000;
 
 type ReadyScreenProps = {
+  plinkoEnabled?: boolean;
   /** The active event. The rolling list shows its board. */
   eventId: string | null;
   /** The event's board ranks every event's scores. */
@@ -29,6 +30,7 @@ type ReadyScreenProps = {
 const HOP_DOUBLE_TAP_MS = 500;
 
 export function ReadyScreen({
+  plinkoEnabled = true,
   eventId,
   allTime,
   highScore,
@@ -299,7 +301,7 @@ export function ReadyScreen({
         />
         <div className="ready-copy">
           <h1>GIANT keyboard typing contest!</h1>
-          <p className="ready-plinko">Type above 50 WPM for a Plinko drop.</p>
+          {plinkoEnabled ? <p className="ready-plinko">Type above 50 WPM for a Plinko drop.</p> : null}
           <section className="high-score-card" aria-label="Current high score">
             <p className="stat-label">{allTime ? "ALL-TIME HIGH SCORE" : "CURRENT HIGH SCORE"}</p>
             {highScore ? (

@@ -17,7 +17,7 @@ describe("applySetupKey", () => {
   it("selects the cursor's choice on Enter and leaves the other groups alone", () => {
     // PALETTE is last, so Down from it wraps to the event name at the top, then on to the first length.
     expect(applySetupKey({ ...ready, cursor: "palette" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
-    const onLength = applySetupKey({ ...ready, cursor: "recap" }, "ArrowDown", { shiftKey: false, canContinue: true });
+    const onLength = applySetupKey({ ...ready, cursor: "plinko" }, "ArrowDown", { shiftKey: false, canContinue: true });
     expect(onLength).toEqual({ ...ready, cursor: "30" });
     if (onLength === null || typeof onLength === "string") {
       throw new Error("ArrowDown should land on 30 seconds");
@@ -64,6 +64,7 @@ describe("all-time choice", () => {
       "all-time",
       "download",
       "clear",
+      "recap",
       "backup",
       "import",
       "start",
@@ -81,14 +82,14 @@ describe("all-time choice", () => {
 describe("clear choice", () => {
   it("comes after the event name, then SAVE BACKUP and RESTORE BACKUP, and only while an event exists", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("name") + 1]).toBe("recap");
-    // The event name and its recap open the order, above Test length; the backup tools sit just before START EVENT.
-    expect(choices.slice(0, 3)).toEqual(["name", "recap", "30"]);
+    expect(choices[choices.indexOf("name") + 1]).toBe("plinko");
+    // The event name and Plinko open the order, above Test length; the backup tools sit just before START EVENT.
+    expect(choices.slice(0, 4)).toEqual(["name", "plinko", "30", "60"]);
     expect(choices.slice(choices.indexOf("backup"), choices.indexOf("start") + 1)).toEqual(["backup", "import", "start"]);
     expect(setupChoices("famous-lines", false)).not.toContain("clear");
     expect(applySetupKey({ ...ready, cursor: "name" }, "ArrowDown", { shiftKey: false, canContinue: true })).toEqual({
       ...ready,
-      cursor: "recap",
+      cursor: "plinko",
     });
   });
 
@@ -117,13 +118,13 @@ describe("download choice", () => {
 });
 
 describe("event name choice", () => {
-  it("comes before EVENT RECAP, and Up from START EVENT reaches the footer tools", () => {
+  it("comes before PLINKO DROP, and Up from START EVENT reaches the footer tools", () => {
     const choices = setupChoices("famous-lines", true);
-    expect(choices[choices.indexOf("recap") - 1]).toBe("name");
+    expect(choices[choices.indexOf("backup") - 1]).toBe("recap");
     expect(choices[choices.indexOf("start") - 1]).toBe("import");
     expect(setupChoices("famous-lines", false)).toContain("name");
     expect(applySetupKey(ready, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "import" });
-    expect(applySetupKey({ ...ready, cursor: "recap" }, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
+    expect(applySetupKey({ ...ready, cursor: "plinko" }, "ArrowUp", { shiftKey: false, canContinue: true })).toEqual({ ...ready, cursor: "name" });
   });
 
   it("asks to edit the name on Enter", () => {
@@ -135,7 +136,7 @@ describe("score actions", () => {
   it("sit with the Leaderboard choices: DOWNLOAD, CLEAR, then RESTORE; the footer tools follow the event name", () => {
     const choices = setupChoices("famous-lines", true, false, true);
     const from = choices.indexOf("all-time");
-    expect(choices.slice(from, from + 7)).toEqual(["all-time", "download", "clear", "restore", "backup", "import", "start"]);
+    expect(choices.slice(from, from + 8)).toEqual(["all-time", "download", "clear", "restore", "recap", "backup", "import", "start"]);
   });
 
   it("offers RESTORE BACKUP on a fresh device, where there is nothing yet to save", () => {
@@ -170,7 +171,7 @@ describe("sound and music choices", () => {
 describe("restore choice", () => {
   it("comes after CLEAR BOARD, and only while a clear can be undone", () => {
     const choices = setupChoices("famous-lines", true, false, true);
-    expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "backup"]);
+    expect(choices.slice(choices.indexOf("clear"), choices.indexOf("clear") + 3)).toEqual(["clear", "restore", "recap"]);
     expect(setupChoices("famous-lines", true, false, false)).not.toContain("restore");
   });
 
@@ -210,6 +211,10 @@ describe("update choice", () => {
       "ArrowDown",
       { shiftKey: false, canContinue: true, canClear: false },
     );
-    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("backup");
+    expect(typeof fromDownload === "object" && fromDownload?.cursor).toBe("recap");
   });
+});
+
+it("toggles the event prize from the keyboard", () => {
+  expect(applySetupKey({ cursor: "plinko", duration: 30, testMode: "words", leaderboard: "continue" }, "Enter", { shiftKey: false, canContinue: true })).toBe("plinko");
 });

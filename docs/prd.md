@@ -274,6 +274,19 @@ When Event Setup opens and no event exists, Start Fresh, `30 seconds`, and Famou
 
 When an event already exists, including when the operator returns from Ready, Typing, Results, or the Leaderboard, Continue is selected. The duration control shows that event's stored duration. The game mode control shows that event's stored mode.
 
+### Per-event Plinko Drop
+
+Event Setup offers PLINKO DROP: ON/OFF, applied with START EVENT alongside the other event choices.
+New events and older events without a saved setting default to ON. Continue and All-time update this setting
+on the same event, preserving its ID, scores, ranks, and history; changing the toggle never starts a fresh board.
+The event setting survives reload and backup/restore. The staff switch remains available while OFF so it can be re-enabled.
+
+When OFF, omit the Ready prize prompt, Results prize pill and prize-only celebration/sound, and both Plinko recap
+figures entirely; the layout closes up naturally. Scores downloads omit the Plinko column while the active event is OFF.
+Leaderboard ranking and name entry never depend on this switch. When ON, existing prize thresholds still apply.
+Each new score records whether prizes were enabled when played, so OFF rounds do not become winners after
+re-enabling. Older scores without that field retain the original prize eligibility. Backup JSON preserves all fields.
+
 ### Start Fresh
 
 Starting fresh should:

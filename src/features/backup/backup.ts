@@ -50,6 +50,7 @@ function isEvent(value: unknown): value is EventRecord {
   return (
     isRecord(value) &&
     isText(value.id) &&
+    (value.plinkoEnabled === undefined || typeof value.plinkoEnabled === "boolean") &&
     DURATIONS.has(value.durationSeconds as number) &&
     MODES.has(value.testMode as string) &&
     isText(value.createdAt) &&
@@ -62,6 +63,7 @@ function isScore(value: unknown): value is ScoreRecord {
   return (
     isRecord(value) &&
     isText(value.id) &&
+    (value.plinkoEnabled === undefined || typeof value.plinkoEnabled === "boolean") &&
     isText(value.eventId) &&
     isOptionalText(value.name) &&
     isNumber(value.rawWpm) &&

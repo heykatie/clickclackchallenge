@@ -256,3 +256,9 @@ describe("resultCopy kind", () => {
     expect(resultCopy(standing(), 40, 100).kind).toBe("thanks");
   });
 });
+
+it("suppresses the prize and prize-only celebration when Plinko is off", () => {
+  const unplaced = { isNewHighScore: false, isTop5: false, isTop10: false, showNameEntry: false };
+  expect(resultCopy(unplaced, 65, 100, false)).toMatchObject({ plinkoLine: null, kind: "thanks" });
+  expect(resultCopy(unplaced, 65, 100, true).plinkoLine).toBe("You win a Plinko drop!");
+});

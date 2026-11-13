@@ -53,6 +53,34 @@ describe("persistence", () => {
     await deleteDB(LEGACY_DB_NAME);
   });
 
+  it("persists Plinko changes on the same event without changing any score", async () => {
+    const event = await startFreshEvent(30);
+    const score = await saveScore(scoreInput(event.id, 65));
+    for (const plinkoEnabled of [false, true]) {
+      const updated = await updateActiveEvent(event.id, { durationSeconds: 30, testMode: event.testMode, plinkoEnabled });
+      expect(updated.id).toBe(event.id);
+      expect(updated.plinkoEnabled).toBe(plinkoEnabled);
+      await closeDatabase();
+      expect((await loadBooth()).activeEvent?.plinkoEnabled).toBe(plinkoEnabled);
+      expect(await listScores(event.id)).toEqual([score]);
+      expect((await listEverything()).events).toHaveLength(1);
+    }
+  });
+
+  it("defaults older events to Plinko on and preserves off in a backup restore", async () => {
+    const event = await startFreshEvent(30, "words", { plinkoEnabled: false });
+    const backup = await readBackupData();
+    await closeDatabase();
+    await deleteDB(DB_NAME);
+    await restoreBackupData(backup);
+    expect((await loadBooth()).activeEvent?.plinkoEnabled).toBe(false);
+    const db = await openDatabase();
+    const legacy = { ...event };
+    delete legacy.plinkoEnabled;
+    await db.put("events", legacy);
+    expect((await loadBooth()).activeEvent?.plinkoEnabled).toBe(true);
+  });
+
   it("creates a fresh event with the selected duration, passage set, and no scores", async () => {
     const event = await startFreshEvent(60);
     expect(event.durationSeconds).toBe(60);

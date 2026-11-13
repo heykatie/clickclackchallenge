@@ -11,7 +11,7 @@ const result: TestResult = { rawWpm: 42, displayedWpm: 42, accuracy: 96, display
 const ranked: ResultStanding = { isNewHighScore: false, isTop5: true, isTop10: true, showNameEntry: true };
 const unranked: ResultStanding = { isNewHighScore: false, isTop5: false, isTop10: false, showNameEntry: false };
 
-function renderResults(standing: ResultStanding | null, shown: TestResult = result) {
+function renderResults(standing: ResultStanding | null, shown: TestResult = result, plinkoEnabled = true) {
   const handlers = {
     onSave: vi.fn(),
     onViewLeaderboard: vi.fn(),
@@ -21,6 +21,7 @@ function renderResults(standing: ResultStanding | null, shown: TestResult = resu
   let shortEscape: (() => void) | null = null;
   render(
     <ResultsScreen
+      plinkoEnabled={plinkoEnabled}
       result={shown}
       standing={standing}
       saving={false}
@@ -524,4 +525,10 @@ describe("ResultsScreen headline animation", () => {
     expect(main.classList.contains("has-edge-blob")).toBe(true);
     expect(main.classList.contains("has-edge-ring")).toBe(true);
   });
+});
+
+it("omits the prize element entirely when disabled while preserving leaderboard placement", () => {
+  renderResults(ranked, { ...result, displayedWpm: 80 }, false);
+  expect(document.querySelector(".result-plinko")).toBeNull();
+  expect(screen.getByText("You made the Top 5!")).toBeTruthy();
 });

@@ -113,3 +113,11 @@ describe("liveWpm", () => {
     expect(liveWpm(25, 6)).toBe(50);
   });
 });
+
+it("does not count rounds played with Plinko off, including after it is re-enabled", () => {
+  expect(countPlinkoWins([
+    { displayedWpm: 65, accuracy: 100, plinkoEnabled: false },
+    { displayedWpm: 65, accuracy: 100, plinkoEnabled: true },
+    { displayedWpm: 65, accuracy: 100 },
+  ])).toBe(2);
+});

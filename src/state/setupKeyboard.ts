@@ -21,7 +21,8 @@ export type SetupChoice =
   | "recap"
   | "sound"
   | "music"
-  | "palette";
+  | "palette"
+  | "plinko";
 
 export interface SetupSelection {
   cursor: SetupChoice;
@@ -38,17 +39,14 @@ export function setupChoices(
   canClear = true,
 ): SetupChoice[] {
   const choices: SetupChoice[] = updateReady ? ["update"] : [];
-  // The event name and its recap sit on one line above Test length, so they come first.
-  choices.push("name");
-  if (canContinue) {
-    choices.push("recap");
-  }
+  // The event name and Plinko choice sit above Test length.
+  choices.push("name", "plinko");
   if (testMode !== "story") {
     choices.push("30", "60");
   }
   choices.push("words", "famous-lines", "story", "fresh");
   if (canContinue) {
-    // Download and board actions sit under Leaderboard; the recap sits with the event name in the footer.
+    // Download and board actions sit under Leaderboard; the recap sits with the backup tools in the footer.
     choices.push("continue", "all-time", "download");
     // CLEAR BOARD is greyed out on a board with no scores, so the cursor skips it.
     if (canClear) {
@@ -61,7 +59,7 @@ export function setupChoices(
   // The backup tools sit by START EVENT: SAVE BACKUP needs an event; RESTORE BACKUP is always offered, so a fresh
   // or reset device can bring its scores back.
   if (canContinue) {
-    choices.push("backup");
+    choices.push("recap", "backup");
   }
   choices.push("import");
   choices.push("start", "sound", "music", "palette");
@@ -98,7 +96,7 @@ export function applySetupKey(
   selection: SetupSelection,
   key: string,
   options: { shiftKey: boolean; canContinue: boolean; updateReady?: boolean; canRestore?: boolean; canClear?: boolean },
-): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "backup" | "import" | "recap" | "sound" | "music" | "palette" | "name" | null {
+): SetupSelection | "start" | "update" | "clear" | "restore" | "download" | "backup" | "import" | "recap" | "sound" | "music" | "palette" | "plinko" | "name" | null {
   const choices = setupChoices(selection.testMode, options.canContinue, options.updateReady, options.canRestore, options.canClear);
   const current = { ...selection, cursor: clampCursor(selection.cursor, choices) };
 
@@ -135,6 +133,9 @@ export function applySetupKey(
     }
     if (current.cursor === "sound") {
       return "sound";
+    }
+    if (current.cursor === "plinko") {
+      return "plinko";
     }
     if (current.cursor === "music") {
       return "music";

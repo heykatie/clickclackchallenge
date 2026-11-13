@@ -42,7 +42,7 @@ const HEADLINES: Record<ResultKind, string> = {
   thanks: "Thanks for playing!",
 };
 
-export function resultCopy(standing: ResultStanding, displayedWpm: number, accuracy: number | null): ResultCopy {
+export function resultCopy(standing: ResultStanding, displayedWpm: number, accuracy: number | null, plinkoEnabled = true): ResultCopy {
   if (displayedWpm === 0) {
     return {
       headline: HEADLINES.casper,
@@ -52,7 +52,7 @@ export function resultCopy(standing: ResultStanding, displayedWpm: number, accur
     };
   }
   const cheered = standing.isTop5 || standing.isTop10;
-  const plinko = winsPlinko(displayedWpm, accuracy);
+  const plinko = plinkoEnabled && winsPlinko(displayedWpm, accuracy);
   const kind: ResultKind = standing.isNewHighScore ? "new-high-score" : cheered || plinko ? "nice" : "thanks";
   return {
     headline: HEADLINES[kind],

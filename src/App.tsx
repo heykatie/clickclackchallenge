@@ -203,12 +203,12 @@ function App() {
   // One chime or ding when Results knows where the attempt stands.
   useEffect(() => {
     if (standing && state.latestResult) {
-      const cue = resultCue(resultCopy(standing, state.latestResult.displayedWpm, state.latestResult.accuracy));
+      const cue = resultCue(resultCopy(standing, state.latestResult.displayedWpm, state.latestResult.accuracy, state.activeEvent?.plinkoEnabled !== false));
       if (cue) {
         boothSound.play(cue);
       }
     }
-  }, [standing, state.latestResult]);
+  }, [standing, state.latestResult, state.activeEvent?.plinkoEnabled]);
 
   useEffect(() => {
     if (state.screen !== "results" || state.latestResult === null || state.currentTest === null || state.activeEvent === null) {
@@ -257,6 +257,7 @@ function App() {
     testMode: TestMode,
     boardScope: BoardScope,
     name: string | null,
+    plinkoEnabled: boolean,
   ) {
     protectStorage();
     const event = state.activeEvent;
@@ -269,9 +270,10 @@ function App() {
         durationSeconds === event.durationSeconds &&
         testMode === event.testMode &&
         boardScope === event.boardScope &&
+        plinkoEnabled === (event.plinkoEnabled !== false) &&
         name === event.name
           ? event
-          : await updateActiveEvent(event.id, { durationSeconds, testMode, boardScope, name });
+          : await updateActiveEvent(event.id, { durationSeconds, testMode, boardScope, name, plinkoEnabled });
       await openReady(active);
     } catch {
       setStatus("failed");
@@ -330,7 +332,7 @@ function App() {
   async function downloadScores() {
     try {
       const { scores, events } = await listEverything();
-      downloadTextFile(scoresFileName(new Date()), scoresCsv(scores, events));
+      downloadTextFile(scoresFileName(new Date()), scoresCsv(scores, events, undefined, state.activeEvent?.plinkoEnabled !== false));
     } catch (error) {
       // A failed backup must not stop the event: the scores are still on the device.
       console.error("Could not download scores", error);
@@ -389,11 +391,11 @@ function App() {
     return result;
   }
 
-  async function startFresh(durationSeconds: TestDuration, testMode: TestMode, name: string | null) {
+  async function startFresh(durationSeconds: TestDuration, testMode: TestMode, name: string | null, plinkoEnabled: boolean) {
     protectStorage();
     setSaving(true);
     try {
-      const event = await startFreshEvent(durationSeconds, testMode, { name });
+      const event = await startFreshEvent(durationSeconds, testMode, { name, plinkoEnabled });
       await openReady(event);
     } catch {
       setStatus("failed");
@@ -528,6 +530,7 @@ function App() {
         <EventSetupScreen
           // A different current event (after Clear board or Restore) reloads Setup's choices from that event.
           key={state.activeEvent?.id ?? "no-event"}
+          storedPlinkoEnabled={state.activeEvent?.plinkoEnabled !== false}
           storedDuration={state.activeEvent?.durationSeconds ?? null}
           storedTestMode={state.activeEvent?.testMode ?? null}
           storedEventName={state.activeEvent?.name ?? null}
@@ -537,11 +540,11 @@ function App() {
           onApplyUpdate={() => {
             void updateServiceWorker(true);
           }}
-          onStartFresh={(durationSeconds, testMode, name) => {
-            void startFresh(durationSeconds, testMode, name);
+          onStartFresh={(durationSeconds, testMode, name, plinkoEnabled) => {
+            void startFresh(durationSeconds, testMode, name, plinkoEnabled);
           }}
-          onContinue={(durationSeconds, testMode, boardScope, name) => {
-            void continueEvent(durationSeconds, testMode, boardScope, name);
+          onContinue={(durationSeconds, testMode, boardScope, name, plinkoEnabled) => {
+            void continueEvent(durationSeconds, testMode, boardScope, name, plinkoEnabled);
           }}
           onClearScores={(durationSeconds, testMode, name) => {
             void clearScores(durationSeconds, testMode, name);
@@ -579,6 +582,7 @@ function App() {
     case "ready":
       return (
         <ReadyScreen
+          plinkoEnabled={state.activeEvent?.plinkoEnabled !== false}
           eventId={state.activeEvent?.id ?? null}
           allTime={state.activeEvent?.boardScope === "all-time"}
           highScore={state.highScore}
@@ -630,6 +634,7 @@ function App() {
       return landscapeOnly(
         "results",
         <ResultsScreen
+          plinkoEnabled={state.activeEvent?.plinkoEnabled !== false}
           result={state.latestResult}
           standing={standing}
           saving={saving}
@@ -682,6 +687,7 @@ function attemptRow(
     eventId: event.id,
     name: null,
     eventName: event.name,
+    plinkoEnabled: event.plinkoEnabled !== false,
     rawWpm: result.rawWpm,
     displayedWpm: result.displayedWpm,
     accuracy: result.accuracy ?? 0,
